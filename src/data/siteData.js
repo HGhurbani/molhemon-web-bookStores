@@ -65,7 +65,10 @@ export const books = [
     publisher: 'دار الفراشة للنشر',
     publishDate: '2023-05-15',
     pages: 120,
-    format: 'غلاف ورقي'
+    format: 'غلاف ورقي',
+    coverImage: '',
+    type: '',
+    tags: ''
   },
   {
     id: 2,
@@ -83,7 +86,10 @@ export const books = [
     publisher: 'دار الحكمة للنشر',
     publishDate: '2024-01-20',
     pages: 250,
-    format: 'غلاف مقوى'
+    format: 'غلاف مقوى',
+    coverImage: '',
+    type: '',
+    tags: ''
   },
   {
     id: 3,
@@ -101,7 +107,10 @@ export const books = [
     publisher: 'مكتبة المستقبل',
     publishDate: '2022-11-01',
     pages: 320,
-    format: 'كتاب إلكتروني'
+    format: 'كتاب إلكتروني',
+    coverImage: '',
+    type: '',
+    tags: ''
   },
    {
     id: 4,
@@ -119,7 +128,10 @@ export const books = [
     publisher: 'دار الفراشة للنشر',
     publishDate: '2023-05-15',
     pages: 120,
-    format: 'غلاف ورقي'
+    format: 'غلاف ورقي',
+    coverImage: '',
+    type: '',
+    tags: ''
   },
   {
     id: 5,
@@ -137,7 +149,10 @@ export const books = [
     publisher: 'دار الحكمة للنشر',
     publishDate: '2024-01-20',
     pages: 250,
-    format: 'غلاف مقوى'
+    format: 'غلاف مقوى',
+    coverImage: '',
+    type: '',
+    tags: ''
   },
   {
     id: 6,
@@ -155,7 +170,10 @@ export const books = [
     publisher: 'مكتبة المستقبل',
     publishDate: '2022-11-01',
     pages: 320,
-    format: 'كتاب إلكتروني'
+    format: 'كتاب إلكتروني',
+    coverImage: '',
+    type: '',
+    tags: ''
   }
 ];
 

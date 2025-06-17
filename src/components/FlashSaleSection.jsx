@@ -64,10 +64,10 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
     <div>
       <div className={`relative mb-2 sm:mb-3 ${square ? 'aspect-square' : 'aspect-[3/4]'} rounded-md overflow-hidden group`}>
         <Link to={`/book/${book.id}`}>
-          <img     
+          <img
             alt={`غلاف كتاب ${book.title}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-           src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg" />
+            src={book.coverImage || 'https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg'} />
         </Link>
         <Button
           size="icon"
