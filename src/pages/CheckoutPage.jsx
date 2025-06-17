@@ -126,9 +126,9 @@ const CheckoutPage = ({ cart }) => {
               <h2 className="text-xl font-semibold text-gray-800 mb-5">ملخص طلبك</h2>
               <div className="space-y-3 max-h-60 overflow-y-auto mb-4 pr-2">
                 {cart.map(item => (
-                  <div key={item.id} className="flex justify-between items-center text-sm">
-                    <div className="flex items-center">
-                      <img  alt={item.title} className="w-10 h-14 object-cover rounded-sm mr-2 rtl:ml-2 rtl:mr-0" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+                    <div key={item.id} className="flex justify-between items-center text-sm">
+                      <div className="flex items-center">
+                        <img  alt={item.title} className="w-10 h-14 object-cover rounded-sm mr-2 rtl:ml-2 rtl:mr-0" src={item.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
                       <div>
                         <p className="text-gray-700 font-medium">{item.title}</p>
                         <p className="text-xs text-gray-500">الكمية: {item.quantity}</p>

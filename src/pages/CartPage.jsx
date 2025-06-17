@@ -42,8 +42,8 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
               className="bg-white p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-center gap-4"
             >
               <div className="w-24 h-32 sm:w-20 sm:h-28 rounded-md overflow-hidden flex-shrink-0">
-                <img  alt={`غلاف كتاب ${item.title}`} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
-              </div>
+                  <img  alt={`غلاف كتاب ${item.title}`} className="w-full h-full object-cover" src={item.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
+                </div>
               <div className="flex-grow text-center sm:text-right rtl:sm:text-left">
                 <Link to={`/book/${item.id}`}>
                   <h2 className="text-lg font-semibold text-gray-800 hover:text-blue-600">{item.title}</h2>
