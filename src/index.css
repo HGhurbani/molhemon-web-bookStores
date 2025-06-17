@@ -73,10 +73,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Amiri', 'Merriweather', serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-['Tajawal',_sans-serif] font-bold;
+    @apply font-['Amiri',_serif] font-bold;
   }
 }
 
@@ -156,7 +156,7 @@
   background: hsl(var(--secondary-foreground) / 0.6);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Merriweather:wght@400;700&display=swap');
 
 @media (max-width: 640px) {
   .hero-section h1 {

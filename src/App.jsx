@@ -137,7 +137,7 @@ const App = () => {
 
   return (
     <Router>
-      <div className="font-['Tajawal',_sans-serif]" dir="rtl">
+      <div className="font-['Amiri',_serif]" dir="rtl">
         <AnimatePresence mode="wait">
           <Routes>
             <Route
