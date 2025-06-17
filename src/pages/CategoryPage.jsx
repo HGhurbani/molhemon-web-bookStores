@@ -112,8 +112,8 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
                 className="my-3"
               />
               <div className="flex justify-between text-xs text-gray-600">
-                <span>{priceRange[0]} ر.س</span>
-                <span>{priceRange[1]} ر.س</span>
+                <span>{priceRange[0]} د.إ</span>
+                <span>{priceRange[1]} د.إ</span>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>المؤلفون</DropdownMenuLabel>

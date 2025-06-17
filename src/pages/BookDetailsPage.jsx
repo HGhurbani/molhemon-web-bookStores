@@ -4,7 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Star, Heart, ShoppingCart, Minus, Plus, Share2, BookOpenText, Headphones, ChevronDown, ChevronUp } from 'lucide-react';
-import { BookCard } from '@/components/FlashSaleSection.jsx'; 
+import { BookCard } from '@/components/FlashSaleSection.jsx';
+import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist }) => {
@@ -112,19 +113,17 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <Link to={`/author/${authorDetails?.id || 'unknown'}`} className="text-blue-600 hover:underline font-medium mr-1 rtl:ml-1 rtl:mr-0">{book.author}</Link>
             <span className="text-gray-400 mx-2">|</span>
             <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-4 h-4 ${i < Math.floor(book.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
-              ))}
-              <span className="text-gray-600 mr-1 rtl:ml-1 rtl:mr-0">({book.rating.toFixed(1)})</span>
+              <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
+              <span className="text-gray-600 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5</span>
               <span className="text-gray-400 mx-1">·</span>
               <span className="text-gray-600">{book.reviews} مراجعة</span>
             </div>
           </div>
 
           <div className="mb-4">
-            <span className="text-3xl font-bold text-blue-600">{book.price.toFixed(2)} ر.س</span>
+            <span className="text-3xl font-bold text-blue-600">{book.price.toFixed(2)} د.إ</span>
             {book.originalPrice && (
-              <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-lg mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} ر.س</span>
+              <span className="text-gray-400 old-price text-lg mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} د.إ</span>
             )}
           </div>
           
@@ -152,7 +151,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <div className="text-center">
                 <BookOpenText className="w-6 h-6 mx-auto text-blue-600 mb-1" />
                 <p className="text-xs text-gray-600">كتاب مطبوع</p>
-                <p className="text-sm font-medium">{book.price.toFixed(2)} ر.س</p>
+                <p className="text-sm font-medium">{book.price.toFixed(2)} د.إ</p>
               </div>
               <div className="text-center opacity-50 cursor-not-allowed">
                 <Headphones className="w-6 h-6 mx-auto text-gray-400 mb-1" />
@@ -196,21 +195,13 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
       </div>
 
       {relatedBooks.length > 0 && (
-        <div className="mt-10 sm:mt-12">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">كتب ذات صلة</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-            {relatedBooks.map((relatedBook, index) => (
-              <BookCard 
-                key={relatedBook.id} 
-                book={relatedBook} 
-                handleAddToCart={handleAddToCart} 
-                handleToggleWishlist={handleToggleWishlist} 
-                index={index}
-                isInWishlist={JSON.parse(localStorage.getItem('wishlist') || '[]').some(item => item.id === relatedBook.id)}
-              />
-            ))}
-          </div>
-        </div>
+        <YouMayAlsoLikeSection
+          books={relatedBooks}
+          handleAddToCart={handleAddToCart}
+          handleToggleWishlist={handleToggleWishlist}
+          wishlist={JSON.parse(localStorage.getItem('wishlist') || '[]')}
+          authors={authors}
+        />
       )}
     </div>
   );

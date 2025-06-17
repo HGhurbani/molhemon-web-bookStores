@@ -61,29 +61,20 @@ const YouMayAlsoLikeSection = ({ books, handleAddToCart, handleToggleWishlist, w
                 
                 <div className="flex items-center mb-1 sm:mb-2">
                   <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
-                          i < Math.floor(book.rating) 
-                            ? 'text-yellow-400 fill-yellow-400' 
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+                    <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600 fill-blue-600" />
                   </div>
-                  <span className="text-[10px] sm:text-xs text-gray-500 mr-1.5 rtl:ml-1.5 rtl:mr-0">({book.reviews}%)</span>
+                  <span className="text-[10px] sm:text-xs text-gray-500 mr-1.5 rtl:ml-1.5 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
                 </div>
                 
                 <div className="flex items-baseline mb-1 sm:mb-2">
-                  <span className="font-bold text-blue-600 text-sm sm:text-lg">{book.price.toFixed(2)} ر.س</span>
+                  <span className="font-bold text-blue-600 text-sm sm:text-lg">{book.price.toFixed(2)} د.إ</span>
                   {book.originalPrice && (
-                    <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-[10px] sm:text-xs mr-1.5 rtl:ml-1.5 rtl:mr-0">
-                      {book.originalPrice.toFixed(2)} ر.س
+                    <span className="text-gray-400 old-price text-[10px] sm:text-xs mr-1.5 rtl:ml-1.5 rtl:mr-0">
+                      {book.originalPrice.toFixed(2)} د.إ
                     </span>
                   )}
                 </div>
-                 <p className="text-[10px] sm:text-xs text-green-600 mb-2 sm:mb-3">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} ر.س</p>
+                 <p className="text-[10px] sm:text-xs text-green-600 mb-2 sm:mb-3">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
               </div>
               
               <Button 

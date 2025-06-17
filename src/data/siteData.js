@@ -179,7 +179,7 @@ export const authors = [
 export const dashboardStats = [
   { title: 'إجمالي الكتب', value: '2,847', icon: BookOpen, color: 'bg-blue-500' },
   { title: 'المؤلفون', value: '156', icon: Users, color: 'bg-green-500' },
-  { title: 'المبيعات اليوم', value: '1,234 ر.س', icon: DollarSign, color: 'bg-purple-500' },
+  { title: 'المبيعات اليوم', value: '1,234 د.إ', icon: DollarSign, color: 'bg-purple-500' },
   { title: 'الزوار', value: '8,945', icon: Eye, color: 'bg-orange-500' }
 ];
 
