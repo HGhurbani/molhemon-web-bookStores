@@ -34,13 +34,13 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
             <p className="text-[11px] text-white mb-1.5">متوفر على</p>
             <div className="flex flex-col sm:flex-row space-y-1.5 sm:space-y-0 sm:space-x-1.5 rtl:sm:space-x-reverse">
                 <button onClick={() => handleFeatureClick('google-play')} aria-label="تحميل التطبيق من جوجل بلاي" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <svg className="w-4 h-4 text-white ml-1 rtl:mr-1 rtl:ml-0" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true">
+                    <svg className="w-4 h-4 text-white ml-2 rtl:mr-2 rtl:ml-0" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true">
                         <path d="M325.3 234.3L104.7 6.6c-4.5-4.5-12.2-1.2-12.2 5.7v487.4c0 6.9 7.7 10.2 12.2 5.7l220.6-227.7-220.6-127zM352.3 256L142.6 138.2l158.4 91.8L352.3 256zM352.3 256l-51.3 26L142.6 373.8 352.3 256zM386.2 278.9l82.1 47.5c6.4 3.7 14.5-0.9 14.5-8.3V193.9c0-7.4-8.1-12-14.5-8.3l-82.1 47.5-51.3 23.5 51.3 23.5z"/>
                     </svg>
                     Google Play
                 </button>
                 <button onClick={() => handleFeatureClick('app-store')} aria-label="تحميل التطبيق من آب ستور" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <svg className="w-4 h-4 text-white ml-1 rtl:mr-1 rtl:ml-0" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
+                    <svg className="w-4 h-4 text-white ml-2 rtl:mr-2 rtl:ml-0" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
                         <path d="M318.7 268.6c-.2-52.8 43.2-78 45-79.1-24.5-36-62.7-41-76.3-41.5-32.4-3.3-63.2 19.1-79.5 19.1-16.3 0-41.5-18.6-68.3-18.1-35.1.5-67.5 20.4-85.5 51.7-36.6 63.5-9.3 158.1 26.2 210 17.4 25.1 38.1 53.3 65.5 52.2 26.3-1 36.3-17 68-17 31.6 0 41 17 68.4 16.5 28.3-.5 46.2-25.5 63.6-50.7 20.1-29.3 28.4-57.8 28.7-59.3-.6-.3-55-21.1-55.2-83.1zM255 81.8c14.5-17.6 24.3-42.1 21.6-66.8-21 1-46.4 14-61.5 31.6-13.5 15.7-25.2 40.8-22 64.9 23.3 1.8 47.2-11.9 61.9-29.7z"/>
                     </svg>
                     App Store
