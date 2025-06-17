@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import { CreditCard, Lock, ShoppingBag } from 'lucide-react';
 
-const CheckoutPage = ({ cart }) => {
+const CheckoutPage = ({ cart, setCart }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '', email: '', address: '', city: '', country: 'الإمارات العربية المتحدة', zipCode: '',
@@ -22,13 +22,21 @@ const CheckoutPage = ({ cart }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // هنا سيتم دمج Stripe لاحقاً
-    toast({
-      title: "🚧 الدفع قيد الإنشاء",
-      description: "سيتم تفعيل الدفع عبر Stripe قريباً. شكراً لصبرك! 🚀",
-    });
-    // افتراضياً، بعد "الدفع" الناجح، يتم توجيه المستخدم لصفحة تأكيد أو الرئيسية
-    // navigate('/order-confirmation'); 
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const order = {
+      id: Date.now().toString(),
+      date: new Date().toISOString().split('T')[0],
+      total,
+      status: 'قيد المعالجة',
+      items: cart.map(i => ({ id: i.id, title: i.title, quantity: i.quantity }))
+    };
+    const stored = JSON.parse(localStorage.getItem('orders') || '[]');
+    localStorage.setItem('orders', JSON.stringify([order, ...stored]));
+    toast({ title: 'تم استلام الطلب بنجاح!' });
+    // تفريغ السلة بعد إتمام الطلب
+    setCart([]);
+    localStorage.setItem('cart', '[]');
+    navigate('/');
   };
 
   if (cart.length === 0) {
