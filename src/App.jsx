@@ -41,8 +41,6 @@ const App = () => {
     if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
     const storedAuthors = localStorage.getItem('authors');
     if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
-    const storedCategories = localStorage.getItem('categories');
-    if (storedCategories) setCategoriesState(JSON.parse(storedCategories));
     const storedOrders = localStorage.getItem('orders');
     if (storedOrders) setOrders(JSON.parse(storedOrders));
   }, []);
@@ -59,9 +57,6 @@ const App = () => {
     localStorage.setItem('authors', JSON.stringify(authors));
   }, [authors]);
 
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categoriesState));
-  }, [categoriesState]);
 
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
