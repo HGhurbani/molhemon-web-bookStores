@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
@@ -8,6 +8,8 @@ import Header from '@/components/Header.jsx';
 import TopBar from '@/components/TopBar.jsx';
 import Footer from '@/components/Footer.jsx';
 import Dashboard from '@/components/Dashboard.jsx';
+import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
+import CustomerLoginPage from '@/pages/CustomerLoginPage.jsx';
 
 import HomePage from '@/pages/HomePage.jsx';
 import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
@@ -22,8 +24,9 @@ import { categories, books as initialBooks, authors as initialAuthors, dashboard
 import { TrendingUp } from 'lucide-react';
 
 const App = () => {
-  const [showDashboard, setShowDashboard] = useState(false);
   const [dashboardSection, setDashboardSection] = useState('overview');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(localStorage.getItem('adminLoggedIn') === 'true');
+  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(localStorage.getItem('customerLoggedIn') === 'true');
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState(initialBooks);
@@ -123,9 +126,8 @@ const App = () => {
   const MainLayout = ({ children }) => (
     <div className="min-h-screen bg-slate-100 text-gray-800">
       <TopBar handleFeatureClick={handleFeatureClick} />
-      <Header 
-        handleFeatureClick={handleFeatureClick} 
-        setShowDashboard={setShowDashboard}
+      <Header
+        handleFeatureClick={handleFeatureClick}
         cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
       />
       {children}
@@ -137,29 +139,37 @@ const App = () => {
     <Router>
       <div className="font-['Tajawal',_sans-serif]" dir="rtl">
         <AnimatePresence mode="wait">
-          {showDashboard ? (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Dashboard 
-                dashboardStats={dashboardStats}
-                books={books}
-                authors={authors}
-                dashboardSection={dashboardSection}
-                setDashboardSection={setDashboardSection}
-                setShowDashboard={setShowDashboard}
-                handleFeatureClick={handleFeatureClick}
-                setBooks={setBooks}
-                setAuthors={setAuthors}
-              />
-            </motion.div>
-          ) : (
-            <Routes>
-              <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categories} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+          <Routes>
+            <Route
+              path="/admin"
+              element={
+                isAdminLoggedIn ? (
+                  <Dashboard
+                    dashboardStats={dashboardStats}
+                    books={books}
+                    authors={authors}
+                    dashboardSection={dashboardSection}
+                    setDashboardSection={setDashboardSection}
+                    handleFeatureClick={handleFeatureClick}
+                    setBooks={setBooks}
+                    setAuthors={setAuthors}
+                  />
+                ) : (
+                  <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
+                )
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                isCustomerLoggedIn ? (
+                  <Navigate to="/profile" />
+                ) : (
+                  <MainLayout><PageLayout><CustomerLoginPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
+                )
+              }
+            />
+            <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categories} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/book/:id" element={<MainLayout><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categories} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
@@ -168,7 +178,6 @@ const App = () => {
               <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
-          )}
         </AnimatePresence>
         <Toaster />
       </div>
