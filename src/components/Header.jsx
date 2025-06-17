@@ -50,7 +50,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
               whileHover={{ scale: 1.05 }}
             >
               <Link to="/" className="flex items-center">
-                <img  alt="شعار ملهمون" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2024/09/Dar.png" />
+                <img  alt="شعار ملهمون" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
                
               </Link>
             </motion.div>
@@ -79,16 +79,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
             <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
               {renderDropdown("تصفح الفئات", categoryItems, true)}
               {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
-              <Button
-                asChild
-                variant="outline"
-                className="hidden lg:flex text-white border-white hover:bg-blue-500/25 hover:text-white px-3 py-1.5 text-sm h-10"
-              >
-                <Link to="/admin">
-                  <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
-                  لوحة التحكم
-                </Link>
-              </Button>
+             
             </div>
 
             <DropdownMenu>
@@ -135,16 +126,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                 )}
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="icon" className="text-white hover:text-blue-200 w-10 h-10">
-              <Link to="/profile?tab=wishlist">
-                <Bookmark className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="ghost" size="icon" className="text-white hover:text-blue-200 w-10 h-10">
-              <Link to="/profile">
-                <UserCircle className="w-5 h-5" />
-              </Link>
-            </Button>
+            
           </div>
         </div>
         <div className="flex items-center justify-center space-x-3 rtl:space-x-reverse py-2 text-xs text-white overflow-x-auto whitespace-nowrap">

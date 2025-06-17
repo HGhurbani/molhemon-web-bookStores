@@ -16,7 +16,7 @@ const TopBar = ({ handleFeatureClick }) => {
   ];
 
   return (
-    <div className="bg-blue-700 text-white text-xs py-2">
+    <div className="bg-blue-600 text-white text-xs py-2">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center">
         <div className="flex items-center space-x-3 rtl:space-x-reverse mb-2 sm:mb-0 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0">
           {topNavItems.map((item, index) => {

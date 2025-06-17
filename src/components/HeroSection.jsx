@@ -38,7 +38,7 @@ const HeroSection = ({ slides }) => {
           <img  
             alt={currentSlide.alt} 
             className="w-full h-full object-cover"
-           src="https://images.unsplash.com/photo-1580232557758-174817146622" />
+           src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png" />
           <div className="absolute inset-0 bg-black/30"></div>
         </motion.div>
       </AnimatePresence>

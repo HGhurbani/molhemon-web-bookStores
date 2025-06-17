@@ -4,32 +4,33 @@ import { BookOpen, Users, TrendingUp, Award, Headphones, Smartphone, Gift, Menu,
 export const heroSlides = [
   {
     id: 1,
-    titleLine1: 'كنت أدرك بعمق أن أكبر واق من',
-    titleLine2: 'الجنون والموت المجاني هو الكتاب',
-    imgPlaceholder: 'رجل يرتدي قبعة ويقرأ صحيفة بجانب كتب كلاسيكية',
-    alt: 'رجل يرتدي قبعة يقرأ صحيفة تايمز وبجانبه كتب كلاسيكية',
+    titleLine1: null,
+    titleLine2: null,
+    imgPlaceholder: null,
+    alt: null,
     discount: null,
-    description: 'اكتشف مجموعة واسعة من الكتب العربية والعالمية في دار ملهمون.',
+    description: null,
   },
   {
     id: 2,
-    titleLine1: 'خصم على',
-    titleLine2: 'جميع الإصدارات',
-    imgPlaceholder: 'نظارات فوق مجموعة من الكتب المفتوحة على طاولة خشبية',
-    alt: 'نظارات فوق مجموعة من الكتب المفتوحة على طاولة خشبية',
-    discount: '20%',
+    titleLine1: null,
+    titleLine2: null,
+    imgPlaceholder: null,
+    alt: null,
+    discount: null,
     description: null,
   },
   {
     id: 3,
-    titleLine1: 'اكتشف عوالم جديدة',
-    titleLine2: 'مع كل صفحة تقرأها',
-    imgPlaceholder: 'يد تمسك كتاباً مفتوحاً أمام رفوف كتب ممتلئة',
-    alt: 'يد تمسك كتاباً مفتوحاً أمام رفوف كتب ممتلئة',
+    titleLine1: null,
+    titleLine2: null,
+    imgPlaceholder: null,
+    alt: null,
     discount: null,
-    description: 'آلاف العناوين بانتظارك لتغوص في أعماقها وتستكشف خباياها.',
+    description: null,
   },
 ];
+
 
 
 export const categories = [
