@@ -2,9 +2,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, ShoppingCart, Bookmark, ChevronDown, Globe, Briefcase, UserCircle } from 'lucide-react';
+import { Search, ShoppingCart, Bookmark, ChevronDown, Briefcase, UserCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
@@ -76,9 +76,55 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
           </div>
 
           <div className="flex items-center space-x-1 rtl:space-x-reverse">
-            {renderDropdown("تصفح الفئات", categoryItems, true)}
-            {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
-            
+            <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
+              {renderDropdown("تصفح الفئات", categoryItems, true)}
+              {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
+              <Button
+                asChild
+                variant="outline"
+                className="hidden lg:flex text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 px-3 py-1.5 text-sm h-10"
+              >
+                <Link to="/admin">
+                  <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
+                  لوحة التحكم
+                </Link>
+              </Button>
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-blue-600 w-10 h-10">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="md:hidden w-56">
+                <DropdownMenuLabel className="text-xs text-gray-500">تصفح الفئات</DropdownMenuLabel>
+                {categoryItems.map((item, idx) => (
+                  <DropdownMenuItem key={idx} asChild className="px-4 py-2">
+                    <Link to={`/category/${item.id}`}>{item.name}</Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-gray-500">العلامات التجارية</DropdownMenuLabel>
+                {["دار الشروق", "دار الآداب", "مكتبة جرير"].map((item, idx) => (
+                  <DropdownMenuItem
+                    key={idx}
+                    onClick={() => handleFeatureClick(item.toLowerCase().replace(/\s/g, '-'))}
+                    className="px-4 py-2"
+                  >
+                    {item}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="flex items-center">
+                    <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
+                    لوحة التحكم
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button asChild variant="ghost" size="icon" className="relative text-gray-600 hover:text-blue-600 w-10 h-10">
               <Link to="/cart">
                 <ShoppingCart className="w-5 h-5" />
@@ -92,16 +138,6 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
             <Button asChild variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600 w-10 h-10">
               <Link to="/profile?tab=wishlist">
                 <Bookmark className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 px-3 py-1.5 text-sm h-10"
-            >
-              <Link to="/admin">
-                <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
-                لوحة التحكم
               </Link>
             </Button>
             <Button asChild variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600 w-10 h-10">
