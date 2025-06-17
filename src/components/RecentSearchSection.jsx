@@ -13,7 +13,7 @@ const RecentSearchSection = ({ books, handleAddToCart, handleToggleWishlist, wis
         <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse mb-3 sm:mb-0">
             <Search className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Recent Search</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">بحث حديث</h2>
           </div>
           <Link to="/category/recent-search">
             <Button variant="link" className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm px-1 py-0.5 h-auto">

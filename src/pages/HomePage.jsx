@@ -50,7 +50,7 @@ const HomePage = ({
         handleAddToCart={handleAddToCart}
         handleToggleWishlist={handleToggleWishlist}
         wishlist={wishlist}
-        title="Book Bestseller"
+        title="الكتب الصوتية الأكثر مبيعاً"
         icon={TrendingUp}
       />
        <BookBestsellerSection
@@ -58,7 +58,7 @@ const HomePage = ({
         handleAddToCart={handleAddToCart}
         handleToggleWishlist={handleToggleWishlist}
         wishlist={wishlist}
-        title="Book Bestseller" 
+        title="الكتب الأكثر مبيعاً" 
         icon={TrendingUp}
         bgColor="bg-slate-100"
       />

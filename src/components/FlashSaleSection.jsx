@@ -132,7 +132,7 @@ const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishli
         <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse mb-3 sm:mb-0">
             <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-red-500" />
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Flash Sale</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">تخفيضات سريعة</h2>
             <FlashSaleCountdown />
           </div>
           <Link to="/category/flash-sale">
