@@ -40,13 +40,13 @@ const FlashSaleCountdown = () => {
 
   return (
     <div className="flex items-center space-x-1 rtl:space-x-reverse">
-      {timeLeft.days > 0 && <span className="font-mono font-semibold text-sm bg-red-500 text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.days)}</span>}
-      {timeLeft.days > 0 && <span className="text-red-500 font-bold text-sm">:</span>}
-      <span className="font-mono font-semibold text-sm bg-red-500 text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.hours)}</span>
-      <span className="text-red-500 font-bold text-sm">:</span>
-      <span className="font-mono font-semibold text-sm bg-red-500 text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.minutes)}</span>
-      <span className="text-red-500 font-bold text-sm">:</span>
-      <span className="font-mono font-semibold text-sm bg-red-500 text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.seconds)}</span>
+      {timeLeft.days > 0 && <span className="font-mono font-semibold text-sm bg-black text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.days)}</span>}
+      {timeLeft.days > 0 && <span className="text-black font-bold text-sm">:</span>}
+      <span className="font-mono font-semibold text-sm bg-black text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.hours)}</span>
+      <span className="text-black font-bold text-sm">:</span>
+      <span className="font-mono font-semibold text-sm bg-black text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.minutes)}</span>
+      <span className="text-black font-bold text-sm">:</span>
+      <span className="font-mono font-semibold text-sm bg-black text-white px-1.5 py-0.5 rounded">{formatTime(timeLeft.seconds)}</span>
     </div>
   );
 };
