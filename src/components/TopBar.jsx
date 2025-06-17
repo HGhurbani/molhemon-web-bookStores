@@ -19,7 +19,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
   return (
     <div className="bg-blue-600 text-white text-xs py-2">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse mb-2 sm:mb-0 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0">
+        <div className="hidden sm:flex items-center space-x-3 rtl:space-x-reverse mb-2 sm:mb-0 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0">
           {topNavItems.map((item, index) => {
             const IconComponent = item.icon;
             const content = (
@@ -57,7 +57,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
             );
           })}
         </div>
-        <div className="hidden sm:flex items-center space-x-3 rtl:space-x-reverse">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
