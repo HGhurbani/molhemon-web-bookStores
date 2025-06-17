@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { TrendingUp } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 
-const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, title, icon, bgColor = "bg-white" }) => {
+const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, title, icon, bgColor = "bg-white", squareImages = false }) => {
   const IconComponent = icon || TrendingUp;
   return (
     <section className={`py-8 sm:py-10 ${bgColor}`}>
@@ -25,13 +25,14 @@ const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, w
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
           {books.slice(0,6).map((book, index) => (
-             <BookCard 
-                key={`${book.id}-${index}-bestseller`} 
-                book={book} 
-                handleAddToCart={handleAddToCart} 
-                handleToggleWishlist={handleToggleWishlist} 
+             <BookCard
+                key={`${book.id}-${index}-bestseller`}
+                book={book}
+                handleAddToCart={handleAddToCart}
+                handleToggleWishlist={handleToggleWishlist}
                 index={index}
                 isInWishlist={wishlist?.some(item => item.id === book.id)}
+                square={squareImages}
               />
           ))}
         </div>

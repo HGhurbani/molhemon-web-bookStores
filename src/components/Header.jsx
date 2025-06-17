@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Search, ShoppingCart, Bookmark, ChevronDown, Briefcase, UserCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
+import NewsletterSection from '@/components/NewsletterSection.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
@@ -43,6 +44,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
   const deliveryItems = ["توصيل سريع", "شحن عادي", "استلام من المتجر"];
 
   return (
+    <>
     <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl mb-4">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -149,6 +151,8 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
         </div>
       </div>
     </header>
+    <NewsletterSection handleFeatureClick={handleFeatureClick} />
+    </>
   );
 };
 

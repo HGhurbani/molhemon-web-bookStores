@@ -52,7 +52,7 @@ const FlashSaleCountdown = () => {
 };
 
 
-const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWishlist, authors = [] }) => (
+const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWishlist, authors = [], square = false }) => (
   <motion.div
     whileHover={{ y: -5, boxShadow: "0 8px 15px rgba(0,0,0,0.08)" }}
     transition={{ type: "spring", stiffness: 200, damping: 15 }}
@@ -62,7 +62,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
     transition={{ delay: index * 0.08 }}
   >
     <div>
-      <div className="relative mb-2 sm:mb-3 aspect-[3/4] rounded-md overflow-hidden group">
+      <div className={`relative mb-2 sm:mb-3 ${square ? 'aspect-square' : 'aspect-[3/4]'} rounded-md overflow-hidden group`}>
         <Link to={`/book/${book.id}`}>
           <img     
             alt={`غلاف كتاب ${book.title}`}
@@ -97,29 +97,20 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
       
       <div className="flex items-center mb-1 sm:mb-1.5">
         <div className="flex items-center">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${
-                i < Math.floor(book.rating) 
-                  ? 'text-yellow-400 fill-yellow-400' 
-                  : 'text-gray-300'
-              }`}
-            />
-          ))}
+          <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 fill-blue-600" />
         </div>
-        <span className="text-[9px] sm:text-[10px] text-gray-500 mr-1 rtl:ml-1 rtl:mr-0">({book.reviews}%)</span>
+        <span className="text-[9px] sm:text-[10px] text-gray-500 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
       </div>
       
       <div className="flex items-baseline mb-1 sm:mb-1.5">
-        <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} ر.س</span>
+        <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} د.إ</span>
         {book.originalPrice && (
-          <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-[9px] sm:text-[10px] mr-1 rtl:ml-1 rtl:mr-0">
-            {book.originalPrice.toFixed(2)} ر.س
+          <span className="text-gray-400 old-price text-[9px] sm:text-[10px] mr-1 rtl:ml-1 rtl:mr-0">
+            {book.originalPrice.toFixed(2)} د.إ
           </span>
         )}
       </div>
-       <p className="text-[9px] sm:text-[10px] text-green-600">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} ر.س</p>
+       <p className="text-[9px] sm:text-[10px] text-green-600">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
     </div>
   </motion.div>
 );

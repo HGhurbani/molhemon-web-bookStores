@@ -308,10 +308,10 @@ const DashboardBooks = ({ books, setBooks, authors, handleFeatureClick }) => {
                     </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.author}</td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.price.toFixed(2)} ر.س</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.price.toFixed(2)} د.إ</td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
                       <span className="text-sm text-gray-700 mr-1 rtl:ml-1 rtl:mr-0">{book.rating}</span>
                     </div>
                   </td>

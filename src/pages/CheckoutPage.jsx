@@ -134,14 +134,14 @@ const CheckoutPage = ({ cart }) => {
                         <p className="text-xs text-gray-500">الكمية: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="text-gray-800 font-medium">{(item.price * item.quantity).toFixed(2)} ر.س</p>
+                    <p className="text-gray-800 font-medium">{(item.price * item.quantity).toFixed(2)} د.إ</p>
                   </div>
                 ))}
               </div>
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">المجموع الفرعي:</span>
-                  <span className="font-medium text-gray-800">{totalPrice.toFixed(2)} ر.س</span>
+                  <span className="font-medium text-gray-800">{totalPrice.toFixed(2)} د.إ</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">الشحن:</span>
@@ -149,7 +149,7 @@ const CheckoutPage = ({ cart }) => {
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
                   <span className="text-gray-800">الإجمالي:</span>
-                  <span className="text-blue-600">{totalPrice.toFixed(2)} ر.س</span>
+                  <span className="text-blue-600">{totalPrice.toFixed(2)} د.إ</span>
                 </div>
               </div>
               <Button type="submit" size="lg" className="w-full mt-6 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-lg py-3">

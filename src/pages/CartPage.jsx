@@ -49,7 +49,7 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
                   <h2 className="text-lg font-semibold text-gray-800 hover:text-blue-600">{item.title}</h2>
                 </Link>
                 <p className="text-sm text-gray-500">{item.author}</p>
-                <p className="text-md font-bold text-blue-600 mt-1">{item.price.toFixed(2)} ر.س</p>
+                <p className="text-md font-bold text-blue-600 mt-1">{item.price.toFixed(2)} د.إ</p>
               </div>
               <div className="flex items-center space-x-3 rtl:space-x-reverse my-3 sm:my-0">
                 <Button variant="outline" size="icon" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="h-8 w-8">
@@ -61,7 +61,7 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
                 </Button>
               </div>
               <div className="text-lg font-semibold text-gray-800 w-24 text-center sm:text-left rtl:sm:text-right">
-                {(item.price * item.quantity).toFixed(2)} ر.س
+                {(item.price * item.quantity).toFixed(2)} د.إ
               </div>
               <Button variant="ghost" size="icon" onClick={() => handleRemoveFromCart(item.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-10 w-10">
                 <Trash2 className="w-5 h-5" />
@@ -81,7 +81,7 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
             <div className="space-y-2 mb-5 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">المجموع الفرعي:</span>
-                <span className="font-medium text-gray-800">{totalPrice.toFixed(2)} ر.س</span>
+                <span className="font-medium text-gray-800">{totalPrice.toFixed(2)} د.إ</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">الشحن:</span>
@@ -89,7 +89,7 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
               </div>
               <div className="flex justify-between border-t pt-2 mt-2">
                 <span className="text-lg font-bold text-gray-800">الإجمالي:</span>
-                <span className="text-xl font-bold text-blue-600">{totalPrice.toFixed(2)} ر.س</span>
+                <span className="text-xl font-bold text-blue-600">{totalPrice.toFixed(2)} د.إ</span>
               </div>
             </div>
             <Button asChild size="lg" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg py-3">
