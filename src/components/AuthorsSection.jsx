@@ -42,28 +42,28 @@ const AuthorsSection = ({ authors }) => {
         </div>
         
         <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-center">
-            <motion.div 
-                className="bg-white p-3 sm:p-4 lg:p-6 rounded-lg shadow-md overflow-hidden"
+            <motion.div
+                className="rounded-lg overflow-hidden"
                 initial={{ opacity: 0, x: -25 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
             >
-                <img    
+                <img
                     alt="ملصق ترويجي لدار ملهمون يضم صور مؤلفين عالميين مشهورين باللونين الأبيض والأسود"
-                    className="w-full h-auto rounded-md object-contain max-h-72"
+                    className="w-full h-full object-cover"
                   src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png" />
             </motion.div>
-            <motion.div 
-                className="bg-gradient-to-br from-blue-600 to-blue-600 p-3 sm:p-4 lg:p-6 rounded-lg shadow-md text-white overflow-hidden"
+            <motion.div
+                className="rounded-lg overflow-hidden"
                 initial={{ opacity: 0, x: 25 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay:0.1, ease: "easeOut" }}
             >
-                 <img    
+                 <img
                     alt="عرض لكتب ديفيد هاوكينز مع صورته الشخصية وخلفية زرقاء متدرجة"
-                    className="w-full h-auto rounded-md object-contain max-h-72"
+                    className="w-full h-full object-cover"
                    src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
             </motion.div>
         </div>
