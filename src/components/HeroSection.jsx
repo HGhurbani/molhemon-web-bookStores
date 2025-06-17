@@ -85,18 +85,17 @@ const HeroSection = ({ slides }) => {
         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5 rtl:space-x-reverse z-20">
-        {slides.map((_, index) => (
-          <button 
-            key={index} 
-            aria-label={`الانتقال إلى الشريحة ${index + 1}`}
-            onClick={() => setCurrentIndex(index)} 
-            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-white/50 hover:bg-white/70'}`}
-          ></button>
-        ))}
-      </div>
     </section>
+    <div className="flex justify-center mt-2 space-x-1.5 rtl:space-x-reverse">
+      {slides.map((_, index) => (
+        <button
+          key={index}
+          aria-label={`الانتقال إلى الشريحة ${index + 1}`}
+          onClick={() => setCurrentIndex(index)}
+          className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-white/50 hover:bg-white/70'}`}
+        ></button>
+      ))}
+    </div>
   );
-};
 
 export default HeroSection;

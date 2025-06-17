@@ -78,7 +78,7 @@ const YouMayAlsoLikeSection = ({ books, handleAddToCart, handleToggleWishlist, w
                 <div className="flex items-baseline mb-1 sm:mb-2">
                   <span className="font-bold text-blue-600 text-sm sm:text-lg">{book.price.toFixed(2)} ر.س</span>
                   {book.originalPrice && (
-                    <span className="text-gray-400 line-through text-[10px] sm:text-xs mr-1.5 rtl:ml-1.5 rtl:mr-0">
+                    <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-[10px] sm:text-xs mr-1.5 rtl:ml-1.5 rtl:mr-0">
                       {book.originalPrice.toFixed(2)} ر.س
                     </span>
                   )}
