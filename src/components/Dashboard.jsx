@@ -585,14 +585,14 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
                   <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.author}</td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm">
                     {book.originalPrice && (
-                      <span className="line-through text-red-500 ml-1 rtl:mr-1 rtl:ml-0">{book.originalPrice.toFixed(2)}</span>
+                      <span className="line-through text-red-500 ml-2 rtl:mr-2 rtl:ml-0">{book.originalPrice.toFixed(2)}</span>
                     )}
                     <span className={book.originalPrice ? 'text-red-600 font-bold' : 'text-gray-700'}>{book.price.toFixed(2)} د.إ</span>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
-                      <span className="text-sm text-gray-700 mr-1 rtl:ml-1 rtl:mr-0">{book.rating}</span>
+                      <span className="text-sm text-gray-700 mr-2 rtl:ml-2 rtl:mr-0">{book.rating}</span>
                     </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm font-medium">

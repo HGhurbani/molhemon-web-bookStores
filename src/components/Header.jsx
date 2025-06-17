@@ -12,7 +12,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="default" className="text-sm bg-white text-gray-400 hover:bg-white/80 px-2 py-2 rounded-md h-10">
           {label}
-          <ChevronDown className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+          <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200">
@@ -123,7 +123,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/admin" className="flex items-center">
-                      <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
+                      <Briefcase className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
                       لوحة التحكم
                     </Link>
                   </DropdownMenuItem>

@@ -61,9 +61,9 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
-                <img  alt="علم الإمارات العربية المتحدة" className="w-5 h-3 ml-1 object-contain rtl:mr-1 rtl:ml-0" src="https://darmolhimon.com/wp-content/uploads/2025/06/united-arab-emirates-svgrepo-com.svg" />
+                <img  alt="علم الإمارات العربية المتحدة" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://darmolhimon.com/wp-content/uploads/2025/06/united-arab-emirates-svgrepo-com.svg" />
                 الإمارات | UAE
-                <ChevronDown className="w-3 h-3 mr-1 rtl:ml-1 rtl:mr-0" />
+                <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
@@ -80,9 +80,9 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
-                <Globe className="w-3 h-3 ml-1 rtl:mr-1 rtl:ml-0" />
+                <Globe className="w-3 h-3 ml-2 rtl:mr-2 rtl:ml-0" />
                 English
-                <ChevronDown className="w-3 h-3 mr-1 rtl:ml-1 rtl:mr-0" />
+                <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">

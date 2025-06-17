@@ -98,7 +98,7 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
               <Button variant="outline" className="flex items-center">
                 <Filter className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
                 تصفية
-                <ChevronDown className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 p-4">
@@ -126,7 +126,7 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center">
                 ترتيب حسب
-                <ChevronDown className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
