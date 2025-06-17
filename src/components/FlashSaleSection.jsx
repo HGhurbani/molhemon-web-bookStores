@@ -82,7 +82,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
                 className="w-full text-[10px] sm:text-xs py-1 sm:py-1.5 h-auto bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => handleAddToCart(book)}
               >
-                <ShoppingCartIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 rtl:mr-1 rtl:ml-0" />
+                <ShoppingCartIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-2 rtl:mr-2 rtl:ml-0" />
                 أضف للسلة
             </Button>
         </div>
@@ -97,7 +97,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
       
         <div className="flex items-center mb-1 sm:mb-1.5 bg-blue-600/10 rounded-sm px-1 w-max">
           <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 fill-blue-600" />
-          <span className="text-[9px] sm:text-[10px] text-gray-600 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
+          <span className="text-[9px] sm:text-[10px] text-gray-600 mr-2 rtl:ml-2 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
         </div>
 
         <div className="flex items-baseline justify-between mb-1 sm:mb-1.5 w-full">
