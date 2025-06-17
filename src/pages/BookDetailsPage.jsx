@@ -88,6 +88,14 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <Button variant="outline" className="w-full"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />اقرأ عينة</Button>
             <Button variant="outline" className="w-full"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />عينة صوتية</Button>
           </div>
+        </motion.div>
+
+        <motion.div
+          className="order-2 lg:order-2 space-y-4"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{book.title}</h1>
           <div className="flex flex-wrap items-center text-sm text-gray-600 mb-3">
             <span>بقلم </span>
