@@ -6,7 +6,7 @@ import { Search, ShoppingCart, Bookmark, ChevronDown, Globe, Briefcase, UserCirc
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
 
-const Header = ({ handleFeatureClick, setShowDashboard, cartItemCount }) => {
+const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -97,13 +97,15 @@ const Header = ({ handleFeatureClick, setShowDashboard, cartItemCount }) => {
                 <Bookmark className="w-5 h-5" />
               </Link>
             </Button>
-             <Button 
-              onClick={() => setShowDashboard(true)}
+            <Button
+              asChild
               variant="outline"
               className="text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 px-3 py-1.5 text-sm h-10"
             >
-              <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
-              لوحة التحكم
+              <Link to="/admin">
+                <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
+                لوحة التحكم
+              </Link>
             </Button>
             <Button asChild variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600 w-10 h-10">
               <Link to="/profile">

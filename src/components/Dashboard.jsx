@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
-import { 
+import {
   BookOpen,
   Users,
   Settings,
@@ -14,7 +14,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  X,
   Star,
   Home,
   Save
@@ -24,7 +23,9 @@ import { Label } from '@/components/ui/label.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 
-const DashboardSidebar = ({ dashboardSection, setDashboardSection, setShowDashboard }) => {
+import { Link } from 'react-router-dom';
+
+const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
   const navItems = [
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
@@ -63,13 +64,15 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, setShowDashbo
           );
         })}
       </nav>
-      <Button 
+      <Button
+        asChild
         variant="outline"
         className="w-full mt-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
-        onClick={() => setShowDashboard(false)}
       >
-        <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-        العودة للموقع
+        <Link to="/">
+          <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          العودة للموقع
+        </Link>
       </Button>
     </div>
   );
@@ -367,7 +370,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, dashboardSection, setDashboardSection, setShowDashboard, handleFeatureClick, setBooks, setAuthors }) => {
+const Dashboard = ({ dashboardStats, books, authors, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -379,7 +382,7 @@ const Dashboard = ({ dashboardStats, books, authors, dashboardSection, setDashbo
 
   return (
     <div className="min-h-screen bg-slate-100 flex text-gray-800">
-      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} setShowDashboard={setShowDashboard} />
+      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} />
       <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
