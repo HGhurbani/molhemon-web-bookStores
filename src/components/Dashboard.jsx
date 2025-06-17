@@ -138,9 +138,24 @@ const DashboardOverview = ({ dashboardStats }) => (
   </div>
 );
 
+import { categories } from '@/data/siteData.js';
+
 const BookForm = ({ book, onSubmit, onCancel, authors }) => {
-  const [formData, setFormData] = useState(book || {
-    title: '', author: '', authorId: '', price: '', originalPrice: '', rating: '', reviews: '', category: '', description: '', imgPlaceholder: ''
+  const [formData, setFormData] = useState({
+    title: '',
+    author: '',
+    authorId: '',
+    price: '',
+    originalPrice: '',
+    rating: '',
+    reviews: '',
+    category: '',
+    description: '',
+    imgPlaceholder: '',
+    type: '',
+    tags: '',
+    coverImage: '',
+    ...book
   });
 
   const handleChange = (e) => {
@@ -193,9 +208,33 @@ const BookForm = ({ book, onSubmit, onCancel, authors }) => {
           </div>
           <div>
             <Label htmlFor="category">الفئة</Label>
-            <Input id="category" name="category" value={formData.category} onChange={handleChange} />
+            <select id="category" name="category" value={formData.category} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md">
+              <option value="">اختر فئة</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
-           <div>
+          <div>
+            <Label htmlFor="type">النوع</Label>
+            <Input id="type" name="type" value={formData.type} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="tags">الوسوم</Label>
+            <Input id="tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="مثال: دراما, مغامرة" />
+          </div>
+          <div>
+            <Label htmlFor="coverImage">صورة الغلاف</Label>
+            <input id="coverImage" name="coverImage" type="file" accept="image/*" onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => setFormData(prev => ({ ...prev, coverImage: reader.result }));
+                reader.readAsDataURL(file);
+              }
+            }} className="w-full p-2 border border-gray-300 rounded-md" />
+          </div>
+          <div>
             <Label htmlFor="imgPlaceholder">وصف الصورة (لـ Unsplash)</Label>
             <Input id="imgPlaceholder" name="imgPlaceholder" value={formData.imgPlaceholder} onChange={handleChange} />
           </div>
@@ -300,7 +339,7 @@ const DashboardBooks = ({ books, setBooks, authors, handleFeatureClick }) => {
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-14 rounded-md mr-3 rtl:ml-3 rtl:mr-0 shadow-sm overflow-hidden flex-shrink-0">
-                         <img  alt={`غلاف كتاب ${book.title} المصغر`} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+                         <img  alt={`غلاف كتاب ${book.title} المصغر`} className="w-full h-full object-cover" src={book.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{book.title}</div>
@@ -308,7 +347,12 @@ const DashboardBooks = ({ books, setBooks, authors, handleFeatureClick }) => {
                     </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.author}</td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.price.toFixed(2)} د.إ</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
+                    {book.originalPrice && (
+                      <span className="line-through text-red-500 ml-1 rtl:mr-1 rtl:ml-0">{book.originalPrice.toFixed(2)}</span>
+                    )}
+                    <span className={book.originalPrice ? 'text-red-600 font-bold' : 'text-gray-700'}>{book.price.toFixed(2)} د.إ</span>
+                  </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-blue-600 fill-blue-600" />

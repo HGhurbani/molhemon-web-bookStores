@@ -79,7 +79,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="relative aspect-[3/4] w-48 mx-auto rounded-lg shadow-xl overflow-hidden">
-            <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+            <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src={book.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
             <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
               خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
             </span>
