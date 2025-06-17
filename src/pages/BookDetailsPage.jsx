@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
-import { Star, Heart, ShoppingCart, Minus, Plus, Share2, BookOpenText, Headphones, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
@@ -38,7 +37,6 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
     }
   }, [book, handleToggleWishlist]);
 
-
   const authorDetails = authors.find(a => a.name === book?.author);
 
   const handleQuantityChange = (amount) => {
@@ -48,7 +46,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const onAddToCart = () => {
     handleAddToCart({ ...book, quantity });
   };
-  
+
   const onToggleWishlist = () => {
     handleToggleWishlist(book);
     setIsInWishlist(!isInWishlist);
@@ -60,7 +58,6 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
 
   const description = book.description || "لا يوجد وصف متوفر لهذا الكتاب حاليًا. نعمل على توفير أوصاف شاملة لجميع كتبنا. شكرًا لتفهمكم.";
   const displayedDescription = showFullDescription ? description : `${description.substring(0, 250)}${description.length > 250 ? '...' : ''}`;
-
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
@@ -74,13 +71,23 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         </ol>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <motion.div
-          className="order-2 lg:order-1"
+          className="order-1 lg:order-1 space-y-4"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
+          <div className="relative aspect-[3/4] w-48 mx-auto rounded-lg shadow-xl overflow-hidden">
+            <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+            <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+              خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
+            </span>
+          </div>
+          <div className="flex flex-col space-y-2 w-48 mx-auto">
+            <Button variant="outline" className="w-full"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />اقرأ عينة</Button>
+            <Button variant="outline" className="w-full"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />عينة صوتية</Button>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{book.title}</h1>
           <div className="flex flex-wrap items-center text-sm text-gray-600 mb-3">
             <span>بقلم </span>
@@ -130,10 +137,6 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <p className="text-sm text-gray-700 mt-4 whitespace-pre-line">{authorDetails?.bio || 'لا توجد نبذة متوفرة.'}</p>
             )}
           </div>
-
-          <h3 className="font-semibold text-gray-800 mb-2">تقييمات العملاء</h3>
-          <p className="text-gray-600 text-sm mb-6">🚧 هذه الميزة غير مطبقة بعد</p>
-
           <Button variant="outline" className="w-full text-gray-600 border-gray-300 hover:bg-gray-100" onClick={() => toast({title: 'مشاركة المنتج', description:'🚧 هذه الميزة غير مطبقة بعد'})}>
             <Share2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
             مشاركة هذا المنتج
@@ -141,22 +144,12 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         </motion.div>
 
         <motion.div
-          className="order-1 lg:order-2"
+          className="order-3 lg:order-3"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div className="sticky top-24 space-y-4">
-            <div className="relative aspect-[3/4] rounded-lg shadow-xl overflow-hidden">
-              <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
-              <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-                خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
-              </span>
-            </div>
-            <div className="flex space-x-2 rtl:space-x-reverse">
-              <Button variant="outline" className="flex-1"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />اقرأ عينة</Button>
-              <Button variant="outline" className="flex-1"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />عينة صوتية</Button>
-            </div>
             <div className="bg-white rounded-lg shadow p-4 space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="border rounded-md p-2 text-center">
@@ -198,6 +191,11 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             </div>
           </div>
         </motion.div>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="font-semibold text-gray-800 mb-2">تقييمات العملاء</h3>
+        <p className="text-gray-600 text-sm">🚧 هذه الميزة غير مطبقة بعد</p>
       </div>
 
       {relatedBooks.length > 0 && (
