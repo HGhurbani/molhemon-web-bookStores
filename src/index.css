@@ -73,10 +73,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Amiri', 'Merriweather', serif;
+    font-family: system-ui, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-['Amiri',_serif] font-bold;
+    @apply font-sans font-bold;
   }
 }
 
@@ -156,7 +156,6 @@
   background: hsl(var(--secondary-foreground) / 0.6);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Merriweather:wght@400;700&display=swap');
 
 @media (max-width: 640px) {
   .hero-section h1 {

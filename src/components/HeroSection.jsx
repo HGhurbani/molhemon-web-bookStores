@@ -93,7 +93,7 @@ const HeroSection = ({ slides }) => {
             key={index}
             aria-label={`الانتقال إلى الشريحة ${index + 1}`}
             onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-white/50 hover:bg-white/70'}`}
+            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-blue-100 hover:bg-blue-200'}`}
           ></button>
         ))}
       </div>
