@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button.jsx';
 
 const Footer = ({ footerLinks, handleFeatureClick }) => {
   return (
-    <footer className="bg-slate-900 text-slate-400 pt-10 sm:pt-12 pb-5 sm:pb-6 rounded-t-2xl">
+    <footer className="bg-slate-900 text-slate-400 pt-10 sm:pt-12 pb-5 sm:pb-6 rounded-t-2xl -mt-10">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-10">
           <div className="md:col-span-2 lg:col-span-1">
