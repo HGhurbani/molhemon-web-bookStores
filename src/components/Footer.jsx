@@ -3,10 +3,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
+import NewsletterSection from '@/components/NewsletterSection.jsx';
 
 const Footer = ({ footerLinks, handleFeatureClick }) => {
   return (
     <footer className="bg-[#2E3192] text-white pt-10 sm:pt-12 pb-5 sm:pb-6 rounded-t-2xl -mt-10">
+      <NewsletterSection handleFeatureClick={handleFeatureClick} />
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-10">
           <div className="md:col-span-2 lg:col-span-1">

@@ -54,7 +54,7 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
             <p className="text-blue-200 text-sm sm:text-base mb-3">{author.bio || 'مؤلف وكاتب شغوف، يسعى لإثراء المحتوى العربي بأعمال أدبية وفكرية قيمة.'}</p>
             <div className="flex items-center justify-center sm:justify-start space-x-4 rtl:space-x-reverse text-sm">
               <span className="flex items-center"><BookOpen className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-blue-300" /> {authorBooks.length} كتاب</span>
-              <span className="flex items-center"><Star className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-yellow-300" /> متوسط تقييم { (authorBooks.reduce((acc,b) => acc + b.rating, 0) / (authorBooks.length || 1)).toFixed(1) }</span>
+              <span className="flex items-center bg-gray-100 rounded-sm px-1"><Star className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-yellow-300" /> متوسط تقييم { (authorBooks.reduce((acc,b) => acc + b.rating, 0) / (authorBooks.length || 1)).toFixed(1) }</span>
             </div>
           </div>
           <Button variant="outline" size="sm" className="mt-4 sm:mt-0 sm:ml-auto rtl:sm:mr-auto rtl:sm:ml-0 text-blue-600 bg-white hover:bg-blue-50 border-transparent" onClick={() => toast({title:"متابعة المؤلف", description:"🚧 هذه الميزة غير مطبقة بعد"})}>

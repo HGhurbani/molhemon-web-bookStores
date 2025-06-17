@@ -191,10 +191,10 @@
 .old-price::after {
   content: '';
   position: absolute;
-  top: 0;
+  top: 50%;
   right: 0;
   width: 100%;
   border-top: 2px solid #ef4444;
-  transform: rotate(-10deg);
-  transform-origin: top right;
+  transform: translateY(-50%) rotate(-10deg);
+  transform-origin: center right;
 }

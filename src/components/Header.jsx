@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Search, ShoppingCart, Bookmark, ChevronDown, Briefcase, UserCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
-import NewsletterSection from '@/components/NewsletterSection.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
@@ -151,7 +150,6 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
         </div>
       </div>
     </header>
-    <NewsletterSection handleFeatureClick={handleFeatureClick} />
     </>
   );
 };
