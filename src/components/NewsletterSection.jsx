@@ -5,20 +5,22 @@ import { motion } from 'framer-motion';
 
 const NewsletterSection = ({ handleFeatureClick }) => {
   return (
-    <section className="py-10 sm:py-12 bg-gradient-to-r from-blue-700 to-blue-700 text-white rounded-t-2xl -mb-10">
-      <motion.div 
-        className="max-w-xl lg:max-w-2xl mx-auto text-center px-4 sm:px-6 lg:px-8"
+    <section className="py-10 sm:py-12 bg-blue-600 text-white rounded-t-2xl -mb-10">
+      <motion.div
+        className="max-w-screen-lg mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y:25 }}
         whileInView={{ opacity: 1, y:0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2.5 sm:mb-3">ابق على اطلاع</h2>
-        <p className="text-sm sm:text-base mb-5 sm:mb-6 opacity-90 max-w-lg mx-auto">
-          اشترك في نشرتنا الإخبارية اليومية للحصول على آخر التحديثات التي تصل مباشرة إلى بريدك الوارد
-        </p>
-        <form 
-            className="flex flex-col sm:flex-row max-w-sm sm:max-w-md mx-auto bg-white/20 backdrop-blur-sm rounded-lg p-1 sm:p-1.5 shadow-lg focus-within:ring-2 focus-within:ring-white/80"
+        <div className="sm:w-1/2 text-right mb-4 sm:mb-0 sm:pr-4 rtl:sm:pl-4 rtl:sm:pr-0">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2.5 sm:mb-3">ابق على اطلاع</h2>
+          <p className="text-sm sm:text-base opacity-90">
+            اشترك في نشرتنا الإخبارية اليومية للحصول على آخر التحديثات التي تصل مباشرة إلى بريدك الوارد
+          </p>
+        </div>
+        <form
+            className="flex flex-col sm:flex-row max-w-sm sm:max-w-md bg-white/20 backdrop-blur-sm rounded-lg p-1 sm:p-1.5 shadow-lg focus-within:ring-2 focus-within:ring-white/80 sm:ml-auto rtl:sm:mr-auto"
             onSubmit={(e) => { e.preventDefault(); handleFeatureClick('newsletter-subscribe'); }}
         >
           <div className="relative flex-grow mb-1.5 sm:mb-0 sm:mr-1.5 rtl:sm:ml-1.5 rtl:sm:mr-0">
