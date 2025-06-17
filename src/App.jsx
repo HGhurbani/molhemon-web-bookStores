@@ -19,6 +19,7 @@ import CartPage from '@/pages/CartPage.jsx';
 import CheckoutPage from '@/pages/CheckoutPage.jsx';
 import UserProfilePage from '@/pages/UserProfilePage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
+import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { categories as initialCategories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
 import { TrendingUp } from 'lucide-react';
@@ -33,6 +34,8 @@ const App = () => {
   const [authors, setAuthors] = useState(initialAuthors);
   const [categoriesState, setCategoriesState] = useState(initialCategories);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
+  const [cartDialogOpen, setCartDialogOpen] = useState(false);
+  const [cartDialogBook, setCartDialogBook] = useState(null);
 
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
@@ -66,16 +69,14 @@ const App = () => {
     setCart((prevCart) => {
       const existingBook = prevCart.find(item => item.id === book.id);
       if (existingBook) {
-        return prevCart.map(item => 
+        return prevCart.map(item =>
           item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prevCart, { ...book, quantity: 1 }];
     });
-    toast({
-      title: "تمت الإضافة للسلة",
-      description: `تم إضافة "${book.title}" إلى سلة التسوق.`,
-    });
+    setCartDialogBook(book);
+    setCartDialogOpen(true);
   };
 
   const handleRemoveFromCart = (bookId) => {
@@ -199,6 +200,16 @@ const App = () => {
             </Routes>
         </AnimatePresence>
         <Toaster />
+        <AddToCartDialog
+          open={cartDialogOpen}
+          onOpenChange={setCartDialogOpen}
+          book={cartDialogBook}
+          recommendedBooks={books.filter(b => cartDialogBook ? b.id !== cartDialogBook.id : true).slice(0,6)}
+          handleAddToCart={handleAddToCart}
+          handleToggleWishlist={handleToggleWishlist}
+          wishlist={wishlist}
+          authors={authors}
+        />
       </div>
     </Router>
   );
