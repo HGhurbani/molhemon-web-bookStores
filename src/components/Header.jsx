@@ -40,8 +40,10 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
     { id: 'science', name: 'علوم' },
   ];
 
+  const deliveryItems = ["توصيل سريع", "شحن عادي", "استلام من المتجر"];
+
   return (
-    <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl">
+    <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl mb-4">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-6 rtl:space-x-reverse">
@@ -56,8 +58,13 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
             </motion.div>
           </div>
           
-          <div className="flex-1 max-w-md lg:max-w-lg mx-4 lg:mx-8">
-            <div className="relative">
+          <div className="flex-1 mx-4 lg:mx-8 flex items-center space-x-1 rtl:space-x-reverse">
+            <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
+              {renderDropdown("تصفح الفئات", categoryItems, true)}
+              {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
+              {renderDropdown("طريقة التوصيل", deliveryItems)}
+            </div>
+            <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="ابحث بالعنوان، المؤلف، الكلمة المفتاحية، ISBN..."
@@ -65,7 +72,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                 onFocus={() => handleFeatureClick('search-main-focus')}
                 onChange={() => handleFeatureClick('search-main-change')}
               />
-              <Button 
+              <Button
                 className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white"
                 onClick={() => handleFeatureClick('search-main-button')}
                 size="sm"
@@ -76,11 +83,6 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
           </div>
 
           <div className="flex items-center space-x-1 rtl:space-x-reverse">
-            <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
-              {renderDropdown("تصفح الفئات", categoryItems, true)}
-              {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
-             
-            </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -106,15 +108,26 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                     {item}
                   </DropdownMenuItem>
                 ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/admin" className="flex items-center">
-                    <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
-                    لوحة التحكم
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-gray-500">طريقة التوصيل</DropdownMenuLabel>
+                  {deliveryItems.map((item, idx) => (
+                    <DropdownMenuItem
+                      key={idx}
+                      onClick={() => handleFeatureClick(item.toLowerCase().replace(/\s/g, '-'))}
+                      className="px-4 py-2"
+                    >
+                      {item}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="flex items-center">
+                      <Briefcase className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
+                      لوحة التحكم
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
             <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-blue-200 w-10 h-10">
               <Link to="/cart">
@@ -130,7 +143,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
           </div>
         </div>
         <div className="flex items-center justify-center space-x-3 rtl:space-x-reverse py-2 text-xs text-white overflow-x-auto whitespace-nowrap">
-            {["recommendation search", "recent search", "recommendation search", "recent search", "recommendation search", "recent search", "recommendation search", "recent search"].map((item,idx) => (
+            {["بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث"].map((item,idx) => (
                  <span key={idx} className="cursor-pointer hover:text-blue-200" onClick={() => handleFeatureClick(item.replace(/\s/g, '-'))}>{item}</span>
             ))}
         </div>
