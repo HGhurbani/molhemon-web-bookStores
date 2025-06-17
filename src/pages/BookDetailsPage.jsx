@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import SubscriptionDialog from '@/components/SubscriptionDialog.jsx';
-import { Star, Heart, ShoppingCart, Minus, Plus, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
@@ -12,7 +12,6 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [relatedBooks, setRelatedBooks] = useState([]);
-  const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('details');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -41,12 +40,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
 
   const authorDetails = authors.find(a => a.name === book?.author);
 
-  const handleQuantityChange = (amount) => {
-    setQuantity(prev => Math.max(1, prev + amount));
-  };
-
   const onAddToCart = () => {
-    handleAddToCart({ ...book, quantity });
+    handleAddToCart({ ...book, quantity: 1 });
   };
 
   const onToggleWishlist = () => {
@@ -184,13 +179,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                   <div className="text-green-600">وفر {(book.originalPrice - book.price).toFixed(2)} د.إ</div>
                 )}
               </div>
-              <div className="flex items-center mb-3 space-x-2 rtl:space-x-reverse">
-                <div className="flex items-center border border-gray-300 rounded-md">
-                  <Button variant="ghost" size="icon" onClick={() => handleQuantityChange(-1)} className="h-8 w-8 text-gray-600 hover:bg-gray-100 rounded-r-md rtl:rounded-l-md rtl:rounded-r-none"><Minus className="w-4 h-4" /></Button>
-                  <span className="px-3 text-sm font-medium">{quantity}</span>
-                  <Button variant="ghost" size="icon" onClick={() => handleQuantityChange(1)} className="h-8 w-8 text-gray-600 hover:bg-gray-100 rounded-l-md rtl:rounded-r-md rtl:rounded-l-none"><Plus className="w-4 h-4" /></Button>
-                </div>
-                <Button onClick={onAddToCart} className="flex-grow bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-1 rtl:mr-1 rtl:ml-0" />أضف إلى السلة</Button>
+              <div className="mb-3">
+                <Button onClick={onAddToCart} className="w-full bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-1 rtl:mr-1 rtl:ml-0" />أضف إلى السلة</Button>
               </div>
               <Button variant="secondary" className="w-full mb-3">اشتري الان بنقرة واحدة</Button>
               <div className="flex justify-around text-sm text-gray-600">
@@ -217,7 +207,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           authors={authors}
         />
       )}
-      <SubscriptionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <SubscriptionDialog open={dialogOpen} onOpenChange={setDialogOpen} book={book} onAddToCart={onAddToCart} />
     </div>
   );
 };
