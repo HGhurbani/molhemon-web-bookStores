@@ -20,7 +20,7 @@ import CheckoutPage from '@/pages/CheckoutPage.jsx';
 import UserProfilePage from '@/pages/UserProfilePage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
 
-import { categories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
+import { categories as initialCategories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
 import { TrendingUp } from 'lucide-react';
 
 const App = () => {
@@ -31,12 +31,20 @@ const App = () => {
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState(initialBooks);
   const [authors, setAuthors] = useState(initialAuthors);
+  const [categoriesState, setCategoriesState] = useState(initialCategories);
+  const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
 
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
     if (storedCart) setCart(JSON.parse(storedCart));
     const storedWishlist = localStorage.getItem('wishlist');
     if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+    const storedAuthors = localStorage.getItem('authors');
+    if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
+    const storedCategories = localStorage.getItem('categories');
+    if (storedCategories) setCategoriesState(JSON.parse(storedCategories));
+    const storedOrders = localStorage.getItem('orders');
+    if (storedOrders) setOrders(JSON.parse(storedOrders));
   }, []);
 
   useEffect(() => {
@@ -46,6 +54,18 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
+
+  useEffect(() => {
+    localStorage.setItem('authors', JSON.stringify(authors));
+  }, [authors]);
+
+  useEffect(() => {
+    localStorage.setItem('categories', JSON.stringify(categoriesState));
+  }, [categoriesState]);
+
+  useEffect(() => {
+    localStorage.setItem('orders', JSON.stringify(orders));
+  }, [orders]);
 
   const handleAddToCart = (book) => {
     setCart((prevCart) => {
@@ -148,11 +168,15 @@ const App = () => {
                     dashboardStats={dashboardStats}
                     books={books}
                     authors={authors}
+                    categories={categoriesState}
+                    orders={orders}
                     dashboardSection={dashboardSection}
                     setDashboardSection={setDashboardSection}
                     handleFeatureClick={handleFeatureClick}
                     setBooks={setBooks}
                     setAuthors={setAuthors}
+                    setCategories={setCategoriesState}
+                    setOrders={setOrders}
                   />
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
@@ -169,12 +193,12 @@ const App = () => {
                 )
               }
             />
-            <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categories} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+            <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/book/:id" element={<MainLayout><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categories} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/cart" element={<MainLayout><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
-              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} /></PageLayout></MainLayout>} />
+              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} setCart={setCart} /></PageLayout></MainLayout>} />
               <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>

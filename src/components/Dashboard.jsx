@@ -30,6 +30,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
     { id: 'authors', name: 'المؤلفون', icon: Users },
+    { id: 'categories', name: 'الأصناف', icon: BookOpen },
     { id: 'orders', name: 'الطلبات', icon: Package },
     { id: 'customers', name: 'العملاء', icon: UserCheck },
     { id: 'settings', name: 'الإعدادات', icon: Settings }
@@ -77,6 +78,242 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     </div>
   );
 };
+
+
+const AuthorForm = ({ author, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', bio: '', imgPlaceholder: '', ...author });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{author ? 'تعديل المؤلف' : 'إضافة مؤلف جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="name">الاسم</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="bio">نبذة</Label>
+          <Textarea id="bio" name="bio" value={formData.bio} onChange={handleChange} rows={3} />
+        </div>
+        <div>
+          <Label htmlFor="imgPlaceholder">وصف الصورة (لـ Unsplash)</Label>
+          <Input id="imgPlaceholder" name="imgPlaceholder" value={formData.imgPlaceholder} onChange={handleChange} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {author ? 'حفظ التعديلات' : 'إضافة المؤلف'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardAuthors = ({ authors, setAuthors }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingAuthor, setEditingAuthor] = useState(null);
+
+  const handleAddAuthor = (data) => {
+    const newAuthor = { id: Date.now(), books: 0, ...data };
+    setAuthors(prev => [newAuthor, ...prev]);
+    localStorage.setItem('authors', JSON.stringify([newAuthor, ...authors]));
+    toast({ title: 'تمت الإضافة بنجاح!' });
+    setShowForm(false);
+  };
+
+  const handleEditAuthor = (data) => {
+    const updated = { ...editingAuthor, ...data };
+    setAuthors(prev => prev.map(a => a.id === updated.id ? updated : a));
+    localStorage.setItem('authors', JSON.stringify(authors.map(a => a.id === updated.id ? updated : a)));
+    toast({ title: 'تم التعديل بنجاح!' });
+    setShowForm(false);
+    setEditingAuthor(null);
+  };
+
+  const handleDeleteAuthor = (id) => {
+    setAuthors(prev => prev.filter(a => a.id !== id));
+    localStorage.setItem('authors', JSON.stringify(authors.filter(a => a.id !== id)));
+    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  };
+
+  if (showForm) {
+    return <AuthorForm author={editingAuthor} onSubmit={editingAuthor ? handleEditAuthor : handleAddAuthor} onCancel={() => { setShowForm(false); setEditingAuthor(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة المؤلفين</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingAuthor(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة مؤلف
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {authors.map(a => (
+              <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{a.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingAuthor(a); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteAuthor(a.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const CategoryForm = ({ category, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ id: '', name: '', ...category });
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{category ? 'تعديل الصنف' : 'إضافة صنف جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="id">المعرف</Label>
+          <Input id="id" name="id" value={formData.id} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="name">الاسم</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {category ? 'حفظ التعديلات' : 'إضافة الصنف'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardCategories = ({ categories, setCategories }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+
+  const handleAdd = (data) => {
+    const newCat = { ...data };
+    setCategories(prev => [newCat, ...prev]);
+    localStorage.setItem('categories', JSON.stringify([newCat, ...categories]));
+    toast({ title: 'تمت الإضافة بنجاح!' });
+    setShowForm(false);
+  };
+
+  const handleEdit = (data) => {
+    setCategories(prev => prev.map(c => c.id === data.id ? data : c));
+    localStorage.setItem('categories', JSON.stringify(categories.map(c => c.id === data.id ? data : c)));
+    toast({ title: 'تم التعديل بنجاح!' });
+    setShowForm(false);
+    setEditingCategory(null);
+  };
+
+  const handleDelete = (id) => {
+    setCategories(prev => prev.filter(c => c.id !== id));
+    localStorage.setItem('categories', JSON.stringify(categories.filter(c => c.id !== id)));
+    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  };
+
+  if (showForm) {
+    return <CategoryForm category={editingCategory} onSubmit={editingCategory ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingCategory(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة الأصناف</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingCategory(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة صنف
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {categories.map(c => (
+              <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCategory(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const DashboardOrders = ({ orders }) => (
+  <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <h2 className="text-2xl font-semibold text-gray-700 mb-3">الطلبات الواردة</h2>
+    <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+      <table className="w-full min-w-[400px]">
+        <thead className="bg-slate-50">
+          <tr>
+            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">رقم الطلب</th>
+            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التاريخ</th>
+            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجمالي</th>
+            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-200">
+          {orders.map(o => (
+            <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
+              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.id}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.date}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.total.toFixed(2)} د.إ</td>
+              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </motion.div>
+);
 
 const DashboardOverview = ({ dashboardStats }) => (
   <div className="space-y-6">
@@ -138,9 +375,8 @@ const DashboardOverview = ({ dashboardStats }) => (
   </div>
 );
 
-import { categories } from '@/data/siteData.js';
 
-const BookForm = ({ book, onSubmit, onCancel, authors }) => {
+const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -256,7 +492,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors }) => {
 };
 
 
-const DashboardBooks = ({ books, setBooks, authors, handleFeatureClick }) => {
+const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureClick }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
 
@@ -300,7 +536,7 @@ const DashboardBooks = ({ books, setBooks, authors, handleFeatureClick }) => {
   };
 
   if (showForm) {
-    return <BookForm book={editingBook} onSubmit={editingBook ? handleEditBook : handleAddBook} onCancel={() => { setShowForm(false); setEditingBook(null); }} authors={authors} />;
+    return <BookForm book={editingBook} onSubmit={editingBook ? handleEditBook : handleAddBook} onCancel={() => { setShowForm(false); setEditingBook(null); }} authors={authors} categories={categories} />;
   }
 
   return (
@@ -414,7 +650,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors }) => {
+const Dashboard = ({ dashboardStats, books, authors, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setCategories, setOrders }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -433,8 +669,11 @@ const Dashboard = ({ dashboardStats, books, authors, dashboardSection, setDashbo
         </div>
 
         {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
-        {dashboardSection === 'books' && <DashboardBooks books={books} setBooks={setBooks} authors={authors} handleFeatureClick={handleFeatureClick} />}
-        {['authors', 'orders', 'customers', 'settings'].includes(dashboardSection) && (
+        {dashboardSection === 'books' && <DashboardBooks books={books} setBooks={setBooks} authors={authors} categories={categories} handleFeatureClick={handleFeatureClick} />}
+        {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
+        {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
+        {dashboardSection === 'orders' && <DashboardOrders orders={orders} />}
+        {['customers', 'settings'].includes(dashboardSection) && (
           <PlaceholderSection sectionName={sectionTitles[dashboardSection]} handleFeatureClick={handleFeatureClick} />
         )}
       </main>
