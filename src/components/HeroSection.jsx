@@ -25,6 +25,7 @@ const HeroSection = ({ slides }) => {
   const currentSlide = slides[currentIndex];
 
   return (
+    <>
     <section className="hero-section h-[350px] md:h-[450px] text-white relative overflow-hidden bg-slate-200">
       <AnimatePresence initial={false} mode="wait">
         <motion.div
@@ -86,16 +87,17 @@ const HeroSection = ({ slides }) => {
       </button>
 
     </section>
-    <div className="flex justify-center mt-2 space-x-1.5 rtl:space-x-reverse">
-      {slides.map((_, index) => (
-        <button
-          key={index}
-          aria-label={`الانتقال إلى الشريحة ${index + 1}`}
-          onClick={() => setCurrentIndex(index)}
-          className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-white/50 hover:bg-white/70'}`}
-        ></button>
-      ))}
-    </div>
+      <div className="flex justify-center mt-2 space-x-1.5 rtl:space-x-reverse">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            aria-label={`الانتقال إلى الشريحة ${index + 1}`}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ease-in-out ${currentIndex === index ? 'bg-blue-500 w-5 sm:w-6' : 'bg-white/50 hover:bg-white/70'}`}
+          ></button>
+        ))}
+      </div>
+    </>
   );
 
 export default HeroSection;
