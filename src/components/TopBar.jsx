@@ -57,7 +57,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
             );
           })}
         </div>
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+        <div className="hidden sm:flex items-center space-x-3 rtl:space-x-reverse">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
