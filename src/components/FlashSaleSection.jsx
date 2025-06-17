@@ -114,7 +114,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
       <div className="flex items-baseline mb-1 sm:mb-1.5">
         <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} ر.س</span>
         {book.originalPrice && (
-          <span className="text-gray-400 line-through text-[9px] sm:text-[10px] mr-1 rtl:ml-1 rtl:mr-0">
+          <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-[9px] sm:text-[10px] mr-1 rtl:ml-1 rtl:mr-0">
             {book.originalPrice.toFixed(2)} ر.س
           </span>
         )}

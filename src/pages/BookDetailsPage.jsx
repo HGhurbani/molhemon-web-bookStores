@@ -124,7 +124,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           <div className="mb-4">
             <span className="text-3xl font-bold text-blue-600">{book.price.toFixed(2)} ر.س</span>
             {book.originalPrice && (
-              <span className="text-gray-400 line-through text-lg mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} ر.س</span>
+              <span className="text-gray-400 line-through decoration-red-500 decoration-wavy text-lg mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} ر.س</span>
             )}
           </div>
           

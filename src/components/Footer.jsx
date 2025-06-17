@@ -31,11 +31,11 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
             <p className="text-[11px] text-white mb-1.5">متوفر على</p>
             <div className="flex flex-col sm:flex-row space-y-1.5 sm:space-y-0 sm:space-x-1.5 rtl:sm:space-x-reverse">
                 <button onClick={() => handleFeatureClick('google-play')} aria-label="تحميل التطبيق من جوجل بلاي" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <i className="fa-brands fa-google-play text-white ml-1 rtl:mr-1 rtl:ml-0"></i>
+                    <i className="fab fa-google-play text-white ml-1 rtl:mr-1 rtl:ml-0"></i>
                     Google Play
                 </button>
                 <button onClick={() => handleFeatureClick('app-store')} aria-label="تحميل التطبيق من آب ستور" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <i className="fa-brands fa-apple text-white ml-1 rtl:mr-1 rtl:ml-0"></i>
+                    <i className="fab fa-apple text-white ml-1 rtl:mr-1 rtl:ml-0"></i>
                     App Store
                 </button>
             </div>
