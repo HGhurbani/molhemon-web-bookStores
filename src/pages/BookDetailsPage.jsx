@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import SubscriptionDialog from '@/components/SubscriptionDialog.jsx';
 import { Star, Heart, ShoppingCart, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
+import AudioSamplePlayer from '@/components/AudioSamplePlayer.jsx';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
@@ -16,6 +17,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [audioOpen, setAudioOpen] = useState(false);
 
   useEffect(() => {
     const currentBook = books.find(b => b.id.toString() === id);
@@ -83,7 +85,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           </div>
           <div className="flex flex-col space-y-2 w-56 mx-auto">
             <Button variant="ghost" onClick={() => setDialogOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />اقرأ عينة</Button>
-            <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
+            <Button variant="ghost" onClick={() => setAudioOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
           </div>
         </motion.div>
 
@@ -208,6 +210,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         />
       )}
       <SubscriptionDialog open={dialogOpen} onOpenChange={setDialogOpen} book={book} onAddToCart={onAddToCart} />
+      {audioOpen && <AudioSamplePlayer book={book} onClose={() => setAudioOpen(false)} />}
     </div>
   );
 };
