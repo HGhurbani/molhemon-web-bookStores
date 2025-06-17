@@ -1,0 +1,179 @@
+
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Toaster } from '@/components/ui/toaster';
+import { toast } from '@/components/ui/use-toast.js';
+import Header from '@/components/Header.jsx';
+import TopBar from '@/components/TopBar.jsx';
+import Footer from '@/components/Footer.jsx';
+import Dashboard from '@/components/Dashboard.jsx';
+
+import HomePage from '@/pages/HomePage.jsx';
+import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
+import AuthorPage from '@/pages/AuthorPage.jsx';
+import CategoryPage from '@/pages/CategoryPage.jsx';
+import CartPage from '@/pages/CartPage.jsx';
+import CheckoutPage from '@/pages/CheckoutPage.jsx';
+import UserProfilePage from '@/pages/UserProfilePage.jsx';
+import NotFoundPage from '@/pages/NotFoundPage.jsx';
+
+import { categories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
+import { TrendingUp } from 'lucide-react';
+
+const App = () => {
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [dashboardSection, setDashboardSection] = useState('overview');
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [books, setBooks] = useState(initialBooks);
+  const [authors, setAuthors] = useState(initialAuthors);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) setCart(JSON.parse(storedCart));
+    const storedWishlist = localStorage.getItem('wishlist');
+    if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  const handleAddToCart = (book) => {
+    setCart((prevCart) => {
+      const existingBook = prevCart.find(item => item.id === book.id);
+      if (existingBook) {
+        return prevCart.map(item => 
+          item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prevCart, { ...book, quantity: 1 }];
+    });
+    toast({
+      title: "تمت الإضافة للسلة",
+      description: `تم إضافة "${book.title}" إلى سلة التسوق.`,
+    });
+  };
+
+  const handleRemoveFromCart = (bookId) => {
+    setCart(prevCart => prevCart.filter(item => item.id !== bookId));
+    toast({
+      title: "تم الحذف من السلة",
+      description: "تم حذف المنتج من سلة التسوق.",
+      variant: "destructive"
+    });
+  };
+
+  const handleUpdateQuantity = (bookId, quantity) => {
+    if (quantity < 1) {
+      handleRemoveFromCart(bookId);
+      return;
+    }
+    setCart(prevCart => prevCart.map(item => item.id === bookId ? {...item, quantity} : item));
+  }
+
+  const handleToggleWishlist = (book) => {
+    setWishlist((prevWishlist) => {
+      const isInWishlist = prevWishlist.find(item => item.id === book.id);
+      if (isInWishlist) {
+        toast({
+          title: "تم الحذف من المفضلة",
+          description: `تم حذف "${book.title}" من قائمة الرغبات.`,
+          variant: "destructive"
+        });
+        return prevWishlist.filter(item => item.id !== book.id);
+      } else {
+        toast({
+          title: "تمت الإضافة للمفضلة",
+          description: `تم إضافة "${book.title}" إلى قائمة الرغبات.`,
+        });
+        return [...prevWishlist, book];
+      }
+    });
+  };
+  
+  const handleFeatureClick = (feature) => {
+    toast({
+      title: "🚧 هذه الميزة غير مطبقة بعد",
+      description: "لا تقلق! يمكنك طلبها في رسالتك التالية! 🚀",
+      duration: 3000,
+    });
+  };
+
+  const PageLayout = ({ children }) => {
+    const location = useLocation();
+    return (
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+  
+  const MainLayout = ({ children }) => (
+    <div className="min-h-screen bg-slate-100 text-gray-800">
+      <TopBar handleFeatureClick={handleFeatureClick} />
+      <Header 
+        handleFeatureClick={handleFeatureClick} 
+        setShowDashboard={setShowDashboard}
+        cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+      />
+      {children}
+      <Footer footerLinks={footerLinks} handleFeatureClick={handleFeatureClick} />
+    </div>
+  );
+
+  return (
+    <Router>
+      <div className="font-['Tajawal',_sans-serif]" dir="rtl">
+        <AnimatePresence mode="wait">
+          {showDashboard ? (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Dashboard 
+                dashboardStats={dashboardStats}
+                books={books}
+                authors={authors}
+                dashboardSection={dashboardSection}
+                setDashboardSection={setDashboardSection}
+                setShowDashboard={setShowDashboard}
+                handleFeatureClick={handleFeatureClick}
+                setBooks={setBooks}
+                setAuthors={setAuthors}
+              />
+            </motion.div>
+          ) : (
+            <Routes>
+              <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categories} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/book/:id" element={<MainLayout><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/author/:id" element={<MainLayout><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categories} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/cart" element={<MainLayout><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
+              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} /></PageLayout></MainLayout>} />
+              <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
+            </Routes>
+          )}
+        </AnimatePresence>
+        <Toaster />
+      </div>
+    </Router>
+  );
+};
+
+export default App;
