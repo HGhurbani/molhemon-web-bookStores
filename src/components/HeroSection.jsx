@@ -100,4 +100,6 @@ const HeroSection = ({ slides }) => {
     </>
   );
 
+};
+
 export default HeroSection;
