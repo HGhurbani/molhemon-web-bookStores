@@ -17,7 +17,7 @@ const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, w
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{title}</h2>
           </div>
           <Link to={`/category/${title.toLowerCase().replace(/\s/g, '-')}`}>
-            <Button variant="link" className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm px-1 py-0.5 h-auto">
+            <Button className="text-gray-700 bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm px-2 py-1 h-auto rounded-md">
               شاهد المزيد
             </Button>
           </Link>

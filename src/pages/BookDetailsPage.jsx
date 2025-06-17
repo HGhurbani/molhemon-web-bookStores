@@ -112,7 +112,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <span className="text-gray-600">بواسطة:</span>
             <Link to={`/author/${authorDetails?.id || 'unknown'}`} className="text-blue-600 hover:underline font-medium mr-1 rtl:ml-1 rtl:mr-0">{book.author}</Link>
             <span className="text-gray-400 mx-2">|</span>
-            <div className="flex items-center">
+            <div className="flex items-center bg-gray-100 rounded-sm px-1">
               <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
               <span className="text-gray-600 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5</span>
               <span className="text-gray-400 mx-1">·</span>
@@ -121,10 +121,10 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           </div>
 
           <div className="mb-4">
-            <span className="text-3xl font-bold text-blue-600">{book.price.toFixed(2)} د.إ</span>
             {book.originalPrice && (
-              <span className="text-gray-400 old-price text-lg mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} د.إ</span>
+              <span className="text-gray-400 old-price text-lg ml-2 rtl:mr-2 rtl:ml-0">{book.originalPrice.toFixed(2)} د.إ</span>
             )}
+            <span className="text-3xl font-bold text-blue-600">{book.price.toFixed(2)} د.إ</span>
           </div>
           
           <div className="flex items-center space-x-3 rtl:space-x-reverse mb-5">

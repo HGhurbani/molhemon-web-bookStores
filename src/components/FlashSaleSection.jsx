@@ -95,22 +95,20 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
         <p className="text-gray-500 text-[10px] sm:text-[11px] mb-1 sm:mb-1.5 hover:text-blue-500">{book.author}</p>
       </Link>
       
-      <div className="flex items-center mb-1 sm:mb-1.5">
-        <div className="flex items-center">
-          <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 fill-blue-600" />
-        </div>
-        <span className="text-[9px] sm:text-[10px] text-gray-500 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
+      <div className="flex items-center mb-1 sm:mb-1.5 bg-gray-100 rounded-sm px-1">
+        <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 fill-blue-600" />
+        <span className="text-[9px] sm:text-[10px] text-gray-600 mr-1 rtl:ml-1 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
       </div>
       
       <div className="flex items-baseline mb-1 sm:mb-1.5">
-        <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} د.إ</span>
         {book.originalPrice && (
-          <span className="text-gray-400 old-price text-[9px] sm:text-[10px] mr-1 rtl:ml-1 rtl:mr-0">
+          <span className="text-gray-400 old-price text-[9px] sm:text-[10px] ml-1 rtl:mr-1 rtl:ml-0">
             {book.originalPrice.toFixed(2)} د.إ
           </span>
         )}
+        <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} د.إ</span>
       </div>
-       <p className="text-[9px] sm:text-[10px] text-green-600">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
+       <p className="text-[9px] sm:text-[10px] text-gray-800 bg-gray-500 rounded-sm px-1">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
     </div>
   </motion.div>
 );
@@ -127,7 +125,7 @@ const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishli
             <FlashSaleCountdown />
           </div>
           <Link to="/category/flash-sale">
-            <Button variant="link" className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm px-1 py-0.5 h-auto">
+            <Button className="text-gray-700 bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm px-2 py-1 h-auto rounded-md">
               شاهد المزيد
             </Button>
           </Link>
