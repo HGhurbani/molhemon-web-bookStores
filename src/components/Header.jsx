@@ -10,7 +10,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="text-sm text-white hover:bg-blue-500/25 px-2 py-2 rounded-md h-10">
+        <Button variant="default" className="text-sm bg-white text-blue-600 hover:bg-white/80 px-2 py-2 rounded-md h-10">
           {label}
           <ChevronDown className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
         </Button>
@@ -59,11 +59,6 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
           </div>
           
           <div className="flex-1 mx-4 lg:mx-8 flex items-center space-x-1 rtl:space-x-reverse">
-            <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
-              {renderDropdown("تصفح الفئات", categoryItems, true)}
-              {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
-              {renderDropdown("طريقة التوصيل", deliveryItems)}
-            </div>
             <div className="relative flex-1">
               <input
                 type="text"
@@ -79,6 +74,11 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
               >
                 <Search className="w-4 h-4" />
               </Button>
+            </div>
+            <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
+              {renderDropdown("تصفح الفئات", categoryItems, true)}
+              {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
+              {renderDropdown("طريقة التوصيل", deliveryItems)}
             </div>
           </div>
 
