@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
+import SubscriptionDialog from '@/components/SubscriptionDialog.jsx';
 import { Star, Heart, ShoppingCart, Minus, Plus, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
@@ -15,6 +16,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const [activeTab, setActiveTab] = useState('details');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const currentBook = books.find(b => b.id.toString() === id);
@@ -78,15 +80,15 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="relative aspect-[3/4] w-48 mx-auto rounded-lg shadow-xl overflow-hidden">
+          <div className="relative aspect-[3/4] w-56 mx-auto rounded-lg shadow-xl overflow-hidden">
             <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src={book.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
             <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
               خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
             </span>
           </div>
-          <div className="flex flex-col space-y-2 w-48 mx-auto">
-            <Button variant="outline" className="w-full"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />اقرأ عينة</Button>
-            <Button variant="outline" className="w-full"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />عينة صوتية</Button>
+          <div className="flex flex-col space-y-2 w-56 mx-auto">
+            <Button variant="ghost" onClick={() => setDialogOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />اقرأ عينة</Button>
+            <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
           </div>
         </motion.div>
 
@@ -157,7 +159,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="sticky top-24 space-y-4">
+          <div className="sticky top-24 space-y-4 lg:w-64 mx-auto">
             <div className="bg-white rounded-lg shadow p-4 space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="border rounded-md p-2 text-center">
@@ -215,6 +217,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           authors={authors}
         />
       )}
+      <SubscriptionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 };
