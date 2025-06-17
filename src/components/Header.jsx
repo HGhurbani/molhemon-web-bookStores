@@ -10,7 +10,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
   const renderDropdown = (label, items, isCategory = false) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="default" className="text-sm bg-white text-blue-600 hover:bg-white/80 px-2 py-2 rounded-md h-10">
+        <Button variant="default" className="text-sm bg-white text-gray-700 hover:bg-white/80 px-2 py-2 rounded-md h-10">
           {label}
           <ChevronDown className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
         </Button>

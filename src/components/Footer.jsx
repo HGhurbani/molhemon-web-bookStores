@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button.jsx';
 
 const Footer = ({ footerLinks, handleFeatureClick }) => {
   return (
-    <footer className="bg-[#2E3192] text-slate-400 pt-10 sm:pt-12 pb-5 sm:pb-6 rounded-t-2xl -mt-10">
+    <footer className="bg-[#2E3192] text-white pt-10 sm:pt-12 pb-5 sm:pb-6 rounded-t-2xl -mt-10">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-10">
           <div className="md:col-span-2 lg:col-span-1">
@@ -14,28 +14,28 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
               <img  alt="شعار ملهمون في الفوتر" className="h-9 w-auto mr-1.5 rtl:ml-1.5 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
    
             </Link>
-            <p className="text-[11px] text-slate-500 mb-3">تواصل معنا على</p>
+            <p className="text-[11px] text-white mb-3">تواصل معنا على</p>
             <div className="flex space-x-2.5 rtl:space-x-reverse mb-4">
               {[Facebook, Twitter, Instagram, Linkedin, Youtube].map((Icon, index) => (
                 <a 
                   key={index} 
                   href="#" 
                   aria-label={`تابعنا على ${Icon.displayName || `social icon ${index}`}`}
-                  className="text-slate-500 hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-200 transition-colors"
                   onClick={(e) => { e.preventDefault(); handleFeatureClick(`social-${Icon.displayName?.toLowerCase() || `icon${index}` }`);}}
                 >
                   <Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                 </a>
               ))}
             </div>
-            <p className="text-[11px] text-slate-500 mb-1.5">متوفر على</p>
+            <p className="text-[11px] text-white mb-1.5">متوفر على</p>
             <div className="flex flex-col sm:flex-row space-y-1.5 sm:space-y-0 sm:space-x-1.5 rtl:sm:space-x-reverse">
-                <button onClick={() => handleFeatureClick('google-play')} aria-label="تحميل التطبيق من جوجل بلاي" className="bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-2.5 rounded-md flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <img  alt="أيقونة جوجل بلاي" className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" src="https://images.unsplash.com/photo-1679094837433-32484a621c74" />
+                <button onClick={() => handleFeatureClick('google-play')} aria-label="تحميل التطبيق من جوجل بلاي" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
+                    <img  alt="أيقونة جوجل بلاي" className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 filter invert" src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Play_Arrow_logo.svg" />
                     Google Play
                 </button>
-                <button onClick={() => handleFeatureClick('app-store')} aria-label="تحميل التطبيق من آب ستور" className="bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-2.5 rounded-md flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
-                    <img  alt="أيقونة آب ستور" className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" src="https://images.unsplash.com/photo-1620829868801-8a443f0370f3" />
+                <button onClick={() => handleFeatureClick('app-store')} aria-label="تحميل التطبيق من آب ستور" className="border border-white text-white bg-transparent hover:bg-white/10 py-1.5 px-2.5 rounded-lg flex items-center text-[10px] sm:text-xs justify-center sm:justify-start">
+                    <img  alt="أيقونة آب ستور" className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 filter invert" src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" />
                     App Store
                 </button>
             </div>
@@ -43,14 +43,14 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
 
           {footerLinks.map((section, index) => (
             <div key={index}>
-              <h4 className="font-semibold text-sm sm:text-base text-slate-200 mb-3 sm:mb-4">{section.title}</h4>
+              <h4 className="font-semibold text-sm sm:text-base text-white mb-3 sm:mb-4">{section.title}</h4>
               <ul className="space-y-2 sm:space-y-2.5">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     {link.href === '#' || link.action ? (
                        <a
                         href={link.href}
-                        className="text-slate-400 hover:text-blue-400 text-[11px] sm:text-xs transition-colors"
+                        className="text-white hover:text-blue-200 text-[11px] sm:text-xs transition-colors"
                         onClick={(e) => { e.preventDefault(); handleFeatureClick(link.action || link.text.toLowerCase().replace(/\s/g, '-'));}}
                       >
                         {link.text}
@@ -58,7 +58,7 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-slate-400 hover:text-blue-400 text-[11px] sm:text-xs transition-colors"
+                        className="text-white hover:text-blue-200 text-[11px] sm:text-xs transition-colors"
                       >
                         {link.text}
                       </Link>
@@ -70,11 +70,11 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
           ))}
         </div>
 
-        <div className="border-t border-slate-700/50 pt-5 sm:pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] sm:text-xs text-slate-500">
+        <div className="border-t border-slate-700/50 pt-5 sm:pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] sm:text-xs text-white">
           <p>جميع الحقوق محفوظة © {new Date().getFullYear()} ملهمون</p>
           <div className="flex space-x-2.5 sm:space-x-3 rtl:space-x-reverse mt-2 sm:mt-0">
-            <a href="#" className="hover:text-blue-400" onClick={(e) => {e.preventDefault(); handleFeatureClick('privacy-policy')}}>سياسة الخصوصية</a>
-            <a href="#" className="hover:text-blue-400" onClick={(e) => {e.preventDefault(); handleFeatureClick('terms-of-use')}}>شروط الاستخدام</a>
+            <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('privacy-policy')}}>سياسة الخصوصية</a>
+            <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('terms-of-use')}}>شروط الاستخدام</a>
           </div>
         </div>
       </div>

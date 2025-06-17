@@ -125,7 +125,7 @@ const App = () => {
   
   const MainLayout = ({ children }) => (
     <div className="min-h-screen bg-slate-100 text-gray-800">
-      <TopBar handleFeatureClick={handleFeatureClick} />
+      <TopBar handleFeatureClick={handleFeatureClick} isLoggedIn={isCustomerLoggedIn} />
       <Header
         handleFeatureClick={handleFeatureClick}
         cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}

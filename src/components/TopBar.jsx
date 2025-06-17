@@ -5,7 +5,8 @@ import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe 
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
 
-const TopBar = ({ handleFeatureClick }) => {
+const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
+  const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
     { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },
     { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
@@ -23,11 +24,15 @@ const TopBar = ({ handleFeatureClick }) => {
             const IconComponent = item.icon;
             const content = (
               <>
-                <IconComponent className="w-4 h-4" />
+                {index === 0 && isLoggedIn ? (
+                  <img src={userPhoto} alt="صورة المستخدم" className="w-4 h-4 rounded-full" />
+                ) : (
+                  <IconComponent className="w-4 h-4" />
+                )}
                 <span>{item.text}</span>
               </>
             );
-            return item.link ? (
+            const element = item.link ? (
               <Link
                 key={index}
                 to={item.link}
@@ -36,13 +41,19 @@ const TopBar = ({ handleFeatureClick }) => {
                 {content}
               </Link>
             ) : (
-              <button 
-                key={index} 
+              <button
+                key={index}
                 className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200 transition-colors flex-shrink-0"
                 onClick={() => handleFeatureClick(item.action)}
               >
                 {content}
               </button>
+            );
+            return (
+              <React.Fragment key={index}>
+                {element}
+                {index < topNavItems.length - 1 && <span className="mx-2">|</span>}
+              </React.Fragment>
             );
           })}
         </div>
