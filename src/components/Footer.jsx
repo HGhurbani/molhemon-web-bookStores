@@ -11,11 +11,8 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-10">
           <div className="md:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center mb-2.5">
-              <img  alt="شعار ملهمون في الفوتر" className="h-9 w-auto mr-1.5 rtl:ml-1.5 rtl:mr-0" src="https://images.unsplash.com/photo-1651263260446-a4f31295a965" />
-              <div>
-                <span className="block text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">ملهمون</span>
-                <span className="block text-[10px] text-slate-500">للنشر والتوزيع</span>
-              </div>
+              <img  alt="شعار ملهمون في الفوتر" className="h-9 w-auto mr-1.5 rtl:ml-1.5 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
+   
             </Link>
             <p className="text-[11px] text-slate-500 mb-3">تواصل معنا على</p>
             <div className="flex space-x-2.5 rtl:space-x-reverse mb-4">

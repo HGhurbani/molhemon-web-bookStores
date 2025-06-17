@@ -32,7 +32,7 @@ const AuthorsSection = ({ authors }) => {
                    <img    
                       alt={`صورة المؤلف ${author.name}`} 
                       className="w-full h-full rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-sm group-hover:shadow-md"
-                      src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                      src="https://darmolhimon.com/wp-content/uploads/2025/06/Group-162.png" />
                    <div className="absolute inset-0 rounded-full ring-1 ring-blue-500 ring-offset-1 ring-offset-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <h3 className="font-medium text-[10px] sm:text-xs text-gray-700 group-hover:text-blue-600 transition-colors">{author.name}</h3>
@@ -52,10 +52,10 @@ const AuthorsSection = ({ authors }) => {
                 <img    
                     alt="ملصق ترويجي لدار ملهمون يضم صور مؤلفين عالميين مشهورين باللونين الأبيض والأسود"
                     className="w-full h-auto rounded-md object-contain max-h-72"
-                  src="https://images.unsplash.com/photo-1617120050397-7df1b6b16f58" />
+                  src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png" />
             </motion.div>
             <motion.div 
-                className="bg-gradient-to-br from-blue-600 to-purple-600 p-3 sm:p-4 lg:p-6 rounded-lg shadow-md text-white overflow-hidden"
+                className="bg-gradient-to-br from-blue-600 to-blue-600 p-3 sm:p-4 lg:p-6 rounded-lg shadow-md text-white overflow-hidden"
                 initial={{ opacity: 0, x: 25 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -64,7 +64,7 @@ const AuthorsSection = ({ authors }) => {
                  <img    
                     alt="عرض لكتب ديفيد هاوكينز مع صورته الشخصية وخلفية زرقاء متدرجة"
                     className="w-full h-auto rounded-md object-contain max-h-72"
-                   src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+                   src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
             </motion.div>
         </div>
 

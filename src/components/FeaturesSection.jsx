@@ -40,7 +40,7 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
             <img   
                 alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
                 className="w-full max-w-3xl mx-auto h-auto rounded-md object-contain mb-4 sm:mb-6"
-              src="https://images.unsplash.com/photo-1541359927273-d76820fc43f9" />
+              src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
             <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1.5 sm:mb-2">ابحث عن مكانك في متجر ملهمون الإلكتروني</h2>
             <p className="text-gray-600 text-xs sm:text-sm max-w-lg md:max-w-xl mx-auto">
                 أكثر من 5 ملايين كتاب جاهز للشحن، 3.6 مليون كتاب إلكتروني، و300,000 كتاب صوتي للتحميل الآن! خدمة الاستلام من السيارة متوفرة في معظم المتاجر!

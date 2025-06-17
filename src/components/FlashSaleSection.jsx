@@ -67,7 +67,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
           <img     
             alt={`غلاف كتاب ${book.title}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-           src="https://images.unsplash.com/photo-1605825176731-2538ff89cbc4" />
+           src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg" />
         </Link>
         <Button
           size="icon"

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const NewsletterSection = ({ handleFeatureClick }) => {
   return (
-    <section className="py-10 sm:py-12 bg-gradient-to-r from-blue-700 to-purple-700 text-white">
+    <section className="py-10 sm:py-12 bg-gradient-to-r from-blue-700 to-blue-700 text-white">
       <motion.div 
         className="max-w-xl lg:max-w-2xl mx-auto text-center px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y:25 }}

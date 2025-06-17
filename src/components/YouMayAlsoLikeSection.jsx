@@ -40,7 +40,7 @@ const YouMayAlsoLikeSection = ({ books, handleAddToCart, handleToggleWishlist, w
                     <img    
                       alt={`غلاف كتاب ${book.title}`}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
+                      src="https://darmolhimon.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-13-at-10.40.18-AM-300x450.jpeg" />
                   </Link>
                   <Button
                     size="icon"

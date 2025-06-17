@@ -50,11 +50,8 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
               whileHover={{ scale: 1.05 }}
             >
               <Link to="/" className="flex items-center">
-                <img  alt="شعار ملهمون" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://images.unsplash.com/photo-1651263260446-a4f31295a965" />
-                <div>
-                  <span className="block text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">ملهمون</span>
-                  <span className="block text-xs text-gray-500">للنشر والتوزيع</span>
-                </div>
+                <img  alt="شعار ملهمون" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2024/09/Dar.png" />
+               
               </Link>
             </motion.div>
           </div>
