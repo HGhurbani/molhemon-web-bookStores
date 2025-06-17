@@ -84,8 +84,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             </span>
           </div>
           <div className="flex flex-col space-y-2 w-56 mx-auto">
-            <Button variant="ghost" onClick={() => setDialogOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><BookOpenText className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />اقرأ عينة</Button>
-            <Button variant="ghost" onClick={() => setAudioOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><BookOpenText className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />اقرأ عينة</Button>
+            <Button variant="ghost" onClick={() => setAudioOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
           </div>
         </motion.div>
 
@@ -182,13 +182,13 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                 )}
               </div>
               <div className="mb-3">
-                <Button onClick={onAddToCart} className="w-full bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-1 rtl:mr-1 rtl:ml-0" />أضف إلى السلة</Button>
+                <Button onClick={onAddToCart} className="w-full bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0" />أضف إلى السلة</Button>
               </div>
               <Button variant="secondary" className="w-full mb-3">اشتري الان بنقرة واحدة</Button>
               <div className="flex justify-around text-sm text-gray-600">
-                <Button variant="ghost" size="sm" onClick={() => toast({title:'دردشة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><ChevronDown className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />دردش</Button>
-                <Button variant="ghost" size="sm" onClick={onToggleWishlist} className="px-2"><Heart className={`w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />قائمة الرغبات</Button>
-                <Button variant="ghost" size="sm" onClick={() => toast({title:'مشاركة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><Share2 className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />مشاركة</Button>
+                <Button variant="ghost" size="sm" onClick={() => toast({title:'دردشة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><ChevronDown className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />دردش</Button>
+                <Button variant="ghost" size="sm" onClick={onToggleWishlist} className="px-2"><Heart className={`w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />قائمة الرغبات</Button>
+                <Button variant="ghost" size="sm" onClick={() => toast({title:'مشاركة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><Share2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />مشاركة</Button>
               </div>
             </div>
           </div>

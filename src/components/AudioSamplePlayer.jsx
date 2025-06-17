@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button.jsx';
 const AudioSamplePlayer = ({ book, onClose }) => {
   const audioSrc = book?.sampleAudio || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
   return (
-    <div className="fixed bottom-0 inset-x-0 flex items-center bg-white border-t shadow-lg p-4 space-x-4 rtl:space-x-reverse rounded-t-xl">
+    <div className="fixed bottom-0 left-4 right-4 flex items-center bg-white border-t shadow-lg p-4 space-x-4 rtl:space-x-reverse rounded-t-xl">
       <img
         src={book?.coverImage || 'https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg'}
         alt={book ? `غلاف كتاب ${book.title}` : ''}
