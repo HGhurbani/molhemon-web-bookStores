@@ -13,14 +13,14 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
                 key={index}
                 whileHover={{ y: -4, boxShadow: "0 6px 12px rgba(0,0,0,0.06)" }}
                 transition={{ type: "spring", stiffness: 250, damping: 10 }}
-                className="flex items-center p-3 sm:p-4 bg-white rounded-lg shadow-sm cursor-pointer space-x-3 rtl:space-x-reverse text-blue-600"
+                className="flex items-center p-3 sm:p-4 bg-white rounded-lg shadow-sm cursor-pointer space-x-3 rtl:space-x-reverse text-black"
                 onClick={() => handleFeatureClick(feature.title.toLowerCase().replace(/\s/g, '-'))}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.25, delay: index * 0.08, ease: "easeOut" }}
               >
-                <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
+                <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 text-blue-600" />
                 <div>
                   <h3 className="font-bold text-sm sm:text-base mb-1">{feature.title}</h3>
                   <p className="text-[11px] sm:text-xs">{feature.description}</p>

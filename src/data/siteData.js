@@ -202,29 +202,25 @@ export const dashboardStats = [
 ];
 
 export const featuresData = [
-  { 
-    icon: Briefcase, 
-    title: 'القراءة والمكافآت', 
-    description: 'انضم الآن لكسب كتب مجانية',
-    color: 'text-blue-500'
+  {
+    icon: Briefcase,
+    title: 'القراءة والمكافآت',
+    description: 'انضم الآن لكسب كتب مجانية'
   },
-  { 
-    icon: Gift, 
-    title: 'عروض ملهمون', 
-    description: 'وفر حتى 20% على أي منتج مؤهل',
-    color: 'text-green-500'
+  {
+    icon: Gift,
+    title: 'عروض ملهمون',
+    description: 'وفر حتى 20% على أي منتج مؤهل'
   },
-  { 
-    icon: Truck, 
-    title: 'الشحن المجاني', 
-    description: 'للطلبات أكثر من 100 درهم',
-    color: 'text-purple-500'
+  {
+    icon: Truck,
+    title: 'الشحن المجاني',
+    description: 'للطلبات أكثر من 100 درهم'
   },
-  { 
-    icon: Smartphone, 
-    title: 'تطبيق الجوال', 
-    description: 'تسوق أسرع واكسب نقاط إضافية',
-    color: 'text-orange-500'
+  {
+    icon: Smartphone,
+    title: 'تطبيق الجوال',
+    description: 'تسوق أسرع واكسب نقاط إضافية'
   },
 ];
 
