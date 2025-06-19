@@ -16,16 +16,29 @@ module.exports = {
 			},
 		},
 		extend: {
-			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))',
-				},
+                        colors: {
+                                border: 'hsl(var(--border))',
+                                input: 'hsl(var(--input))',
+                                ring: 'hsl(var(--ring))',
+                                background: 'hsl(var(--background))',
+                                foreground: 'hsl(var(--foreground))',
+                                blue: {
+                                        DEFAULT: '#4A59FE',
+                                        50: '#4A59FE',
+                                        100: '#4A59FE',
+                                        200: '#4A59FE',
+                                        300: '#4A59FE',
+                                        400: '#4A59FE',
+                                        500: '#4A59FE',
+                                        600: '#4A59FE',
+                                        700: '#4A59FE',
+                                        800: '#4A59FE',
+                                        900: '#4A59FE',
+                                },
+                                primary: {
+                                        DEFAULT: 'hsl(var(--primary))',
+                                        foreground: 'hsl(var(--primary-foreground))',
+                                },
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))',
