@@ -21,6 +21,7 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
                 transition={{ duration: 0.25, delay: index * 0.08, ease: "easeOut" }}
               >
                 <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 text-blue-600" />
+                <IconComponent className={`w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 ${feature.color}`} />
                 <div>
                   <h3 className="font-bold text-sm sm:text-base mb-1">{feature.title}</h3>
                   <p className="text-[11px] sm:text-xs">{feature.description}</p>
