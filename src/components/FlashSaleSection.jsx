@@ -116,8 +116,8 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
 
 const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, authors }) => {
   return (
-    <section className="py-8 sm:py-10 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-8 sm:py-10">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 bg-white">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse mb-3 sm:mb-0">
             <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-red-500" />

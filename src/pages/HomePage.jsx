@@ -52,14 +52,15 @@ const HomePage = ({
         icon={TrendingUp}
         squareImages
       />
-       <BookBestsellerSection
-        books={bestsellerBooks.slice(0,3).concat(bestsellerBooks.slice(0,3))} 
+      <BookBestsellerSection
+        books={bestsellerBooks.slice(0,3).concat(bestsellerBooks.slice(0,3))}
         handleAddToCart={handleAddToCart}
         handleToggleWishlist={handleToggleWishlist}
         wishlist={wishlist}
-        title="الكتب الأكثر مبيعاً" 
+        title="الكتب الأكثر مبيعاً"
         icon={TrendingUp}
         bgColor="bg-slate-100"
+        likeCardStyle
       />
       <FeaturesSection features={featuresData} handleFeatureClick={handleFeatureClick} />
     </>
