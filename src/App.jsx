@@ -19,6 +19,7 @@ import CheckoutPage from '@/pages/CheckoutPage.jsx';
 import UserProfilePage from '@/pages/UserProfilePage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
 import AudiobookPage from '@/pages/AudiobookPage.jsx';
+import EbookPage from '@/pages/EbookPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { categories as initialCategories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
@@ -195,6 +196,7 @@ const App = () => {
               <Route path="/cart" element={<MainLayout><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
               <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} setCart={setCart} /></PageLayout></MainLayout>} />
               <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/ebooks" element={<MainLayout><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/audiobooks" element={<MainLayout><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
