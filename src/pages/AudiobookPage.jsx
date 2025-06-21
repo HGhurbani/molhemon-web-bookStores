@@ -48,22 +48,20 @@ const AudiobookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, 
         className="bg-gradient-to-br from-blue-600 to-purple-700 p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center justify-between text-white"
       >
         <div className="text-center md:text-right rtl:md:text-left max-w-lg md:max-w-md">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">أنت باقة الاستماع المناسبة لك</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">أختر باقة الاستماع المناسبة لك</h1>
           <p className="text-blue-100 text-sm sm:text-base mb-6 mx-auto md:mx-0 rtl:md:ml-auto rtl:md:mr-0">
-            استمع إلى آلاف الكتب والمقالات الصوتية في أي وقت وفي أي مكان. اشترك الآن واستمتع بفترة تجريبية مجانية لمدة 7 أيام.
-          </p>
+قصص بلا حدود، رواة خبراء، أينما كنت.          </p>
           <Button
             size="lg"
             className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg"
             onClick={() => handleFeatureClick('free-trial-7-days')}
           >
-            احصل على فترة تجريبية مجانية لمدة ٧ أيام
-          </Button>
+تجربة مجانية لمدة ٧ أيام          </Button>
         </div>
         <img
           alt="غلاف كتاب ما تبقى من البقايا"
           className="w-48 h-auto rounded-lg shadow-xl mt-6 md:mt-0 md:mr-6 rtl:md:ml-6 rtl:md:mr-0"
-          src="https://images.unsplash.com/photo-1586489171296-c6bb6c2a7c57?auto=format&fit=crop&w=260&q=80"
+          src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg"
         />
       </motion.section>
 

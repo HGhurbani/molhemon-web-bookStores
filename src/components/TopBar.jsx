@@ -1,7 +1,8 @@
+// src/components/TopBar.jsx
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe } from 'lucide-react';
+import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe, Headphones, BookOpen } from 'lucide-react'; // Ensure Headphones and BookOpen are imported
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
 
@@ -9,6 +10,8 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
     { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },
+    { icon: BookOpen, text: 'كتاب إلكتروني', action: 'ebook-top', link: '/category/ebooks' }, // Assuming a category for ebooks or similar
+    { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' }, // THIS IS THE MODIFIED ITEM
     { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
     { icon: Box, text: 'تتبع الطلب', action: 'track-order-top', link: '/profile?tab=orders' },
     { icon: Download, text: 'حمل تطبيقنا', action: 'download-app-top' },

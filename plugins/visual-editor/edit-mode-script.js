@@ -1,4 +1,4 @@
-import { POPUP_STYLES, getPopupHTMLTemplate } from './plugins/visual-editor/visual-editor-config.js';
+import { POPUP_STYLES, getPopupHTMLTemplate } from './visual-editor-config.js'; // تم تصحيح المسار هنا
 
 const PLUGIN_APPLY_EDIT_API_URL = '/api/apply-edit';
 
@@ -318,4 +318,4 @@ window.addEventListener("message", function(event) {
   if (event.data?.type === "disable-edit-mode") {
     disableEditMode();
   }
-}); 
+});

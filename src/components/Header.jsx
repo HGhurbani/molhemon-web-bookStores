@@ -69,10 +69,10 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
               <span>كتاب إلكتروني</span>
             </button>
             <span className="mx-2">|</span>
-            <button onClick={() => handleFeatureClick('audio-book-top')} className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
-              <Headphones className="w-4 h-4" />
-              <span>كتاب مسموع</span>
-            </button>
+           <Link to="/audiobooks" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
+  <Headphones className="w-4 h-4" />
+  <span>كتاب مسموع</span>
+</Link>
             <span className="mx-2">|</span>
             <button onClick={() => handleFeatureClick('track-order-top')} className="hover:text-blue-200">تتبع الطلب</button>
             <span className="mx-2">|</span>
