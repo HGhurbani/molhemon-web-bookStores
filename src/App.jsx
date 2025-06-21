@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
 import Header from '@/components/Header.jsx';
-import TopBar from '@/components/TopBar.jsx';
 import Footer from '@/components/Footer.jsx';
 import Dashboard from '@/components/Dashboard.jsx';
 import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
@@ -141,7 +140,6 @@ const App = () => {
   
   const MainLayout = ({ children }) => (
     <div className="min-h-screen bg-slate-100 text-gray-800">
-      <TopBar handleFeatureClick={handleFeatureClick} isLoggedIn={isCustomerLoggedIn} />
       <Header
         handleFeatureClick={handleFeatureClick}
         cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
