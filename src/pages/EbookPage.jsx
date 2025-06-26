@@ -70,11 +70,7 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
             تجربة مجانية لمدة ٧ أيام
           </Button>
         </div>
-        <img
-          alt="فتاة تقرأ كتاباً إلكترونياً على جهاز لوحي"
-          className="w-48 h-auto rounded-lg shadow-xl mt-6 md:mt-0 md:mr-6 rtl:md:ml-6 rtl:md:mr-0"
-          src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg"
-        />
+      
       </motion.section>
 
       <section className="mt-10 sm:mt-12">
