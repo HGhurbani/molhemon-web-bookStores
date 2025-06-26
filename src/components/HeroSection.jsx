@@ -80,7 +80,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="max-w-lg md:max-w-xl ml-auto text-right rtl:mr-auto rtl:text-left"
+            className="max-w-lg md:max-w-xl ml-auto text-right rtl:mr-auto"
           >
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 leading-tight text-shadow-lg">
               {currentSlide.titleLine1}

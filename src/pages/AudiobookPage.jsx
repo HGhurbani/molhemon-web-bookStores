@@ -132,7 +132,7 @@
             </div>
 
             {/* Text and Button Section (Right side) */}
-            <div className="text-center md:text-right rtl:md:text-left max-w-lg md:max-w-md md:mr-auto">
+            <div className="text-center md:text-right max-w-lg md:max-w-md md:mr-auto">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight text-shadow-lg">
                 اختر باقة الاستماع المناسبة لك
               </h1>
@@ -228,7 +228,7 @@
                   </motion.div>
                 ))}
               </div>
-              <div className="md:w-1/2 text-center md:text-right rtl:md:text-left">
+              <div className="md:w-1/2 text-center md:text-right">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">قصص مختارة بعناية</h2>
                 <p className="text-gray-600 text-sm sm:text-base mb-6">
                   تابع مؤلفات أو رواة في مسلسلاتك المفضلة، واحصل على توصيات
@@ -263,7 +263,7 @@
                 ))}
               </div>
 
-              <div className="md:w-1/2 text-center md:text-right rtl:md:text-left">
+              <div className="md:w-1/2 text-center md:text-right">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">في أي وقت، وفي أي مكان.</h2>
                 <p className="text-gray-600 text-sm sm:text-base mb-6">
                   استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.

@@ -49,7 +49,7 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
               className="w-full h-full object-cover"
              src="https://images.unsplash.com/photo-1572119003128-d110c07af847" />
           </div>
-          <div className="text-center sm:text-right rtl:sm:text-left">
+          <div className="text-center sm:text-right">
             <h1 className="text-3xl sm:text-4xl font-extrabold mb-1.5">{author.name}</h1>
             <p className="text-blue-200 text-sm sm:text-base mb-3">{author.bio || 'مؤلف وكاتب شغوف، يسعى لإثراء المحتوى العربي بأعمال أدبية وفكرية قيمة.'}</p>
             <div className="flex items-center justify-center sm:justify-start space-x-4 rtl:space-x-reverse text-sm">
