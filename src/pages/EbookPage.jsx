@@ -25,20 +25,29 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
     {
       name: 'الأساسية',
       price: '$9.99',
-      features: ['الكتب الإلكترونية غير محدودة', '1 ساعة شهرياً', 'الوصول إلى مجموعات مختارة'],
-      message: 'تم اختيار الباقة الأساسية!'
+      period: 'شهرياً',
+      subtitle: 'الميزات الأساسية',
+      features: ['كتب إلكترونية غير محدودة', 'استماع محدود للكتب الصوتية (مدة: 1 ساعات شهرياً)', 'الوصول إلى مجموعات مختارة'],
+      message: 'تم اختيار الباقة الأساسية!',
+      isPopular: false
     },
     {
       name: 'المحترفة',
       price: '$14.99',
-      features: ['الكتب الإلكترونية غير محدودة', 'غير محدودة ساعة استماع', 'وصول لمجموعات مختارة', 'تنزيل الكتب دون اتصال'],
-      message: 'تم اختيار الباقة المحترفة!'
+      period: 'شهرياً',
+      subtitle: 'جميع الميزات المميزة',
+      features: ['كتب إلكترونية غير محدودة', 'كتب صوتية غير محدودة', 'الوصول إلى مجموعات مختارة', 'وصول مبكر حصري للإصدارات الجديدة', 'تنزيل الكتب الإلكترونية والكتب الصوتية دون اتصال'],
+      message: 'تم اختيار الباقة المحترفة!',
+      isPopular: true
     },
     {
       name: 'العائلية',
       price: '$49.99',
-      features: ['كتب إلكترونية', 'مشاركة مع ما يصل إلى ٥ أفراد', 'كتب ومقالات', 'فئات وميزات حصرية'],
-      message: 'تم اختيار الباقة العائلية!'
+      period: 'شهرياً',
+      subtitle: 'ميزات عائلية',
+      features: ['مشاركة مع ما يصل إلى 5 أفراد', 'الإرشاة الأبوية', 'ملفات تعريف شخصية', 'فئات وميزات حصرية'],
+      message: 'تم اختيار الباقة العائلية!',
+      isPopular: false
     }
   ];
 
@@ -64,38 +73,60 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         <img
           alt="فتاة تقرأ كتاباً إلكترونياً على جهاز لوحي"
           className="w-48 h-auto rounded-lg shadow-xl mt-6 md:mt-0 md:mr-6 rtl:md:ml-6 rtl:md:mr-0"
-          src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=260&q=80"
+          src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg"
         />
       </motion.section>
 
       <section className="mt-10 sm:mt-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">استمتع بقراءة واستماع غير محدودين</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-8">استمتع بقراءة واستماع غير محدودين</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              className="bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col items-center text-center"
+              className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden ${
+                plan.isPopular ? 'border-blue-500 scale-105' : 'border-gray-200'
+              }`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
-              <p className="text-blue-600 font-bold mb-4">{plan.price}</p>
-              <ul className="space-y-2 mb-4 w-full text-right">
-                {plan.features.map((feat, i) => (
-                  <li key={i} className="flex items-center">
-                    <Check className="w-4 h-4 text-green-500 ml-2 rtl:mr-2 rtl:ml-0" />
-                    <span className="text-sm">{feat}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => toast({ title: plan.message })}
-              >
-                اختر هذه الباقة
-              </Button>
+              {plan.isPopular && (
+                <div className="absolute top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 text-sm font-medium">
+                  الأكثر شيوعاً
+                </div>
+              )}
+              
+              <div className={`p-6 ${plan.isPopular ? 'pt-12' : 'pt-6'}`}>
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{plan.subtitle}</p>
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+                    <span className="text-gray-600 text-sm mr-1">{plan.period}</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start text-right">
+                      <Check className="w-4 h-4 text-blue-500 mt-0.5 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
+                      <span className="text-sm text-gray-700 leading-5">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
+                    plan.isPopular
+                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300'
+                  }`}
+                  onClick={() => toast({ title: plan.message })}
+                >
+                  اختر باقتك
+                </Button>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -161,46 +192,56 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         </div>
       </section>
 
-      <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div
-          className="bg-white p-6 rounded-lg shadow-md text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h3 className="text-lg font-semibold mb-2">أعمال دارملهمون الأصلية</h3>
-          <p className="text-gray-600 text-sm mb-4">اكتشف أعمالنا الأصلية التي كتبها مؤلفو دار ملهمون حصرياً، تصفح جميع أعمالهم.</p>
-          <Button onClick={() => handleFeatureClick && handleFeatureClick('browse-molhimon-originals')} className="bg-blue-600 hover:bg-blue-700 text-white">
-            تصفح أعمالنا
-          </Button>
-        </motion.div>
-        <motion.div
-          className="bg-white p-6 rounded-lg shadow-md text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          <h3 className="text-lg font-semibold mb-2">بيئة آمنة للأطفال</h3>
-          <p className="text-gray-600 text-sm mb-4">بنية أمنة ومفيدة للأطفال، يمكنك التحكم بالمحتوى وتصفح الكتب باأمان مع أطفالك.</p>
-          <Button onClick={() => handleFeatureClick && handleFeatureClick('discover-kids-plans')} className="bg-blue-600 hover:bg-blue-700 text-white">
-            اكتشف باقاتنا
-          </Button>
-        </motion.div>
-        <motion.div
-          className="bg-white p-6 rounded-lg shadow-md text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <h3 className="text-lg font-semibold mb-2">مكتبة ٣٦٥</h3>
-          <p className="text-gray-600 text-sm mb-4">أكبر مكتبة في جيبك، أكثر من ٦٠٠٠٠ كتاب إلكتروني، استمتع بكتبك المفضلة يومياً.</p>
-          <Button onClick={() => handleFeatureClick && handleFeatureClick('start-evaluation')} className="bg-blue-600 hover:bg-blue-700 text-white">
-            ابدأ تقييمك
-          </Button>
-        </motion.div>
+      <section className="mt-12 bg-gray-100 py-12 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div
+            className="bg-white p-8 rounded-2xl shadow-sm text-right"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="flex justify-start mb-6">
+              <Check className="w-12 h-12 text-blue-500" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">أعمال دارملهمون الأصلية</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">اكتشف محتوى حصرياً مؤلفاً خصيصاً من دار ملهمون. محتوى شيق ومصمم خصيصاً لقُرّاء الموهوبين.</p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white p-8 rounded-2xl shadow-sm text-right"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <div className="flex justify-start mb-6">
+              <svg className="w-12 h-12 text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">بيئة آمنة للأطفال</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">دع أطفالك يستكشف المغامرات في وضع الأطفال - مكان آمن مع كتب الأطفال فقط لديا ما يناسبهم جميعاً.</p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white p-8 rounded-2xl shadow-sm text-right"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <div className="flex justify-start mb-6">
+              <svg className="w-12 h-12 text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                <rect x="7" y="2" width="10" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 10h8M8 14h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">مكتبة لا تنتهي</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">أكثر من 700,000 كتاب - بشتى لغات، اعتل من قبلك العالمية واستمتع بها أو اكتشف منها حكيراً.</p>
+          </motion.div>
+        </div>
       </section>
     </main>
   );

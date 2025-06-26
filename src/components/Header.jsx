@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -17,10 +18,10 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount }) => {
-  const renderDropdown = (label, items, isCategory = false) => (
+  const renderDropdown = (label, items, isCategory = false, hideOnMobile = false) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="default" className="text-sm bg-white text-gray-400 hover:bg-white/80 px-2 py-2 rounded-md h-10">
+        <Button variant="default" className={`text-sm bg-white text-gray-400 hover:bg-white/80 px-2 py-2 rounded-md h-10 ${hideOnMobile ? 'hidden lg:flex' : ''}`}> {/* Added hidden lg:flex */}
           {label}
           <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
         </Button>
@@ -56,9 +57,9 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
     <>
     <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl mb-4">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top Bar */}
-        <div className="hidden sm:flex items-center justify-between text-xs py-2">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse overflow-x-auto whitespace-nowrap">
+        {/* Top Bar - Visible on all screens now, but adjusts layout */}
+        <div className="flex items-center justify-between text-xs py-2 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0"> {/* Removed hidden sm:flex */}
+          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
             <Link to="/profile" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
               <UserCircle className="w-4 h-4" />
               <span>بروس وين</span>
@@ -82,7 +83,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
             <span className="mx-2">|</span>
             <button onClick={() => handleFeatureClick('locations-top')} className="hover:text-blue-200">مواقعنا</button>
           </div>
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
@@ -135,7 +136,6 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
           </div>
           
           <div className="flex-1 mx-4 lg:mx-8 flex items-center space-x-3 rtl:space-x-reverse">
-            {renderDropdown("تصفح الفئات", categoryItems, true)}
             <div className="relative flex-1">
               <input
                 type="text"
@@ -152,8 +152,9 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-            {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"])}
-            {renderDropdown("اختر طريقة التوصيل", deliveryItems)}
+            {renderDropdown("تصفح الفئات", categoryItems, true, true)} {/* Added hideOnMobile prop */}
+            {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"], false, true)} {/* Added hideOnMobile prop */}
+            {renderDropdown("اختر طريقة التوصيل", deliveryItems, false, true)} {/* Added hideOnMobile prop */}
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">

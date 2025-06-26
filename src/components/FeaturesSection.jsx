@@ -41,7 +41,7 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
               <img
                 alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
                 className="w-full h-24 sm:h-32 object-cover rounded-md"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
+                src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png" />
               <img
                 alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
                 className="w-full h-24 sm:h-32 object-cover rounded-md"
@@ -49,7 +49,7 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
               <img
                 alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
                 className="w-full h-24 sm:h-32 object-cover rounded-md"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
+                src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1.5 sm:mb-2">ابحث عن مكانك في متجر ملهمون الإلكتروني</h2>
             <p className="text-gray-600 text-xs sm:text-sm max-w-lg md:max-w-xl mx-auto">

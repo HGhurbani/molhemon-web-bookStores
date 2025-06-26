@@ -108,7 +108,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
             </span>
           )}
         </div>
-         <p className="text-[9px] sm:text-[10px] text-blue-600 bg-blue-600/10 rounded-sm px-1 text-center">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
+         <p className="text-[9px] sm:text-[10px] text-gray-600 bg-gray-600/10 rounded-sm px-1 text-center">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
     </div>
   </motion.div>
 );
@@ -117,7 +117,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
 const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, authors }) => {
   return (
     <section className="py-8 sm:py-10">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 bg-white">
+<div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 bg-white p-4 rounded-[18px]">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse mb-3 sm:mb-0">
             <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-red-500" />

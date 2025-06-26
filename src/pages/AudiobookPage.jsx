@@ -1,222 +1,351 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button.jsx';
-import { toast } from '@/components/ui/use-toast.js';
-import { BookCard } from '@/components/FlashSaleSection.jsx';
-import { Check, Award, Star } from 'lucide-react';
+import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
 
-const AudiobookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wishlist, handleFeatureClick }) => {
-  const [localWishlist, setLocalWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
+// Simple Button component replacement
+const Button = ({ children, className, onClick, ...props }) => (
+  <button 
+    className={`px-4 py-2 rounded font-medium transition-colors ${className}`}
+    onClick={onClick}
+    {...props}
+  >
+    {children}
+  </button>
+);
+  const books = [];
+  const authors = [];
+  const wishlist = [];
+  const handleAddToCart = () => {};
+  const handleToggleWishlist = () => {};
+  const handleFeatureClick = (feature) => {
+    console.log('Feature clicked:', feature);
+  };
+  const [localWishlist, setLocalWishlist] = useState(() => {
+    // Using in-memory storage instead of localStorage
+    return wishlist || [];
+  });
 
   useEffect(() => {
-    setLocalWishlist(JSON.parse(localStorage.getItem('wishlist') || '[]'));
+    setLocalWishlist(wishlist || []);
   }, [wishlist]);
 
   const onToggleWishlist = (book) => {
     handleToggleWishlist(book);
-    const stored = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    setLocalWishlist(stored);
+    setLocalWishlist(prev => {
+      const isInWishlist = prev.some(item => item.id === book.id);
+      if (isInWishlist) {
+        return prev.filter(item => item.id !== book.id);
+      } else {
+        return [...prev, book];
+      }
+    });
   };
 
-  const audiobooks = books.filter(book => book.type === 'audiobook' || book.id % 2 === 0);
+  const audiobooks = books?.filter(book => book.type === 'audiobook' || book.id % 2 === 0) || [];
+
+  // Sample book covers for the grid
+  const sampleBooks = [
+    { id: 1, title: "بلسماً لأحزان", cover: "https://source.unsplash.com/200x300?book1" },
+    { id: 2, title: "حارة الثعبان", cover: "https://source.unsplash.com/200x300?book2" },
+    { id: 3, title: "لا تحدث من السقيفة", cover: "https://source.unsplash.com/200x300?book3" },
+    { id: 4, title: "غزوفة البروكش", cover: "https://source.unsplash.com/200x300?book4" },
+    { id: 5, title: "كن غريباً طيباً", cover: "https://source.unsplash.com/200x300?book5" },
+    { id: 6, title: "رسائل من النبي", cover: "https://source.unsplash.com/200x300?book6" },
+    { id: 7, title: "السرخسيات المهجورة", cover: "https://source.unsplash.com/200x300?book7" },
+    { id: 8, title: "مائة عام من العزلة", cover: "https://source.unsplash.com/200x300?book8" },
+    { id: 9, title: "انتقيطة", cover: "https://source.unsplash.com/200x300?book9" },
+    { id: 10, title: "مذكرات من العالم القديم", cover: "https://source.unsplash.com/200x300?book10" },
+    { id: 11, title: "بلى بالنجوم", cover: "https://source.unsplash.com/200x300?book11" },
+    { id: 12, title: "في وجوه شاحبة", cover: "https://source.unsplash.com/200x300?book12" }
+  ];
 
   const plans = [
     {
+      id: 'basic',
       name: 'الأساسية',
       price: '$9.99',
-      features: ['وصول غير محدود', 'محتوى جديد أسبوعياً', 'إلغاء في أي وقت']
+      duration: 'شهرياً',
+      color: 'bg-blue-50 border-blue-200',
+      buttonColor: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+      features: [
+        'كتب إلكترونية غير محدودة', 
+        'استماع محدود للكتب الصوتية', 
+        'وصول إلى مجموعات مختارة'
+      ],
+      message: 'تم اختيار الباقة الأساسية!'
     },
     {
-      name: 'العائلية',
+      id: 'pro',
+      name: 'المحترفة',
       price: '$14.99',
+      duration: 'شهرياً',
       popular: true,
-      features: ['كل مميزات الأساسية', 'حتى 5 حسابات', 'مزامنة عبر الأجهزة']
+      color: 'bg-blue-500 text-white',
+      buttonColor: 'bg-white text-blue-500 hover:bg-gray-100',
+      features: [
+        'جميع المميزات المميزة',
+        'كتب إلكترونية وصوتية غير محدودة', 
+        'تنزيل الكتب دون اتصال',
+        'وصول إلى جميع المجموعات'
+      ],
+      message: 'تم اختيار الباقة المحترفة!'
     },
     {
-      name: 'السنوية',
-      price: '$99.99',
-      features: ['أفضل قيمة', 'دفع واحد سنوياً', 'خصم 20%']
+      id: 'family',
+      name: 'العائلية',  
+      price: '$49.99',
+      duration: 'شهرياً',
+      color: 'bg-purple-50 border-purple-200',
+      buttonColor: 'bg-purple-100 text-purple-700 hover:bg-purple-200',
+      features: [
+        'مشاركة مع ٥ أفراد',
+        'الرقابة الأبوية', 
+        'ملفات تعريف شخصية',
+        'جميع مميزات الباقة المحترفة'
+      ],
+      message: 'تم اختيار الباقة العائلية!'
     }
   ];
 
   return (
-    <main className="container mx-auto px-4 py-6 sm:py-8">
-      <motion.section
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-blue-600 to-purple-700 p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center justify-between text-white"
-      >
-        <div className="text-center md:text-right rtl:md:text-left max-w-lg md:max-w-md">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">أختر باقة الاستماع المناسبة لك</h1>
-          <p className="text-blue-100 text-sm sm:text-base mb-6 mx-auto md:mx-0 rtl:md:ml-auto rtl:md:mr-0">
-قصص بلا حدود، رواة خبراء، أينما كنت.          </p>
-          <Button
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg"
-            onClick={() => handleFeatureClick('free-trial-7-days')}
-          >
-تجربة مجانية لمدة ٧ أيام          </Button>
-        </div>
-        <img
-          alt="غلاف كتاب ما تبقى من البقايا"
-          className="w-48 h-auto rounded-lg shadow-xl mt-6 md:mt-0 md:mr-6 rtl:md:ml-6 rtl:md:mr-0"
-          src="https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg"
-        />
-      </motion.section>
-
-      <section className="mt-10 sm:mt-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">استمتع بقراءة واستماع غير محدودين</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.name}
-              className={`bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col items-center text-center relative ${plan.popular ? 'border-2 border-blue-600' : ''}`}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              {plan.popular && (
-                <span className="absolute -top-3 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full">الأكثر شعبية</span>
-              )}
-              <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
-              <p className="text-blue-600 font-bold mb-4">{plan.price}</p>
-              <ul className="space-y-2 mb-4 w-full text-right">
-                {plan.features.map((feat, i) => (
-                  <li key={i} className="flex items-center">
-                    <Check className="w-4 h-4 text-green-500 ml-2 rtl:mr-2 rtl:ml-0" />
-                    <span className="text-sm">{feat}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => toast({ title: `اخترت الباقة ${plan.name}!` })}
-              >
-                اختر هذه الباقة
-              </Button>
-            </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      {/* Header Section with Book Grid */}
+      <div className="relative">
+        {/* Book Grid Background */}
+        <div className="grid grid-cols-6 md:grid-cols-12 gap-2 p-6 opacity-60">
+          {sampleBooks.map((book, index) => (
+            <div key={book.id} className="aspect-[3/4] relative group">
+              <img
+                src={book.cover}
+                alt={book.title}
+                className="w-full h-full object-cover rounded-lg shadow-lg"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"></div>
+            </div>
           ))}
         </div>
-      </section>
 
-      <section className="mt-12">
-        <div className="bg-slate-100 p-6 sm:p-8 rounded-xl shadow-inner text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">قصص مختارة بعناية</h2>
-          <p className="text-gray-600 text-sm sm:text-base mb-6">استمتع بقصصنا الصوتية الأكثر مبيعًا، وقصص الدراما والحركة، وأكثر من 2000 قصة ورواية.</p>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white text-base py-3 px-8 shadow-lg hover:shadow-xl"
-            onClick={() => handleFeatureClick('browse-all-stories')}
-          >
-            تصفح جميع القصص
-          </Button>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-            {[1,2,3].map((n,i) => (
-              <motion.img
-                key={n}
-                className="w-full h-40 object-cover rounded-lg"
-                src={`https://source.unsplash.com/random/300x30${n}?book`}
-                alt={`غلاف قصة صوتية ${n}`}
+        {/* Overlay Content */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent">
+          <div className="container mx-auto px-6 h-full flex items-center">
+            <div className="max-w-2xl text-white">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-48 h-64 relative">
+                  <img
+                    src="https://source.unsplash.com/300x400?fairy-tale-book"
+                    alt="روميليا والأسد"
+                    className="w-full h-full object-cover rounded-lg shadow-2xl"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                      <Play className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold mb-4">أختر باقة الاستماع المناسبة لك</h1>
+                  <p className="text-xl text-blue-200 mb-6">قصص بلا حدود، رواة خبراء، أينما كنت.</p>
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg transition-colors"
+                    onClick={() => handleFeatureClick('free-trial-7-days')}
+                  >
+                    تجربة مجانية لمدة ٧ أيام
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Blue Section with Subscription Plans */}
+      <div className="bg-blue-600 text-white py-16">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">استمتع بقراءة واستماع غير محدودين</h2>
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <Headphones className="w-6 h-6" />
+              <span>التجديد التلقائي - إلغ 99.5 شهرياً</span>
+              <span className="bg-white/20 px-3 py-1 rounded-full text-sm">إلغاء مجاني في أي وقت</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                className={`${plan.color} p-8 rounded-2xl shadow-xl relative ${plan.popular ? 'ring-4 ring-white/50 scale-105' : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              />
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-yellow-400 text-black font-bold px-4 py-2 rounded-full text-sm">
+                      الأكثر شيوعاً
+                    </span>
+                  </div>
+                )}
+                
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  <div className="text-4xl font-bold mb-1">{plan.price}</div>
+                  <div className="opacity-80">{plan.duration}</div>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-400" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button 
+                  className={`w-full py-3 rounded-lg font-semibold transition-colors ${plan.buttonColor}`}
+                  onClick={() => console.log(plan.message)}
+                >
+                  اختر باقتك
+                </Button>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="mt-12">
-        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg flex flex-col md:flex-row items-center gap-6">
-          <div className="flex space-x-3 rtl:space-x-reverse">
-            {[1,2].map((n,i) => (
-              <motion.img
-                key={n}
-                className="w-40 h-40 object-cover rounded-full shadow-lg"
-                src={`https://source.unsplash.com/random/200x20${n}?listener`}
-                alt="مستمع لكتاب صوتي"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              />
-            ))}
-          </div>
-          <div className="text-center md:text-right rtl:md:text-left">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">في أي وقت. وفي أي مكان.</h2>
-            <p className="text-gray-600 text-sm sm:text-base mb-6">استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.</p>
-            <Button
-              className="bg-purple-600 hover:bg-purple-700 text-white text-base py-3 px-8 shadow-lg hover:shadow-xl"
-              onClick={() => handleFeatureClick('browse-audiobooks')}
+      {/* Featured Stories Section */}
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">قصص مختارة بعناية</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+              تابع مؤلفات أو رواة في مسلسلاتك المفضلة، واحصل على توصيات
+              مخصصة بناء على ما استمعت إليه سابقاً.
+            </p>
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors"
+              onClick={() => handleFeatureClick('free-trial-7-days')}
             >
-              تصفح الكتب الصوتية
+              تجربة مجانية لمدة ٧ أيام
             </Button>
           </div>
-        </div>
-      </section>
 
-      <section className="py-8 sm:py-10 bg-slate-100 rounded-xl mb-8 sm:mb-10 mt-12">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-5 sm:mb-6">
-            <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse">
-              <Award className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">الكتب الصوتية الأكثر مبيعًا</h2>
-            </div>
-            <Link to="/category/audiobook-bestseller">
-              <Button className="text-gray-700 bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm px-2 py-1 h-auto rounded-md">
-                شاهد المزيد
-              </Button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-            {audiobooks.slice(0,6).map((book, index) => (
-              <BookCard
-                key={`${book.id}-${index}-bestsell`}
-                book={book}
-                handleAddToCart={handleAddToCart}
-                handleToggleWishlist={onToggleWishlist}
-                index={index}
-                isInWishlist={localWishlist?.some(item => item.id === book.id)}
-                authors={authors}
-                square={true}
-              />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {sampleBooks.slice(0, 4).map((book, index) => (
+              <motion.div
+                key={book.id}
+                className="relative group cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+              >
+                <div className="aspect-[3/4] relative">
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="w-full h-full object-cover rounded-lg shadow-lg group-hover:shadow-xl transition-shadow"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                      <Play className="w-6 h-6 text-gray-800" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="py-8 sm:py-10 bg-white rounded-xl">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-5 sm:mb-6">
-            <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse">
-              <Star className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-500 fill-yellow-500" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">دار ملهمون أوريجينالز</h2>
+      {/* Anywhere, Anytime Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <div className="grid grid-cols-2 gap-4">
+                {sampleBooks.slice(4, 8).map((book, index) => (
+                  <motion.div
+                    key={book.id}
+                    className="aspect-[3/4] relative"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <img
+                      src={book.cover}
+                      alt={book.title}
+                      className="w-full h-full object-cover rounded-lg shadow-lg"
+                    />
+                  </motion.div>
+                ))}
+              </div>
             </div>
-            <Link to="/category/molhimon-originals">
-              <Button className="text-gray-700 bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm px-2 py-1 h-auto rounded-md">
-                شاهد المزيد
+            
+            <div className="md:w-1/2 text-center md:text-right">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">في أي وقت، وفي أي مكان</h2>
+              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                تنقل بسلاسة بين قراءة الكتب الإلكترونية والاستماع إلى الكتب الصوتية.
+                مثالية في أي نشاط من روتينك اليومي.
+              </p>
+              <div className="flex items-center justify-center md:justify-end gap-4 mb-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">التجديد التلقائي - إلغ 99.5 شهرياً</div>
+                  <div className="text-sm text-gray-500">إلغاء مجاني في أي وقت</div>
+                </div>
+              </div>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg transition-colors"
+                onClick={() => handleFeatureClick('free-trial-7-days')}
+              >
+                تجربة مجانية لمدة ٧ أيام
               </Button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-            {audiobooks.slice(6,12).map((book, index) => (
-              <BookCard
-                key={`${book.id}-${index}-orig`}
-                book={book}
-                handleAddToCart={handleAddToCart}
-                handleToggleWishlist={onToggleWishlist}
-                index={index}
-                isInWishlist={localWishlist?.some(item => item.id === book.id)}
-                authors={authors}
-                square={true}
-              />
-            ))}
+            </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center p-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Headphones className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">مكتبة فاخرة</h3>
+              <p className="text-gray-600">
+                آلاف الكتب التي تشمل الكتب العالمية والعربية مع
+                أكثر من 500,000 كتاب مصوّر أو كتاب صوتي عالي الجودة
+              </p>
+            </div>
+
+            <div className="text-center p-8">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">بيئة آمنة للأطفال</h3>
+              <p className="text-gray-600">
+                بيئة آمنة مصممة خصيصاً للأطفال - معايير آمنة في البحث والتصفح -
+                تطبيق منفصل للأطفال ضمان أمان البيانات
+              </p>
+            </div>
+
+            <div className="text-center p-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">أعمال داريونفون الأصلية</h3>
+              <p className="text-gray-600">
+                احصل على إصدارات حصرية لأعمال جديدة للمؤلفين والمبدعين، مصممة خصيصاً لمنصة دار الهيمون
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

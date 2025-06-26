@@ -2,7 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const HeroSection = ({ slides }) => {
+const HeroSection = () => {
+  const slides = [
+    {
+      id: 1,
+      // titleLine1: 'عنوان الصورة الأولى',
+      // titleLine2: 'تابع المزيد',
+      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png',
+      alt: 'صورة أولى',
+      link: 'https://example.com/link1',
+    },
+    {
+      id: 2,
+      // titleLine1: 'عنوان الصورة الثانية',
+      // titleLine2: 'تعرف على الكتب',
+      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image.png',
+      alt: 'صورة ثانية',
+      link: 'https://example.com/link2',
+    },
+    {
+      id: 3,
+      // titleLine1: 'عنوان الصورة الثالثة',
+      // titleLine2: 'عرض خاص',
+      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png',
+      alt: 'صورة ثالثة',
+      link: 'https://example.com/link3',
+    },
+  ];
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = () => {
@@ -26,67 +53,59 @@ const HeroSection = ({ slides }) => {
 
   return (
     <>
-    <section className="hero-section h-[350px] md:h-[450px] text-white relative overflow-hidden bg-slate-200">
-      <AnimatePresence initial={false} mode="wait">
-        <motion.div
-          key={currentSlide.id}
-          initial={{ opacity: 0, x: currentIndex % 2 === 0 ? 100 : -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: currentIndex % 2 === 0 ? -100 : 100 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-          <img  
-            alt={currentSlide.alt} 
-            className="w-full h-full object-cover"
-           src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png" />
-          <div className="absolute inset-0 bg-black/30"></div>
-        </motion.div>
-      </AnimatePresence>
-      
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
+      <section className="hero-section h-[350px] md:h-[450px] text-white relative overflow-hidden bg-slate-200">
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={currentSlide.id}
+            initial={{ opacity: 0, x: currentIndex % 2 === 0 ? 100 : -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: currentIndex % 2 === 0 ? -100 : 100 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <a href={currentSlide.link}>
+              <img
+                alt={currentSlide.alt}
+                className="w-full h-full object-cover"
+                src={currentSlide.img}
+              />
+              <div className="absolute inset-0 bg-black/30"></div>
+            </a>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
           <motion.div
             key={`text-${currentSlide.id}`}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className={`max-w-lg md:max-w-xl ${currentSlide.discount ? 'mr-auto text-left rtl:ml-auto rtl:text-right' : 'ml-auto text-right rtl:mr-auto rtl:text-left'}`}
+            className="max-w-lg md:max-w-xl ml-auto text-right rtl:mr-auto rtl:text-left"
           >
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 leading-tight text-shadow-lg">
               {currentSlide.titleLine1}
               <br />
               {currentSlide.titleLine2}
             </h1>
-            {currentSlide.discount && (
-              <div className="relative inline-block my-2">
-                <div className="absolute -inset-1 sm:-inset-2 transform -rotate-2 bg-red-500 rounded-md"></div>
-                <span className="relative text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white px-1.5 py-0.5">{currentSlide.discount} <span className="text-lg sm:text-xl">خصم</span></span>
-              </div>
-            )}
-            {!currentSlide.discount && currentSlide.description && (
-                <p className="text-sm sm:text-base mb-5 sm:mb-6 opacity-90 max-w-md">
-                    {currentSlide.description}
-                </p>
-            )}
           </motion.div>
-      </div>
+        </div>
 
-      <button 
-        onClick={prevSlide} 
-        aria-label="الشريحة السابقة"
-        className="absolute top-1/2 left-2 sm:left-3 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 p-1.5 sm:p-2 rounded-full z-20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-      >
-        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-      </button>
-      <button 
-        onClick={nextSlide} 
-        aria-label="الشريحة التالية"
-        className="absolute top-1/2 right-2 sm:right-3 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 p-1.5 sm:p-2 rounded-full z-20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-      >
-        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-      </button>
+        <button
+          onClick={prevSlide}
+          aria-label="الشريحة السابقة"
+          className="absolute top-1/2 left-2 sm:left-3 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 p-1.5 sm:p-2 rounded-full z-20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        <button
+          onClick={nextSlide}
+          aria-label="الشريحة التالية"
+          className="absolute top-1/2 right-2 sm:right-3 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 p-1.5 sm:p-2 rounded-full z-20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+      </section>
 
-    </section>
       <div className="flex justify-center mt-2 space-x-1.5 rtl:space-x-reverse">
         {slides.map((_, index) => (
           <button
@@ -99,7 +118,6 @@ const HeroSection = ({ slides }) => {
       </div>
     </>
   );
-
 };
 
 export default HeroSection;

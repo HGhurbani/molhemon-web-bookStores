@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -60,8 +59,8 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
     </div>
 
     <Button
-      className={`w-full text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto ${index % 2 === 0 ? 'bg-blue-600 hover:bg-blue-700' : 'border-blue-600 text-blue-600 hover:bg-blue-50'}`}
-      variant={index % 2 === 0 ? 'default' : 'outline'}
+      className="w-full text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto bg-blue-600 text-white hover:bg-white hover:text-blue-600 hover:border-blue-600"
+      variant="default"
       onClick={() => handleAddToCart(book)}
     >
       <ShoppingCartIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 rtl:mr-1.5 rtl:ml-0" />
@@ -74,8 +73,8 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
 const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, title, icon, bgColor = "bg-white", squareImages = false, likeCardStyle = false }) => {
   const IconComponent = icon || TrendingUp;
   return (
-    <section className={`py-8 sm:py-10 ${bgColor}`}>
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className={`py-8 sm:py-10`}>
+      <div className={`max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 ${bgColor} p-4 rounded-[18px]`}>
         <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-center space-x-2 sm:space-x-2.5 rtl:space-x-reverse mb-3 sm:mb-0">
             <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500" />

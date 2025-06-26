@@ -77,13 +77,13 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="relative aspect-[3/4] w-56 mx-auto rounded-lg shadow-xl overflow-hidden">
+          <div className="relative aspect-[3/4] w-80 rounded-lg shadow-xl overflow-hidden">
             <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src={book.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
             <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
               خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
             </span>
           </div>
-          <div className="flex flex-col space-y-2 w-56 mx-auto">
+          <div className="flex flex-col space-y-2 w-80">
             <Button variant="ghost" onClick={() => setDialogOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><BookOpenText className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />اقرأ عينة</Button>
             <Button variant="ghost" onClick={() => setAudioOpen(true)} className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20"><Headphones className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />عينة صوتية</Button>
           </div>
@@ -144,10 +144,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <p className="text-sm text-gray-700 mt-4 whitespace-pre-line">{authorDetails?.bio || 'لا توجد نبذة متوفرة.'}</p>
             )}
           </div>
-          <Button variant="outline" className="w-full text-gray-600 border-gray-300 hover:bg-gray-100" onClick={() => toast({title: 'مشاركة المنتج', description:'🚧 هذه الميزة غير مطبقة بعد'})}>
-            <Share2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
-            مشاركة هذا المنتج
-          </Button>
+
         </motion.div>
 
         <motion.div
@@ -156,7 +153,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="sticky top-24 space-y-4 lg:w-64 mx-auto">
+          <div className="sticky top-24 space-y-4 mx-auto">
             <div className="bg-white rounded-lg shadow p-4 space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="border rounded-md p-2 text-center">
@@ -186,19 +183,114 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               </div>
               <Button variant="secondary" className="w-full mb-3">اشتري الان بنقرة واحدة</Button>
               <div className="flex justify-around text-sm text-gray-600">
-                <Button variant="ghost" size="sm" onClick={() => toast({title:'دردشة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><ChevronDown className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />دردش</Button>
-                <Button variant="ghost" size="sm" onClick={onToggleWishlist} className="px-2"><Heart className={`w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />قائمة الرغبات</Button>
-                <Button variant="ghost" size="sm" onClick={() => toast({title:'مشاركة', description:'🚧 هذه الميزة غير مطبقة بعد'})} className="px-2"><Share2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />مشاركة</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    toast({
+                      title: 'دردشة',
+                      description: '🚧 هذه الميزة غير مطبقة بعد',
+                    })
+                  }
+                  className="px-2"
+                >
+                  <i className="fa-solid fa-comments text-blue-600 ml-2 rtl:mr-2 rtl:ml-0" />
+                  دردش
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleWishlist}
+                  className="px-2"
+                >
+                  <Heart
+                    className={`w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-blue-600'
+                      }`}
+                  />
+                  قائمة الرغبات
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    toast({
+                      title: 'مشاركة',
+                      description: '🚧 هذه الميزة غير مطبقة بعد',
+                    })
+                  }
+                  className="px-2"
+                >
+                  <Share2 className="w-4 h-4 text-blue-600 ml-2 rtl:mr-2 rtl:ml-0" />
+                  مشاركة
+                </Button>
               </div>
+
             </div>
           </div>
         </motion.div>
       </div>
 
-      <div className="mt-8">
-        <h3 className="font-semibold text-gray-800 mb-2">تقييمات العملاء</h3>
-        <p className="text-gray-600 text-sm">🚧 هذه الميزة غير مطبقة بعد</p>
+      <div className="rounded-lg shadow-sm p-4 mt-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+  {/* تصفية التقييمات */}
+  <div className="lg:col-span-1">
+    <div className="border rounded-lg p-4 bg-gray-50">
+      <p className="text-lg font-semibold mb-2 text-gray-800">فلاتر التقييمات</p>
+      <div className="space-y-2 text-sm text-gray-700">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" className="accent-blue-600" />
+          <span>مع صور وفيديوهات</span>
+        </label>
+        <div className="border-t my-2" />
+        {[5, 4, 3, 2, 1].map(star => (
+          <label key={star} className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" className="accent-blue-600" />
+            <div className="flex items-center gap-1">
+              {[...Array(star)].map((_, i) => (
+                <span key={i} className="text-blue-600 text-xs">★</span>
+              ))}
+            </div>
+          </label>
+        ))}
       </div>
+    </div>
+  </div>
+
+  {/* قائمة التقييمات */}
+  <div className="lg:col-span-3 space-y-6">
+    {[1, 2, 3].map(index => (
+      <div key={index} className="border-b pb-4">
+        <div className="flex items-center gap-3 mb-2">
+          <img src="https://i.pravatar.cc/40?img=5" alt="user" className="w-10 h-10 rounded-full border" />
+          <div>
+            <p className="font-semibold text-gray-800 text-sm">ديانا روز</p>
+            <p className="text-xs text-gray-500">19 يناير 2025</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-yellow-500 text-sm mb-2">
+          {[...Array(5)].map((_, i) => (
+            <span key={i}>★</span>
+          ))}
+        </div>
+        <p className="text-sm text-gray-700 mb-3">
+          من المعروف أن المحتوى المفروض لصفحة ما سيشتت انتباه القارئ عند النظر إلى شكلها الخارجي.
+        </p>
+        <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
+            <i className="fa-regular fa-thumbs-up"></i>
+            <span>10</span>
+          </div>
+          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
+            <i className="fa-regular fa-thumbs-down"></i>
+            <span>2</span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
 
       {relatedBooks.length > 0 && (
         <YouMayAlsoLikeSection

@@ -85,8 +85,7 @@
 }
 
 .book-card {
-  transition: all 0.2s ease-in-out;
-  background: hsl(var(--card));
+
 }
 
 .book-card.group:hover { 
