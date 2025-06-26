@@ -3,7 +3,7 @@ import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
 
 // Simple Button component replacement
 const Button = ({ children, className, onClick, ...props }) => (
-  <button 
+  <button
     className={`px-4 py-2 rounded font-medium transition-colors ${className}`}
     onClick={onClick}
     {...props}
@@ -11,6 +11,8 @@ const Button = ({ children, className, onClick, ...props }) => (
     {children}
   </button>
 );
+
+const AudiobookPage = () => {
   const books = [];
   const authors = [];
   const wishlist = [];
