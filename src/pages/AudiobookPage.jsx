@@ -159,42 +159,50 @@
             {plans.map((plan, index) => (
               <motion.div
                 key={plan.id}
-                className={`p-6 rounded-2xl shadow-lg border-2 flex flex-col items-center text-center relative transition-all duration-300 ${
-                  plan.popular ? 'border-blue-600 scale-105' : 'border-gray-200'
-                } ${plan.color}`}
+                className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden flex flex-col items-center text-center transition-all duration-300 ${
+                  plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-yellow-400 text-black font-bold px-4 py-2 rounded-full text-sm shadow-md">
-                      الأكثر شيوعاً
-                    </span>
+                  <div className="absolute top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 text-sm font-medium">
+                    الأكثر شيوعاً
                   </div>
                 )}
 
-                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-sm text-gray-500 mb-4">{plan.subtitle}</p>
-                <div className="text-4xl font-bold mb-1">{plan.price}</div>
-                <p className="text-sm opacity-80 mb-6">{plan.duration}</p>
+                <div className={`p-6 ${plan.popular ? 'pt-12' : 'pt-6'}`}>
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{plan.subtitle}</p>
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+                      <span className="text-gray-600 text-sm mr-1">{plan.duration}</span>
+                    </div>
+                  </div>
 
-                <ul className="space-y-3 mb-8 w-full text-right text-gray-700">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <Check className="w-4 h-4 text-blue-600 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
-                      <span className="text-sm leading-tight">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="space-y-3 mb-6 text-right">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <Check className="w-4 h-4 text-blue-500 mt-0.5 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
+                        <span className="text-sm text-gray-700 leading-5">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Button
-                  className={`w-full py-3 rounded-xl font-semibold transition-colors ${plan.buttonColor}`}
-                  onClick={() => toast({ title: plan.message })}
-                >
-                  اختر باقتك
-                </Button>
+                  <Button
+                    className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
+                      plan.popular
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300'
+                    }`}
+                    onClick={() => toast({ title: plan.message })}
+                  >
+                    اختر باقتك
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </div>
