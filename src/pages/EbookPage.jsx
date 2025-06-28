@@ -56,9 +56,11 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
       <motion.section
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-blue-600 to-purple-700 p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center justify-between text-white"
+        style={{ backgroundImage: "url('https://i.ibb.co/3Y7PkFH7/image-1318.png')" }}
+        className="relative bg-center bg-cover p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center justify-between text-white overflow-hidden"
       >
-        <div className="text-center md:text-right max-w-lg md:max-w-md">
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative bg-purple-700/80 p-6 sm:p-8 rounded-xl text-center md:text-right max-w-lg md:max-w-md">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
           <p className="text-lg sm:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
           <p className="text-blue-100 text-sm sm:text-base mb-6">اكتشف آلاف الكتب من الأطفال، إلى %٥٠ خصم وأكثر في أي وقت</p>
@@ -70,7 +72,7 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
             تجربة مجانية لمدة ٧ أيام
           </Button>
         </div>
-      
+
       </motion.section>
 
       <section className="mt-10 sm:mt-12">
