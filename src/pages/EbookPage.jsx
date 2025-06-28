@@ -64,7 +64,7 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         <div className="relative z-20 p-6 sm:p-8 text-center md:text-right max-w-lg md:max-w-md">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
           <p className="text-lg sm:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
-          <p className="text-blue-100 text-sm sm:text-base mb-6">اكتشف آلاف الكتب من الأطفال، إلى %٥٠ خصم وأكثر في أي وقت</p>
+          <p className="text-white-100 text-sm sm:text-base mb-6">اكتشف آلاف الكتب من الأطفال، إلى %٥٠ خصم وأكثر في أي وقت</p>
           <Button
             size="lg"
             className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg"

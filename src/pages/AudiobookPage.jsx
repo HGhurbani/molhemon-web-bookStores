@@ -136,7 +136,7 @@
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight text-shadow-lg">
                 اختر باقة الاستماع المناسبة لك
               </h1>
-              <p className="text-lg sm:text-xl text-blue-100 mb-6 mx-auto md:mx-0 rtl:md:ml-auto rtl:md:mr-0">
+              <p className="text-lg sm:text-xl text-white-100 mb-6 mx-auto md:mx-0 rtl:md:ml-auto rtl:md:mr-0">
                 قصص بلا حدود، رواة خبراء، أينما كنت.
               </p>
               <Button
@@ -146,7 +146,7 @@
               >
                 تجربة مجانية لمدة ٧ أيام
               </Button>
-              <p className="text-blue-200 text-xs sm:text-sm mt-3">
+              <p className="text-white-200 text-xs sm:text-sm mt-3">
                 التجديد التلقائي - إلغِ في أي وقت
               </p>
             </div>
