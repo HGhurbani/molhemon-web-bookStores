@@ -59,8 +59,8 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         style={{ backgroundImage: "url('https://i.ibb.co/3Y7PkFH7/image-1318.png')" }}
         className="relative bg-center bg-cover p-6 sm:p-8 rounded-xl shadow-2xl flex items-center text-white overflow-hidden"
       >
-        <div className="absolute inset-0 bg-black/40 z-0" />
-        <div className="absolute inset-y-0 left-0 w-full md:w-1/2 bg-purple-700/80 rounded-r-full z-10" />
+        <div className="absolute inset-0 z-0" />
+        <div className="absolute inset-y-0 right-0 w-full md:w-1/2 bg-purple-700 rounded-l-full z-10" />
         <div className="relative z-20 p-6 sm:p-8 text-center md:text-right max-w-lg md:max-w-md">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
           <p className="text-lg sm:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
