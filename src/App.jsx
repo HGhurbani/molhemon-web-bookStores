@@ -8,7 +8,7 @@ import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import Dashboard from '@/components/Dashboard.jsx';
 import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
-import CustomerLoginPage from '@/pages/CustomerLoginPage.jsx';
+import AuthPage from '@/pages/AuthPage.jsx';
 
 import HomePage from '@/pages/HomePage.jsx';
 import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
@@ -185,7 +185,7 @@ const App = () => {
                 isCustomerLoggedIn ? (
                   <Navigate to="/profile" />
                 ) : (
-                  <MainLayout><PageLayout><CustomerLoginPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
+                  <MainLayout><PageLayout><AuthPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
                 )
               }
             />
