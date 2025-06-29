@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
+import { Button } from '@/components/ui/button.jsx';
 
 const AudiobookPage = () => {
   // Mock data
@@ -128,11 +129,11 @@ const AudiobookPage = () => {
             </div>
           </div>
           {/* Button below the book cover */}
-          <button
-            className="absolute -bottom-12 sm:-bottom-16 w-full bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg text-base sm:text-lg px-6 py-3 transition-colors"
+          <Button
+            className="absolute -bottom-12 sm:-bottom-16 w-full py-3 rounded-xl font-medium transition-all duration-200 bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base sm:text-lg px-6 shadow-md"
           >
             تصفح الكتب الصوتية
-          </button>
+          </Button>
         </div>
       </motion.div>
       <section className="mt-10 sm:mt-12">
@@ -173,15 +174,15 @@ const AudiobookPage = () => {
                   ))}
                 </ul>
 
-                <button
+                <Button
                   className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
                     plan.popular
                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300'
+                      : 'bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]'
                   }`}
                 >
                   اختر باقتك
-                </button>
+                </Button>
               </div>
             </motion.div>
           ))}
@@ -251,9 +252,9 @@ const AudiobookPage = () => {
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.
               </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white text-base py-3 px-8 shadow-lg hover:shadow-xl rounded-lg transition-all">
+              <Button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base px-8 py-3 rounded-xl font-medium shadow-md transition-all">
                 تصفح الكتب الصوتية
-              </button>
+              </Button>
             </div>
           </div>
         </div>
