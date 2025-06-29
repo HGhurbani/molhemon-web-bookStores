@@ -129,11 +129,13 @@ const AudiobookPage = () => {
             </div>
           </div>
           {/* Button below the book cover */}
+          <Button
+            className="absolute -bottom-12 sm:-bottom-16 w-full py-3 rounded-xl font-medium transition-all duration-200 bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base sm:text-lg px-6 shadow-md"
           <button
             className="absolute -bottom-12 sm:-bottom-16 w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] rounded-full shadow-md text-base sm:text-lg px-6 py-3 transition-colors"
           >
             تصفح الكتب الصوتية
-          </button>
+          </Button>
         </div>
       </motion.div>
       <section className="mt-10 sm:mt-12">
@@ -252,9 +254,10 @@ const AudiobookPage = () => {
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.
               </p>
+              <Button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base px-8 py-3 rounded-xl font-medium shadow-md transition-all">
               <button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base py-3 px-8 shadow-md rounded-lg transition-all">
                 تصفح الكتب الصوتية
-              </button>
+              </Button>
             </div>
           </div>
         </div>
