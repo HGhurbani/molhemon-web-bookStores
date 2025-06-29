@@ -57,10 +57,22 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         style={{ backgroundImage: "url('https://i.ibb.co/3Y7PkFH7/image-1318.png')" }}
-        className="relative bg-center bg-cover p-6 sm:p-8 rounded-xl shadow-2xl flex items-center text-white overflow-hidden"
+        className="relative p-6 sm:p-8 rounded-xl shadow-2xl flex items-center text-white overflow-hidden"
       >
         <div className="absolute inset-0 z-0" />
-        <div className="absolute inset-y-0 right-0 w-full md:w-1/2 bg-purple-700 rounded-l-full z-10" />
+        
+        {/* SVG لتطبيق المنحنى المطلوب باللون الجديد #9774FF */}
+        <svg
+          className="absolute inset-y-0 right-0 w-full md:w-1/2 z-10"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <path 
+            d="M 0 0 C 40 0, 40 100, 0 100 L 100 100 L 100 0 Z" 
+            fill="#9774FF" // تم تغيير اللون هنا
+          />
+        </svg>
+
         <div className="relative z-20 p-6 sm:p-8 text-center md:text-right max-w-lg md:max-w-md">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
           <p className="text-lg sm:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
@@ -116,10 +128,10 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
                 </ul>
 
                 <Button
-                  className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
-                    plan.isPopular
+                  className={`w-full py-3 rounded-xl font-medium transition-all duration-200 
+                  ${plan.isPopular
                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300'
+                      : 'bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]' // تم التعديل هنا: ألوان مخصصة
                   }`}
                   onClick={() => toast({ title: plan.message })}
                 >
