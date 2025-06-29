@@ -48,15 +48,18 @@ const AuthPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <div className="relative w-full max-w-6xl mx-auto bg-white rounded-lg shadow-xl flex flex-col lg:flex-row overflow-hidden">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={formVariants}
-          transition={{ duration: 0.5 }}
-          className="lg:w-1/2 order-2 lg:order-1 p-6 sm:p-10 flex flex-col justify-center"
-        >
+    <div
+      className="min-h-screen flex items-center justify-start relative bg-cover bg-center"
+      style={{ backgroundImage: 'url(https://i.ibb.co/8LrHvv4P/upscalemedia-transformed-3-1.png)' }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:to-transparent" />
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={formVariants}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md p-6 sm:p-10 ml-4 my-4 md:ml-24 bg-white/80 rounded-lg shadow-xl"
+      >
           <h1 className="text-2xl font-bold mb-4 text-center">
             {isSignUp ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
           </h1>
@@ -126,16 +129,6 @@ const AuthPage = ({ onLogin }) => {
             </Button>
           </div>
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="lg:w-1/2 order-1 lg:order-2 min-h-[250px] relative"
-          style={{ backgroundImage: 'url(https://i.ibb.co/8LrHvv4P/upscalemedia-transformed-3-1.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent lg:bg-gradient-to-l lg:from-black/60 lg:to-transparent" />
-        </motion.div>
-      </div>
     </div>
   );
 };
