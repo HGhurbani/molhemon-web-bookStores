@@ -140,11 +140,11 @@ const AudiobookPage = () => {
       </motion.div>
       <section className="mt-10 sm:mt-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">استمتع بقراءة واستماع غير محدودين</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
-              className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden flex flex-col items-center text-center transition-all duration-300 ${
+              className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden ${
                 plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
               }`}
               initial={{ opacity: 0, y: 20 }}
@@ -167,9 +167,9 @@ const AudiobookPage = () => {
                   </div>
                 </div>
 
-                <ul className="space-y-3 mb-6 text-right">
+                <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
+                    <li key={i} className="flex items-start text-right">
                       <Check className="w-4 h-4 text-blue-500 mt-0.5 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
                       <span className="text-sm text-gray-700 leading-5">{feature}</span>
                     </li>
