@@ -9,6 +9,7 @@ import {
   BarChart3,
   Package,
   UserCheck,
+  Store,
   DollarSign,
   Eye,
   Plus,
@@ -30,6 +31,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
     { id: 'authors', name: 'المؤلفون', icon: Users },
+    { id: 'sellers', name: 'البائعون', icon: Store },
     { id: 'categories', name: 'الأصناف', icon: BookOpen },
     { id: 'orders', name: 'الطلبات', icon: Package },
     { id: 'customers', name: 'العملاء', icon: UserCheck },
@@ -275,6 +277,218 @@ const DashboardCategories = ({ categories, setCategories }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCategory(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const SellerForm = ({ seller, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', ...seller });
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{seller ? 'تعديل البائع' : 'إضافة بائع جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="name">الاسم</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="email">البريد الإلكتروني</Label>
+          <Input id="email" name="email" value={formData.email} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="phone">الهاتف</Label>
+          <Input id="phone" name="phone" value={formData.phone} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {seller ? 'حفظ التعديلات' : 'إضافة البائع'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardSellers = ({ sellers, setSellers }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingSeller, setEditingSeller] = useState(null);
+
+  const handleAdd = (data) => {
+    const newSeller = { id: Date.now(), ...data };
+    setSellers(prev => [newSeller, ...prev]);
+    localStorage.setItem('sellers', JSON.stringify([newSeller, ...sellers]));
+    toast({ title: 'تمت الإضافة بنجاح!' });
+    setShowForm(false);
+  };
+
+  const handleEdit = (data) => {
+    const updated = { ...editingSeller, ...data };
+    setSellers(prev => prev.map(s => s.id === updated.id ? updated : s));
+    localStorage.setItem('sellers', JSON.stringify(sellers.map(s => s.id === updated.id ? updated : s)));
+    toast({ title: 'تم التعديل بنجاح!' });
+    setShowForm(false);
+    setEditingSeller(null);
+  };
+
+  const handleDelete = (id) => {
+    setSellers(prev => prev.filter(s => s.id !== id));
+    localStorage.setItem('sellers', JSON.stringify(sellers.filter(s => s.id !== id)));
+    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  };
+
+  if (showForm) {
+    return <SellerForm seller={editingSeller} onSubmit={editingSeller ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingSeller(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة البائعين</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingSeller(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة بائع
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد الإلكتروني</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الهاتف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {sellers.map(s => (
+              <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.email}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.phone}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingSeller(s); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const CustomerForm = ({ customer, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', ...customer });
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{customer ? 'تعديل العميل' : 'إضافة عميل جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="cname">الاسم</Label>
+          <Input id="cname" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="cemail">البريد الإلكتروني</Label>
+          <Input id="cemail" name="email" value={formData.email} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="cphone">الهاتف</Label>
+          <Input id="cphone" name="phone" value={formData.phone} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {customer ? 'حفظ التعديلات' : 'إضافة العميل'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardCustomers = ({ customers, setCustomers }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+
+  const handleAdd = (data) => {
+    const newCustomer = { id: Date.now(), ...data };
+    setCustomers(prev => [newCustomer, ...prev]);
+    localStorage.setItem('customers', JSON.stringify([newCustomer, ...customers]));
+    toast({ title: 'تمت الإضافة بنجاح!' });
+    setShowForm(false);
+  };
+
+  const handleEdit = (data) => {
+    const updated = { ...editingCustomer, ...data };
+    setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+    localStorage.setItem('customers', JSON.stringify(customers.map(c => c.id === updated.id ? updated : c)));
+    toast({ title: 'تم التعديل بنجاح!' });
+    setShowForm(false);
+    setEditingCustomer(null);
+  };
+
+  const handleDelete = (id) => {
+    setCustomers(prev => prev.filter(c => c.id !== id));
+    localStorage.setItem('customers', JSON.stringify(customers.filter(c => c.id !== id)));
+    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  };
+
+  if (showForm) {
+    return <CustomerForm customer={editingCustomer} onSubmit={editingCustomer ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingCustomer(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة العملاء</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingCustomer(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة عميل
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد الإلكتروني</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الهاتف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {customers.map(c => (
+              <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.email}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.phone}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCustomer(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </td>
@@ -650,11 +864,12 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setCategories, setOrders }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
     authors: 'المؤلفون',
+    sellers: 'البائعون',
     orders: 'الطلبات',
     customers: 'العملاء',
     settings: 'الإعدادات',
@@ -671,9 +886,11 @@ const Dashboard = ({ dashboardStats, books, authors, categories, orders, dashboa
         {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
         {dashboardSection === 'books' && <DashboardBooks books={books} setBooks={setBooks} authors={authors} categories={categories} handleFeatureClick={handleFeatureClick} />}
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
+        {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} />}
-        {['customers', 'settings'].includes(dashboardSection) && (
+        {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
+        {dashboardSection === 'settings' && (
           <PlaceholderSection sectionName={sectionTitles[dashboardSection]} handleFeatureClick={handleFeatureClick} />
         )}
       </main>

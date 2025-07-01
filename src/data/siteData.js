@@ -194,6 +194,16 @@ export const authors = [
   { id: 10, name: 'ناتالي مكرر', books: 10, imgPlaceholder: 'صورة ناتالي كرتونية مكررة', bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.' },
 ];
 
+export const sellers = [
+  { id: 1, name: 'مكتبة المعرفة', email: 'info@knowledge.ae', phone: '+971 50 111 2222' },
+  { id: 2, name: 'دار الحكمة', email: 'contact@hikma.ae', phone: '+971 50 333 4444' },
+];
+
+export const customers = [
+  { id: 1, name: 'أحمد محمد', email: 'ahmed@example.com', phone: '+971 55 111 1111' },
+  { id: 2, name: 'سارة علي', email: 'sara@example.com', phone: '+971 55 222 2222' },
+];
+
 export const dashboardStats = [
   { title: 'إجمالي الكتب', value: '2,847', icon: BookOpen, color: 'bg-blue-500' },
   { title: 'المؤلفون', value: '156', icon: Users, color: 'bg-green-500' },
