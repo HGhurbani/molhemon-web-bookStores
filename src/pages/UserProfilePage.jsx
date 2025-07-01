@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
-import { User, ShoppingBag, Heart, Settings, LogOut, Edit2, MapPin, CreditCard as CreditCardIcon } from 'lucide-react';
+import { User, ShoppingBag, Heart, Settings, LogOut, Edit2, MapPin, CreditCard as CreditCardIcon, Bell, Gift, Shield } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 
@@ -66,13 +66,36 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   const handleAddPaymentMethod = () => handleFeatureClick('add-payment-method');
 
 
-  const tabs = [
-    { id: 'profile', label: 'الملف الشخصي', icon: User },
-    { id: 'orders', label: 'طلباتي', icon: ShoppingBag },
-    { id: 'wishlist', label: 'قائمة الرغبات', icon: Heart },
-    { id: 'addresses', label: 'العناوين', icon: MapPin },
-    { id: 'payment', label: 'طرق الدفع', icon: CreditCardIcon },
-    { id: 'settings', label: 'الإعدادات', icon: Settings },
+  const navSections = [
+    {
+      label: 'حسابي',
+      items: [
+        { id: 'profile', label: 'الملف الشخصي', icon: User },
+        { id: 'payment', label: 'البنوك والبطاقات', icon: CreditCardIcon },
+        { id: 'addresses', label: 'العناوين', icon: MapPin },
+        { id: 'notification-settings', label: 'إعدادات الاشعارات', icon: Bell },
+        { id: 'privacy-settings', label: 'إعدادات الخصوصية', icon: Shield },
+      ],
+    },
+    {
+      label: 'مشترياتي',
+      items: [
+        { id: 'orders', label: 'مشترياتي', icon: ShoppingBag },
+        { id: 'wishlist', label: 'قائمة الرغبات', icon: Heart },
+      ],
+    },
+    {
+      label: 'الاشعارات',
+      items: [
+        { id: 'notifications', label: 'الإشعارات', icon: Bell },
+      ],
+    },
+    {
+      label: 'قسائمي',
+      items: [
+        { id: 'coupons', label: 'قسائمي', icon: Gift },
+      ],
+    },
   ];
 
   const renderContent = () => {
@@ -185,7 +208,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
         return (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">طرق الدفع</h2>
+                <h2 className="text-xl font-semibold">البنوك والبطاقات</h2>
                 <Button onClick={handleAddPaymentMethod} size="sm" className="bg-blue-600 hover:bg-blue-700">إضافة طريقة دفع</Button>
             </div>
             <div className="space-y-3">
@@ -202,6 +225,34 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                 </div>
               ))}
             </div>
+          </motion.div>
+        );
+      case 'notification-settings':
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">إعدادات الإشعارات</h2>
+            <p>يمكنك التحكم في نوع الإشعارات التي ترغب باستلامها.</p>
+          </motion.div>
+        );
+      case 'privacy-settings':
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">إعدادات الخصوصية</h2>
+            <p>قم بضبط الخيارات المتعلقة بخصوصية حسابك.</p>
+          </motion.div>
+        );
+      case 'notifications':
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">الإشعارات</h2>
+            <p>لا توجد إشعارات حالياً.</p>
+          </motion.div>
+        );
+      case 'coupons':
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">قسائمي</h2>
+            <p>لا توجد قسائم متاحة.</p>
           </motion.div>
         );
       case 'settings':
@@ -237,21 +288,26 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                 <p className="text-xs text-gray-500">{userData.email}</p>
               </div>
             </div>
-            <nav className="space-y-1">
-              {tabs.map(tab => {
-                const Icon = tab.icon;
-                return (
-                  <Button
-                    key={tab.id}
-                    variant={activeTab === tab.id ? 'default' : 'ghost'}
-                    className={`w-full justify-start text-sm ${activeTab === tab.id ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                    onClick={() => handleTabChange(tab.id)}
-                  >
-                    <Icon className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {tab.label}
-                  </Button>
-                );
-              })}
+            <nav className="space-y-4">
+              {navSections.map(section => (
+                <div key={section.label} className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">{section.label}</p>
+                  {section.items.map(item => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={activeTab === item.id ? 'default' : 'ghost'}
+                        className={`w-full justify-start text-sm ${activeTab === item.id ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                        onClick={() => handleTabChange(item.id)}
+                      >
+                        <Icon className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              ))}
               <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleFeatureClick('logout')}>
                 <LogOut className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
                 تسجيل الخروج
