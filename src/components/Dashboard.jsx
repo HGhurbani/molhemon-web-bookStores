@@ -22,6 +22,14 @@ import {
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 
 import { Link } from 'react-router-dom';
@@ -501,33 +509,116 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
   );
 };
 
-const DashboardOrders = ({ orders }) => (
-  <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-    <h2 className="text-2xl font-semibold text-gray-700 mb-3">الطلبات الواردة</h2>
-    <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
-      <table className="w-full min-w-[400px]">
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">رقم الطلب</th>
-            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التاريخ</th>
-            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجمالي</th>
-            <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200">
-          {orders.map(o => (
-            <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
-              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.id}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.date}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.total.toFixed(2)} د.إ</td>
-              <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
+const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
+  if (!order) return null;
+  const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg space-y-4">
+        <DialogHeader>
+          <DialogTitle>تفاصيل الطلب {order.id}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2 text-sm">
+          <p>التاريخ: {order.date}</p>
+          <p>الإجمالي: {order.total.toFixed(2)} د.إ</p>
+          <div>
+            <Label htmlFor="status">الحالة</Label>
+            <select
+              id="status"
+              value={order.status}
+              onChange={(e) => onUpdateStatus(order.id, e.target.value)}
+              className="w-full p-2 mt-1 border border-gray-300 rounded-md"
+            >
+              {statuses.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <h4 className="font-semibold mt-4 mb-2">المنتجات</h4>
+            <ul className="space-y-1">
+              {order.items.map((item) => (
+                <li key={item.id} className="flex justify-between">
+                  <span>{item.title} × {item.quantity}</span>
+                  <span>{(item.price * item.quantity).toFixed(2)} د.إ</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="destructive" onClick={() => { onDelete(order.id); onOpenChange(false); }}>
+            حذف الطلب
+          </Button>
+          <DialogClose asChild>
+            <Button variant="outline">إغلاق</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const DashboardOrders = ({ orders, setOrders }) => {
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleUpdateStatus = (id, status) => {
+    const updated = orders.map((o) => (o.id === id ? { ...o, status } : o));
+    setOrders(updated);
+    localStorage.setItem('orders', JSON.stringify(updated));
+    toast({ title: 'تم تحديث حالة الطلب' });
+  };
+
+  const handleDeleteOrder = (id) => {
+    const updated = orders.filter((o) => o.id !== id);
+    setOrders(updated);
+    localStorage.setItem('orders', JSON.stringify(updated));
+    toast({ title: 'تم حذف الطلب', variant: 'destructive' });
+  };
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">الطلبات الواردة</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">رقم الطلب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التاريخ</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجمالي</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
+              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </motion.div>
-);
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {orders.map((o) => (
+              <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.date}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.total.toFixed(2)} د.إ</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setSelectedOrder(o); setDialogOpen(true); }}><Eye className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteOrder(o.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <OrderDetailsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        order={selectedOrder}
+        onUpdateStatus={handleUpdateStatus}
+        onDelete={handleDeleteOrder}
+      />
+    </motion.div>
+  );
+};
 
 const DashboardOverview = ({ dashboardStats }) => (
   <div className="space-y-6">
@@ -960,7 +1051,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
-        {dashboardSection === 'orders' && <DashboardOrders orders={orders} />}
+        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'settings' && (
           <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
