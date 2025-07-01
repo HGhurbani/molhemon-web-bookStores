@@ -273,3 +273,14 @@ export const footerLinks = [
     ],
   },
 ];
+export const siteSettings = {
+  siteName: 'ملهمون',
+  description: 'دار ملهمون للنشر والتوزيع',
+  contactEmail: 'info@molhemoon.com',
+  contactPhone: '0097165551184',
+  address: 'الإمارات العربية المتحدة',
+  facebook: '',
+  twitter: '',
+  instagram: '',
+  themeColor: '#1D4ED8'
+};
