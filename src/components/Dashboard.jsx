@@ -51,8 +51,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
       <div className="flex items-center mb-8">
          <img  alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
         <div>
-          <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">ملهمون</h2>
-          <span className="text-xs text-slate-400">لوحة التحكم</span>
+         
         </div>
       </div>
       
