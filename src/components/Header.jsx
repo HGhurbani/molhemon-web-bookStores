@@ -71,7 +71,7 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
                   <span>بروس وين</span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
+              <DropdownMenuContent dir="rtl" align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
                 <DropdownMenuItem asChild>
                   <Link to="/profile?tab=wishlist" className="flex items-center">
                     <Bookmark className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
