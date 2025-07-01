@@ -22,7 +22,7 @@ import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
-import { categories as initialCategories, books as initialBooks, authors as initialAuthors, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
+import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
 import { TrendingUp } from 'lucide-react';
 
 const App = () => {
@@ -33,6 +33,14 @@ const App = () => {
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState(initialBooks);
   const [authors, setAuthors] = useState(initialAuthors);
+  const [sellers, setSellers] = useState(() => {
+    const stored = localStorage.getItem('sellers');
+    return stored ? JSON.parse(stored) : initialSellers;
+  });
+  const [customers, setCustomers] = useState(() => {
+    const stored = localStorage.getItem('customers');
+    return stored ? JSON.parse(stored) : initialCustomers;
+  });
   const [categoriesState, setCategoriesState] = useState(initialCategories);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
@@ -60,6 +68,14 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('authors', JSON.stringify(authors));
   }, [authors]);
+
+  useEffect(() => {
+    localStorage.setItem('sellers', JSON.stringify(sellers));
+  }, [sellers]);
+
+  useEffect(() => {
+    localStorage.setItem('customers', JSON.stringify(customers));
+  }, [customers]);
 
 
   useEffect(() => {
@@ -164,6 +180,8 @@ const App = () => {
                     dashboardStats={dashboardStats}
                     books={books}
                     authors={authors}
+                    sellers={sellers}
+                    customers={customers}
                     categories={categoriesState}
                     orders={orders}
                     dashboardSection={dashboardSection}
@@ -171,6 +189,8 @@ const App = () => {
                     handleFeatureClick={handleFeatureClick}
                     setBooks={setBooks}
                     setAuthors={setAuthors}
+                    setSellers={setSellers}
+                    setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
                   />
