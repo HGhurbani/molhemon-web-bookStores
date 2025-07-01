@@ -48,8 +48,8 @@ const AuthPage = ({ onLogin }) => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-start relative bg-cover bg-center"
+ <div className="min-h-screen flex items-center justify-start rtl:justify-end relative bg-cover bg-center mb-32"
+
       style={{ backgroundImage: 'url(https://i.ibb.co/8LrHvv4P/upscalemedia-transformed-3-1.png)' }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:to-transparent" />
@@ -58,7 +58,7 @@ const AuthPage = ({ onLogin }) => {
         animate="visible"
         variants={formVariants}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md p-6 sm:p-10 ml-4 my-4 md:ml-24 bg-white/80 rounded-lg shadow-xl"
+        className="relative z-10 w-full max-w-md p-6 sm:p-10 ml-4 my-4 md:ml-24 bg-white rounded-lg shadow-xl"
       >
           <h1 className="text-2xl font-bold mb-4 text-center">
             {isSignUp ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
@@ -122,10 +122,10 @@ const AuthPage = ({ onLogin }) => {
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5" />
             </Button>
             <Button variant="outline" size="icon" onClick={handleSocialClick}>
-              <img src="https://www.svgrepo.com/show/448213/apple.svg" alt="Apple" className="h-5 w-5" />
+             <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="h-5 w-5" />
             </Button>
             <Button variant="outline" size="icon" onClick={handleSocialClick}>
-              <img src="https://www.svgrepo.com/show/452196/facebook.svg" alt="Facebook" className="h-5 w-5" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" className="h-5 w-5" />
             </Button>
           </div>
         </motion.div>

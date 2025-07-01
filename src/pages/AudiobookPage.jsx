@@ -131,9 +131,7 @@ const AudiobookPage = () => {
           {/* Button below the book cover */}
           <Button
             className="absolute -bottom-12 sm:-bottom-16 w-full py-3 rounded-xl font-medium transition-all duration-200 bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base sm:text-lg px-6 shadow-md"
-          <button
-            className="absolute -bottom-12 sm:-bottom-16 w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] rounded-full shadow-md text-base sm:text-lg px-6 py-3 transition-colors"
-          >
+        >
             تصفح الكتب الصوتية
           </Button>
         </div>
@@ -217,7 +215,7 @@ const AudiobookPage = () => {
                 </motion.div>
               ))}
             </div>
-            <div className="md:w-1/2 text-center md:text-right rtl:md:text-left">
+<div className="md:w-1/2 text-right" dir="rtl">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">قصص مختارة بعناية</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 تابع مؤلفات أو رواة في مسلسلاتك المفضلة، واحصل على توصيات
@@ -249,13 +247,12 @@ const AudiobookPage = () => {
               ))}
             </div>
 
-            <div className="md:w-1/2 text-center md:text-right rtl:md:text-left">
+<div className="md:w-1/2 text-right" dir="rtl">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">في أي وقت، وفي أي مكان.</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.
               </p>
               <Button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base px-8 py-3 rounded-xl font-medium shadow-md transition-all">
-              <button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base py-3 px-8 shadow-md rounded-lg transition-all">
                 تصفح الكتب الصوتية
               </Button>
             </div>

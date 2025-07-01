@@ -58,33 +58,69 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white p-6 sm:p-8 rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 mb-8 sm:mb-10"
-      >
-        <div className="flex flex-col items-center md:items-start text-center md:text-right md:flex-row md:space-x-4 rtl:md:space-x-reverse md:justify-start md:w-full">
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0 mb-4 md:mb-0">
-                <img  
-                alt={`صورة المؤلف ${author.name}`} 
-                className="w-full h-full object-cover"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/Group-162.png" />
-            </div>
-            <div className="flex-grow text-center md:text-right">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-1.5">{author.name}</h1>
-                <p className="text-gray-600 text-sm sm:text-base mb-3 leading-relaxed whitespace-pre-line">
-                    {author.bio || 'مؤلف وكاتب شغوف، يسعى لإثراء المحتوى العربي بأعمال أدبية وفكرية قيمة.'}
-                </p>
-                <div className="flex items-center justify-center md:justify-start space-x-4 rtl:space-x-reverse text-sm">
-                    <span className="flex items-center"><BookOpen className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" /> {authorBooks.length} كتاب</span>
-                    <span className="flex items-center bg-gray-100 rounded-sm px-1"><Star className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-yellow-500 fill-yellow-500" /> متوسط تقييم { averageRating }</span>
-                </div>
-            </div>
-        </div>
-        <Button variant="outline" size="sm" className="mt-4 md:mt-0 text-blue-600 bg-white hover:bg-blue-50 border-gray-300 flex-shrink-0" onClick={() => toast({ title: "متابعة المؤلف", description: "🚧 هذه الميزة غير مطبقة بعد" })}>
-            <PlusCircle className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" /> متابعة
-        </Button>
-      </motion.div>
+  initial={{ opacity: 0, y: -30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+  className="bg-white p-6 sm:p-8 rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 mb-8 sm:mb-10"
+>
+  <div className="flex flex-col items-center md:items-start text-center md:text-right md:flex-row md:space-x-4 rtl:md:space-x-reverse md:justify-start md:w-full">
+    <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0 mb-4 md:mb-0">
+      <img  
+        alt={`صورة المؤلف ${author.name}`} 
+        className="w-full h-full object-cover"
+        src="https://darmolhimon.com/wp-content/uploads/2025/06/Group-162.png" />
+    </div>
+
+    <div className="flex-grow text-center md:text-right">
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-1.5">{author.name}</h1>
+      <p className="text-gray-600 text-sm sm:text-base mb-3 leading-relaxed whitespace-pre-line">
+        {author.bio || 'مؤلف وكاتب شغوف، يسعى لإثراء المحتوى العربي بأعمال أدبية وفكرية قيمة.'}
+      </p>
+
+      <div className="flex items-center justify-center md:justify-start space-x-4 rtl:space-x-reverse text-sm mb-4">
+        <span className="flex items-center">
+          <BookOpen className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
+          {authorBooks.length} كتاب
+        </span>
+        <span className="flex items-center bg-gray-100 rounded-sm px-1">
+          <Star className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-yellow-500 fill-yellow-500" />
+          متوسط تقييم {averageRating}
+        </span>
+      </div>
+
+      {/* نبذة مدمجة داخل نفس الكارد */}
+      <div className="mt-4 p-0 text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+  <h3 className="text-base font-semibold text-purple-600 mb-2 flex items-center">
+    <Edit3 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+    نبذة عن المؤلف
+  </h3>
+  <p>
+    {author.extendedBio || `${author.name} هو كاتب مبدع يتميز بأسلوبه الفريد وقدرته على نسج عوالم خيالية تأسر القارئ. قدم العديد من الأعمال التي لاقت استحسان النقاد والجمهور على حد سواء، وتنوعت كتاباته بين الرواية والقصة القصيرة والمقالات الفكرية. يسعى ${author.name} من خلال كتاباته إلى طرح قضايا إنسانية عميقة وإثارة التفكير حولها، مما يجعله واحداً من الأصوات الأدبية المؤثرة في المشهد الثقافي.`}
+  </p>
+  <Link to={`/contact-author/${author.id}`} className="mt-4 inline-block">
+    <Button variant="link" className="text-blue-600 hover:text-blue-700 px-0">
+      تواصل مع المؤلف
+    </Button>
+  </Link>
+</div>
+
+    </div>
+  </div>
+
+  <Button
+    variant="outline"
+    size="sm"
+    className="mt-4 md:mt-0 text-blue-600 bg-white hover:bg-blue-50 border-gray-300 flex-shrink-0"
+    onClick={() => toast({
+      title: "متابعة المؤلف",
+      description: "🚧 هذه الميزة غير مطبقة بعد"
+    })}
+  >
+    <PlusCircle className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+    متابعة
+  </Button>
+</motion.div>
+
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
