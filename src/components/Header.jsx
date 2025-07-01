@@ -10,6 +10,10 @@ import {
   ChevronDown,
   Briefcase,
   UserCircle,
+  User,
+  ShoppingBag,
+  LogOut,
+  LogIn,
   Menu,
   Book,
   Headphones,
@@ -60,10 +64,45 @@ const Header = ({ handleFeatureClick, cartItemCount }) => {
         {/* Top Bar - Visible on all screens now, but adjusts layout */}
         <div className="flex items-center justify-between text-xs py-2 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0"> {/* Removed hidden sm:flex */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
-            <Link to="/profile" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
-              <UserCircle className="w-4 h-4" />
-              <span>بروس وين</span>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
+                  <UserCircle className="w-4 h-4" />
+                  <span>بروس وين</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile?tab=wishlist" className="flex items-center">
+                    <Bookmark className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                    مكتبتي
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center">
+                    <User className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                    حسابي
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile?tab=orders" className="flex items-center">
+                    <ShoppingBag className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                    مشترياتي
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleFeatureClick('logout')} className="flex items-center text-red-600">
+                  <LogOut className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                  تسجيل الخروج
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/login" className="flex items-center">
+                    <LogIn className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                    تسجيل الدخول / إنشاء حساب
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <span className="mx-2">|</span>
             <Link to="/ebooks" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
               <Book className="w-4 h-4" />
