@@ -282,5 +282,9 @@ export const siteSettings = {
   facebook: '',
   twitter: '',
   instagram: '',
-  themeColor: '#1D4ED8'
+  themeColor: '#1D4ED8',
+  stripePublicKey: '',
+  stripeSecretKey: '',
+  paypalClientId: '',
+  paypalSecret: ''
 };

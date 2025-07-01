@@ -991,6 +991,25 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
             <Label htmlFor="themeColor">اللون الرئيسي</Label>
             <Input id="themeColor" name="themeColor" type="color" value={formData.themeColor} onChange={handleChange} />
           </div>
+          <div className="md:col-span-2 border-t pt-4">
+            <h4 className="font-semibold mb-2">إعدادات الدفع</h4>
+          </div>
+          <div>
+            <Label htmlFor="stripePublicKey">Stripe Public Key</Label>
+            <Input id="stripePublicKey" name="stripePublicKey" value={formData.stripePublicKey} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="stripeSecretKey">Stripe Secret Key</Label>
+            <Input id="stripeSecretKey" name="stripeSecretKey" value={formData.stripeSecretKey} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="paypalClientId">PayPal Client ID</Label>
+            <Input id="paypalClientId" name="paypalClientId" value={formData.paypalClientId} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="paypalSecret">PayPal Secret</Label>
+            <Input id="paypalSecret" name="paypalSecret" value={formData.paypalSecret} onChange={handleChange} />
+          </div>
         </div>
         <div className="flex justify-end">
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
