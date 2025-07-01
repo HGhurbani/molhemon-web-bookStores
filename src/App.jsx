@@ -45,7 +45,7 @@ const App = () => {
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
-    return stored ? JSON.parse(stored) : initialSiteSettings;
+    return stored ? { ...initialSiteSettings, ...JSON.parse(stored) } : initialSiteSettings;
   });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
