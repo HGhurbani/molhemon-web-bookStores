@@ -22,7 +22,7 @@ import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
-import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks } from '@/data/siteData.js';
+import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
 import { TrendingUp } from 'lucide-react';
 
 const App = () => {
@@ -43,6 +43,10 @@ const App = () => {
   });
   const [categoriesState, setCategoriesState] = useState(initialCategories);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
+  const [siteSettingsState, setSiteSettingsState] = useState(() => {
+    const stored = localStorage.getItem('siteSettings');
+    return stored ? JSON.parse(stored) : initialSiteSettings;
+  });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
 
@@ -55,6 +59,8 @@ const App = () => {
     if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
     const storedOrders = localStorage.getItem('orders');
     if (storedOrders) setOrders(JSON.parse(storedOrders));
+    const storedSettings = localStorage.getItem('siteSettings');
+    if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
   }, []);
 
   useEffect(() => {
@@ -81,6 +87,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
+  }, [siteSettingsState]);
 
   const handleAddToCart = (book) => {
     setCart((prevCart) => {
@@ -193,6 +203,8 @@ const App = () => {
                     setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
+                    siteSettings={siteSettingsState}
+                    setSiteSettings={setSiteSettingsState}
                   />
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />

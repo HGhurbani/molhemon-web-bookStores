@@ -842,8 +842,80 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
 };
 
 
+const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
+  const [formData, setFormData] = useState(siteSettings);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSiteSettings(formData);
+    toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
+    >
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">إعدادات الموقع</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="siteName">اسم الموقع</Label>
+            <Input id="siteName" name="siteName" value={formData.siteName} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="contactEmail">البريد الإلكتروني</Label>
+            <Input id="contactEmail" name="contactEmail" value={formData.contactEmail} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="contactPhone">رقم الهاتف</Label>
+            <Input id="contactPhone" name="contactPhone" value={formData.contactPhone} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="address">العنوان</Label>
+            <Input id="address" name="address" value={formData.address} onChange={handleChange} />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="description">الوصف</Label>
+            <Textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={3} />
+          </div>
+          <div>
+            <Label htmlFor="facebook">رابط فيسبوك</Label>
+            <Input id="facebook" name="facebook" value={formData.facebook} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="twitter">رابط تويتر</Label>
+            <Input id="twitter" name="twitter" value={formData.twitter} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="instagram">رابط إنستغرام</Label>
+            <Input id="instagram" name="instagram" value={formData.instagram} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="themeColor">اللون الرئيسي</Label>
+            <Input id="themeColor" name="themeColor" type="color" value={formData.themeColor} onChange={handleChange} />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            حفظ الإعدادات
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+
 const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
-  <motion.div 
+  <motion.div
     className="dashboard-card p-10 rounded-xl shadow-lg text-center flex flex-col items-center justify-center min-h-[350px] bg-white"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -864,7 +936,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, siteSettings, setSiteSettings }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -891,7 +963,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} />}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'settings' && (
-          <PlaceholderSection sectionName={sectionTitles[dashboardSection]} handleFeatureClick={handleFeatureClick} />
+          <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
         )}
       </main>
     </div>
