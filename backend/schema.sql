@@ -137,6 +137,14 @@ CREATE TABLE IF NOT EXISTS payment_methods (
   name VARCHAR(100) NOT NULL
 );
 
+INSERT INTO payment_methods (id, name) VALUES
+  (1, 'Stripe'),
+  (2, 'PayPal'),
+  (3, 'Mada'),
+  (4, 'Qitaf'),
+  (5, 'Cash on Delivery')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
 CREATE TABLE IF NOT EXISTS coupons (
   id INT AUTO_INCREMENT PRIMARY KEY,
   code VARCHAR(50) NOT NULL UNIQUE,

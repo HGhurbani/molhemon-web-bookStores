@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormattedPrice from '@/components/FormattedPrice.jsx';
 import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import { CreditCard, Lock, ShoppingBag, Truck, Tag, MessageSquare, MapPin } from 'lucide-react'; // Added MapPin for address
+import { Lock, ShoppingBag, Truck, Tag, MessageSquare, MapPin } from 'lucide-react';
 import api from '@/lib/api.js';
 
 const CheckoutPage = ({ cart, setCart, setOrders }) => {
@@ -19,6 +19,15 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
     city: 'عجمان',
     country: 'الإمارات العربية المتحدة',
   });
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(1);
+
+  useEffect(() => {
+    api.getPaymentMethods().then((data) => {
+      setPaymentMethods(data);
+      if (data[0]) setSelectedPaymentMethod(data[0].id);
+    }).catch(() => {});
+  }, []);
 
   const { currency } = useCurrency();
   const totalPrice = cart.reduce((sum, item) => sum + getPriceForCurrency(item, currency.code) * item.quantity, 0);
@@ -63,7 +72,7 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
         customer_id: null,
         order_id: newOrder.id,
         subscription_id: null,
-        payment_method_id: 1,
+        payment_method_id: selectedPaymentMethod,
         coupon_id: null,
         amount: total,
         status: 'paid'
@@ -210,20 +219,20 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
               {/* Payment Methods Section */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">طريقة الدفع</h2>
-                <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-1">
-                        <CreditCard className="w-6 h-6 text-gray-600" />
-                        <span className="text-xs text-gray-700">إضافة بطاقة</span>
-                    </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-1">
-                        <img src="https://www.paypalobjects.com/webstatic/mktg/logo/AM_SbyPP_btn_Vert_lg.png" alt="PayPal" className="h-8 object-contain" />
-                    </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-1">
-                        <img src="https://developer.apple.com/apple-pay/images/Apple-Pay-Mark_82x52.png" alt="Apple Pay" className="h-8 object-contain" />
-                    </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-1">
-                        <img src="https://www.gstatic.com/instant/images/gpay_mark_rgb_120x35.png" alt="Google Pay" className="h-8 object-contain" />
-                    </Button>
+                <div className="space-y-2">
+                  {paymentMethods.map((m) => (
+                    <label key={m.id} className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value={m.id}
+                        checked={selectedPaymentMethod === m.id}
+                        onChange={() => setSelectedPaymentMethod(m.id)}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span className="text-sm text-gray-700">{m.name}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 

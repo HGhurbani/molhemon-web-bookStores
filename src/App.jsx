@@ -49,6 +49,7 @@ const App = () => {
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
+  const [paymentMethods, setPaymentMethods] = useState(() => JSON.parse(localStorage.getItem('paymentMethods') || '[]'));
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
@@ -89,13 +90,14 @@ const App = () => {
     if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, p, u, sliders, banners, feats] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
           api.getSettings(),
           api.getOrders(),
           api.getPayments(),
+          api.getPaymentMethods(),
           api.getPlans(),
           api.getUsers(),
           api.getSliders(),
@@ -108,6 +110,7 @@ const App = () => {
         setSiteSettingsState(prev => ({ ...prev, ...s }));
         setOrders(o);
         setPayments(pay);
+        setPaymentMethods(methods);
         setPlans(p);
         setUsers(u);
         setHeroSlidesState(sliders);
@@ -147,6 +150,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('payments', JSON.stringify(payments));
   }, [payments]);
+
+  useEffect(() => {
+    localStorage.setItem('paymentMethods', JSON.stringify(paymentMethods));
+  }, [paymentMethods]);
 
   useEffect(() => {
     localStorage.setItem('plans', JSON.stringify(plans));
@@ -291,6 +298,7 @@ const App = () => {
                     categories={categoriesState}
                     orders={orders}
                     payments={payments}
+                    paymentMethods={paymentMethods}
                     plans={plans}
                     dashboardSection={dashboardSection}
                     setDashboardSection={setDashboardSection}
@@ -302,6 +310,7 @@ const App = () => {
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
                     setPayments={setPayments}
+                    setPaymentMethods={setPaymentMethods}
                     setPlans={setPlans}
                     users={users}
                     setUsers={setUsers}
