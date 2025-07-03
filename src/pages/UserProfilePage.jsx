@@ -148,7 +148,9 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                     <p className="text-sm text-gray-500">التاريخ: {order.date}</p>
                     <p className="text-sm text-gray-500">الإجمالي: <FormattedPrice value={order.total} /></p>
                     <p className="text-sm text-gray-500">المنتجات: {order.items.map(i => i.title).join(', ')}</p>
-                    <Button variant="link" size="sm" className="px-0 mt-1" onClick={() => handleFeatureClick(`view-order-${order.id}`)}>عرض التفاصيل</Button>
+                    <Button asChild variant="link" size="sm" className="px-0 mt-1">
+                      <Link to={`/orders/${order.id}`}>عرض التفاصيل</Link>
+                    </Button>
                   </div>
                 ))}
               </div>
