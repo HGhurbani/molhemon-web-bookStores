@@ -71,6 +71,16 @@ export const api = {
 
   getSubscriptions: () => request('/api/subscriptions'),
   addSubscription: (data) => request('/api/subscriptions', { method: 'POST', body: JSON.stringify(data) }),
+
+  getSliders: () => request('/api/sliders'),
+  addSlider: (data) => request('/api/sliders', { method: 'POST', body: JSON.stringify(data) }),
+  updateSlider: (id, data) => request(`/api/sliders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSlider: (id) => request(`/api/sliders/${id}`, { method: 'DELETE' }),
+
+  getBanners: () => request('/api/banners'),
+  addBanner: (data) => request('/api/banners', { method: 'POST', body: JSON.stringify(data) }),
+  updateBanner: (id, data) => request(`/api/banners/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBanner: (id) => request(`/api/banners/${id}`, { method: 'DELETE' }),
 };
 
 export default api;

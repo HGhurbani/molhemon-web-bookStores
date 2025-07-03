@@ -21,7 +21,8 @@ import {
   Trash2,
   Star,
   Home,
-  Save
+  Save,
+  Image
 } from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
@@ -50,6 +51,8 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'users', name: 'المستخدمون', icon: User },
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
+    { id: 'sliders', name: 'السلايدر', icon: Image },
+    { id: 'banners', name: 'البانرات', icon: Image },
     { id: 'settings', name: 'الإعدادات', icon: Settings }
   ];
 
@@ -816,6 +819,232 @@ const DashboardPlans = ({ plans, setPlans }) => {
   );
 };
 
+const SliderForm = ({ slider, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ image_url: '', link: '', alt: '', ...slider });
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{slider ? 'تعديل صورة' : 'إضافة صورة جديدة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="image_url">الرابط المباشر للصورة</Label>
+          <Input id="image_url" name="image_url" value={formData.image_url} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="link">رابط عند النقر</Label>
+          <Input id="link" name="link" value={formData.link} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="alt">وصف بديل</Label>
+          <Input id="alt" name="alt" value={formData.alt} onChange={handleChange} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {slider ? 'حفظ التعديلات' : 'إضافة الصورة'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardSliders = ({ sliders, setSliders }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addSlider(data);
+      setSliders(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateSlider(editing.id, data);
+      setSliders(prev => prev.map(s => s.id === updated.id ? updated : s));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditing(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteSlider(id);
+      setSliders(prev => prev.filter(s => s.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <SliderForm slider={editing} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">صور السلايدر</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة صورة
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعاينة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الرابط</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {sliders.map(s => (
+              <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap"><img src={s.image_url} alt={s.alt} className="w-24 h-14 object-cover rounded" /></td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 break-all">{s.link}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(s); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const BannerForm = ({ banner, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ image_url: '', link: '', alt: '', group_size: 3, ...banner });
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit({ ...formData, group_size: parseInt(formData.group_size, 10) }); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{banner ? 'تعديل بانر' : 'إضافة بانر جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="bimage_url">الرابط المباشر للصورة</Label>
+          <Input id="bimage_url" name="image_url" value={formData.image_url} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="blink">رابط عند النقر</Label>
+          <Input id="blink" name="link" value={formData.link} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="balt">وصف بديل</Label>
+          <Input id="balt" name="alt" value={formData.alt} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="group_size">عدد الصور في المجموعة</Label>
+          <Input id="group_size" name="group_size" type="number" min="1" max="3" value={formData.group_size} onChange={handleChange} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {banner ? 'حفظ التعديلات' : 'إضافة البانر'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardBanners = ({ banners, setBanners }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addBanner(data);
+      setBanners(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateBanner(editing.id, data);
+      setBanners(prev => prev.map(b => b.id === updated.id ? updated : b));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditing(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteBanner(id);
+      setBanners(prev => prev.filter(b => b.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <BannerForm banner={editing} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">البانرات</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة بانر
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعاينة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المجموعة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {banners.map(b => (
+              <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap"><img src={b.image_url} alt={b.alt} className="w-24 h-14 object-cover rounded" /></td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.group_size}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(b); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(b.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
   if (!order) return null;
   const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
@@ -1481,7 +1710,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -1492,6 +1721,8 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     users: 'المستخدمون',
     payments: 'المدفوعات',
     plans: 'خطط الاشتراك',
+    sliders: 'السلايدر',
+    banners: 'البانرات',
     settings: 'الإعدادات',
   };
 
@@ -1513,6 +1744,8 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
+        {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
+        {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
         {dashboardSection === 'settings' && (
           <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
         )}

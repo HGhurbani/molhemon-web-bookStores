@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const FeaturesSection = ({ features, handleFeatureClick }) => {
+const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
   return (
     <section className="py-8 sm:py-10 bg-slate-100">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,18 +38,14 @@ const FeaturesSection = ({ features, handleFeatureClick }) => {
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-              <img
-                alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
-                className="w-full h-24 sm:h-32 object-cover rounded-md"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png" />
-              <img
-                alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
-                className="w-full h-24 sm:h-32 object-cover rounded-md"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/image.png" />
-              <img
-                alt="ملصق ترويجي لمتجر ملهمون يعرض صور متنوعة لكتب وتطبيقات وخدمات"
-                className="w-full h-24 sm:h-32 object-cover rounded-md"
-                src="https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png" />
+              {banners.filter(b => b.group_size === 3).map((b, i) => (
+                <img
+                  key={i}
+                  alt={b.alt}
+                  className="w-full h-24 sm:h-32 object-cover rounded-md"
+                  src={b.image_url}
+                />
+              ))}
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1.5 sm:mb-2">ابحث عن مكانك في متجر ملهمون الإلكتروني</h2>
             <p className="text-gray-600 text-xs sm:text-sm max-w-lg md:max-w-xl mx-auto">
