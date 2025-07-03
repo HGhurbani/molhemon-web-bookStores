@@ -44,6 +44,7 @@ const App = () => {
   });
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
+  const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
     return stored ? { ...initialSiteSettings, ...JSON.parse(stored) } : initialSiteSettings;
@@ -64,18 +65,20 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     (async () => {
       try {
-        const [b, a, c, s, o] = await Promise.all([
+        const [b, a, c, s, o, p] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
           api.getSettings(),
           api.getOrders(),
+          api.getPlans(),
         ]);
         setBooks(b);
         setAuthors(a);
         setCategoriesState(c);
         setSiteSettingsState(prev => ({ ...prev, ...s }));
         setOrders(o);
+        setPlans(p);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -106,6 +109,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('plans', JSON.stringify(plans));
+  }, [plans]);
 
   useEffect(() => {
     localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
@@ -220,6 +227,7 @@ const App = () => {
                     customers={customers}
                     categories={categoriesState}
                     orders={orders}
+                    plans={plans}
                     dashboardSection={dashboardSection}
                     setDashboardSection={setDashboardSection}
                     handleFeatureClick={handleFeatureClick}
@@ -229,6 +237,7 @@ const App = () => {
                     setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
+                    setPlans={setPlans}
                     siteSettings={siteSettingsState}
                     setSiteSettings={setSiteSettingsState}
                   />

@@ -177,6 +177,43 @@ app.delete('/api/orders/:id', async (req, res) => {
   res.sendStatus(204);
 });
 
+app.get('/api/plans', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM subscription_plans');
+  res.json(rows);
+});
+
+app.post('/api/plans', async (req, res) => {
+  const { name, price, duration, description } = req.body;
+  const [result] = await pool.execute('INSERT INTO subscription_plans (name, price, duration, description) VALUES (?,?,?,?)', [name, price, duration, description]);
+  const [rows] = await pool.query('SELECT * FROM subscription_plans WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/plans/:id', async (req, res) => {
+  await pool.query('UPDATE subscription_plans SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM subscription_plans WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/plans/:id', async (req, res) => {
+  await pool.query('DELETE FROM subscription_plans WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
+
+app.get('/api/subscriptions', async (_req, res) => {
+  const [rows] = await pool.query("SELECT s.*, c.name AS customer_name, p.name AS plan_name FROM subscriptions s LEFT JOIN customers c ON s.customer_id=c.id LEFT JOIN subscription_plans p ON s.plan_id=p.id ORDER BY s.start_date DESC");
+  res.json(rows);
+});
+
+app.post('/api/subscriptions', async (req, res) => {
+  const { customer_id, plan_id } = req.body;
+  const [planRows] = await pool.query('SELECT duration FROM subscription_plans WHERE id=?', [plan_id]);
+  if (planRows.length === 0) return res.status(400).json({ error: 'Invalid plan' });
+  const duration = planRows[0].duration;
+  const [result] = await pool.execute('INSERT INTO subscriptions (customer_id, plan_id, end_date) VALUES (?,?, DATE_ADD(NOW(), INTERVAL ? DAY))', [customer_id || null, plan_id, duration]);
+  const [rows] = await pool.query('SELECT * FROM subscriptions WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});
