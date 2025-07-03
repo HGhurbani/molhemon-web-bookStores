@@ -20,10 +20,12 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
+import { useCurrency } from '@/lib/currencyContext.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const { currency, setCurrency, currencies } = useCurrency();
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -306,6 +308,22 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
                 <Bookmark className="w-5 h-5" />
               </Link>
             </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white hover:text-blue-200 w-10 h-10">
+                  {React.createElement(currency.icon, { className: 'w-5 h-5' })}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {currencies.map(c => (
+                  <DropdownMenuItem key={c.code} onClick={() => setCurrency(c)} className="flex items-center gap-2 rtl:space-x-reverse">
+                    {React.createElement(c.icon, { className: 'w-4 h-4' })}
+                    <span>{c.code}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-blue-200 w-10 h-10">
               <Link to="/cart">

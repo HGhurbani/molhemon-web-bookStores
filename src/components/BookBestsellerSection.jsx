@@ -1,4 +1,5 @@
 import React from 'react';
+import FormattedPrice from './FormattedPrice.jsx';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -50,12 +51,12 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
       <div className="flex items-baseline mb-1 sm:mb-2">
         {book.originalPrice && (
           <span className="text-gray-400 old-price text-[10px] sm:text-xs ml-1.5 rtl:mr-1.5 rtl:ml-0">
-            {book.originalPrice.toFixed(2)} د.إ
+            <FormattedPrice value={book.originalPrice} />
           </span>
         )}
-        <span className="font-bold text-blue-600 text-sm sm:text-lg">{book.price.toFixed(2)} د.إ</span>
+        <span className="font-bold text-blue-600 text-sm sm:text-lg"><FormattedPrice book={book} /></span>
       </div>
-      <p className="text-[10px] sm:text-xs text-blue-600 bg-blue-600/10 rounded-sm px-1 mb-2 sm:mb-3">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
+      <p className="text-[10px] sm:text-xs text-blue-600 bg-blue-600/10 rounded-sm px-1 mb-2 sm:mb-3">وفر: <FormattedPrice value={book.originalPrice && book.price ? (book.originalPrice - book.price) : 0} /></p>
     </div>
 
     <Button

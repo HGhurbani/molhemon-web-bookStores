@@ -9,6 +9,7 @@ import { User, ShoppingBag, Heart, Settings, LogOut, Edit2, MapPin, CreditCard a
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import api from '@/lib/api.js';
+import FormattedPrice from '@/components/FormattedPrice.jsx';
 
 const UserProfilePage = ({ handleFeatureClick }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -145,7 +146,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                       <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'تم التوصيل' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span>
                     </div>
                     <p className="text-sm text-gray-500">التاريخ: {order.date}</p>
-                    <p className="text-sm text-gray-500">الإجمالي: {order.total.toFixed(2)} د.إ</p>
+                    <p className="text-sm text-gray-500">الإجمالي: <FormattedPrice value={order.total} /></p>
                     <p className="text-sm text-gray-500">المنتجات: {order.items.map(i => i.title).join(', ')}</p>
                     <Button variant="link" size="sm" className="px-0 mt-1" onClick={() => handleFeatureClick(`view-order-${order.id}`)}>عرض التفاصيل</Button>
                   </div>

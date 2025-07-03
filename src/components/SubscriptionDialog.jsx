@@ -3,6 +3,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { ChevronLeft, X } from 'lucide-react';
+import FormattedPrice from './FormattedPrice.jsx';
 import api from '@/lib/api.js';
 import { toast } from '@/components/ui/use-toast.js';
 
@@ -50,9 +51,9 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
               <div className="flex justify-between items-end text-sm">
                 <div>
                   {book?.originalPrice && (
-                    <span className="line-through text-red-500 ml-2">{book.originalPrice.toFixed(2)} د.إ</span>
+                    <span className="line-through text-red-500 ml-2"><FormattedPrice value={book.originalPrice} /></span>
                   )}
-                  <div className="text-2xl font-bold text-blue-600">{book?.price.toFixed(2)} د.إ</div>
+                  <div className="text-2xl font-bold text-blue-600"><FormattedPrice book={book} /></div>
                 </div>
               </div>
               <Button onClick={onAddToCart} className="w-full bg-blue-600 hover:bg-blue-700 h-9 text-white">
@@ -65,7 +66,7 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
               <DialogDescription>لمواصلة القراءة والاستماع – تحتاج إلى باقة اشتراكك.</DialogDescription>
               {plans.length > 0 && (
                 <div className="text-sm">
-                  <p>{plans[0].name} - {plans[0].price} د.إ / {plans[0].duration} يوم</p>
+                  <p>{plans[0].name} - <FormattedPrice value={plans[0].price} /> / {plans[0].duration} يوم</p>
                 </div>
               )}
               <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubscribe}>

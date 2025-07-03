@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import FormattedPrice from '@/components/FormattedPrice.jsx';
+import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -18,7 +20,8 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
     country: 'الإمارات العربية المتحدة',
   });
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const { currency } = useCurrency();
+  const totalPrice = cart.reduce((sum, item) => sum + getPriceForCurrency(item, currency.code) * item.quantity, 0);
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Example logic for shipping and discounts based on total price
@@ -157,9 +160,9 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-800">{ (item.price * item.quantity).toFixed(2)} د.إ</p>
+                      <p className="font-semibold text-gray-800"><FormattedPrice value={getPriceForCurrency(item, currency.code) * item.quantity} /></p>
                       {item.originalPrice && (
-                        <p className="text-[10px] text-red-500 line-through">{item.originalPrice.toFixed(2)} د.إ</p>
+                        <p className="text-[10px] text-red-500 line-through"><FormattedPrice value={item.originalPrice} /></p>
                       )}
                     </div>
                   </div>
@@ -187,7 +190,7 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
 
                 <div className="flex justify-between items-center text-sm font-semibold text-gray-700 border-t pt-4 mt-4">
                     <span>المجموع الفرعي للمنتج:</span>
-                    <span>{actualProductSubtotal.toFixed(2)} د.إ</span>
+                    <span><FormattedPrice value={actualProductSubtotal} /></span>
                 </div>
               </div>
             </div>
@@ -234,15 +237,15 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
               <div className="border-t pt-4 space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">المجموع الفرعي للمنتجات:</span>
-                  <span className="font-medium text-gray-800">{actualProductSubtotal.toFixed(2)} د.إ</span>
+                  <span className="font-medium text-gray-800"><FormattedPrice value={actualProductSubtotal} /></span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">المجموع الفرعي للشحن:</span>
-                  <span className="font-medium text-gray-800">{actualShippingCost.toFixed(2)} د.إ</span>
+                  <span className="font-medium text-gray-800"><FormattedPrice value={actualShippingCost} /></span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3 mt-3">
                   <span className="text-gray-800">إجمالي الدفع:</span>
-                  <span className="text-blue-600">{actualFinalTotal.toFixed(2)} د.إ</span>
+                  <span className="text-blue-600"><FormattedPrice value={actualFinalTotal} /></span>
                 </div>
               </div>
 

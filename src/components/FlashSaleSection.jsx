@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Star, Heart, ShoppingCart as ShoppingCartIcon, Zap } from 'lucide-react';
+import FormattedPrice from './FormattedPrice.jsx';
 
 const FlashSaleCountdown = () => {
   const calculateTimeLeft = () => {
@@ -101,14 +102,16 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
         </div>
 
         <div className="flex items-baseline justify-between mb-1 sm:mb-1.5 w-full">
-          <span className="font-bold text-blue-600 text-xs sm:text-sm">{book.price.toFixed(2)} د.إ</span>
+          <span className="font-bold text-blue-600 text-xs sm:text-sm"><FormattedPrice book={book} /></span>
           {book.originalPrice && (
             <span className="text-gray-400 old-price text-[9px] sm:text-[10px] rtl:ml-1 rtl:mr-0">
-              {book.originalPrice.toFixed(2)} د.إ
+              <FormattedPrice value={book.originalPrice} />
             </span>
           )}
         </div>
-         <p className="text-[9px] sm:text-[10px] text-gray-600 bg-gray-600/10 rounded-sm px-1 text-center">وفر: {(book.originalPrice && book.price ? (book.originalPrice - book.price).toFixed(2) : '0.00')} د.إ</p>
+         <p className="text-[9px] sm:text-[10px] text-gray-600 bg-gray-600/10 rounded-sm px-1 text-center">
+           وفر: <FormattedPrice value={(book.originalPrice && book.price ? (book.originalPrice - book.price) : 0)} />
+         </p>
     </div>
   </motion.div>
 );
