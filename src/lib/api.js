@@ -81,6 +81,11 @@ export const api = {
   addBanner: (data) => request('/api/banners', { method: 'POST', body: JSON.stringify(data) }),
   updateBanner: (id, data) => request(`/api/banners/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteBanner: (id) => request(`/api/banners/${id}`, { method: 'DELETE' }),
+
+  getFeatures: () => request('/api/features'),
+  addFeature: (data) => request('/api/features', { method: 'POST', body: JSON.stringify(data) }),
+  updateFeature: (id, data) => request(`/api/features/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteFeature: (id) => request(`/api/features/${id}`, { method: 'DELETE' }),
 };
 
 export default api;

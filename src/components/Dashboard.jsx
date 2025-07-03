@@ -22,7 +22,8 @@ import {
   Star,
   Home,
   Save,
-  Image
+  Image,
+  Zap
 } from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
@@ -51,6 +52,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'users', name: 'المستخدمون', icon: User },
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
+    { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
     { id: 'banners', name: 'البانرات', icon: Image },
     { id: 'settings', name: 'الإعدادات', icon: Settings }
@@ -1045,6 +1047,117 @@ const DashboardBanners = ({ banners, setBanners }) => {
   );
 };
 
+const FeatureForm = ({ feature, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ icon: '', title: '', description: '', ...feature });
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{feature ? 'تعديل ميزة' : 'إضافة ميزة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="icon">الأيقونة</Label>
+          <Input id="icon" name="icon" value={formData.icon} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="title">العنوان</Label>
+          <Input id="title" name="title" value={formData.title} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="description">الوصف</Label>
+          <Input id="description" name="description" value={formData.description} onChange={handleChange} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {feature ? 'حفظ التعديلات' : 'إضافة الميزة'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardFeatures = ({ features, setFeatures }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addFeature(data);
+      setFeatures(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateFeature(editing.id, data);
+      setFeatures(prev => prev.map(f => f.id === updated.id ? updated : f));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditing(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteFeature(id);
+      setFeatures(prev => prev.filter(f => f.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <FeatureForm feature={editing} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">المميزات</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة ميزة
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الأيقونة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العنوان</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {features.map(f => (
+              <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{f.icon}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{f.title}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(f); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(f.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
   if (!order) return null;
   const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
@@ -1710,7 +1823,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -1721,6 +1834,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     users: 'المستخدمون',
     payments: 'المدفوعات',
     plans: 'خطط الاشتراك',
+    features: 'المميزات',
     sliders: 'السلايدر',
     banners: 'البانرات',
     settings: 'الإعدادات',
@@ -1744,6 +1858,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
+        {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
         {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
         {dashboardSection === 'settings' && (

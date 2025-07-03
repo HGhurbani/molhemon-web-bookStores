@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import * as Icons from 'lucide-react';
 
 const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
   return (
@@ -7,7 +8,7 @@ const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {features.map((feature, index) => {
-            const IconComponent = feature.icon;
+            const IconComponent = typeof feature.icon === 'string' ? (Icons[feature.icon] || Icons.Star) : feature.icon;
             return (
               <motion.div
                 key={index}

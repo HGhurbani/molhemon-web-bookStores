@@ -399,6 +399,33 @@ app.delete('/api/banners/:id', async (req, res) => {
   await pool.query('DELETE FROM banners WHERE id=?', [req.params.id]);
   res.sendStatus(204);
 });
+
+// Features
+app.get('/api/features', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM features ORDER BY id ASC');
+  res.json(rows);
+});
+
+app.post('/api/features', async (req, res) => {
+  const { icon, title, description } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO features (icon, title, description) VALUES (?,?,?)',
+    [icon, title, description]
+  );
+  const [rows] = await pool.query('SELECT * FROM features WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/features/:id', async (req, res) => {
+  await pool.query('UPDATE features SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM features WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/features/:id', async (req, res) => {
+  await pool.query('DELETE FROM features WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});

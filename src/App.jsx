@@ -25,7 +25,7 @@ import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
-import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
+import { sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp } from 'lucide-react';
 
@@ -56,14 +56,23 @@ const App = () => {
   });
   const [heroSlidesState, setHeroSlidesState] = useState(() => {
     const stored = localStorage.getItem('heroSlides');
-    return stored ? JSON.parse(stored) : heroSlides;
+    return stored ? JSON.parse(stored) : [];
   });
+  const [features, setFeatures] = useState([]);
   const [bannersState, setBannersState] = useState(() => {
     const stored = localStorage.getItem('banners');
     return stored ? JSON.parse(stored) : [];
   });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
+
+  const bestsellerBooks = React.useMemo(() => {
+    return [...books].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6);
+  }, [books]);
+
+  const recentSearchBooks = React.useMemo(() => {
+    return books.slice(3, 6).concat(books.slice(0, 3));
+  }, [books]);
 
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
@@ -76,9 +85,11 @@ const App = () => {
     if (storedOrders) setOrders(JSON.parse(storedOrders));
     const storedSettings = localStorage.getItem('siteSettings');
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
+    const storedFeatures = localStorage.getItem('features');
+    if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, p, u, sliders, banners] = await Promise.all([
+        const [b, a, c, s, o, pay, p, u, sliders, banners, feats] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -89,6 +100,7 @@ const App = () => {
           api.getUsers(),
           api.getSliders(),
           api.getBanners(),
+          api.getFeatures(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -100,6 +112,7 @@ const App = () => {
         setUsers(u);
         setHeroSlidesState(sliders);
         setBannersState(banners);
+        setFeatures(feats);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -150,6 +163,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('banners', JSON.stringify(bannersState));
   }, [bannersState]);
+
+  useEffect(() => {
+    localStorage.setItem('features', JSON.stringify(features));
+  }, [features]);
 
   useEffect(() => {
     if (siteSettingsState.siteName) {
@@ -294,6 +311,8 @@ const App = () => {
                     setSliders={setHeroSlidesState}
                     banners={bannersState}
                     setBanners={setBannersState}
+                    features={features}
+                    setFeatures={setFeatures}
                   />
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
@@ -310,7 +329,7 @@ const App = () => {
                 )
               }
             />
-            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={features} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
