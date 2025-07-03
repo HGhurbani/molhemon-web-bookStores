@@ -1,12 +1,31 @@
 import React, { createContext, useContext, useState } from 'react';
-import { DollarSign, Euro, PoundSterling, Coins, Bitcoin } from 'lucide-react';
 
 export const currencies = [
-  { code: 'AED', icon: Coins },
-  { code: 'USD', icon: DollarSign },
-  { code: 'EUR', icon: Euro },
-  { code: 'GBP', icon: PoundSterling },
-  { code: 'BTC', icon: Bitcoin },
+  {
+    code: 'AED',
+    name: 'الإمارات العربية المتحدة',
+    flag: 'https://cdn.countryflags.com/thumbs/united-arab-emirates/flag-round-250.png',
+  },
+  {
+    code: 'USD',
+    name: 'دولار أمريكي',
+    flag: 'https://cdn.countryflags.com/thumbs/united-states-of-america/flag-round-250.png',
+  },
+  {
+    code: 'EUR',
+    name: 'يورو',
+    flag: 'https://cdn.countryflags.com/thumbs/european-union/flag-round-250.png',
+  },
+  {
+    code: 'GBP',
+    name: 'جنيه إسترليني',
+    flag: 'https://cdn.countryflags.com/thumbs/united-kingdom/flag-round-250.png',
+  },
+  {
+    code: 'BTC',
+    name: 'بيتكوين',
+    flag: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?width=32',
+  },
 ];
 
 const CurrencyContext = createContext({ currency: currencies[0], setCurrency: () => {}, currencies });
