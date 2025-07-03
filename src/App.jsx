@@ -214,6 +214,8 @@ const App = () => {
         handleFeatureClick={handleFeatureClick}
         cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
         isCustomerLoggedIn={isCustomerLoggedIn}
+        books={books}
+        categories={categoriesState}
       />
       {children}
       <Footer footerLinks={footerLinks} handleFeatureClick={handleFeatureClick} />
