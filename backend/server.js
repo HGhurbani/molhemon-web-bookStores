@@ -241,16 +241,9 @@ app.delete('/api/customers/:id', async (req, res) => {
 
 // Orders
 app.get('/api/orders', async (_req, res) => {
-  const [orders] = await pool.query(
-    'SELECT id, customer_id, seller_id, total, status, DATE(order_date) AS date FROM orders ORDER BY order_date DESC'
-  );
-  const [items] = await pool.query(
-    'SELECT oi.*, b.title FROM order_items oi JOIN books b ON oi.book_id=b.id'
-  );
-  const result = orders.map(o => ({
-    ...o,
-    items: items.filter(i => i.order_id === o.id)
-  }));
+  const [orders] = await pool.query('SELECT * FROM orders ORDER BY order_date DESC');
+  const [items] = await pool.query('SELECT * FROM order_items');
+  const result = orders.map(o => ({ ...o, items: items.filter(i => i.order_id === o.id) }));
   res.json(result);
 });
 
@@ -267,42 +260,15 @@ app.post('/api/orders', async (req, res) => {
       [orderId, item.id, item.quantity, item.price]
     );
   }
-  const [rows] = await pool.query(
-    'SELECT id, customer_id, seller_id, total, status, DATE(order_date) AS date FROM orders WHERE id=?',
-    [orderId]
-  );
-  const [itemRows] = await pool.query(
-    'SELECT oi.*, b.title FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE oi.order_id=?',
-    [orderId]
-  );
+  const [rows] = await pool.query('SELECT * FROM orders WHERE id=?', [orderId]);
+  const [itemRows] = await pool.query('SELECT * FROM order_items WHERE order_id=?', [orderId]);
   res.status(201).json({ ...rows[0], items: itemRows });
 });
 
 app.put('/api/orders/:id', async (req, res) => {
   await pool.query('UPDATE orders SET ? WHERE id=?', [req.body, req.params.id]);
-  const [rows] = await pool.query(
-    'SELECT id, customer_id, seller_id, total, status, DATE(order_date) AS date FROM orders WHERE id=?',
-    [req.params.id]
-  );
-  const [itemRows] = await pool.query(
-    'SELECT oi.*, b.title FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE oi.order_id=?',
-    [req.params.id]
-  );
-  res.json({ ...rows[0], items: itemRows });
-});
-
-app.get('/api/orders/:id', async (req, res) => {
-  const [rows] = await pool.query(
-    'SELECT id, customer_id, seller_id, total, status, DATE(order_date) AS date FROM orders WHERE id=?',
-    [req.params.id]
-  );
-  if (rows.length === 0) {
-    return res.status(404).json({ error: 'Order not found' });
-  }
-  const [itemRows] = await pool.query(
-    'SELECT oi.*, b.title FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE oi.order_id=?',
-    [req.params.id]
-  );
+  const [rows] = await pool.query('SELECT * FROM orders WHERE id=?', [req.params.id]);
+  const [itemRows] = await pool.query('SELECT * FROM order_items WHERE order_id=?', [req.params.id]);
   res.json({ ...rows[0], items: itemRows });
 });
 
@@ -397,11 +363,8 @@ app.get('/api/payment-methods', async (_req, res) => {
 });
 
 app.post('/api/payment-methods', async (req, res) => {
-  const { name, test_mode } = req.body;
-  const [result] = await pool.execute(
-    'INSERT INTO payment_methods (name, test_mode) VALUES (?, ?)',
-    [name, test_mode === true]
-  );
+  const { name } = req.body;
+  const [result] = await pool.execute('INSERT INTO payment_methods (name) VALUES (?)', [name]);
   const [rows] = await pool.query('SELECT * FROM payment_methods WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
 });
