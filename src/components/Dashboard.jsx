@@ -1047,6 +1047,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     description: '',
     imgPlaceholder: '',
     type: '',
+    sampleAudio: '',
     tags: '',
     coverImage: '',
     ...book
@@ -1110,8 +1111,23 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
             </select>
           </div>
           <div>
-            <Label htmlFor="type">النوع</Label>
-            <Input id="type" name="type" value={formData.type} onChange={handleChange} />
+            <Label htmlFor="type">نوع الكتاب</Label>
+            <select
+              id="type"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">اختر نوع الكتاب</option>
+              <option value="ebook">كتاب إلكتروني</option>
+              <option value="audio">كتاب صوتي</option>
+              <option value="both">كلاهما</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
+            <Input id="sampleAudio" name="sampleAudio" value={formData.sampleAudio} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="tags">الوسوم</Label>

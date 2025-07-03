@@ -67,7 +67,8 @@ export const books = [
     pages: 120,
     format: 'غلاف ورقي',
     coverImage: '',
-    type: '',
+    type: 'both',
+    sampleAudio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     tags: ''
   },
   {

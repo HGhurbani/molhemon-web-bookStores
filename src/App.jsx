@@ -20,6 +20,8 @@ import UserProfilePage from '@/pages/UserProfilePage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
 import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
+import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
+import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
@@ -281,6 +283,8 @@ const App = () => {
               <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/ebooks" element={<MainLayout><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/audiobooks" element={<MainLayout><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/read/:id" element={<MainLayout><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/listen/:id" element={<MainLayout><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
         </AnimatePresence>

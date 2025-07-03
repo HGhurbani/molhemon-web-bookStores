@@ -27,8 +27,8 @@ app.get('/api/books', async (_req, res) => {
 app.post('/api/books', async (req, res) => {
   const data = req.body;
   const [result] = await pool.execute(
-    'INSERT INTO books (title, author_id, category_id, price, original_price, rating, reviews, description, isbn, publisher, publish_date, pages, format, cover_image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    [data.title, data.author_id, data.category_id, data.price, data.original_price, data.rating, data.reviews, data.description, data.isbn, data.publisher, data.publish_date, data.pages, data.format, data.cover_image]
+    'INSERT INTO books (title, author_id, category_id, price, original_price, rating, reviews, description, isbn, publisher, publish_date, pages, format, cover_image, type, sample_audio) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    [data.title, data.authorId, data.categoryId, data.price, data.originalPrice, data.rating, data.reviews, data.description, data.isbn, data.publisher, data.publishDate, data.pages, data.format, data.coverImage, data.type, data.sampleAudio]
   );
   const [rows] = await pool.query('SELECT * FROM books WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
@@ -37,7 +37,25 @@ app.post('/api/books', async (req, res) => {
 app.put('/api/books/:id', async (req, res) => {
   const id = req.params.id;
   const data = req.body;
-  await pool.query('UPDATE books SET ? WHERE id=?', [data, id]);
+  const mapped = {
+    title: data.title,
+    author_id: data.authorId,
+    category_id: data.categoryId,
+    price: data.price,
+    original_price: data.originalPrice,
+    rating: data.rating,
+    reviews: data.reviews,
+    description: data.description,
+    isbn: data.isbn,
+    publisher: data.publisher,
+    publish_date: data.publishDate,
+    pages: data.pages,
+    format: data.format,
+    cover_image: data.coverImage,
+    type: data.type,
+    sample_audio: data.sampleAudio,
+  };
+  await pool.query('UPDATE books SET ? WHERE id=?', [mapped, id]);
   const [rows] = await pool.query('SELECT * FROM books WHERE id=?', [id]);
   res.json(rows[0]);
 });
