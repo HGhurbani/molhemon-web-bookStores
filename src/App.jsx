@@ -24,6 +24,7 @@ import EbookPage from '@/pages/EbookPage.jsx';
 import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
 import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
 import EbookReaderPage from '@/pages/EbookReaderPage.jsx';
+import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
@@ -354,6 +355,7 @@ const App = () => {
               <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
               <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
               <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/player/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPlayerPage books={books} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
         </AnimatePresence>
