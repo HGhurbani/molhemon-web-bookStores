@@ -3,28 +3,15 @@ import React, { createContext, useContext, useState } from 'react';
 export const currencies = [
   {
     code: 'AED',
-    name: 'الإمارات العربية المتحدة',
+    name: 'الدرهم الإماراتي',
     flag: 'https://cdn.countryflags.com/thumbs/united-arab-emirates/flag-round-250.png',
+    symbol: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/UAE_Dirham_Symbol.svg/960px-UAE_Dirham_Symbol.svg.png',
   },
   {
-    code: 'USD',
-    name: 'دولار أمريكي',
-    flag: 'https://cdn.countryflags.com/thumbs/united-states-of-america/flag-round-250.png',
-  },
-  {
-    code: 'EUR',
-    name: 'يورو',
-    flag: 'https://cdn.countryflags.com/thumbs/european-union/flag-round-250.png',
-  },
-  {
-    code: 'GBP',
-    name: 'جنيه إسترليني',
-    flag: 'https://cdn.countryflags.com/thumbs/united-kingdom/flag-round-250.png',
-  },
-  {
-    code: 'BTC',
-    name: 'بيتكوين',
-    flag: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?width=32',
+    code: 'SAR',
+    name: 'الريال السعودي',
+    flag: 'https://cdn.countryflags.com/thumbs/saudi-arabia/flag-round-250.png',
+    symbol: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Saudi_Riyal_Symbol.svg/512px-Saudi_Riyal_Symbol.svg.png',
   },
 ];
 
