@@ -21,7 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 
-const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [] }) => {
+const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
@@ -213,8 +213,12 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
               whileHover={{ scale: 1.05 }}
             >
               <Link to="/" className="flex items-center">
-                <img  alt="شعار ملهمون" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
-               
+                <img
+                  alt={siteSettings.siteName || 'شعار ملهمون'}
+                  className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0"
+                  src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png"
+                />
+                <span className="font-semibold text-lg">{siteSettings.siteName || 'ملهمون'}</span>
               </Link>
             </motion.div>
           </div>

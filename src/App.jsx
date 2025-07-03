@@ -130,6 +130,12 @@ const App = () => {
     localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
   }, [siteSettingsState]);
 
+  useEffect(() => {
+    if (siteSettingsState.siteName) {
+      document.title = siteSettingsState.siteName;
+    }
+  }, [siteSettingsState.siteName]);
+
   const handleAddToCart = (book) => {
     setCart((prevCart) => {
       const existingBook = prevCart.find(item => item.id === book.id);
@@ -210,7 +216,7 @@ const App = () => {
     );
   };
   
-  const MainLayout = ({ children }) => (
+  const MainLayout = ({ children, siteSettings }) => (
     <div className="min-h-screen bg-slate-100 text-gray-800">
       <Header
         handleFeatureClick={handleFeatureClick}
@@ -218,9 +224,14 @@ const App = () => {
         isCustomerLoggedIn={isCustomerLoggedIn}
         books={books}
         categories={categoriesState}
+        siteSettings={siteSettings}
       />
       {children}
-      <Footer footerLinks={footerLinks} handleFeatureClick={handleFeatureClick} />
+      <Footer
+        footerLinks={footerLinks}
+        handleFeatureClick={handleFeatureClick}
+        siteSettings={siteSettings}
+      />
     </div>
   );
 
@@ -270,22 +281,22 @@ const App = () => {
                 isCustomerLoggedIn ? (
                   <Navigate to="/profile" />
                 ) : (
-                  <MainLayout><PageLayout><AuthPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
+                  <MainLayout siteSettings={siteSettingsState}><PageLayout><AuthPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
                 )
               }
             />
-            <Route path="/" element={<MainLayout><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/book/:id" element={<MainLayout><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/author/:id" element={<MainLayout><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/cart" element={<MainLayout><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
-              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
-              <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/ebooks" element={<MainLayout><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/audiobooks" element={<MainLayout><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/read/:id" element={<MainLayout><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/listen/:id" element={<MainLayout><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="*" element={<MainLayout><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
+            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
+              <Route path="/checkout" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
+              <Route path="/profile" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
         </AnimatePresence>
         <Toaster />

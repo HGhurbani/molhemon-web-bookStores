@@ -5,7 +5,7 @@ import { Facebook, Twitter, Instagram, Linkedin, Youtube, MessageSquare } from '
 import { Button } from '@/components/ui/button.jsx';
 import NewsletterSection from '@/components/NewsletterSection.jsx';
 
-const Footer = ({ footerLinks, handleFeatureClick }) => {
+const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
   return (
     <>
     <NewsletterSection handleFeatureClick={handleFeatureClick} />
@@ -46,6 +46,15 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
                     App Store
                 </button>
             </div>
+            {siteSettings.contactEmail && (
+              <p className="text-[11px] text-white mt-4">{siteSettings.contactEmail}</p>
+            )}
+            {siteSettings.contactPhone && (
+              <p className="text-[11px] text-white">{siteSettings.contactPhone}</p>
+            )}
+            {siteSettings.address && (
+              <p className="text-[11px] text-white">{siteSettings.address}</p>
+            )}
           </div>
 
           {footerLinks.map((section, index) => (
@@ -78,7 +87,7 @@ const Footer = ({ footerLinks, handleFeatureClick }) => {
         </div>
 
         <div className="border-t border-slate-700/50 pt-5 sm:pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] sm:text-xs text-white">
-          <p>جميع الحقوق محفوظة © {new Date().getFullYear()} ملهمون</p>
+          <p>جميع الحقوق محفوظة © {new Date().getFullYear()} {siteSettings.siteName || 'ملهمون'}</p>
           <div className="flex space-x-2.5 sm:space-x-3 rtl:space-x-reverse mt-2 sm:mt-0">
             <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('privacy-policy')}}>سياسة الخصوصية</a>
             <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('terms-of-use')}}>شروط الاستخدام</a>
