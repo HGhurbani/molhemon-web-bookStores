@@ -17,6 +17,7 @@ import CategoryPage from '@/pages/CategoryPage.jsx';
 import CartPage from '@/pages/CartPage.jsx';
 import CheckoutPage from '@/pages/CheckoutPage.jsx';
 import UserProfilePage from '@/pages/UserProfilePage.jsx';
+import OrderDetailsPage from '@/pages/OrderDetailsPage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
 import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
@@ -346,6 +347,7 @@ const App = () => {
               <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
               <Route path="/checkout" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
               <Route path="/profile" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><OrderDetailsPage /></PageLayout></MainLayout>} />
               <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />

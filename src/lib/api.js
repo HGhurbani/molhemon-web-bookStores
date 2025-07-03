@@ -42,6 +42,7 @@ export const api = {
   deleteUser: (id) => request(`/api/users/${id}`, { method: 'DELETE' }),
 
   getOrders: () => request('/api/orders'),
+  getOrder: (id) => request(`/api/orders/${id}`),
   addOrder: (data) => request('/api/orders', { method: 'POST', body: JSON.stringify(data) }),
   updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteOrder: (id) => request(`/api/orders/${id}`, { method: 'DELETE' }),
