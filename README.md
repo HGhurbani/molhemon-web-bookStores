@@ -11,7 +11,7 @@ mysql -u <user> -p < backend/schema.sql
 ```
 
 ## Configuration
-1. Copy `.env.example` to `.env` and update the variables for your database credentials.
+1. Copy `.env.example` to `.env` and update the variables if needed. The example already contains the provided database credentials and sets `VITE_API_BASE` to `https://demo.darmolhimon.com`.
 2. Install dependencies (requires internet access):
 
 ```bash

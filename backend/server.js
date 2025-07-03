@@ -24,7 +24,7 @@ function loadDbConfig() {
   return {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'u6axwhnwuhpzi',
-    password: process.env.DB_PASSWORD || '#2@l$4e5i~5+',
+    password: process.env.DB_PASSWORD || '8@21b@f111@g',
     database: process.env.DB_NAME || 'dbxs5qfidu3hqr',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
   };
