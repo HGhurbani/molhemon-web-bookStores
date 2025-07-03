@@ -1288,10 +1288,24 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSiteSettings(formData);
-    toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+    try {
+      const updated = await api.updateSettings(formData);
+      setSiteSettings(updated);
+      toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+    } catch (err) {
+      toast({ title: 'خطأ أثناء الحفظ', variant: 'destructive' });
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      await api.importGoogleMerchant();
+      toast({ title: 'تم استيراد الكتب بنجاح!' });
+    } catch (err) {
+      toast({ title: 'خطأ في الاستيراد', variant: 'destructive' });
+    }
   };
 
   return (
@@ -1358,8 +1372,22 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
             <Label htmlFor="paypalSecret">PayPal Secret</Label>
             <Input id="paypalSecret" name="paypalSecret" value={formData.paypalSecret} onChange={handleChange} />
           </div>
+          <div className="md:col-span-2 border-t pt-4">
+            <h4 className="font-semibold mb-2">Google Merchant</h4>
+          </div>
+          <div>
+            <Label htmlFor="googleMerchantId">Merchant ID</Label>
+            <Input id="googleMerchantId" name="googleMerchantId" value={formData.googleMerchantId || ''} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="googleApiKey">API Key</Label>
+            <Input id="googleApiKey" name="googleApiKey" value={formData.googleApiKey || ''} onChange={handleChange} />
+          </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <Button type="button" onClick={handleImport} variant="outline">
+            استيراد من Google Merchant
+          </Button>
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
             <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
             حفظ الإعدادات
