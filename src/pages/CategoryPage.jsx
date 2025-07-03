@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import FormattedPrice from '@/components/FormattedPrice.jsx';
+import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -17,6 +19,7 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
   const [sortOption, setSortOption] = useState('default');
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const { currency } = useCurrency();
 
   useEffect(() => {
     const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
@@ -52,16 +55,19 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
     
     let sortedBooks = [...currentBooks];
     if (sortOption === 'price-asc') {
-      sortedBooks.sort((a, b) => a.price - b.price);
+      sortedBooks.sort((a, b) => getPriceForCurrency(a, currency.code) - getPriceForCurrency(b, currency.code));
     } else if (sortOption === 'price-desc') {
-      sortedBooks.sort((a, b) => b.price - a.price);
+      sortedBooks.sort((a, b) => getPriceForCurrency(b, currency.code) - getPriceForCurrency(a, currency.code));
     } else if (sortOption === 'rating') {
       sortedBooks.sort((a, b) => b.rating - a.rating);
     } else if (sortOption === 'newest') {
       sortedBooks.sort((a,b) => (new Date(b.publishDate || 0)) - (new Date(a.publishDate || 0)));
     }
 
-    sortedBooks = sortedBooks.filter(book => book.price >= priceRange[0] && book.price <= priceRange[1]);
+    sortedBooks = sortedBooks.filter(book => {
+      const p = getPriceForCurrency(book, currency.code);
+      return p >= priceRange[0] && p <= priceRange[1];
+    });
 
     setFilteredBooks(sortedBooks);
 
@@ -112,8 +118,8 @@ const CategoryPage = ({ books, categories, handleAddToCart, handleToggleWishlist
                 className="my-3"
               />
               <div className="flex justify-between text-xs text-gray-600">
-                <span>{priceRange[0]} د.إ</span>
-                <span>{priceRange[1]} د.إ</span>
+                <span><FormattedPrice value={priceRange[0]} /></span>
+                <span><FormattedPrice value={priceRange[1]} /></span>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>المؤلفون</DropdownMenuLabel>

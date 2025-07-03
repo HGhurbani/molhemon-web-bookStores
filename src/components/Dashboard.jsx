@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import api from '@/lib/api.js';
+import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import {
@@ -105,7 +106,14 @@ const AuthorForm = ({ author, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const prices = {
+      AED: parseFloat(formData.priceAED || 0),
+      USD: parseFloat(formData.priceUSD || 0),
+      EUR: parseFloat(formData.priceEUR || 0),
+      GBP: parseFloat(formData.priceGBP || 0),
+      BTC: parseFloat(formData.priceBTC || 0),
+    };
+    onSubmit({ ...formData, price: prices.AED, prices });
   };
 
   return (
@@ -819,7 +827,7 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
         </DialogHeader>
         <div className="space-y-2 text-sm">
           <p>التاريخ: {order.date}</p>
-          <p>الإجمالي: {order.total.toFixed(2)} د.إ</p>
+          <p>الإجمالي: <FormattedPrice value={order.total} /></p>
           <div>
             <Label htmlFor="status">الحالة</Label>
             <select
@@ -839,7 +847,7 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
               {order.items.map((item) => (
                 <li key={item.id} className="flex justify-between">
                   <span>{item.title} × {item.quantity}</span>
-                  <span>{(item.price * item.quantity).toFixed(2)} د.إ</span>
+                  <span><FormattedPrice value={item.price * item.quantity} /></span>
                 </li>
               ))}
             </ul>
@@ -901,7 +909,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
               <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.id}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.date}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.total.toFixed(2)} د.إ</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700"><FormattedPrice value={o.total} /></td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
@@ -1039,7 +1047,11 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     title: '',
     author: '',
     authorId: '',
-    price: '',
+    priceAED: '',
+    priceUSD: '',
+    priceEUR: '',
+    priceGBP: '',
+    priceBTC: '',
     originalPrice: '',
     rating: '',
     reviews: '',
@@ -1050,7 +1062,12 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     sampleAudio: '',
     tags: '',
     coverImage: '',
-    ...book
+    ...book,
+    priceAED: book?.prices?.AED ?? book?.price ?? '',
+    priceUSD: book?.prices?.USD ?? '',
+    priceEUR: book?.prices?.EUR ?? '',
+    priceGBP: book?.prices?.GBP ?? '',
+    priceBTC: book?.prices?.BTC ?? '',
   });
 
   const handleChange = (e) => {
@@ -1060,7 +1077,14 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const prices = {
+      AED: parseFloat(formData.priceAED || 0),
+      USD: parseFloat(formData.priceUSD || 0),
+      EUR: parseFloat(formData.priceEUR || 0),
+      GBP: parseFloat(formData.priceGBP || 0),
+      BTC: parseFloat(formData.priceBTC || 0),
+    };
+    onSubmit({ ...formData, price: prices.AED, prices });
   };
 
   return (
@@ -1086,8 +1110,24 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
             </select>
           </div>
           <div>
-            <Label htmlFor="price">السعر</Label>
-            <Input id="price" name="price" type="number" value={formData.price} onChange={handleChange} required />
+            <Label htmlFor="priceAED">السعر (AED)</Label>
+            <Input id="priceAED" name="priceAED" type="number" value={formData.priceAED} onChange={handleChange} required />
+          </div>
+          <div>
+            <Label htmlFor="priceUSD">السعر (USD)</Label>
+            <Input id="priceUSD" name="priceUSD" type="number" value={formData.priceUSD} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="priceEUR">السعر (EUR)</Label>
+            <Input id="priceEUR" name="priceEUR" type="number" value={formData.priceEUR} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="priceGBP">السعر (GBP)</Label>
+            <Input id="priceGBP" name="priceGBP" type="number" value={formData.priceGBP} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="priceBTC">السعر (BTC)</Label>
+            <Input id="priceBTC" name="priceBTC" type="number" value={formData.priceBTC} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="originalPrice">السعر الأصلي (اختياري)</Label>
@@ -1253,9 +1293,13 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
                   <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.author}</td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm">
                     {book.originalPrice && (
-                      <span className="line-through text-red-500 ml-2 rtl:mr-2 rtl:ml-0">{book.originalPrice.toFixed(2)}</span>
+                      <span className="line-through text-red-500 ml-2 rtl:mr-2 rtl:ml-0">
+                        <FormattedPrice value={book.originalPrice} />
+                      </span>
                     )}
-                    <span className={book.originalPrice ? 'text-red-600 font-bold' : 'text-gray-700'}>{book.price.toFixed(2)} د.إ</span>
+                    <span className={book.originalPrice ? 'text-red-600 font-bold' : 'text-gray-700'}>
+                      <FormattedPrice book={book} />
+                    </span>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">

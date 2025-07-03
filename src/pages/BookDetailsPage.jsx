@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FormattedPrice from '@/components/FormattedPrice.jsx';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -162,7 +163,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <div className="grid grid-cols-2 gap-2">
                 <div className="border rounded-md p-2 text-center">
                   <p className="text-sm font-medium mb-1">كتاب</p>
-                  <p className="text-lg font-bold text-blue-600">{book.price.toFixed(2)} د.إ</p>
+                  <p className="text-lg font-bold text-blue-600"><FormattedPrice book={book} /></p>
                   <p className="text-xs text-green-600">متوفر فوراً</p>
                 </div>
                 <div className="border rounded-md p-2 text-center">
@@ -174,12 +175,12 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <div className="flex justify-between items-end text-sm">
                 <div>
                   {book.originalPrice && (
-                    <span className="line-through text-red-500 mr-2 rtl:ml-2 rtl:mr-0">{book.originalPrice.toFixed(2)} د.إ</span>
+                    <span className="line-through text-red-500 mr-2 rtl:ml-2 rtl:mr-0"><FormattedPrice value={book.originalPrice} /></span>
                   )}
-                  <div className="text-2xl font-bold text-blue-600">{book.price.toFixed(2)} د.إ</div>
+                  <div className="text-2xl font-bold text-blue-600"><FormattedPrice book={book} /></div>
                 </div>
                 {book.originalPrice && (
-                  <div className="text-green-600">وفر {(book.originalPrice - book.price).toFixed(2)} د.إ</div>
+                  <div className="text-green-600">وفر <FormattedPrice value={book.originalPrice - book.price} /></div>
                 )}
               </div>
               <div className="mb-3">
