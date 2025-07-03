@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -21,32 +21,67 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 
-const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn }) => {
-  const renderDropdown = (label, items, isCategory = false, hideOnMobile = false) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="default" className={`text-sm bg-white text-gray-400 hover:bg-white/80 px-2 py-2 rounded-md h-10 ${hideOnMobile ? 'hidden lg:flex' : ''}`}> {/* Added hidden lg:flex */}
-          {label}
-          <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200">
-        {items.map((item, index) => (
-          <DropdownMenuItem key={index} asChild className="px-4 py-2 hover:bg-indigo-50 text-gray-700">
-            {isCategory ? (
-              <Link to={`/category/${item.id || item.toLowerCase().replace(/\s/g, '-')}`}>
-                {item.name || item}
-              </Link>
-            ) : (
-              <button onClick={() => handleFeatureClick(item.toLowerCase().replace(/\s/g, '-'))} className="w-full text-right">
-                {item}
-              </button>
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [] }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const term = searchTerm.toLowerCase();
+    const filtered = books.filter(
+      (b) =>
+        (b.title && b.title.toLowerCase().includes(term)) ||
+        (b.author && b.author.toLowerCase().includes(term)) ||
+        (b.isbn && b.isbn.toLowerCase().includes(term))
+    ).slice(0, 5);
+    setSuggestions(filtered);
+  }, [searchTerm, books]);
+
+  const DropdownWithSearch = ({ label, items, isCategory = false, hideOnMobile = false }) => {
+    const [filterText, setFilterText] = useState('');
+    const filteredItems = items.filter((item) => {
+      const text = item.name || item;
+      return text.toLowerCase().includes(filterText.toLowerCase());
+    });
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="default"
+            className={`text-sm bg-white text-gray-400 hover:bg-white/80 px-2 py-2 rounded-md h-10 ${hideOnMobile ? 'hidden lg:flex' : ''}`}
+          >
+            {label}
+            <ChevronDown className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200">
+          <input
+            type="text"
+            placeholder="ابحث..."
+            className="w-full px-2 py-1 text-sm border-b outline-none mb-1"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
+          {filteredItems.map((item, index) => (
+            <DropdownMenuItem key={index} asChild className="px-4 py-2 hover:bg-indigo-50 text-gray-700">
+              {isCategory ? (
+                <Link to={`/category/${item.id || item.toLowerCase().replace(/\s/g, '-')}`}>{item.name || item}</Link>
+              ) : (
+                <button onClick={() => handleFeatureClick(item.toLowerCase().replace(/\s/g, '-'))} className="w-full text-right">
+                  {item.name || item}
+                </button>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
 
   const renderUserSection = () => {
     if (isCustomerLoggedIn) {
@@ -94,12 +129,14 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn }) => {
     );
   };
 
-  const categoryItems = [
-    { id: 'fiction', name: 'الخيال' },
-    { id: 'nonfiction', name: 'غير الخيال' },
-    { id: 'kids', name: 'أطفال' },
-    { id: 'science', name: 'علوم' },
-  ];
+  const categoryItems = categories.length
+    ? categories
+    : [
+        { id: 'fiction', name: 'الخيال' },
+        { id: 'nonfiction', name: 'غير الخيال' },
+        { id: 'kids', name: 'أطفال' },
+        { id: 'science', name: 'علوم' },
+      ];
 
   const deliveryItems = ["توصيل سريع", "شحن عادي", "استلام من المتجر"];
 
@@ -188,9 +225,18 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn }) => {
                 type="text"
                 placeholder="ابحث حسب العنوان، المؤلف، الكلمة المفتاحية، رقم ISBN..."
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm h-10"
-                onFocus={() => handleFeatureClick('search-main-focus')}
-                onChange={() => handleFeatureClick('search-main-change')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {suggestions.length > 0 && (
+                <ul className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded-md mt-1 max-h-48 overflow-auto text-sm">
+                  {suggestions.map((s) => (
+                    <li key={s.id} className="px-3 py-2 hover:bg-gray-100">
+                      <Link to={`/book/${s.id}`}>{s.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <Button
                 className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white"
                 onClick={() => handleFeatureClick('search-main-button')}
@@ -199,9 +245,9 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn }) => {
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-            {renderDropdown("تصفح الفئات", categoryItems, true, true)} {/* Added hideOnMobile prop */}
-            {renderDropdown("العلامات التجارية", ["دار الشروق", "دار الآداب", "مكتبة جرير"], false, true)} {/* Added hideOnMobile prop */}
-            {renderDropdown("اختر طريقة التوصيل", deliveryItems, false, true)} {/* Added hideOnMobile prop */}
+            <DropdownWithSearch label="تصفح الفئات" items={categoryItems} isCategory hideOnMobile />
+            <DropdownWithSearch label="العلامات التجارية" items={["دار الشروق", "دار الآداب", "مكتبة جرير"]} hideOnMobile />
+            <DropdownWithSearch label="اختر طريقة التوصيل" items={deliveryItems} hideOnMobile />
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
