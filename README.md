@@ -40,3 +40,4 @@ Set `GOOGLE_MERCHANT_ID` and `GOOGLE_API_KEY` in your `.env` file to enable impo
 ## Notes
 - CRUD actions in the dashboard now communicate with the backend using the provided API routes.
 - If you need to build the project for production, run `npm run build` (requires installed dependencies).
+- Category management forms now include a dropdown to select an icon from the `lucide-react` library.

@@ -25,6 +25,7 @@ import {
   Image,
   Zap
 } from 'lucide-react';
+import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
@@ -228,6 +229,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
 
 const CategoryForm = ({ category, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({ id: '', name: '', icon: '', ...category });
+  const iconNames = React.useMemo(() => Object.keys(AllIcons).filter((name) => /^[A-Z]/.test(name)).sort(), []);
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -247,7 +249,19 @@ const CategoryForm = ({ category, onSubmit, onCancel }) => {
         </div>
         <div>
           <Label htmlFor="icon">الأيقونة</Label>
-          <Input id="icon" name="icon" value={formData.icon} onChange={handleChange} required />
+          <select
+            id="icon"
+            name="icon"
+            value={formData.icon}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            required
+          >
+            <option value="">اختر أيقونة</option>
+            {iconNames.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
