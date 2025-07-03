@@ -110,7 +110,9 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
   name VARCHAR(255) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   duration INT NOT NULL,
-  description TEXT
+  description TEXT,
+  plan_type ENUM('membership','package') NOT NULL DEFAULT 'membership',
+  package_type ENUM('ebook','audio')
 );
 
 CREATE TABLE IF NOT EXISTS subscriptions (

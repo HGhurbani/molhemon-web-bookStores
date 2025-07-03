@@ -277,14 +277,29 @@ app.delete('/api/orders/:id', async (req, res) => {
   res.sendStatus(204);
 });
 
-app.get('/api/plans', async (_req, res) => {
-  const [rows] = await pool.query('SELECT * FROM subscription_plans');
+app.get('/api/plans', async (req, res) => {
+  const { type, packageType } = req.query;
+  let query = 'SELECT * FROM subscription_plans';
+  const params = [];
+  const conditions = [];
+  if (type) {
+    conditions.push('plan_type=?');
+    params.push(type);
+  }
+  if (packageType) {
+    conditions.push('package_type=?');
+    params.push(packageType);
+  }
+  if (conditions.length) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+  const [rows] = await pool.query(query, params);
   res.json(rows);
 });
 
 app.post('/api/plans', async (req, res) => {
-  const { name, price, duration, description } = req.body;
-  const [result] = await pool.execute('INSERT INTO subscription_plans (name, price, duration, description) VALUES (?,?,?,?)', [name, price, duration, description]);
+  const { name, price, duration, description, plan_type, package_type } = req.body;
+  const [result] = await pool.execute('INSERT INTO subscription_plans (name, price, duration, description, plan_type, package_type) VALUES (?,?,?,?,?,?)', [name, price, duration, description, plan_type || 'membership', package_type || null]);
   const [rows] = await pool.query('SELECT * FROM subscription_plans WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
 });

@@ -609,13 +609,25 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
 }; 
 
 const PlanForm = ({ plan, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', price: '', duration: '', description: '', ...plan });
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    duration: '',
+    description: '',
+    plan_type: 'membership',
+    package_type: 'ebook',
+    ...plan,
+  });
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...formData, price: parseFloat(formData.price), duration: parseInt(formData.duration, 10) });
+    onSubmit({
+      ...formData,
+      price: parseFloat(formData.price),
+      duration: parseInt(formData.duration, 10),
+    });
   };
 
   return (
@@ -638,6 +650,22 @@ const PlanForm = ({ plan, onSubmit, onCancel }) => {
           <Label htmlFor="pdesc">الوصف</Label>
           <Textarea id="pdesc" name="description" value={formData.description} onChange={handleChange} rows={3} />
         </div>
+        <div>
+          <Label htmlFor="plan_type">نوع الخطة</Label>
+          <select id="plan_type" name="plan_type" value={formData.plan_type} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md">
+            <option value="membership">عضوية</option>
+            <option value="package">باقة</option>
+          </select>
+        </div>
+        {formData.plan_type === 'package' && (
+          <div>
+            <Label htmlFor="package_type">نوع الباقة</Label>
+            <select id="package_type" name="package_type" value={formData.package_type || ''} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md">
+              <option value="ebook">كتب إلكترونية</option>
+              <option value="audio">كتب صوتية</option>
+            </select>
+          </div>
+        )}
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -830,6 +858,8 @@ const DashboardPlans = ({ plans, setPlans }) => {
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">السعر</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المدة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">النوع</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">نوع الباقة</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -840,6 +870,8 @@ const DashboardPlans = ({ plans, setPlans }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.name}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.price}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.duration}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.plan_type}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.package_type || '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingPlan(p); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>

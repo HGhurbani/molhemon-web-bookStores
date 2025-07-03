@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
+import api from '@/lib/api.js';
 
 const AudiobookPage = () => {
   // Mock data
@@ -22,44 +23,17 @@ const AudiobookPage = () => {
 
   const infiniteBooks = Array(15).fill(sampleBooks.slice(0, 10)).flat();
 
-  const plans = [
-    {
-      id: 'basic',
-      name: 'الأساسية',
-      price: '$9.99',
-      duration: 'شهرياً',
-      features: [
-        'كتب إلكترونية غير محدودة',
-        'استماع محدود للكتب الصوتية (مثلاً: 1 ساعة شهرياً)',
-        'وصول إلى مجموعات مختارة'
-      ]
-    },
-    {
-      id: 'pro',
-      name: 'المحترفة',
-      price: '$14.99',
-      duration: 'شهرياً',
-      popular: true,
-      features: [
-        'جميع المميزات المميزة',
-        'كتب إلكترونية وصوتية غير محدودة',
-        'تنزيل الكتب دون اتصال',
-        'وصول إلى جميع المجموعات'
-      ]
-    },
-    {
-      id: 'family',
-      name: 'العائلية',
-      price: '$49.99',
-      duration: 'شهرياً',
-      features: [
-        'مشاركة مع ٥ أفراد',
-        'الرقابة الأبوية',
-        'ملفات تعريف شخصية',
-        'جميع مميزات الباقة المحترفة'
-      ]
-    }
-  ];
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setPlans(await api.getPlans({ type: 'package', packageType: 'audio' }));
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   return (
     <main className="container mx-auto px-4 py-6 sm:py-8">
@@ -142,48 +116,22 @@ const AudiobookPage = () => {
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
-              className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden ${
-                plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
-              }`}
+              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              {plan.popular && (
-                <div className="absolute top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 text-sm font-medium">
-                  الأكثر شيوعاً
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-gray-600 text-sm mr-1">{plan.duration} يوم</span>
                 </div>
-              )}
-
-              <div className={`p-6 ${plan.popular ? 'pt-12' : 'pt-6'}`}>
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-600 text-sm mr-1">{plan.duration}</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start text-right">
-                      <Check className="w-4 h-4 text-blue-500 mt-0.5 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 leading-5">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
-                    plan.popular
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
-                      : 'bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]'
-                  }`}
-                >
-                  اختر باقتك
-                </Button>
               </div>
+              <Button className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]">
+                اختر باقتك
+              </Button>
             </motion.div>
           ))}
         </div>
