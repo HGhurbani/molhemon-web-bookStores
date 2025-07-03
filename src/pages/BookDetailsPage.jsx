@@ -3,10 +3,13 @@ import FormattedPrice from '@/components/FormattedPrice.jsx';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
+import { Textarea } from '@/components/ui/textarea.jsx';
+import { Label } from '@/components/ui/label.jsx';
 import { Star, Heart, ShoppingCart, Share2, BookOpenText, Headphones, ChevronDown } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
+import api from '@/lib/api.js';
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist }) => {
   const { id } = useParams();
@@ -15,6 +18,9 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const [activeTab, setActiveTab] = useState('details');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [ratings, setRatings] = useState([]);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [comment, setComment] = useState('');
 
   useEffect(() => {
     const currentBook = books.find(b => b.id.toString() === id);
@@ -37,6 +43,18 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
     }
   }, [book, handleToggleWishlist]);
 
+  useEffect(() => {
+    if (!book) return;
+    (async () => {
+      try {
+        const r = await api.getBookRatings(book.id);
+        setRatings(r);
+      } catch (e) {
+        console.error('Failed to fetch ratings', e);
+      }
+    })();
+  }, [book]);
+
   const authorDetails = authors.find(a => a.name === book?.author);
 
   const onAddToCart = () => {
@@ -48,12 +66,27 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
     setIsInWishlist(!isInWishlist);
   };
 
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.addBookRating(book.id, { rating: ratingValue, comment });
+      const r = await api.getBookRatings(book.id);
+      setRatings(r);
+      setRatingValue(0);
+      setComment('');
+      toast({ title: 'تم إضافة تقييمك' });
+    } catch (err) {
+      toast({ title: 'خطأ أثناء إضافة التقييم', variant: 'destructive' });
+    }
+  };
+
   if (!book) {
     return <div className="container mx-auto px-4 py-8 text-center">جاري تحميل تفاصيل الكتاب...</div>;
   }
 
   const description = book.description || "لا يوجد وصف متوفر لهذا الكتاب حاليًا. نعمل على توفير أوصاف شاملة لجميع كتبنا. شكرًا لتفهمكم.";
   const displayedDescription = showFullDescription ? description : `${description.substring(0, 250)}${description.length > 250 ? '...' : ''}`;
+  const avgRating = ratings.length ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : book.rating;
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
@@ -108,7 +141,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <span className="mx-2">|</span>
             <span className="px-2 py-1 border rounded-full bg-white text-gray-800">{book.category}</span>
             <span className="mx-2">|</span>
-            <span className="flex items-center"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-1" />{book.rating.toFixed(1)}/5</span>
+            <span className="flex items-center"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-1" />{avgRating.toFixed(1)}/5 ({ratings.length})</span>
             <span className="mx-2">|</span>
             <span>{book.salesRank || 0} نسخة مباعة</span>
           </div>
@@ -237,64 +270,54 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         </motion.div>
       </div>
 
-      <div className="rounded-lg shadow-sm p-4 mt-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
-  {/* تصفية التقييمات */}
-  <div className="lg:col-span-1">
-    <div className="border rounded-lg p-4 bg-gray-50">
-      <p className="text-lg font-semibold mb-2 text-gray-800">فلاتر التقييمات</p>
-      <div className="space-y-2 text-sm text-gray-700">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" className="accent-blue-600" />
-          <span>مع صور وفيديوهات</span>
-        </label>
-        <div className="border-t my-2" />
-        {[5, 4, 3, 2, 1].map(star => (
-          <label key={star} className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="accent-blue-600" />
-            <div className="flex items-center gap-1">
-              {[...Array(star)].map((_, i) => (
-                <span key={i} className="text-blue-600 text-xs">★</span>
-              ))}
+      <div className="rounded-lg shadow-sm p-4 mt-4">
+        {localStorage.getItem('customerLoggedIn') === 'true' && (
+          <form onSubmit={handleRatingSubmit} className="space-y-2 mb-6">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="ratingValue" className="text-sm">قيم الكتاب</Label>
+              <select
+                id="ratingValue"
+                value={ratingValue}
+                onChange={(e) => setRatingValue(parseInt(e.target.value))}
+                className="border rounded p-1"
+                required
+              >
+                <option value="">اختر</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
             </div>
-          </label>
-        ))}
-      </div>
-    </div>
-  </div>
-
-  {/* قائمة التقييمات */}
-  <div className="lg:col-span-3 space-y-6">
-    {[1, 2, 3].map(index => (
-      <div key={index} className="border-b pb-4">
-        <div className="flex items-center gap-3 mb-2">
-          <img src="https://i.pravatar.cc/40?img=5" alt="user" className="w-10 h-10 rounded-full border" />
-          <div>
-            <p className="font-semibold text-gray-800 text-sm">ديانا روز</p>
-            <p className="text-xs text-gray-500">19 يناير 2025</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 text-yellow-500 text-sm mb-2">
-          {[...Array(5)].map((_, i) => (
-            <span key={i}>★</span>
+            <Textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="اكتب تعليقك"
+              rows={2}
+            />
+            <Button type="submit" className="bg-blue-600 text-white">إرسال التقييم</Button>
+          </form>
+        )}
+        <div className="space-y-6">
+          {ratings.map((r) => (
+            <div key={r.id} className="border-b pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <img src="https://i.pravatar.cc/40" alt="user" className="w-10 h-10 rounded-full border" />
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">{r.user_id || 'مستخدم'}</p>
+                  <p className="text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-yellow-500 text-sm mb-2">
+                {[...Array(r.rating)].map((_, i) => (
+                  <span key={i}>★</span>
+                ))}
+              </div>
+              {r.comment && <p className="text-sm text-gray-700 mb-3">{r.comment}</p>}
+            </div>
           ))}
-        </div>
-        <p className="text-sm text-gray-700 mb-3">
-          من المعروف أن المحتوى المفروض لصفحة ما سيشتت انتباه القارئ عند النظر إلى شكلها الخارجي.
-        </p>
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-            <i className="fa-regular fa-thumbs-up"></i>
-            <span>10</span>
-          </div>
-          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-            <i className="fa-regular fa-thumbs-down"></i>
-            <span>2</span>
-          </div>
+          {ratings.length === 0 && <p className="text-sm">لا توجد تقييمات بعد.</p>}
         </div>
       </div>
-    ))}
-  </div>
-</div>
 
 
       {relatedBooks.length > 0 && (

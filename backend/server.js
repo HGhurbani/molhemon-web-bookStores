@@ -28,7 +28,7 @@ app.post('/api/books', async (req, res) => {
   const data = req.body;
   const [result] = await pool.execute(
     'INSERT INTO books (title, author_id, category_id, price, original_price, rating, reviews, description, isbn, publisher, publish_date, pages, format, cover_image, type, sample_audio) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    [data.title, data.authorId, data.categoryId, data.price, data.originalPrice, data.rating, data.reviews, data.description, data.isbn, data.publisher, data.publishDate, data.pages, data.format, data.coverImage, data.type, data.sampleAudio]
+    [data.title, data.authorId, data.categoryId, data.price, data.originalPrice, 0, 0, data.description, data.isbn, data.publisher, data.publishDate, data.pages, data.format, data.coverImage, data.type, data.sampleAudio]
   );
   const [rows] = await pool.query('SELECT * FROM books WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
@@ -43,8 +43,6 @@ app.put('/api/books/:id', async (req, res) => {
     category_id: data.categoryId,
     price: data.price,
     original_price: data.originalPrice,
-    rating: data.rating,
-    reviews: data.reviews,
     description: data.description,
     isbn: data.isbn,
     publisher: data.publisher,
@@ -64,6 +62,30 @@ app.delete('/api/books/:id', async (req, res) => {
   const id = req.params.id;
   await pool.query('DELETE FROM books WHERE id=?', [id]);
   res.sendStatus(204);
+});
+
+app.get('/api/books/:id/ratings', async (req, res) => {
+  const [rows] = await pool.query(
+    'SELECT * FROM book_ratings WHERE book_id=? ORDER BY created_at DESC',
+    [req.params.id]
+  );
+  res.json(rows);
+});
+
+app.post('/api/books/:id/ratings', async (req, res) => {
+  const { userId, rating, comment } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO book_ratings (book_id, user_id, rating, comment) VALUES (?,?,?,?)',
+    [req.params.id, userId || null, rating, comment || null]
+  );
+  const [agg] = await pool.query(
+    'SELECT AVG(rating) AS avgRating, COUNT(*) AS count FROM book_ratings WHERE book_id=?',
+    [req.params.id]
+  );
+  const { avgRating, count } = agg[0];
+  await pool.query('UPDATE books SET rating=?, reviews=? WHERE id=?', [avgRating, count, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM book_ratings WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
 });
 
 app.get('/api/authors', async (_req, res) => {

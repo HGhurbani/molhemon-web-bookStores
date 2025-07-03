@@ -86,6 +86,10 @@ export const api = {
   addFeature: (data) => request('/api/features', { method: 'POST', body: JSON.stringify(data) }),
   updateFeature: (id, data) => request(`/api/features/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteFeature: (id) => request(`/api/features/${id}`, { method: 'DELETE' }),
+
+  getBookRatings: (bookId) => request(`/api/books/${bookId}/ratings`),
+  addBookRating: (bookId, data) =>
+    request(`/api/books/${bookId}/ratings`, { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export default api;
