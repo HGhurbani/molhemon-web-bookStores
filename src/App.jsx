@@ -163,6 +163,12 @@ const App = () => {
   };
   
   const handleFeatureClick = (feature) => {
+    if (feature === 'logout') {
+      localStorage.removeItem('customerLoggedIn');
+      setIsCustomerLoggedIn(false);
+      toast({ title: 'تم تسجيل الخروج' });
+      return;
+    }
     toast({
       title: "🚧 هذه الميزة غير مطبقة بعد",
       description: "لا تقلق! سيتم تطبيقها الأيام القادمة",
@@ -190,6 +196,7 @@ const App = () => {
       <Header
         handleFeatureClick={handleFeatureClick}
         cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+        isCustomerLoggedIn={isCustomerLoggedIn}
       />
       {children}
       <Footer footerLinks={footerLinks} handleFeatureClick={handleFeatureClick} />
