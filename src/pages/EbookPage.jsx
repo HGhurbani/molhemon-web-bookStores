@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { toast } from '@/components/ui/use-toast.js';
+import api from '@/lib/api.js';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { Check, Award, Star } from 'lucide-react';
 
@@ -19,37 +20,22 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
     setLocalWishlist(stored);
   };
 
-  const ebooks = books.filter(book => book.format === 'كتاب إلكتروني' || book.type === 'ebook' || book.category === 'ebooks');
+  const ebooks = books.filter(
+    (book) =>
+      book.format === 'كتاب إلكتروني' || book.type === 'ebook' || book.category === 'ebooks'
+  );
 
-  const plans = [
-    {
-      name: 'الأساسية',
-      price: '$9.99',
-      period: 'شهرياً',
-      subtitle: 'الميزات الأساسية',
-      features: ['كتب إلكترونية غير محدودة', 'استماع محدود للكتب الصوتية (مدة: 1 ساعات شهرياً)', 'الوصول إلى مجموعات مختارة'],
-      message: 'تم اختيار الباقة الأساسية!',
-      isPopular: false
-    },
-    {
-      name: 'المحترفة',
-      price: '$14.99',
-      period: 'شهرياً',
-      subtitle: 'جميع الميزات المميزة',
-      features: ['كتب إلكترونية غير محدودة', 'كتب صوتية غير محدودة', 'الوصول إلى مجموعات مختارة', 'وصول مبكر حصري للإصدارات الجديدة', 'تنزيل الكتب الإلكترونية والكتب الصوتية دون اتصال'],
-      message: 'تم اختيار الباقة المحترفة!',
-      isPopular: true
-    },
-    {
-      name: 'العائلية',
-      price: '$49.99',
-      period: 'شهرياً',
-      subtitle: 'ميزات عائلية',
-      features: ['مشاركة مع ما يصل إلى 5 أفراد', 'الإرشاة الأبوية', 'ملفات تعريف شخصية', 'فئات وميزات حصرية'],
-      message: 'تم اختيار الباقة العائلية!',
-      isPopular: false
-    }
-  ];
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setPlans(await api.getPlans({ type: 'package', packageType: 'ebook' }));
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   return (
     <main className="container mx-auto px-4 py-6 sm:py-8">
@@ -93,51 +79,24 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <motion.div
-              key={plan.name}
-              className={`relative bg-white rounded-2xl shadow-lg border-2 overflow-hidden ${
-                plan.isPopular ? 'border-blue-500 scale-105' : 'border-gray-200'
-              }`}
+              key={plan.id}
+              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              {plan.isPopular && (
-                <div className="absolute top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 text-sm font-medium">
-                  الأكثر شيوعاً
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-gray-600 text-sm mr-1">{plan.duration} يوم</span>
                 </div>
-              )}
-              
-              <div className={`p-6 ${plan.isPopular ? 'pt-12' : 'pt-6'}`}>
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{plan.subtitle}</p>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-600 text-sm mr-1">{plan.period}</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start text-right">
-                      <Check className="w-4 h-4 text-blue-500 mt-0.5 ml-2 rtl:mr-2 rtl:ml-0 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 leading-5">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`w-full py-3 rounded-xl font-medium transition-all duration-200 
-                  ${plan.isPopular
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
-                      : 'bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]' // تم التعديل هنا: ألوان مخصصة
-                  }`}
-                  onClick={() => toast({ title: plan.message })}
-                >
-                  اختر باقتك
-                </Button>
               </div>
+              <p className="text-sm text-gray-700 mb-6 text-center">{plan.description}</p>
+              <Button className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]" onClick={() => toast({ title: `تم اختيار ${plan.name}` })}>
+                اختر باقتك
+              </Button>
             </motion.div>
           ))}
         </div>

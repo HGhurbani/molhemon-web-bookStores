@@ -13,7 +13,7 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
   useEffect(() => {
     (async () => {
       try {
-        setPlans(await api.getPlans());
+        setPlans(await api.getPlans({ type: 'membership' }));
       } catch (e) {
         console.error(e);
       }

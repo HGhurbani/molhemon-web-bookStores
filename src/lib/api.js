@@ -64,7 +64,10 @@ export const api = {
   getSettings: () => request('/api/settings'),
   updateSettings: (data) => request('/api/settings', { method: 'PUT', body: JSON.stringify(data) }),
   importGoogleMerchant: () => request('/api/google-merchant/import', { method: 'POST' }),
-  getPlans: () => request('/api/plans'),
+  getPlans: (params) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return request(`/api/plans${query}`);
+  },
   addPlan: (data) => request('/api/plans', { method: 'POST', body: JSON.stringify(data) }),
   updatePlan: (id, data) => request(`/api/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deletePlan: (id) => request(`/api/plans/${id}`, { method: 'DELETE' }),
