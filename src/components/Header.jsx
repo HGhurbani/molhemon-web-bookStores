@@ -1,7 +1,7 @@
 // src/components/Header.jsx
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Search,
@@ -26,6 +26,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const { currency, setCurrency, currencies } = useCurrency();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -245,7 +246,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
               )}
               <Button
                 className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white"
-                onClick={() => handleFeatureClick('search-main-button')}
+                onClick={() => navigate(`/search?q=${encodeURIComponent(searchTerm)}`)}
                 size="sm"
               >
                 <Search className="w-4 h-4" />

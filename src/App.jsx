@@ -22,6 +22,7 @@ import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
 import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
 import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
+import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
@@ -288,6 +289,7 @@ const App = () => {
             <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
               <Route path="/checkout" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
