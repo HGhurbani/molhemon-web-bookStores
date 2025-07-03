@@ -6,7 +6,6 @@ import { BookOpen, Star, Users, Edit3, PlusCircle, BookOpenText } from 'lucide-r
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import AuthorsSection from '@/components/AuthorsSection.jsx'; // Import AuthorsSection
 import { toast } from "@/components/ui/use-toast.js";
-import { bestsellerBooks } from '@/data/siteData.js'; // Import bestsellerBooks for examples
 
 const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) => {
   const { id } = useParams();
@@ -18,16 +17,10 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
     const currentAuthor = authors.find(a => a.id.toString() === id);
     if (currentAuthor) {
       setAuthor(currentAuthor);
-      // Filter books by author and add some "flash sale" style books from bestsellerBooks
       const booksByAuthor = books.filter(b => b.author === currentAuthor.name || b.authorId === currentAuthor.id);
-      
-      // Combine with some bestseller books for variety, ensuring uniqueness and limiting to a reasonable number
-      const topAuthorPicks = bestsellerBooks
-        .filter(book => !booksByAuthor.some(b => b.id === book.id)) // Avoid duplicates
-        .slice(0, 3); // Take a few top picks
-        
-      setAuthorBooks([...booksByAuthor, ...topAuthorPicks].slice(0, 8)); // Limit total displayed books
-
+      const bestsellers = [...books].sort((a,b) => (b.rating || 0) - (a.rating || 0));
+      const topAuthorPicks = bestsellers.filter(book => !booksByAuthor.some(b => b.id === book.id)).slice(0,3);
+      setAuthorBooks([...booksByAuthor, ...topAuthorPicks].slice(0,8));
     }
     const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     setWishlist(localWishlist);
