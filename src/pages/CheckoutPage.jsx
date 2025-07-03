@@ -53,6 +53,15 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
     };
     try {
       const newOrder = await api.addOrder(orderData);
+      await api.addPayment({
+        customer_id: null,
+        order_id: newOrder.id,
+        subscription_id: null,
+        payment_method_id: 1,
+        coupon_id: null,
+        amount: total,
+        status: 'paid'
+      });
       setOrders(prev => [newOrder, ...(prev || [])]);
       toast({ title: 'تم استلام الطلب بنجاح!' });
       setCart([]);

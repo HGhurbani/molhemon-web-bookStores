@@ -45,6 +45,7 @@ const App = () => {
   const [users, setUsers] = useState([]);
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
+  const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
@@ -66,12 +67,13 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     (async () => {
       try {
-        const [b, a, c, s, o, p, u] = await Promise.all([
+        const [b, a, c, s, o, pay, p, u] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
           api.getSettings(),
           api.getOrders(),
+          api.getPayments(),
           api.getPlans(),
           api.getUsers(),
         ]);
@@ -80,6 +82,7 @@ const App = () => {
         setCategoriesState(c);
         setSiteSettingsState(prev => ({ ...prev, ...s }));
         setOrders(o);
+        setPayments(pay);
         setPlans(p);
         setUsers(u);
       } catch (err) {
@@ -112,6 +115,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('payments', JSON.stringify(payments));
+  }, [payments]);
 
   useEffect(() => {
     localStorage.setItem('plans', JSON.stringify(plans));
@@ -230,6 +237,7 @@ const App = () => {
                     customers={customers}
                     categories={categoriesState}
                     orders={orders}
+                    payments={payments}
                     plans={plans}
                     dashboardSection={dashboardSection}
                     setDashboardSection={setDashboardSection}
@@ -240,6 +248,7 @@ const App = () => {
                     setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
+                    setPayments={setPayments}
                     setPlans={setPlans}
                     users={users}
                     setUsers={setUsers}
