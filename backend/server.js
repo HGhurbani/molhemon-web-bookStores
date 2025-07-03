@@ -27,8 +27,28 @@ app.get('/api/books', async (_req, res) => {
 app.post('/api/books', async (req, res) => {
   const data = req.body;
   const [result] = await pool.execute(
-    'INSERT INTO books (title, author_id, category_id, price, original_price, rating, reviews, description, isbn, publisher, publish_date, pages, format, cover_image, type, sample_audio) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    [data.title, data.authorId, data.categoryId, data.price, data.originalPrice, 0, 0, data.description, data.isbn, data.publisher, data.publishDate, data.pages, data.format, data.coverImage, data.type, data.sampleAudio]
+    'INSERT INTO books (title, author_id, category_id, price, original_price, rating, reviews, description, isbn, publisher, publish_date, pages, format, cover_image, type, sample_audio, delivery_method, ebook_file, audio_file) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    [
+      data.title,
+      data.authorId,
+      data.categoryId,
+      data.price,
+      data.originalPrice,
+      0,
+      0,
+      data.description,
+      data.isbn,
+      data.publisher,
+      data.publishDate,
+      data.pages,
+      data.format,
+      data.coverImage,
+      data.type,
+      data.sampleAudio,
+      data.deliveryMethod,
+      data.ebookFile,
+      data.audioFile,
+    ]
   );
   const [rows] = await pool.query('SELECT * FROM books WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
@@ -52,6 +72,9 @@ app.put('/api/books/:id', async (req, res) => {
     cover_image: data.coverImage,
     type: data.type,
     sample_audio: data.sampleAudio,
+    delivery_method: data.deliveryMethod,
+    ebook_file: data.ebookFile,
+    audio_file: data.audioFile,
   };
   await pool.query('UPDATE books SET ? WHERE id=?', [mapped, id]);
   const [rows] = await pool.query('SELECT * FROM books WHERE id=?', [id]);

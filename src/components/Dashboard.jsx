@@ -1415,6 +1415,9 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     imgPlaceholder: '',
     type: '',
     sampleAudio: '',
+    deliveryMethod: '',
+    ebookFile: '',
+    audioFile: '',
     tags: '',
     coverImage: '',
     ...(book ? (({ rating, reviews, ...rest }) => rest)(book) : {}),
@@ -1501,10 +1504,56 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
               <option value="audio">كتاب صوتي</option>
             </select>
           </div>
-          <div>
-            <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
-            <Input id="sampleAudio" name="sampleAudio" value={formData.sampleAudio} onChange={handleChange} />
-          </div>
+          {formData.type === 'physical' && (
+            <div>
+              <Label htmlFor="deliveryMethod">طريقة التوصيل</Label>
+              <Input id="deliveryMethod" name="deliveryMethod" value={formData.deliveryMethod} onChange={handleChange} />
+            </div>
+          )}
+          {formData.type === 'ebook' && (
+            <div>
+              <Label htmlFor="ebookFile">الملف الإلكتروني</Label>
+              <input
+                id="ebookFile"
+                name="ebookFile"
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => setFormData(prev => ({ ...prev, ebookFile: reader.result }));
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
+          {formData.type === 'audio' && (
+            <>
+              <div>
+                <Label htmlFor="audioFile">الملف الصوتي</Label>
+                <input
+                  id="audioFile"
+                  name="audioFile"
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setFormData(prev => ({ ...prev, audioFile: reader.result }));
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
+                <Input id="sampleAudio" name="sampleAudio" value={formData.sampleAudio} onChange={handleChange} />
+              </div>
+            </>
+          )}
           <div>
             <Label htmlFor="tags">الوسوم</Label>
             <Input id="tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="مثال: دراما, مغامرة" />
