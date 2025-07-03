@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS books (
   category_id INT,
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
   original_price DECIMAL(10,2),
-  rating DECIMAL(3,2),
-  reviews INT,
+  rating DECIMAL(3,2) DEFAULT 0,
+  reviews INT DEFAULT 0,
   description TEXT,
   isbn VARCHAR(50),
   publisher VARCHAR(255),
@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS books (
   sample_audio VARCHAR(255),
   FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE SET NULL,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS book_ratings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  book_id INT NOT NULL,
+  user_id INT,
+  rating INT NOT NULL,
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS sellers (

@@ -1395,8 +1395,6 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     priceGBP: '',
     priceBTC: '',
     originalPrice: '',
-    rating: '',
-    reviews: '',
     category: '',
     description: '',
     imgPlaceholder: '',
@@ -1404,7 +1402,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     sampleAudio: '',
     tags: '',
     coverImage: '',
-    ...book,
+    ...(book ? (({ rating, reviews, ...rest }) => rest)(book) : {}),
     priceAED: book?.prices?.AED ?? book?.price ?? '',
     priceUSD: book?.prices?.USD ?? '',
     priceEUR: book?.prices?.EUR ?? '',
@@ -1474,14 +1472,6 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
           <div>
             <Label htmlFor="originalPrice">السعر الأصلي (اختياري)</Label>
             <Input id="originalPrice" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="rating">التقييم (0-5)</Label>
-            <Input id="rating" name="rating" type="number" step="0.1" min="0" max="5" value={formData.rating} onChange={handleChange} />
-          </div>
-           <div>
-            <Label htmlFor="reviews">عدد المراجعات</Label>
-            <Input id="reviews" name="reviews" type="number" value={formData.reviews} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="category">الفئة</Label>
