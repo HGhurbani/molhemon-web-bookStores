@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { currencies } from '@/lib/currencyContext.jsx';
 import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
@@ -1385,15 +1386,15 @@ const DashboardOverview = ({ dashboardStats }) => (
 
 
 const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
+  const initialPrices = currencies.reduce((acc, c) => {
+    acc[`price${c.code}`] = book?.prices?.[c.code] ?? (c.code === 'AED' ? book?.price ?? '' : '');
+    return acc;
+  }, {});
+
   const [formData, setFormData] = useState({
     title: '',
     author: '',
     authorId: '',
-    priceAED: '',
-    priceUSD: '',
-    priceEUR: '',
-    priceGBP: '',
-    priceBTC: '',
     originalPrice: '',
     category: '',
     description: '',
@@ -1403,11 +1404,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     tags: '',
     coverImage: '',
     ...(book ? (({ rating, reviews, ...rest }) => rest)(book) : {}),
-    priceAED: book?.prices?.AED ?? book?.price ?? '',
-    priceUSD: book?.prices?.USD ?? '',
-    priceEUR: book?.prices?.EUR ?? '',
-    priceGBP: book?.prices?.GBP ?? '',
-    priceBTC: book?.prices?.BTC ?? '',
+    ...initialPrices,
   });
 
   const handleChange = (e) => {
@@ -1417,13 +1414,10 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const prices = {
-      AED: parseFloat(formData.priceAED || 0),
-      USD: parseFloat(formData.priceUSD || 0),
-      EUR: parseFloat(formData.priceEUR || 0),
-      GBP: parseFloat(formData.priceGBP || 0),
-      BTC: parseFloat(formData.priceBTC || 0),
-    };
+    const prices = currencies.reduce((acc, c) => {
+      acc[c.code] = parseFloat(formData[`price${c.code}`] || 0);
+      return acc;
+    }, {});
     onSubmit({ ...formData, price: prices.AED, prices });
   };
 
@@ -1449,26 +1443,22 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
               ))}
             </select>
           </div>
-          <div>
-            <Label htmlFor="priceAED">السعر (AED)</Label>
-            <Input id="priceAED" name="priceAED" type="number" value={formData.priceAED} onChange={handleChange} required />
-          </div>
-          <div>
-            <Label htmlFor="priceUSD">السعر (USD)</Label>
-            <Input id="priceUSD" name="priceUSD" type="number" value={formData.priceUSD} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="priceEUR">السعر (EUR)</Label>
-            <Input id="priceEUR" name="priceEUR" type="number" value={formData.priceEUR} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="priceGBP">السعر (GBP)</Label>
-            <Input id="priceGBP" name="priceGBP" type="number" value={formData.priceGBP} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="priceBTC">السعر (BTC)</Label>
-            <Input id="priceBTC" name="priceBTC" type="number" value={formData.priceBTC} onChange={handleChange} />
-          </div>
+          {currencies.map(c => (
+            <div key={c.code}>
+              <Label htmlFor={`price${c.code}`} className="flex items-center gap-1">
+                السعر ({c.name})
+                <img alt={`علم ${c.name}`} className="w-4 h-3 object-contain ml-1 rtl:mr-1 rtl:ml-0" src={c.flag} />
+              </Label>
+              <Input
+                id={`price${c.code}`}
+                name={`price${c.code}`}
+                type="number"
+                value={formData[`price${c.code}`]}
+                onChange={handleChange}
+                {...(c.code === 'AED' ? { required: true } : {})}
+              />
+            </div>
+          ))}
           <div>
             <Label htmlFor="originalPrice">السعر الأصلي (اختياري)</Label>
             <Input id="originalPrice" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleChange} />

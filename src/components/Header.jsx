@@ -174,20 +174,18 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
-                  <img  alt="علم الإمارات العربية المتحدة" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://darmolhimon.com/wp-content/uploads/2025/06/united-arab-emirates-svgrepo-com.svg" />
-                  الإمارات العربية المتحدة | الإمارات العربية المتحدة
+                  <img alt={`علم ${currency.name}`} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={currency.flag} />
+                  {currency.name}
                   <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
-                <DropdownMenuItem onClick={() => handleFeatureClick('change-country-ksa')} className="hover:bg-blue-50 flex items-center">
-                  <img  alt="علم المملكة العربية السعودية" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://cdn.countryflags.com/thumbs/saudi-arabia/flag-round-250.png" />
-                  المملكة العربية السعودية | KSA
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleFeatureClick('change-country-eg')} className="hover:bg-blue-50 flex items-center">
-                  <img  alt="علم مصر" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://vectorflags.s3.amazonaws.com/flags/eg-circle-01.png" />
-                  مصر | EG
-                </DropdownMenuItem>
+                {currencies.map(c => (
+                  <DropdownMenuItem key={c.code} onClick={() => setCurrency(c)} className="hover:bg-blue-50 flex items-center">
+                    <img alt={`علم ${c.name}`} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={c.flag} />
+                    {c.name} | {c.code}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
@@ -310,21 +308,6 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
               </Link>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white hover:text-blue-200 w-10 h-10">
-                  {React.createElement(currency.icon, { className: 'w-5 h-5' })}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {currencies.map(c => (
-                  <DropdownMenuItem key={c.code} onClick={() => setCurrency(c)} className="flex items-center gap-2 rtl:space-x-reverse">
-                    {React.createElement(c.icon, { className: 'w-4 h-4' })}
-                    <span>{c.code}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-blue-200 w-10 h-10">
               <Link to="/cart">
