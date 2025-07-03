@@ -16,7 +16,8 @@ const HomePage = ({
   categories, 
   recentSearchBooks, 
   bestsellerBooks, 
-  featuresData, 
+  featuresData,
+  banners,
   handleAddToCart, 
   handleToggleWishlist,
   wishlist, 
@@ -62,7 +63,7 @@ const HomePage = ({
         bgColor="bg-slate-100"
         likeCardStyle
       />
-      <FeaturesSection features={featuresData} handleFeatureClick={handleFeatureClick} />
+      <FeaturesSection features={featuresData} banners={banners} handleFeatureClick={handleFeatureClick} />
     </>
   );
 };

@@ -345,6 +345,60 @@ app.delete('/api/payments/:id', async (req, res) => {
   await pool.query('DELETE FROM payments WHERE id=?', [req.params.id]);
   res.sendStatus(204);
 });
+
+// Slider Images
+app.get('/api/sliders', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM sliders ORDER BY id DESC');
+  res.json(rows);
+});
+
+app.post('/api/sliders', async (req, res) => {
+  const { image_url, link, alt } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO sliders (image_url, link, alt) VALUES (?,?,?)',
+    [image_url, link, alt]
+  );
+  const [rows] = await pool.query('SELECT * FROM sliders WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/sliders/:id', async (req, res) => {
+  await pool.query('UPDATE sliders SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM sliders WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/sliders/:id', async (req, res) => {
+  await pool.query('DELETE FROM sliders WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
+
+// Banner Images
+app.get('/api/banners', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM banners ORDER BY id DESC');
+  res.json(rows);
+});
+
+app.post('/api/banners', async (req, res) => {
+  const { image_url, link, alt, group_size } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO banners (image_url, link, alt, group_size) VALUES (?,?,?,?)',
+    [image_url, link, alt, group_size]
+  );
+  const [rows] = await pool.query('SELECT * FROM banners WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/banners/:id', async (req, res) => {
+  await pool.query('UPDATE banners SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM banners WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/banners/:id', async (req, res) => {
+  await pool.query('DELETE FROM banners WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});

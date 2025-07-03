@@ -2,33 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const HeroSection = () => {
-  const slides = [
-    {
-      id: 1,
-      // titleLine1: 'عنوان الصورة الأولى',
-      // titleLine2: 'تابع المزيد',
-      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image-1264-1.png',
-      alt: 'صورة أولى',
-      link: 'https://example.com/link1',
-    },
-    {
-      id: 2,
-      // titleLine1: 'عنوان الصورة الثانية',
-      // titleLine2: 'تعرف على الكتب',
-      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image.png',
-      alt: 'صورة ثانية',
-      link: 'https://example.com/link2',
-    },
-    {
-      id: 3,
-      // titleLine1: 'عنوان الصورة الثالثة',
-      // titleLine2: 'عرض خاص',
-      img: 'https://darmolhimon.com/wp-content/uploads/2025/06/image-1.png',
-      alt: 'صورة ثالثة',
-      link: 'https://example.com/link3',
-    },
-  ];
+const HeroSection = ({ slides = [] }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -67,7 +41,7 @@ const HeroSection = () => {
               <img
                 alt={currentSlide.alt}
                 className="w-full h-full object-cover"
-                src={currentSlide.img}
+                src={currentSlide.image_url}
               />
               <div className="absolute inset-0 bg-black/30"></div>
             </a>

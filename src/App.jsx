@@ -54,6 +54,14 @@ const App = () => {
     const stored = localStorage.getItem('siteSettings');
     return stored ? { ...initialSiteSettings, ...JSON.parse(stored) } : initialSiteSettings;
   });
+  const [heroSlidesState, setHeroSlidesState] = useState(() => {
+    const stored = localStorage.getItem('heroSlides');
+    return stored ? JSON.parse(stored) : heroSlides;
+  });
+  const [bannersState, setBannersState] = useState(() => {
+    const stored = localStorage.getItem('banners');
+    return stored ? JSON.parse(stored) : [];
+  });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
 
@@ -70,7 +78,7 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, p, u] = await Promise.all([
+        const [b, a, c, s, o, pay, p, u, sliders, banners] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -79,6 +87,8 @@ const App = () => {
           api.getPayments(),
           api.getPlans(),
           api.getUsers(),
+          api.getSliders(),
+          api.getBanners(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -88,6 +98,8 @@ const App = () => {
         setPayments(pay);
         setPlans(p);
         setUsers(u);
+        setHeroSlidesState(sliders);
+        setBannersState(banners);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -130,6 +142,14 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
   }, [siteSettingsState]);
+
+  useEffect(() => {
+    localStorage.setItem('heroSlides', JSON.stringify(heroSlidesState));
+  }, [heroSlidesState]);
+
+  useEffect(() => {
+    localStorage.setItem('banners', JSON.stringify(bannersState));
+  }, [bannersState]);
 
   useEffect(() => {
     if (siteSettingsState.siteName) {
@@ -270,6 +290,10 @@ const App = () => {
                     setUsers={setUsers}
                     siteSettings={siteSettingsState}
                     setSiteSettings={setSiteSettingsState}
+                    sliders={heroSlidesState}
+                    setSliders={setHeroSlidesState}
+                    banners={bannersState}
+                    setBanners={setBannersState}
                   />
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
@@ -286,7 +310,7 @@ const App = () => {
                 )
               }
             />
-            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlides} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={featuresData} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
