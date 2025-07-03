@@ -241,6 +241,92 @@ app.delete('/api/users/:id', async (req, res) => {
   await pool.query('DELETE FROM users WHERE id=?', [req.params.id]);
   res.sendStatus(204);
 });
+
+// Payment Methods
+app.get('/api/payment-methods', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM payment_methods');
+  res.json(rows);
+});
+
+app.post('/api/payment-methods', async (req, res) => {
+  const { name } = req.body;
+  const [result] = await pool.execute('INSERT INTO payment_methods (name) VALUES (?)', [name]);
+  const [rows] = await pool.query('SELECT * FROM payment_methods WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/payment-methods/:id', async (req, res) => {
+  await pool.query('UPDATE payment_methods SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM payment_methods WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/payment-methods/:id', async (req, res) => {
+  await pool.query('DELETE FROM payment_methods WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
+
+// Coupons
+app.get('/api/coupons', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM coupons');
+  res.json(rows);
+});
+
+app.post('/api/coupons', async (req, res) => {
+  const { code, discount_type, discount_value, expires_at, is_active } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO coupons (code, discount_type, discount_value, expires_at, is_active) VALUES (?,?,?,?,?)',
+    [code, discount_type, discount_value, expires_at || null, is_active !== false]
+  );
+  const [rows] = await pool.query('SELECT * FROM coupons WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/coupons/:id', async (req, res) => {
+  await pool.query('UPDATE coupons SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM coupons WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/coupons/:id', async (req, res) => {
+  await pool.query('DELETE FROM coupons WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
+
+// Payments
+app.get('/api/payments', async (_req, res) => {
+  const [rows] = await pool.query(
+    `SELECT p.*, c.name AS customer_name, o.status AS order_status, sp.name AS plan_name
+     FROM payments p
+     LEFT JOIN customers c ON p.customer_id=c.id
+     LEFT JOIN orders o ON p.order_id=o.id
+     LEFT JOIN subscriptions s ON p.subscription_id=s.id
+     LEFT JOIN subscription_plans sp ON s.plan_id=sp.id
+     ORDER BY p.transaction_date DESC`
+  );
+  res.json(rows);
+});
+
+app.post('/api/payments', async (req, res) => {
+  const { customer_id, order_id, subscription_id, payment_method_id, coupon_id, amount, status = 'pending' } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO payments (customer_id, order_id, subscription_id, payment_method_id, coupon_id, amount, status) VALUES (?,?,?,?,?,?,?)',
+    [customer_id || null, order_id || null, subscription_id || null, payment_method_id || null, coupon_id || null, amount, status]
+  );
+  const [rows] = await pool.query('SELECT * FROM payments WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/payments/:id', async (req, res) => {
+  await pool.query('UPDATE payments SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM payments WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/payments/:id', async (req, res) => {
+  await pool.query('DELETE FROM payments WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});

@@ -111,3 +111,34 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255),
   role ENUM('admin','author','seller','customer') NOT NULL DEFAULT 'customer'
 );
+
+CREATE TABLE IF NOT EXISTS payment_methods (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS coupons (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(50) NOT NULL UNIQUE,
+  discount_type ENUM('percentage','fixed') NOT NULL,
+  discount_value DECIMAL(10,2) NOT NULL,
+  expires_at DATETIME,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT,
+  order_id INT,
+  subscription_id INT,
+  payment_method_id INT,
+  coupon_id INT,
+  amount DECIMAL(10,2),
+  status VARCHAR(50) DEFAULT 'pending',
+  transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+  FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE SET NULL,
+  FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE SET NULL,
+  FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE SET NULL
+);

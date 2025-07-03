@@ -13,6 +13,7 @@ import {
   User,
   Store,
   DollarSign,
+  CreditCard,
   Eye,
   Plus,
   Edit,
@@ -46,6 +47,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'orders', name: 'الطلبات', icon: Package },
     { id: 'customers', name: 'العملاء', icon: UserCheck },
     { id: 'users', name: 'المستخدمون', icon: User },
+    { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'settings', name: 'الإعدادات', icon: Settings }
   ];
@@ -923,6 +925,54 @@ const DashboardOrders = ({ orders, setOrders }) => {
   );
 };
 
+const DashboardPayments = ({ payments, setPayments }) => {
+  const handleDelete = async (id) => {
+    try {
+      await api.deletePayment(id);
+      setPayments(payments.filter(p => p.id !== id));
+      toast({ title: 'تم حذف عملية الدفع', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'حدث خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">سجل المدفوعات</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العميل</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الطلب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">القيمة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
+              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {payments.map(p => (
+              <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.customer_name || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.order_id || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.amount}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.status}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(p.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const DashboardOverview = ({ dashboardStats }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1343,7 +1393,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPlans, setUsers, siteSettings, setSiteSettings }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -1352,6 +1402,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     orders: 'الطلبات',
     customers: 'العملاء',
     users: 'المستخدمون',
+    payments: 'المدفوعات',
     plans: 'خطط الاشتراك',
     settings: 'الإعدادات',
   };
@@ -1370,6 +1421,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
+        {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}

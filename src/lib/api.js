@@ -46,6 +46,21 @@ export const api = {
   updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteOrder: (id) => request(`/api/orders/${id}`, { method: 'DELETE' }),
 
+  getPaymentMethods: () => request('/api/payment-methods'),
+  addPaymentMethod: (data) => request('/api/payment-methods', { method: 'POST', body: JSON.stringify(data) }),
+  updatePaymentMethod: (id, data) => request(`/api/payment-methods/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePaymentMethod: (id) => request(`/api/payment-methods/${id}`, { method: 'DELETE' }),
+
+  getCoupons: () => request('/api/coupons'),
+  addCoupon: (data) => request('/api/coupons', { method: 'POST', body: JSON.stringify(data) }),
+  updateCoupon: (id, data) => request(`/api/coupons/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteCoupon: (id) => request(`/api/coupons/${id}`, { method: 'DELETE' }),
+
+  getPayments: () => request('/api/payments'),
+  addPayment: (data) => request('/api/payments', { method: 'POST', body: JSON.stringify(data) }),
+  updatePayment: (id, data) => request(`/api/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePayment: (id) => request(`/api/payments/${id}`, { method: 'DELETE' }),
+
   getSettings: () => request('/api/settings'),
   updateSettings: (data) => request('/api/settings', { method: 'PUT', body: JSON.stringify(data) }),
   getPlans: () => request('/api/plans'),
