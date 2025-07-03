@@ -77,7 +77,8 @@ app.get('/api/categories', async (_req, res) => {
 });
 
 app.post('/api/categories', async (req, res) => {
-  const [result] = await pool.execute('INSERT INTO categories (name) VALUES (?)', [req.body.name]);
+  const { name, icon } = req.body;
+  const [result] = await pool.execute('INSERT INTO categories (name, icon) VALUES (?,?)', [name, icon]);
   const [rows] = await pool.query('SELECT * FROM categories WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
 });

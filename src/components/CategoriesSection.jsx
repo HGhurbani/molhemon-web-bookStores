@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import * as Icons from 'lucide-react';
 
 const CategoriesSection = ({ categories }) => {
   return (
@@ -9,7 +10,7 @@ const CategoriesSection = ({ categories }) => {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 sm:gap-3">
           {categories.map((category, index) => {
-            const IconComponent = category.icon;
+            const IconComponent = Icons[category.icon] || Icons.BookOpen;
             return (
               <motion.div
                 key={category.id}

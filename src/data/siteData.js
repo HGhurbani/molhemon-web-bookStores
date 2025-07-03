@@ -34,18 +34,18 @@ export const heroSlides = [
 
 
 export const categories = [
-  { id: 'books', name: 'الكتب', icon: BookOpen },
-  { id: 'fiction', name: 'الخيال', icon: BookOpen },
-  { id: 'nonfiction', name: 'غير الخيال', icon: BookOpen },
-  { id: 'ebooks', name: 'إلكترونية', icon: Smartphone },
-  { id: 'audiobooks', name: 'صوتية', icon: Headphones },
-  { id: 'teen', name: 'المراهقين', icon: Users },
-  { id: 'kids', name: 'الأطفال', icon: Gift },
-  { id: 'trending', name: 'رائجة', icon: TrendingUp},
-  { id: 'deals', name: 'العروض', icon: DollarSign },
-  { id: 'bestseller', name: 'الأكثر مبيعاً', icon: Award },
-  { id: 'etc1', name: 'إلخ', icon: Menu },
-  { id: 'etc2', name: 'إلخ', icon: Menu }
+  { id: 'books', name: 'الكتب', icon: 'BookOpen' },
+  { id: 'fiction', name: 'الخيال', icon: 'BookOpen' },
+  { id: 'nonfiction', name: 'غير الخيال', icon: 'BookOpen' },
+  { id: 'ebooks', name: 'إلكترونية', icon: 'Smartphone' },
+  { id: 'audiobooks', name: 'صوتية', icon: 'Headphones' },
+  { id: 'teen', name: 'المراهقين', icon: 'Users' },
+  { id: 'kids', name: 'الأطفال', icon: 'Gift' },
+  { id: 'trending', name: 'رائجة', icon: 'TrendingUp'},
+  { id: 'deals', name: 'العروض', icon: 'DollarSign' },
+  { id: 'bestseller', name: 'الأكثر مبيعاً', icon: 'Award' },
+  { id: 'etc1', name: 'إلخ', icon: 'Menu' },
+  { id: 'etc2', name: 'إلخ', icon: 'Menu' }
 ];
 
 export const books = [

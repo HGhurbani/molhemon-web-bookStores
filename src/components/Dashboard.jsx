@@ -212,7 +212,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
 };
 
 const CategoryForm = ({ category, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ id: '', name: '', ...category });
+  const [formData, setFormData] = useState({ id: '', name: '', icon: '', ...category });
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -229,6 +229,10 @@ const CategoryForm = ({ category, onSubmit, onCancel }) => {
         <div>
           <Label htmlFor="name">الاسم</Label>
           <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="icon">الأيقونة</Label>
+          <Input id="icon" name="icon" value={formData.icon} onChange={handleChange} required />
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -298,6 +302,7 @@ const DashboardCategories = ({ categories, setCategories }) => {
             <tr>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الأيقونة</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -306,6 +311,7 @@ const DashboardCategories = ({ categories, setCategories }) => {
               <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.id}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.icon}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCategory(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
