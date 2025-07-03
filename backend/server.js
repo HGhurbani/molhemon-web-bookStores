@@ -214,6 +214,32 @@ app.post('/api/subscriptions', async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM subscriptions WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
 });
+
+app.get('/api/users', async (_req, res) => {
+  const [rows] = await pool.query('SELECT * FROM users');
+  res.json(rows);
+});
+
+app.post('/api/users', async (req, res) => {
+  const { name, email, password, role } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO users (name, email, password, role) VALUES (?,?,?,?)',
+    [name, email, password, role]
+  );
+  const [rows] = await pool.query('SELECT * FROM users WHERE id=?', [result.insertId]);
+  res.status(201).json(rows[0]);
+});
+
+app.put('/api/users/:id', async (req, res) => {
+  await pool.query('UPDATE users SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM users WHERE id=?', [req.params.id]);
+  res.json(rows[0]);
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+  await pool.query('DELETE FROM users WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});

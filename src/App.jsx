@@ -42,6 +42,7 @@ const App = () => {
     const stored = localStorage.getItem('customers');
     return stored ? JSON.parse(stored) : initialCustomers;
   });
+  const [users, setUsers] = useState([]);
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
@@ -65,13 +66,14 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     (async () => {
       try {
-        const [b, a, c, s, o, p] = await Promise.all([
+        const [b, a, c, s, o, p, u] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
           api.getSettings(),
           api.getOrders(),
           api.getPlans(),
+          api.getUsers(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -79,6 +81,7 @@ const App = () => {
         setSiteSettingsState(prev => ({ ...prev, ...s }));
         setOrders(o);
         setPlans(p);
+        setUsers(u);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -238,6 +241,8 @@ const App = () => {
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
                     setPlans={setPlans}
+                    users={users}
+                    setUsers={setUsers}
                     siteSettings={siteSettingsState}
                     setSiteSettings={setSiteSettingsState}
                   />
