@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { currencies } from '@/lib/currencyContext.jsx';
 import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
@@ -25,7 +25,8 @@ import {
   Home,
   Save,
   Image,
-  Zap
+  Zap,
+  Database
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -59,7 +60,8 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
     { id: 'banners', name: 'البانرات', icon: Image },
-    { id: 'settings', name: 'الإعدادات', icon: Settings }
+    { id: 'settings', name: 'الإعدادات', icon: Settings },
+    { id: 'database', name: 'تثبيت قاعدة البيانات', icon: Database }
   ];
 
   return (
@@ -2013,6 +2015,73 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
   );
 };
 
+const DashboardDatabase = () => {
+  const [installed, setInstalled] = useState(false);
+  const [formData, setFormData] = useState({ host: 'localhost', user: '', password: '', database: '', port: 3306 });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const status = await api.getDbStatus();
+        setInstalled(status.installed);
+      } catch {}
+    })();
+  }, []);
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      await api.setupDatabase(formData);
+      setInstalled(true);
+      toast({ title: 'تم التثبيت بنجاح!' });
+    } catch {
+      toast({ title: 'خطأ أثناء التثبيت', variant: 'destructive' });
+    }
+  };
+
+  if (installed) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white text-center">
+        قاعدة البيانات مثبتة وجاهزة للاستخدام.
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white max-w-lg">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">تثبيت قاعدة البيانات</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="host">المضيف</Label>
+          <Input id="host" name="host" value={formData.host} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="user">المستخدم</Label>
+          <Input id="user" name="user" value={formData.user} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="password">كلمة المرور</Label>
+          <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="database">قاعدة البيانات</Label>
+          <Input id="database" name="database" value={formData.database} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="port">المنفذ</Label>
+          <Input id="port" name="port" type="number" value={formData.port} onChange={handleChange} />
+        </div>
+        <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">تثبيت</Button>
+      </form>
+    </motion.div>
+  );
+};
+
 
 const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
   <motion.div
@@ -2052,6 +2121,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     sliders: 'السلايدر',
     banners: 'البانرات',
     settings: 'الإعدادات',
+    database: 'تثبيت قاعدة البيانات',
   };
 
   return (
@@ -2079,6 +2149,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'settings' && (
           <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
         )}
+        {dashboardSection === 'database' && <DashboardDatabase />}
       </main>
     </div>
   );

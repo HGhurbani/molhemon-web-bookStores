@@ -2,6 +2,8 @@ import express from 'express';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -9,14 +11,81 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'u6axwhnwuhpzi',
-  password: process.env.DB_PASSWORD || '#2@l$4e5i~5+',
-  database: process.env.DB_NAME || 'dbxs5qfidu3hqr',
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
+const CONFIG_PATH = path.join(process.cwd(), 'backend', 'db-config.json');
+
+function loadDbConfig() {
+  if (fs.existsSync(CONFIG_PATH)) {
+    try {
+      return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    } catch {
+      // ignore
+    }
+  }
+  return {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'u6axwhnwuhpzi',
+    password: process.env.DB_PASSWORD || '#2@l$4e5i~5+',
+    database: process.env.DB_NAME || 'dbxs5qfidu3hqr',
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+  };
+}
+
+let pool;
+function createPool(cfg) {
+  pool = mysql.createPool({
+    ...cfg,
+    waitForConnections: true,
+    connectionLimit: 10,
+  });
+}
+
+createPool(loadDbConfig());
+
+app.get('/api/db-status', async (_req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ installed: true });
+  } catch {
+    res.json({ installed: false });
+  }
+});
+
+app.post('/api/setup-database', async (req, res) => {
+  const cfg = {
+    host: req.body.host,
+    user: req.body.user,
+    password: req.body.password,
+    database: req.body.database,
+    port: req.body.port || 3306,
+  };
+  try {
+    const connection = await mysql.createConnection({
+      host: cfg.host,
+      user: cfg.user,
+      password: cfg.password,
+      port: cfg.port,
+    });
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${cfg.database}\``);
+    await connection.end();
+
+    const newPool = mysql.createPool({
+      ...cfg,
+      waitForConnections: true,
+      connectionLimit: 10,
+    });
+    const schema = fs.readFileSync(path.join(process.cwd(), 'backend', 'schema.sql'), 'utf8');
+    const statements = schema.split(/;\s*\n/);
+    for (const stmt of statements) {
+      const s = stmt.trim();
+      if (s) await newPool.query(s);
+    }
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
+    pool = newPool;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DB setup failed', err);
+    res.status(500).json({ error: 'Setup failed' });
+  }
 });
 
 app.get('/api/books', async (_req, res) => {
