@@ -112,21 +112,57 @@ app.post('/api/books/:id/ratings', async (req, res) => {
 });
 
 app.get('/api/authors', async (_req, res) => {
-  const [rows] = await pool.query('SELECT * FROM authors');
-  res.json(rows);
+  const [authors] = await pool.query('SELECT * FROM authors');
+  if (authors.length) {
+    const ids = authors.map(a => a.id);
+    const [bookCounts] = await pool.query(
+      'SELECT author_id AS id, COUNT(*) AS count FROM books WHERE author_id IN (?) GROUP BY author_id',
+      [ids]
+    );
+    const [soldCounts] = await pool.query(
+      `SELECT b.author_id AS id, SUM(oi.quantity) AS sold FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE b.author_id IN (?) GROUP BY b.author_id`,
+      [ids]
+    );
+    const bcMap = Object.fromEntries(bookCounts.map(r => [r.id, r.count]));
+    const scMap = Object.fromEntries(soldCounts.map(r => [r.id, r.sold]));
+    authors.forEach(a => {
+      a.booksCount = bcMap[a.id] || 0;
+      a.soldCount = scMap[a.id] || 0;
+    });
+  }
+  res.json(authors);
 });
 
 app.post('/api/authors', async (req, res) => {
-  const data = req.body;
-  const [result] = await pool.execute('INSERT INTO authors (name, bio) VALUES (?,?)', [data.name, data.bio]);
+  const { name, bio, image, followers = 0 } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO authors (name, bio, image, followers) VALUES (?,?,?,?)',
+    [name, bio, image || null, followers]
+  );
   const [rows] = await pool.query('SELECT * FROM authors WHERE id=?', [result.insertId]);
-  res.status(201).json(rows[0]);
+  const author = rows[0];
+  const [bookCount] = await pool.query('SELECT COUNT(*) AS count FROM books WHERE author_id=?', [author.id]);
+  const [soldCount] = await pool.query(
+    'SELECT SUM(oi.quantity) AS sold FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE b.author_id=?',
+    [author.id]
+  );
+  author.booksCount = bookCount[0].count;
+  author.soldCount = soldCount[0].sold || 0;
+  res.status(201).json(author);
 });
 
 app.put('/api/authors/:id', async (req, res) => {
   await pool.query('UPDATE authors SET ? WHERE id=?', [req.body, req.params.id]);
   const [rows] = await pool.query('SELECT * FROM authors WHERE id=?', [req.params.id]);
-  res.json(rows[0]);
+  const author = rows[0];
+  const [bookCount] = await pool.query('SELECT COUNT(*) AS count FROM books WHERE author_id=?', [author.id]);
+  const [soldCount] = await pool.query(
+    'SELECT SUM(oi.quantity) AS sold FROM order_items oi JOIN books b ON oi.book_id=b.id WHERE b.author_id=?',
+    [author.id]
+  );
+  author.booksCount = bookCount[0].count;
+  author.soldCount = soldCount[0].sold || 0;
+  res.json(author);
 });
 
 app.delete('/api/authors/:id', async (req, res) => {
