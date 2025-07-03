@@ -68,7 +68,7 @@ export const books = [
     pages: 120,
     format: 'غلاف ورقي',
     coverImage: '',
-    type: 'both',
+    type: 'physical',
     sampleAudio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     tags: ''
   },
@@ -91,7 +91,7 @@ export const books = [
     pages: 250,
     format: 'غلاف مقوى',
     coverImage: '',
-    type: '',
+    type: 'physical',
     tags: ''
   },
   {
@@ -112,7 +112,7 @@ export const books = [
     pages: 320,
     format: 'كتاب إلكتروني',
     coverImage: '',
-    type: '',
+    type: 'ebook',
     tags: ''
   },
    {
@@ -133,7 +133,7 @@ export const books = [
     pages: 120,
     format: 'غلاف ورقي',
     coverImage: '',
-    type: '',
+    type: 'physical',
     tags: ''
   },
   {
@@ -154,7 +154,7 @@ export const books = [
     pages: 250,
     format: 'غلاف مقوى',
     coverImage: '',
-    type: '',
+    type: 'physical',
     tags: ''
   },
   {
@@ -175,7 +175,7 @@ export const books = [
     pages: 320,
     format: 'كتاب إلكتروني',
     coverImage: '',
-    type: '',
+    type: 'ebook',
     tags: ''
   }
 ];

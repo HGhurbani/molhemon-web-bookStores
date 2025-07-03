@@ -1160,9 +1160,9 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">اختر نوع الكتاب</option>
+              <option value="physical">كتاب ورقي (يتم توصيله)</option>
               <option value="ebook">كتاب إلكتروني</option>
               <option value="audio">كتاب صوتي</option>
-              <option value="both">كلاهما</option>
             </select>
           </div>
           <div>

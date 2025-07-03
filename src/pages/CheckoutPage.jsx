@@ -26,7 +26,10 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
 
   // Example logic for shipping and discounts based on total price
   const freeShippingThreshold = 150.00; // Example: Free shipping over 150 AED
-  const shippingCost = totalPrice >= freeShippingThreshold ? 0 : 25.00; // Example shipping cost
+  const hasPhysical = cart.some(item => item.type === 'physical' || !item.type);
+  const shippingCost = hasPhysical
+    ? (totalPrice >= freeShippingThreshold ? 0 : 25.00)
+    : 0;
 
   // This is based on the image's total pricing, which seems to imply an existing discount
   const imageDisplayedProductSubtotal = 45.00 + 60.00; // From the image, two items

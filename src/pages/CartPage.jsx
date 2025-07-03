@@ -18,7 +18,10 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
   const discountThreshold = 105.00; // Example: Discount if total is over 105 AED
   const discountAmount = 5.00; // Example: 5 AED discount
 
-  const shippingCost = totalPrice >= freeShippingThreshold ? 0 : 25.00; // Example shipping cost
+  const hasPhysical = cart.some(item => item.type === 'physical' || !item.type);
+  const shippingCost = hasPhysical
+    ? (totalPrice >= freeShippingThreshold ? 0 : 25.00)
+    : 0;
   const appliedDiscount = totalPrice >= discountThreshold ? discountAmount : 0;
   const finalTotal = totalPrice + shippingCost - appliedDiscount;
 
