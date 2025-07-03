@@ -36,6 +36,11 @@ export const api = {
   updateCustomer: (id, data) => request(`/api/customers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCustomer: (id) => request(`/api/customers/${id}`, { method: 'DELETE' }),
 
+  getOrders: () => request('/api/orders'),
+  addOrder: (data) => request('/api/orders', { method: 'POST', body: JSON.stringify(data) }),
+  updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteOrder: (id) => request(`/api/orders/${id}`, { method: 'DELETE' }),
+
   getSettings: () => request('/api/settings'),
   updateSettings: (data) => request('/api/settings', { method: 'PUT', body: JSON.stringify(data) }),
 };

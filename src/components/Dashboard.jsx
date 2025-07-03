@@ -604,18 +604,24 @@ const DashboardOrders = ({ orders, setOrders }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleUpdateStatus = (id, status) => {
-    const updated = orders.map((o) => (o.id === id ? { ...o, status } : o));
-    setOrders(updated);
-    localStorage.setItem('orders', JSON.stringify(updated));
-    toast({ title: 'تم تحديث حالة الطلب' });
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      const updatedOrder = await api.updateOrder(id, { status });
+      setOrders(orders.map(o => o.id === id ? updatedOrder : o));
+      toast({ title: 'تم تحديث حالة الطلب' });
+    } catch (e) {
+      toast({ title: 'حدث خطأ أثناء التحديث', variant: 'destructive' });
+    }
   };
 
-  const handleDeleteOrder = (id) => {
-    const updated = orders.filter((o) => o.id !== id);
-    setOrders(updated);
-    localStorage.setItem('orders', JSON.stringify(updated));
-    toast({ title: 'تم حذف الطلب', variant: 'destructive' });
+  const handleDeleteOrder = async (id) => {
+    try {
+      await api.deleteOrder(id);
+      setOrders(orders.filter(o => o.id !== id));
+      toast({ title: 'تم حذف الطلب', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'حدث خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   return (

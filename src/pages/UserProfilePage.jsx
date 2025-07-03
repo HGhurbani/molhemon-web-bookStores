@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label.jsx';
 import { User, ShoppingBag, Heart, Settings, LogOut, Edit2, MapPin, CreditCard as CreditCardIcon, Bell, Gift, Shield } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { toast } from '@/components/ui/use-toast.js';
+import api from '@/lib/api.js';
 
 const UserProfilePage = ({ handleFeatureClick }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,11 +37,14 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   useEffect(() => {
     const storedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     setWishlist(storedWishlist);
-    // Mock orders
-    setOrders([
-      { id: 'ORD123', date: '2025-06-15', total: 120.50, status: 'تم التوصيل', items: [{title: 'كتاب 1'}, {title: 'كتاب 2'}] },
-      { id: 'ORD124', date: '2025-06-10', total: 85.00, status: 'قيد الشحن', items: [{title: 'كتاب 3'}] },
-    ]);
+    (async () => {
+      try {
+        const ordersData = await api.getOrders();
+        setOrders(ordersData);
+      } catch (e) {
+        console.error('Failed to fetch orders', e);
+      }
+    })();
   }, []);
 
   const handleTabChange = (tab) => {

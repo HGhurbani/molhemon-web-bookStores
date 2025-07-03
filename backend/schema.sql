@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_id INT,
   seller_id INT,
   total DECIMAL(10,2),
+  status VARCHAR(50) DEFAULT 'قيد المعالجة',
   order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
   FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE SET NULL
