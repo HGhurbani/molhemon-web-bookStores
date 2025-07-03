@@ -23,6 +23,7 @@ import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
 import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
 import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
+import EbookReaderPage from '@/pages/EbookReaderPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
@@ -351,6 +352,7 @@ const App = () => {
               <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
               <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
