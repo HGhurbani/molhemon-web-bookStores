@@ -23,6 +23,7 @@ import EbookPage from '@/pages/EbookPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { categories as initialCategories, books as initialBooks, authors as initialAuthors, sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, featuresData, heroSlides, recentSearchBooks, bestsellerBooks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
+import api from '@/lib/api.js';
 import { TrendingUp } from 'lucide-react';
 
 const App = () => {
@@ -31,8 +32,8 @@ const App = () => {
   const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(localStorage.getItem('customerLoggedIn') === 'true');
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
-  const [books, setBooks] = useState(initialBooks);
-  const [authors, setAuthors] = useState(initialAuthors);
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [sellers, setSellers] = useState(() => {
     const stored = localStorage.getItem('sellers');
     return stored ? JSON.parse(stored) : initialSellers;
@@ -41,7 +42,7 @@ const App = () => {
     const stored = localStorage.getItem('customers');
     return stored ? JSON.parse(stored) : initialCustomers;
   });
-  const [categoriesState, setCategoriesState] = useState(initialCategories);
+  const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
@@ -61,6 +62,22 @@ const App = () => {
     if (storedOrders) setOrders(JSON.parse(storedOrders));
     const storedSettings = localStorage.getItem('siteSettings');
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
+    (async () => {
+      try {
+        const [b, a, c, s] = await Promise.all([
+          api.getBooks(),
+          api.getAuthors(),
+          api.getCategories(),
+          api.getSettings(),
+        ]);
+        setBooks(b);
+        setAuthors(a);
+        setCategoriesState(c);
+        setSiteSettingsState(prev => ({ ...prev, ...s }));
+      } catch (err) {
+        console.error('API fetch failed', err);
+      }
+    })();
   }, []);
 
   useEffect(() => {
