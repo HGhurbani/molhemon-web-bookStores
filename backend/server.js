@@ -338,6 +338,38 @@ app.put('/api/settings', async (req, res) => {
   res.json(rows[0]);
 });
 
+app.post('/api/google-merchant/import', async (_req, res) => {
+  const [rows] = await pool.query(
+    'SELECT googleMerchantId, googleApiKey FROM settings WHERE id=1'
+  );
+  const cfg = rows[0] || {};
+  if (!cfg.googleMerchantId || !cfg.googleApiKey) {
+    return res
+      .status(400)
+      .json({ error: 'Google Merchant configuration missing' });
+  }
+  try {
+    const resp = await fetch(
+      `https://shoppingcontent.googleapis.com/content/v2.1/${cfg.googleMerchantId}/products?key=${cfg.googleApiKey}`
+    );
+    const data = await resp.json();
+    const products = data.resources || data.items || [];
+    const imported = [];
+    for (const p of products) {
+      const [result] = await pool.execute(
+        'INSERT INTO books (title, price, description, cover_image) VALUES (?,?,?,?)',
+        [p.title, (p.price && p.price.value) || 0, p.description || '', p.imageLink || '']
+      );
+      const [bookRows] = await pool.query('SELECT * FROM books WHERE id=?', [result.insertId]);
+      imported.push(bookRows[0]);
+    }
+    res.json(imported);
+  } catch (err) {
+    console.error('Failed to import Google Merchant products', err);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

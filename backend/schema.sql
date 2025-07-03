@@ -80,7 +80,9 @@ CREATE TABLE IF NOT EXISTS settings (
   stripePublicKey VARCHAR(255),
   stripeSecretKey VARCHAR(255),
   paypalClientId VARCHAR(255),
-  paypalSecret VARCHAR(255)
+  paypalSecret VARCHAR(255),
+  googleMerchantId VARCHAR(255),
+  googleApiKey VARCHAR(255)
 );
 
 INSERT INTO settings (id, siteName) VALUES (1, 'Molhemoon') ON DUPLICATE KEY UPDATE siteName = VALUES(siteName);
