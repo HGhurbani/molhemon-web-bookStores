@@ -91,9 +91,6 @@ export const api = {
   updateFeature: (id, data) => request(`/api/features/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteFeature: (id) => request(`/api/features/${id}`, { method: 'DELETE' }),
 
-  setupDatabase: (data) => request('/api/setup-database', { method: 'POST', body: JSON.stringify(data) }),
-  getDbStatus: () => request('/api/db-status'),
-
   getBookRatings: (bookId) => request(`/api/books/${bookId}/ratings`),
   addBookRating: (bookId, data) =>
     request(`/api/books/${bookId}/ratings`, { method: 'POST', body: JSON.stringify(data) }),
