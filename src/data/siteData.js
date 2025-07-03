@@ -69,6 +69,7 @@ export const books = [
     format: 'غلاف ورقي',
     coverImage: '',
     type: 'physical',
+    deliveryMethod: 'شحن عادي',
     sampleAudio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     tags: ''
   },
@@ -92,6 +93,7 @@ export const books = [
     format: 'غلاف مقوى',
     coverImage: '',
     type: 'physical',
+    deliveryMethod: 'توصيل سريع',
     tags: ''
   },
   {
@@ -113,6 +115,7 @@ export const books = [
     format: 'كتاب إلكتروني',
     coverImage: '',
     type: 'ebook',
+    ebookFile: '',
     tags: ''
   },
    {
