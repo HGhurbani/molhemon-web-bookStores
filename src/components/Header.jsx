@@ -256,7 +256,8 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
                   className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0"
                   src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png"
                 />
-                <span className="font-semibold text-lg">{siteSettings.siteName || 'ملهمون'}</span>
+                {/* Keep site name for screen readers but hide visually */}
+                <span className="sr-only">{siteSettings.siteName || 'ملهمون'}</span>
               </Link>
             </motion.div>
           </div>
