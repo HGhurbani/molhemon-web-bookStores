@@ -25,8 +25,30 @@ import { useCurrency } from '@/lib/currencyContext.jsx';
 const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('recentSearches')) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [randomSuggestions, setRandomSuggestions] = useState([]);
   const { currency, setCurrency, currencies } = useCurrency();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (books.length) {
+      const randomTitles = [...books]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 8)
+        .map(b => b.title);
+      setRandomSuggestions(randomTitles);
+    }
+  }, [books]);
+
+  useEffect(() => {
+    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+  }, [recentSearches]);
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -42,6 +64,16 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
     ).slice(0, 5);
     setSuggestions(filtered);
   }, [searchTerm, books]);
+
+  const handleSearchSubmit = (term = searchTerm) => {
+    const query = term.trim();
+    if (!query) return;
+    setRecentSearches(prev => {
+      const updated = [query, ...prev.filter(t => t !== query)].slice(0, 8);
+      return updated;
+    });
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
 
   const DropdownWithSearch = ({ label, items, isCategory = false, hideOnMobile = false }) => {
     const [filterText, setFilterText] = useState('');
@@ -143,6 +175,11 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
 
   const deliveryItems = ["توصيل سريع", "شحن عادي", "استلام من المتجر"];
 
+  const searchSuggestions = React.useMemo(() => {
+    const randoms = randomSuggestions.filter(t => !recentSearches.includes(t));
+    return recentSearches.concat(randoms).slice(0, 8);
+  }, [recentSearches, randomSuggestions]);
+
   return (
     <>
     <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl mb-4">
@@ -232,6 +269,12 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm h-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearchSubmit();
+                  }
+                }}
               />
               {suggestions.length > 0 && (
                 <ul className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded-md mt-1 max-h-48 overflow-auto text-sm">
@@ -244,7 +287,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
               )}
               <Button
                 className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white"
-                onClick={() => navigate(`/search?q=${encodeURIComponent(searchTerm)}`)}
+                onClick={() => handleSearchSubmit()}
                 size="sm"
               >
                 <Search className="w-4 h-4" />
@@ -323,8 +366,8 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
           </div>
         </div>
         <div className="flex items-center justify-center space-x-3 rtl:space-x-reverse py-2 text-xs text-white overflow-x-auto whitespace-nowrap">
-            {["بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث", "بحث مقترح", "بحث حديث"].map((item,idx) => (
-                 <span key={idx} className="cursor-pointer hover:text-blue-200" onClick={() => handleFeatureClick(item.replace(/\s/g, '-'))}>{item}</span>
+            {searchSuggestions.map((item, idx) => (
+                 <span key={idx} className="cursor-pointer hover:text-blue-200" onClick={() => handleSearchSubmit(item)}>{item}</span>
             ))}
         </div>
       </div>
