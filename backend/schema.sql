@@ -102,3 +102,11 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
   FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  password VARCHAR(255),
+  role ENUM('admin','author','seller','customer') NOT NULL DEFAULT 'customer'
+);
