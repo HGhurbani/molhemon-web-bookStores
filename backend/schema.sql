@@ -2,7 +2,9 @@
 CREATE TABLE IF NOT EXISTS authors (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  bio TEXT
+  bio TEXT,
+  image VARCHAR(255),
+  followers INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS categories (

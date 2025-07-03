@@ -104,7 +104,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
 
 
 const AuthorForm = ({ author, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', bio: '', imgPlaceholder: '', ...author });
+  const [formData, setFormData] = useState({ name: '', bio: '', image: '', imgPlaceholder: '', followers: 0, ...author });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,14 +113,7 @@ const AuthorForm = ({ author, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const prices = {
-      AED: parseFloat(formData.priceAED || 0),
-      USD: parseFloat(formData.priceUSD || 0),
-      EUR: parseFloat(formData.priceEUR || 0),
-      GBP: parseFloat(formData.priceGBP || 0),
-      BTC: parseFloat(formData.priceBTC || 0),
-    };
-    onSubmit({ ...formData, price: prices.AED, prices });
+    onSubmit(formData);
   };
 
   return (
@@ -138,6 +131,24 @@ const AuthorForm = ({ author, onSubmit, onCancel }) => {
         <div>
           <Label htmlFor="imgPlaceholder">وصف الصورة (لـ Unsplash)</Label>
           <Input id="imgPlaceholder" name="imgPlaceholder" value={formData.imgPlaceholder} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="image">الصورة</Label>
+          <input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => setFormData(prev => ({ ...prev, image: reader.result }));
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          />
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -206,6 +217,9 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
           <thead className="bg-slate-50">
             <tr>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المباعة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المتابعون</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -213,6 +227,9 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
             {authors.map(a => (
               <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{a.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.booksCount}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.soldCount}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.followers}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingAuthor(a); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>

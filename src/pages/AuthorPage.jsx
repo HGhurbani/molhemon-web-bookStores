@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
-import { BookOpen, Star, Users, Edit3, PlusCircle, BookOpenText } from 'lucide-react';
+import { BookOpen, Star, Users, Edit3, PlusCircle, BookOpenText, TrendingUp } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import AuthorsSection from '@/components/AuthorsSection.jsx'; // Import AuthorsSection
 import { toast } from "@/components/ui/use-toast.js";
@@ -58,10 +58,11 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
 >
   <div className="flex flex-col items-center md:items-start text-center md:text-right md:flex-row md:space-x-4 rtl:md:space-x-reverse md:justify-start md:w-full">
     <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0 mb-4 md:mb-0">
-      <img  
-        alt={`صورة المؤلف ${author.name}`} 
+      <img
+        alt={`صورة المؤلف ${author.name}`}
         className="w-full h-full object-cover"
-        src="https://darmolhimon.com/wp-content/uploads/2025/06/Group-162.png" />
+        src={author.image || `https://source.unsplash.com/150x150/?${encodeURIComponent(author.imgPlaceholder || author.name)}`}
+      />
     </div>
 
     <div className="flex-grow text-center md:text-right">
@@ -73,7 +74,15 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
       <div className="flex items-center justify-center md:justify-start space-x-4 rtl:space-x-reverse text-sm mb-4">
         <span className="flex items-center">
           <BookOpen className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
-          {authorBooks.length} كتاب
+          {author.booksCount} كتاب
+        </span>
+        <span className="flex items-center">
+          <Users className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-green-600" />
+          {author.followers} متابع
+        </span>
+        <span className="flex items-center">
+          <TrendingUp className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-600" />
+          {author.soldCount} مبيعة
         </span>
         <span className="flex items-center bg-gray-100 rounded-sm px-1">
           <Star className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-yellow-500 fill-yellow-500" />

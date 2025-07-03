@@ -29,10 +29,11 @@ const AuthorsSection = ({ authors }) => {
             >
               <Link to={`/author/${author.id}`} className="block">
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-1.5 sm:mb-2">
-                   <img    
-                      alt={`صورة المؤلف ${author.name}`} 
+                   <img
+                      alt={`صورة المؤلف ${author.name}`}
                       className="w-full h-full rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-sm group-hover:shadow-md"
-                      src="https://darmolhimon.com/wp-content/uploads/2025/06/Group-162.png" />
+                      src={author.image || `https://source.unsplash.com/80x80/?${encodeURIComponent(author.imgPlaceholder || author.name)}`}
+                    />
                    <div className="absolute inset-0 rounded-full ring-1 ring-blue-500 ring-offset-1 ring-offset-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <h3 className="font-medium text-[10px] sm:text-xs text-gray-700 group-hover:text-blue-600 transition-colors">{author.name}</h3>
