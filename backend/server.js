@@ -363,8 +363,11 @@ app.get('/api/payment-methods', async (_req, res) => {
 });
 
 app.post('/api/payment-methods', async (req, res) => {
-  const { name } = req.body;
-  const [result] = await pool.execute('INSERT INTO payment_methods (name) VALUES (?)', [name]);
+  const { name, test_mode } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO payment_methods (name, test_mode) VALUES (?, ?)',
+    [name, test_mode === true]
+  );
   const [rows] = await pool.query('SELECT * FROM payment_methods WHERE id=?', [result.insertId]);
   res.status(201).json(rows[0]);
 });
