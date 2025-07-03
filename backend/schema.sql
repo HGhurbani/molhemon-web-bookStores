@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS books (
   pages INT,
   format VARCHAR(50),
   cover_image VARCHAR(255),
-  type ENUM('ebook','audio','both') DEFAULT 'ebook',
+  type ENUM('physical','ebook','audio') DEFAULT 'physical',
   sample_audio VARCHAR(255),
   FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE SET NULL,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
