@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import api from '@/lib/api.js';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import {
@@ -134,27 +135,37 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState(null);
 
-  const handleAddAuthor = (data) => {
-    const newAuthor = { id: Date.now(), books: 0, ...data };
-    setAuthors(prev => [newAuthor, ...prev]);
-    localStorage.setItem('authors', JSON.stringify([newAuthor, ...authors]));
-    toast({ title: 'تمت الإضافة بنجاح!' });
-    setShowForm(false);
+  const handleAddAuthor = async (data) => {
+    try {
+      const newAuthor = await api.addAuthor(data);
+      setAuthors(prev => [newAuthor, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
   };
 
-  const handleEditAuthor = (data) => {
-    const updated = { ...editingAuthor, ...data };
-    setAuthors(prev => prev.map(a => a.id === updated.id ? updated : a));
-    localStorage.setItem('authors', JSON.stringify(authors.map(a => a.id === updated.id ? updated : a)));
-    toast({ title: 'تم التعديل بنجاح!' });
-    setShowForm(false);
-    setEditingAuthor(null);
+  const handleEditAuthor = async (data) => {
+    try {
+      const updated = await api.updateAuthor(editingAuthor.id, data);
+      setAuthors(prev => prev.map(a => a.id === updated.id ? updated : a));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingAuthor(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
   };
 
-  const handleDeleteAuthor = (id) => {
-    setAuthors(prev => prev.filter(a => a.id !== id));
-    localStorage.setItem('authors', JSON.stringify(authors.filter(a => a.id !== id)));
-    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  const handleDeleteAuthor = async (id) => {
+    try {
+      await api.deleteAuthor(id);
+      setAuthors(prev => prev.filter(a => a.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   if (showForm) {
@@ -232,26 +243,37 @@ const DashboardCategories = ({ categories, setCategories }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
 
-  const handleAdd = (data) => {
-    const newCat = { ...data };
-    setCategories(prev => [newCat, ...prev]);
-    localStorage.setItem('categories', JSON.stringify([newCat, ...categories]));
-    toast({ title: 'تمت الإضافة بنجاح!' });
-    setShowForm(false);
+  const handleAdd = async (data) => {
+    try {
+      const newCat = await api.addCategory(data);
+      setCategories(prev => [newCat, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
   };
 
-  const handleEdit = (data) => {
-    setCategories(prev => prev.map(c => c.id === data.id ? data : c));
-    localStorage.setItem('categories', JSON.stringify(categories.map(c => c.id === data.id ? data : c)));
-    toast({ title: 'تم التعديل بنجاح!' });
-    setShowForm(false);
-    setEditingCategory(null);
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateCategory(editingCategory.id, data);
+      setCategories(prev => prev.map(c => c.id === updated.id ? updated : c));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingCategory(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
   };
 
-  const handleDelete = (id) => {
-    setCategories(prev => prev.filter(c => c.id !== id));
-    localStorage.setItem('categories', JSON.stringify(categories.filter(c => c.id !== id)));
-    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteCategory(id);
+      setCategories(prev => prev.filter(c => c.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   if (showForm) {
@@ -335,27 +357,37 @@ const DashboardSellers = ({ sellers, setSellers }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingSeller, setEditingSeller] = useState(null);
 
-  const handleAdd = (data) => {
-    const newSeller = { id: Date.now(), ...data };
-    setSellers(prev => [newSeller, ...prev]);
-    localStorage.setItem('sellers', JSON.stringify([newSeller, ...sellers]));
-    toast({ title: 'تمت الإضافة بنجاح!' });
-    setShowForm(false);
+  const handleAdd = async (data) => {
+    try {
+      const newSeller = await api.addSeller(data);
+      setSellers(prev => [newSeller, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
   };
 
-  const handleEdit = (data) => {
-    const updated = { ...editingSeller, ...data };
-    setSellers(prev => prev.map(s => s.id === updated.id ? updated : s));
-    localStorage.setItem('sellers', JSON.stringify(sellers.map(s => s.id === updated.id ? updated : s)));
-    toast({ title: 'تم التعديل بنجاح!' });
-    setShowForm(false);
-    setEditingSeller(null);
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateSeller(editingSeller.id, data);
+      setSellers(prev => prev.map(s => s.id === updated.id ? updated : s));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingSeller(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
   };
 
-  const handleDelete = (id) => {
-    setSellers(prev => prev.filter(s => s.id !== id));
-    localStorage.setItem('sellers', JSON.stringify(sellers.filter(s => s.id !== id)));
-    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteSeller(id);
+      setSellers(prev => prev.filter(s => s.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   if (showForm) {
@@ -441,27 +473,37 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
 
-  const handleAdd = (data) => {
-    const newCustomer = { id: Date.now(), ...data };
-    setCustomers(prev => [newCustomer, ...prev]);
-    localStorage.setItem('customers', JSON.stringify([newCustomer, ...customers]));
-    toast({ title: 'تمت الإضافة بنجاح!' });
-    setShowForm(false);
+  const handleAdd = async (data) => {
+    try {
+      const newCustomer = await api.addCustomer(data);
+      setCustomers(prev => [newCustomer, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
   };
 
-  const handleEdit = (data) => {
-    const updated = { ...editingCustomer, ...data };
-    setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
-    localStorage.setItem('customers', JSON.stringify(customers.map(c => c.id === updated.id ? updated : c)));
-    toast({ title: 'تم التعديل بنجاح!' });
-    setShowForm(false);
-    setEditingCustomer(null);
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateCustomer(editingCustomer.id, data);
+      setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingCustomer(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
   };
 
-  const handleDelete = (id) => {
-    setCustomers(prev => prev.filter(c => c.id !== id));
-    localStorage.setItem('customers', JSON.stringify(customers.filter(c => c.id !== id)));
-    toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+  const handleDelete = async (id) => {
+    try {
+      await api.deleteCustomer(id);
+      setCustomers(prev => prev.filter(c => c.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   if (showForm) {
@@ -800,43 +842,37 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
 
-  const handleAddBook = (newBookData) => {
-    const newBook = { 
-      ...newBookData, 
-      id: Date.now(), 
-      price: parseFloat(newBookData.price) || 0,
-      originalPrice: parseFloat(newBookData.originalPrice) || null,
-      rating: parseFloat(newBookData.rating) || 0,
-      reviews: parseInt(newBookData.reviews) || 0,
-      author: authors.find(a => a.id === newBookData.authorId)?.name || 'مؤلف غير معروف'
-    };
-    setBooks(prev => [newBook, ...prev]);
-    localStorage.setItem('books', JSON.stringify([newBook, ...books]));
-    toast({ title: "تمت الإضافة بنجاح!", description: `تم إضافة كتاب "${newBook.title}".` });
-    setShowForm(false);
+  const handleAddBook = async (data) => {
+    try {
+      const newBook = await api.addBook(data);
+      setBooks(prev => [newBook, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
   };
 
-  const handleEditBook = (updatedBookData) => {
-    const updatedBook = {
-      ...updatedBookData,
-      price: parseFloat(updatedBookData.price) || 0,
-      originalPrice: parseFloat(updatedBookData.originalPrice) || null,
-      rating: parseFloat(updatedBookData.rating) || 0,
-      reviews: parseInt(updatedBookData.reviews) || 0,
-      author: authors.find(a => a.id === updatedBookData.authorId)?.name || 'مؤلف غير معروف'
-    };
-    setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
-    localStorage.setItem('books', JSON.stringify(books.map(b => b.id === updatedBook.id ? updatedBook : b)));
-    toast({ title: "تم التعديل بنجاح!", description: `تم تعديل كتاب "${updatedBook.title}".` });
-    setShowForm(false);
-    setEditingBook(null);
+  const handleEditBook = async (updatedBookData) => {
+    try {
+      const updated = await api.updateBook(updatedBookData.id, updatedBookData);
+      setBooks(prev => prev.map(b => b.id === updated.id ? updated : b));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingBook(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
   };
 
-  const handleDeleteBook = (bookId) => {
-    const bookToDelete = books.find(b => b.id === bookId);
-    setBooks(prev => prev.filter(b => b.id !== bookId));
-    localStorage.setItem('books', JSON.stringify(books.filter(b => b.id !== bookId)));
-    toast({ title: "تم الحذف بنجاح!", description: `تم حذف كتاب "${bookToDelete?.title}".`, variant: "destructive" });
+  const handleDeleteBook = async (bookId) => {
+    try {
+      await api.deleteBook(bookId);
+      setBooks(prev => prev.filter(b => b.id !== bookId));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
   };
 
   if (showForm) {
