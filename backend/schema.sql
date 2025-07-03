@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS authors (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   bio TEXT,
-  image VARCHAR(255),
+  image MEDIUMTEXT,
   followers INT DEFAULT 0
 );
 
@@ -28,12 +28,12 @@ CREATE TABLE IF NOT EXISTS books (
   publish_date DATE,
   pages INT,
   format VARCHAR(50),
-  cover_image VARCHAR(255),
+  cover_image MEDIUMTEXT,
   type ENUM('physical','ebook','audio') DEFAULT 'physical',
-  sample_audio VARCHAR(255),
+  sample_audio MEDIUMTEXT,
   delivery_method VARCHAR(255),
-  ebook_file VARCHAR(255),
-  audio_file VARCHAR(255),
+  ebook_file MEDIUMTEXT,
+  audio_file MEDIUMTEXT,
   FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE SET NULL,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
@@ -194,3 +194,11 @@ CREATE TABLE IF NOT EXISTS features (
   title VARCHAR(255) NOT NULL,
   description VARCHAR(255)
 );
+
+-- Ensure columns can store large base64 data
+ALTER TABLE authors MODIFY image MEDIUMTEXT;
+ALTER TABLE books
+  MODIFY cover_image MEDIUMTEXT,
+  MODIFY sample_audio MEDIUMTEXT,
+  MODIFY ebook_file MEDIUMTEXT,
+  MODIFY audio_file MEDIUMTEXT;
