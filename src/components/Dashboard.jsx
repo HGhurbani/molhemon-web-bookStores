@@ -16,6 +16,7 @@ import {
   Store,
   DollarSign,
   CreditCard,
+  Wallet,
   Eye,
   Plus,
   Edit,
@@ -53,6 +54,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'customers', name: 'العملاء', icon: UserCheck },
     { id: 'users', name: 'المستخدمون', icon: User },
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
+    { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
@@ -1355,6 +1357,109 @@ const DashboardPayments = ({ payments, setPayments }) => {
   );
 };
 
+const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', ...method });
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{method ? 'تعديل طريقة' : 'إضافة طريقة جديدة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="mname">الاسم</Label>
+          <Input id="mname" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {method ? 'حفظ التعديلات' : 'إضافة الطريقة'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingMethod, setEditingMethod] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addPaymentMethod(data);
+      setPaymentMethods(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updatePaymentMethod(editingMethod.id, data);
+      setPaymentMethods(prev => prev.map(m => m.id === updated.id ? updated : m));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingMethod(null);
+    } catch {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.deletePaymentMethod(id);
+      setPaymentMethods(prev => prev.filter(m => m.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <PaymentMethodForm method={editingMethod} onSubmit={editingMethod ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingMethod(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">طرق الدفع</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingMethod(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة طريقة
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[300px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {paymentMethods.map(m => (
+              <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingMethod(m); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(m.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const DashboardOverview = ({ dashboardStats }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1883,7 +1988,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, paymentMethods, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -1893,6 +1998,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     customers: 'العملاء',
     users: 'المستخدمون',
     payments: 'المدفوعات',
+    'payment-methods': 'طرق الدفع',
     plans: 'خطط الاشتراك',
     features: 'المميزات',
     sliders: 'السلايدر',
@@ -1915,6 +2021,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
         {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
+        {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
