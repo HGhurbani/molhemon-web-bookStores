@@ -1390,8 +1390,11 @@ const DashboardPayments = ({ payments, setPayments }) => {
 };
 
 const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', ...method });
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const [formData, setFormData] = useState({ name: '', test_mode: false, ...method });
+  const handleChange = (e) => {
+    const { name, type, checked, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
   const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
@@ -1400,6 +1403,17 @@ const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
         <div>
           <Label htmlFor="mname">الاسم</Label>
           <Input id="mname" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <input
+            id="mtest"
+            name="test_mode"
+            type="checkbox"
+            checked={formData.test_mode}
+            onChange={handleChange}
+            className="w-4 h-4"
+          />
+          <Label htmlFor="mtest" className="!mb-0">وضع الاختبار</Label>
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -1464,11 +1478,12 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
         </Button>
       </div>
       <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
-        <table className="w-full min-w-[300px]">
+        <table className="w-full min-w-[350px]">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">وضع الاختبار</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -1477,6 +1492,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
               <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.id}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.test_mode ? 'نعم' : 'لا'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingMethod(m); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>

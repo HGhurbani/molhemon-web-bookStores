@@ -136,16 +136,17 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS payment_methods (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL
+  name VARCHAR(100) NOT NULL,
+  test_mode BOOLEAN DEFAULT FALSE
 );
 
-INSERT INTO payment_methods (id, name) VALUES
-  (1, 'Stripe'),
-  (2, 'PayPal'),
-  (3, 'Mada'),
-  (4, 'Qitaf'),
-  (5, 'Cash on Delivery')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+INSERT INTO payment_methods (id, name, test_mode) VALUES
+  (1, 'Stripe', FALSE),
+  (2, 'PayPal', FALSE),
+  (3, 'Mada', FALSE),
+  (4, 'Qitaf', FALSE),
+  (5, 'Cash on Delivery', FALSE)
+ON DUPLICATE KEY UPDATE name = VALUES(name), test_mode = VALUES(test_mode);
 
 CREATE TABLE IF NOT EXISTS coupons (
   id INT AUTO_INCREMENT PRIMARY KEY,
