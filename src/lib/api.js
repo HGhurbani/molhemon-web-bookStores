@@ -43,6 +43,13 @@ export const api = {
 
   getSettings: () => request('/api/settings'),
   updateSettings: (data) => request('/api/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  getPlans: () => request('/api/plans'),
+  addPlan: (data) => request('/api/plans', { method: 'POST', body: JSON.stringify(data) }),
+  updatePlan: (id, data) => request(`/api/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePlan: (id) => request(`/api/plans/${id}`, { method: 'DELETE' }),
+
+  getSubscriptions: () => request('/api/subscriptions'),
+  addSubscription: (data) => request('/api/subscriptions', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export default api;

@@ -44,6 +44,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
     { id: 'categories', name: 'الأصناف', icon: BookOpen },
     { id: 'orders', name: 'الطلبات', icon: Package },
     { id: 'customers', name: 'العملاء', icon: UserCheck },
+    { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'settings', name: 'الإعدادات', icon: Settings }
   ];
 
@@ -539,6 +540,131 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCustomer(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+}; 
+
+const PlanForm = ({ plan, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', price: '', duration: '', description: '', ...plan });
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({ ...formData, price: parseFloat(formData.price), duration: parseInt(formData.duration, 10) });
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{plan ? 'تعديل الخطة' : 'إضافة خطة جديدة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="pname">الاسم</Label>
+          <Input id="pname" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="pprice">السعر</Label>
+          <Input id="pprice" name="price" type="number" step="0.01" value={formData.price} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="pduration">المدة بالأيام</Label>
+          <Input id="pduration" name="duration" type="number" value={formData.duration} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="pdesc">الوصف</Label>
+          <Textarea id="pdesc" name="description" value={formData.description} onChange={handleChange} rows={3} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {plan ? 'حفظ التعديلات' : 'إضافة الخطة'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardPlans = ({ plans, setPlans }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newPlan = await api.addPlan(data);
+      setPlans(prev => [newPlan, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updatePlan(editingPlan.id, data);
+      setPlans(prev => prev.map(p => p.id === updated.id ? updated : p));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingPlan(null);
+    } catch (e) {
+      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.deletePlan(id);
+      setPlans(prev => prev.filter(p => p.id !== id));
+      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <PlanForm plan={editingPlan} onSubmit={editingPlan ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingPlan(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">خطط الاشتراك</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingPlan(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة خطة
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">السعر</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المدة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {plans.map(p => (
+              <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.price}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.duration}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingPlan(p); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(p.id)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </td>
               </tr>
@@ -1087,7 +1213,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, siteSettings, setSiteSettings }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, plans, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPlans, siteSettings, setSiteSettings }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -1095,6 +1221,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     sellers: 'البائعون',
     orders: 'الطلبات',
     customers: 'العملاء',
+    plans: 'خطط الاشتراك',
     settings: 'الإعدادات',
   };
 
@@ -1113,6 +1240,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
+        {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
         {dashboardSection === 'settings' && (
           <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
         )}

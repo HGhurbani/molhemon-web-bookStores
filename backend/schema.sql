@@ -83,3 +83,22 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 INSERT INTO settings (id, siteName) VALUES (1, 'Molhemoon') ON DUPLICATE KEY UPDATE siteName = VALUES(siteName);
+
+CREATE TABLE IF NOT EXISTS subscription_plans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  duration INT NOT NULL,
+  description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT,
+  plan_id INT,
+  start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  end_date DATETIME,
+  status VARCHAR(50) DEFAULT 'نشط',
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+  FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE SET NULL
+);
