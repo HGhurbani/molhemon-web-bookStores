@@ -32,6 +32,7 @@ npm run dev
 ```
 
 The frontend expects the API to be available at the URL defined in `VITE_API_BASE`.
+All dashboard sections including orders now read and write data through the MySQL backend.
 
 ## Notes
 - CRUD actions in the dashboard now communicate with the backend using the provided API routes.

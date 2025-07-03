@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import { CreditCard, Lock, ShoppingBag, Truck, Tag, MessageSquare, MapPin } from 'lucide-react'; // Added MapPin for address
+import api from '@/lib/api.js';
 
-const CheckoutPage = ({ cart, setCart }) => {
+const CheckoutPage = ({ cart, setCart, setOrders }) => {
   const navigate = useNavigate();
   // Mock user data for display, in a real app this would come from user context or API
   const [shippingAddress, setShippingAddress] = useState({
@@ -40,22 +41,25 @@ const CheckoutPage = ({ cart, setCart }) => {
   const actualFinalTotal = totalPrice + shippingCost;
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const total = actualFinalTotal; // Use the actual calculated total
-    const order = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
+    const total = actualFinalTotal;
+    const orderData = {
+      customer_id: null,
+      seller_id: null,
       total,
       status: 'قيد المعالجة',
-      items: cart.map(i => ({ id: i.id, title: i.title, quantity: i.quantity, price: i.price })) // Include price for better order tracking
+      items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
     };
-    const stored = JSON.parse(localStorage.getItem('orders') || '[]');
-    localStorage.setItem('orders', JSON.stringify([order, ...stored]));
-    toast({ title: 'تم استلام الطلب بنجاح!' });
-    // تفريغ السلة بعد إتمام الطلب
-    setCart([]);
-    localStorage.setItem('cart', '[]');
+    try {
+      const newOrder = await api.addOrder(orderData);
+      setOrders(prev => [newOrder, ...(prev || [])]);
+      toast({ title: 'تم استلام الطلب بنجاح!' });
+      setCart([]);
+      localStorage.setItem('cart', '[]');
+    } catch (err) {
+      toast({ title: 'حدث خطأ أثناء إنشاء الطلب', variant: 'destructive' });
+    }
     navigate('/');
   };
 

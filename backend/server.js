@@ -139,6 +139,44 @@ app.delete('/api/customers/:id', async (req, res) => {
   res.sendStatus(204);
 });
 
+// Orders
+app.get('/api/orders', async (_req, res) => {
+  const [orders] = await pool.query('SELECT * FROM orders ORDER BY order_date DESC');
+  const [items] = await pool.query('SELECT * FROM order_items');
+  const result = orders.map(o => ({ ...o, items: items.filter(i => i.order_id === o.id) }));
+  res.json(result);
+});
+
+app.post('/api/orders', async (req, res) => {
+  const { customer_id, seller_id, total, status = 'قيد المعالجة', items = [] } = req.body;
+  const [result] = await pool.execute(
+    'INSERT INTO orders (customer_id, seller_id, total, status) VALUES (?,?,?,?)',
+    [customer_id || null, seller_id || null, total, status]
+  );
+  const orderId = result.insertId;
+  for (const item of items) {
+    await pool.execute(
+      'INSERT INTO order_items (order_id, book_id, quantity, price) VALUES (?,?,?,?)',
+      [orderId, item.id, item.quantity, item.price]
+    );
+  }
+  const [rows] = await pool.query('SELECT * FROM orders WHERE id=?', [orderId]);
+  const [itemRows] = await pool.query('SELECT * FROM order_items WHERE order_id=?', [orderId]);
+  res.status(201).json({ ...rows[0], items: itemRows });
+});
+
+app.put('/api/orders/:id', async (req, res) => {
+  await pool.query('UPDATE orders SET ? WHERE id=?', [req.body, req.params.id]);
+  const [rows] = await pool.query('SELECT * FROM orders WHERE id=?', [req.params.id]);
+  const [itemRows] = await pool.query('SELECT * FROM order_items WHERE order_id=?', [req.params.id]);
+  res.json({ ...rows[0], items: itemRows });
+});
+
+app.delete('/api/orders/:id', async (req, res) => {
+  await pool.query('DELETE FROM orders WHERE id=?', [req.params.id]);
+  res.sendStatus(204);
+});
+
 app.get('/api/settings', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM settings WHERE id=1');
   res.json(rows[0] || {});

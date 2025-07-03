@@ -64,16 +64,18 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     (async () => {
       try {
-        const [b, a, c, s] = await Promise.all([
+        const [b, a, c, s, o] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
           api.getSettings(),
+          api.getOrders(),
         ]);
         setBooks(b);
         setAuthors(a);
         setCategoriesState(c);
         setSiteSettingsState(prev => ({ ...prev, ...s }));
+        setOrders(o);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -243,7 +245,7 @@ const App = () => {
               <Route path="/author/:id" element={<MainLayout><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/category/:categoryId" element={<MainLayout><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/cart" element={<MainLayout><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
-              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} setCart={setCart} /></PageLayout></MainLayout>} />
+              <Route path="/checkout" element={<MainLayout><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
               <Route path="/profile" element={<MainLayout><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/ebooks" element={<MainLayout><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/audiobooks" element={<MainLayout><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
