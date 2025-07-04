@@ -74,23 +74,23 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
       </div>
       
       <nav className="space-y-1.5 flex-grow">
-        {navItems.map((item) => {
-          const IconComponent = item.icon;
-          return (
-            <button
-              key={item.id}
-              className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
-                dashboardSection === item.id 
-                  ? 'active bg-blue-600 text-white shadow-md' 
-                  : 'hover:bg-slate-700 hover:text-white'
-              }`}
-              onClick={() => { setDashboardSection(item.id); setSidebarOpen(false); }}
-            >
-              <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
-              {item.name}
-            </button>
-          );
-        })}
+        {navItems.map(({ id, name, icon: IconComponent }) => (
+          <button
+            key={id}
+            className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
+              dashboardSection === id
+                ? 'active bg-blue-600 text-white shadow-md'
+                : 'hover:bg-slate-700 hover:text-white'
+            }`}
+            onClick={() => {
+              setDashboardSection(id);
+              setSidebarOpen(false);
+            }}
+          >
+            <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
+            {name}
+          </button>
+        ))}
       </nav>
       <Button
         asChild
