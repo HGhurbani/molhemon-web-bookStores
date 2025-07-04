@@ -4,6 +4,7 @@ import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
 import {
   BookOpen,
   Users,
@@ -250,41 +251,64 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
   );
 };
 
+const IconDropdown = ({ value, onChange, iconNames }) => {
+  const Selected = value && AllIcons[value];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="w-full justify-between">
+          {value ? (
+            <span className="flex items-center">
+              {Selected && <Selected className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />}
+              {value}
+            </span>
+          ) : (
+            'اختر أيقونة'
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-60 overflow-auto">
+        {iconNames.map(name => {
+          const Icon = AllIcons[name];
+          return (
+            <DropdownMenuItem
+              key={name}
+              onSelect={() => onChange(name)}
+              className="flex items-center space-x-2 rtl:space-x-reverse"
+            >
+              <Icon className="w-4 h-4" />
+              <span>{name}</span>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 const CategoryForm = ({ category, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ id: '', name: '', icon: '', ...category });
+  const [formData, setFormData] = useState({ name: '', icon: '', ...category });
   const iconNames = React.useMemo(() => Object.keys(AllIcons).filter((name) => /^[A-Z]/.test(name)).sort(), []);
 
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (name, value) => setFormData(prev => ({ ...prev, [name]: value }));
 
-  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { name, icon } = formData;
+    onSubmit({ name, icon });
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
       <h3 className="text-xl font-semibold mb-5 text-gray-700">{category ? 'تعديل الصنف' : 'إضافة صنف جديد'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label htmlFor="id">المعرف</Label>
-          <Input id="id" name="id" value={formData.id} onChange={handleChange} required />
-        </div>
-        <div>
           <Label htmlFor="name">الاسم</Label>
-          <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+          <Input id="name" name="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
         </div>
         <div>
           <Label htmlFor="icon">الأيقونة</Label>
-          <select
-            id="icon"
-            name="icon"
-            value={formData.icon}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            required
-          >
-            <option value="">اختر أيقونة</option>
-            {iconNames.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+          <IconDropdown value={formData.icon} onChange={(val) => handleChange('icon', val)} iconNames={iconNames} />
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -363,7 +387,16 @@ const DashboardCategories = ({ categories, setCategories }) => {
               <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.id}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.name}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{c.icon}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {AllIcons[c.icon] ? (
+                    <React.Fragment>
+                      {React.createElement(AllIcons[c.icon], { className: 'w-4 h-4 inline-block mr-2 rtl:ml-2 rtl:mr-0' })}
+                      {c.icon}
+                    </React.Fragment>
+                  ) : (
+                    c.icon
+                  )}
+                </td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCategory(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
