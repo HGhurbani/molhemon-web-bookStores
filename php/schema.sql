@@ -38,16 +38,6 @@ CREATE TABLE IF NOT EXISTS books (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS book_ratings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  book_id INT NOT NULL,
-  user_id INT,
-  rating INT NOT NULL,
-  comment TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);
 
 CREATE TABLE IF NOT EXISTS sellers (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -132,6 +122,17 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255),
   password VARCHAR(255),
   role ENUM('admin','author','seller','customer') NOT NULL DEFAULT 'customer'
+);
+
+CREATE TABLE IF NOT EXISTS book_ratings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  book_id INT NOT NULL,
+  user_id INT,
+  rating INT NOT NULL,
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS payment_methods (
