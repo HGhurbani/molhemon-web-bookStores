@@ -23,6 +23,8 @@ import {
   Trash2,
   Star,
   Home,
+  Menu,
+  X,
   Save,
   Image,
   Zap
@@ -63,12 +65,12 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
   ];
 
   return (
-    <div className="sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sticky top-0">
-      <div className="flex items-center mb-8">
-         <img  alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
-        <div>
-         
-        </div>
+    <div className={`sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`>
+      <div className="flex items-center justify-between mb-8">
+         <img alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
+        <button className="sm:hidden" onClick={() => setSidebarOpen(false)}>
+          <X className="w-5 h-5" />
+        </button>
       </div>
       
       <nav className="space-y-1.5 flex-grow">
@@ -82,7 +84,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
                   ? 'active bg-blue-600 text-white shadow-md' 
                   : 'hover:bg-slate-700 hover:text-white'
               }`}
-              onClick={() => setDashboardSection(item.id)}
+              onClick={() => { setDashboardSection(item.id); setSidebarOpen(false); }}
             >
               <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
               {item.name}
@@ -2052,12 +2054,16 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     banners: 'البانرات',
     settings: 'الإعدادات',
   };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex text-gray-800">
-      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} />
+    <div className="min-h-screen bg-slate-100 flex text-gray-800 relative">
+      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <button className="sm:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="w-6 h-6" />
+          </button>
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
         </div>
 
