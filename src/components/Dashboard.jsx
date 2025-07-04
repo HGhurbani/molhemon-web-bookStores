@@ -90,7 +90,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
               {item.name}
             </button>
           );
-        })}
+        })
       </nav>
       <Button
         asChild
@@ -1532,7 +1532,7 @@ const DashboardOverview = ({ dashboardStats }) => (
             </div>
           </motion.div>
         );
-      })}
+      })
     </div>
 
     <motion.div 
@@ -1564,7 +1564,7 @@ const DashboardOverview = ({ dashboardStats }) => (
               <span className="text-gray-500 text-xs">{activity.time}</span>
             </div>
           );
-        })}
+        })
       </div>
     </motion.div>
   </div>
