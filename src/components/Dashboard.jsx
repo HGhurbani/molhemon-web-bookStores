@@ -90,7 +90,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
               {item.name}
             </button>
           );
-        })
+        })}
       </nav>
       <Button
         asChild
