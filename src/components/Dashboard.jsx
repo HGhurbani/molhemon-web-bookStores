@@ -45,7 +45,7 @@ import { toast } from '@/components/ui/use-toast.js';
 
 import { Link } from 'react-router-dom';
 
-const DashboardSidebar = ({ dashboardSection, setDashboardSection }) => {
+const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen }) => {
   const navItems = [
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
