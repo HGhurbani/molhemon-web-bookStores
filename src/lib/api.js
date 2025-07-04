@@ -1,3 +1,6 @@
+import firebaseApi from './firebaseApi';
+
+// Old REST based API is kept for reference but Firebase is now the default
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 async function request(url, options = {}) {
@@ -12,11 +15,9 @@ async function request(url, options = {}) {
   return res.status === 204 ? null : res.json();
 }
 
+// Export Firebase API by default
 export const api = {
-  getBooks: () => request('/api/books'),
-  addBook: (data) => request('/api/books', { method: 'POST', body: JSON.stringify(data) }),
-  updateBook: (id, data) => request(`/api/books/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteBook: (id) => request(`/api/books/${id}`, { method: 'DELETE' }),
+  ...firebaseApi,
 
   getAuthors: () => request('/api/authors'),
   addAuthor: (data) => request('/api/authors', { method: 'POST', body: JSON.stringify(data) }),
