@@ -45,6 +45,8 @@ import { toast } from '@/components/ui/use-toast.js';
 
 import { Link } from 'react-router-dom';
 
+const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
+
 const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen }) => {
   const navItems = [
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
@@ -196,6 +198,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
   };
 
   const handleDeleteAuthor = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteAuthor(id);
       setAuthors(prev => prev.filter(a => a.id !== id));
@@ -350,6 +353,7 @@ const DashboardCategories = ({ categories, setCategories }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteCategory(id);
       setCategories(prev => prev.filter(c => c.id !== id));
@@ -475,6 +479,7 @@ const DashboardSellers = ({ sellers, setSellers }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteSeller(id);
       setSellers(prev => prev.filter(s => s.id !== id));
@@ -591,6 +596,7 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteCustomer(id);
       setCustomers(prev => prev.filter(c => c.id !== id));
@@ -783,6 +789,7 @@ const DashboardUsers = ({ users, setUsers }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteUser(id);
       setUsers(prev => prev.filter(u => u.id !== id));
@@ -864,6 +871,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deletePlan(id);
       setPlans(prev => prev.filter(p => p.id !== id));
@@ -983,6 +991,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteSlider(id);
       setSliders(prev => prev.filter(s => s.id !== id));
@@ -1098,6 +1107,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteBanner(id);
       setBanners(prev => prev.filter(b => b.id !== id));
@@ -1209,6 +1219,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteFeature(id);
       setFeatures(prev => prev.filter(f => f.id !== id));
@@ -1325,6 +1336,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
   };
 
   const handleDeleteOrder = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteOrder(id);
       setOrders(orders.filter(o => o.id !== id));
@@ -1379,6 +1391,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
 
 const DashboardPayments = ({ payments, setPayments }) => {
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deletePayment(id);
       setPayments(payments.filter(p => p.id !== id));
@@ -1491,6 +1504,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
     try {
       await api.deletePaymentMethod(id);
       setPaymentMethods(prev => prev.filter(m => m.id !== id));
@@ -1825,6 +1839,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
   };
 
   const handleDeleteBook = async (bookId) => {
+    if (!confirmDelete()) return;
     try {
       await api.deleteBook(bookId);
       setBooks(prev => prev.filter(b => b.id !== bookId));
