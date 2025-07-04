@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { currencies } from '@/lib/currencyContext.jsx';
 import api from '@/lib/api.js';
@@ -65,44 +64,46 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
   ];
 
   return (
-    <div className={`sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`>
-      <div className="flex items-center justify-between mb-8">
-         <img alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
-        <button className="sm:hidden" onClick={() => setSidebarOpen(false)}>
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      
-      <nav className="space-y-1.5 flex-grow">
-        {navItems.map(({ id, name, icon: IconComponent }) => (
-          <button
-            key={id}
-            className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
-              dashboardSection === id
-                ? 'active bg-blue-600 text-white shadow-md'
-                : 'hover:bg-slate-700 hover:text-white'
-            }`}
-            onClick={() => {
-              setDashboardSection(id);
-              setSidebarOpen(false);
-            }}
-          >
-            <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
-            {name}
+    <>
+      <div className={`sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
+        <div className="flex items-center justify-between mb-8">
+           <img alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
+          <button className="sm:hidden" onClick={() => setSidebarOpen(false)}>
+            <X className="w-5 h-5" />
           </button>
-        ))}
-      </nav>
-      <Button
-        asChild
-        variant="outline"
-        className="w-full mt-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
-      >
-        <Link to="/">
-          <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-          العودة للموقع
-        </Link>
-      </Button>
-    </div>
+        </div>
+        
+        <nav className="space-y-1.5 flex-grow">
+          {navItems.map(({ id, name, icon: IconComponent }) => (
+            <button
+              key={id}
+              className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
+                dashboardSection === id
+                  ? 'active bg-blue-600 text-white shadow-md'
+                  : 'hover:bg-slate-700 hover:text-white'
+              }`}
+              onClick={() => {
+                setDashboardSection(id);
+                setSidebarOpen(false);
+              }}
+            >
+              <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
+              {name}
+            </button>
+          ))}
+        </nav>
+        <Button
+          asChild
+          variant="outline"
+          className="w-full mt-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+        >
+          <Link to="/">
+            <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+            العودة للموقع
+          </Link>
+        </Button>
+      </div>
+    </>
   );
 };
 
@@ -1533,7 +1534,7 @@ const DashboardOverview = ({ dashboardStats }) => (
           </motion.div>
         );
       })
-    </div>
+    }</div>
 
     <motion.div 
       className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
@@ -1565,7 +1566,7 @@ const DashboardOverview = ({ dashboardStats }) => (
             </div>
           );
         })
-      </div>
+      }</div>
     </motion.div>
   </div>
 );
