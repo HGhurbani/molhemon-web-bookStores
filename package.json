@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node backend/server.js"
+    "server": "php -S localhost:8000 -t php"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",
