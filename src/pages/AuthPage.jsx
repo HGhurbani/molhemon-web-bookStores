@@ -5,6 +5,9 @@ import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase.js';
 
 const formVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -18,24 +21,33 @@ const AuthPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleAuthSubmit = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
-    if (isSignUp) {
-      toast({
-        title: 'تم إنشاء الحساب بنجاح',
-        description: 'يمكنك تسجيل الدخول الآن'
-      });
-      setIsSignUp(false);
-      setFullName('');
-      setEmail('');
-      setPassword('');
-      return;
-    }
-    if (email === 'customer' && password === '123456') {
+    try {
+      if (isSignUp) {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          name: fullName,
+          email,
+          role: 'customer',
+        });
+        toast({
+          title: 'تم إنشاء الحساب بنجاح',
+          description: 'يمكنك تسجيل الدخول الآن'
+        });
+        setIsSignUp(false);
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        return;
+      }
+
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem('customerLoggedIn', 'true');
+      localStorage.setItem('currentUserId', user.uid);
       onLogin();
       navigate('/profile');
-    } else {
+    } catch (err) {
       toast({
         title: 'بيانات غير صحيحة',
         variant: 'destructive'
