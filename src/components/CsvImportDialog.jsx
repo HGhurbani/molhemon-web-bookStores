@@ -13,7 +13,7 @@ const FIELDS = [
   { key: 'description', label: 'الوصف' },
 ];
 
-export default function ExcelImportDialog({ open, onOpenChange, onImport }) {
+export default function CsvImportDialog({ open, onOpenChange, onImport }) {
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
   const [mapping, setMapping] = useState({});
@@ -21,16 +21,23 @@ export default function ExcelImportDialog({ open, onOpenChange, onImport }) {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const data = new Uint8Array(evt.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
+      let workbook;
+      if (isCsv) {
+        workbook = XLSX.read(evt.target.result, { type: 'string' });
+      } else {
+        const data = new Uint8Array(evt.target.result);
+        workbook = XLSX.read(data, { type: 'array' });
+      }
       const ws = workbook.Sheets[workbook.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
       setHeaders(Object.keys(json[0] || {}));
       setRows(json);
     };
-    reader.readAsArrayBuffer(file);
+    if (isCsv) reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
   };
 
   const handleImport = async () => {
@@ -55,12 +62,12 @@ export default function ExcelImportDialog({ open, onOpenChange, onImport }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="space-y-4">
         <DialogHeader>
-          <DialogTitle>استيراد كتب من Excel</DialogTitle>
+          <DialogTitle>استيراد كتب من ملف CSV</DialogTitle>
         </DialogHeader>
         {!rows.length ? (
           <div>
-            <Label htmlFor="xls-file">اختر ملف Excel</Label>
-            <Input id="xls-file" type="file" accept=".xls,.xlsx" onChange={handleFile} />
+            <Label htmlFor="xls-file">اختر ملف CSV أو Excel</Label>
+            <Input id="xls-file" type="file" accept=".csv,.xls,.xlsx" onChange={handleFile} />
           </div>
         ) : (
           <div className="space-y-3">
