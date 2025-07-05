@@ -98,7 +98,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
       
         <div className="flex items-center mb-1 sm:mb-1.5 bg-blue-600/10 rounded-sm px-1 w-max">
           <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 fill-blue-600" />
-          <span className="text-[9px] sm:text-[10px] text-gray-600 mr-2 rtl:ml-2 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
+          <span className="text-[9px] sm:text-[10px] text-gray-600 mr-2 rtl:ml-2 rtl:mr-0">{Number(book.rating ?? 0).toFixed(1)}/5 ({book.reviews ?? 0})</span>
         </div>
 
         <div className="flex items-baseline justify-between mb-1 sm:mb-1.5 w-full">
