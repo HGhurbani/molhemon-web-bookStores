@@ -255,14 +255,25 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
 };
 
 const IconDropdown = ({ value, onChange, iconNames }) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const Selected = value && AllIcons[value];
+  const filtered = React.useMemo(
+    () =>
+      iconNames.filter((name) =>
+        name.toLowerCase().includes(search.toLowerCase())
+      ),
+    [iconNames, search]
+  );
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-between">
           {value ? (
             <span className="flex items-center">
-              {Selected && <Selected className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />}
+              {Selected && (
+                <Selected className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+              )}
               {value}
             </span>
           ) : (
@@ -271,12 +282,23 @@ const IconDropdown = ({ value, onChange, iconNames }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-60 overflow-auto">
-        {iconNames.map(name => {
+        <div className="p-2">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="بحث..."
+            className="h-8"
+          />
+        </div>
+        {filtered.map((name) => {
           const Icon = AllIcons[name];
           return (
             <DropdownMenuItem
               key={name}
-              onSelect={() => onChange(name)}
+              onSelect={() => {
+                onChange(name);
+                setOpen(false);
+              }}
               className="flex items-center space-x-2 rtl:space-x-reverse"
             >
               <Icon className="w-4 h-4" />
@@ -1161,23 +1183,46 @@ const DashboardBanners = ({ banners, setBanners }) => {
 
 const FeatureForm = ({ feature, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({ icon: '', title: '', description: '', ...feature });
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  const iconNames = React.useMemo(
+    () => Object.keys(AllIcons).filter((name) => /^[A-Z]/.test(name)).sort(),
+    []
+  );
+  const handleChange = (name, value) =>
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
       <h3 className="text-xl font-semibold mb-5 text-gray-700">{feature ? 'تعديل ميزة' : 'إضافة ميزة'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="icon">الأيقونة</Label>
-          <Input id="icon" name="icon" value={formData.icon} onChange={handleChange} required />
+          <IconDropdown
+            value={formData.icon}
+            onChange={(val) => handleChange('icon', val)}
+            iconNames={iconNames}
+          />
         </div>
         <div>
           <Label htmlFor="title">العنوان</Label>
-          <Input id="title" name="title" value={formData.title} onChange={handleChange} required />
+          <Input
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            required
+          />
         </div>
         <div>
           <Label htmlFor="description">الوصف</Label>
-          <Input id="description" name="description" value={formData.description} onChange={handleChange} />
+          <Input
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={(e) => handleChange('description', e.target.value)}
+          />
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -1252,10 +1297,19 @@ const DashboardFeatures = ({ features, setFeatures }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {features.map(f => (
-              <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{f.icon}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{f.title}</td>
+              {features.map(f => (
+                <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">
+                    {AllIcons[f.icon] ? (
+                      <React.Fragment>
+                        {React.createElement(AllIcons[f.icon], { className: 'w-4 h-4 inline-block mr-2 rtl:ml-2 rtl:mr-0' })}
+                        {f.icon}
+                      </React.Fragment>
+                    ) : (
+                      f.icon
+                    )}
+                  </td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{f.title}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(f); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
