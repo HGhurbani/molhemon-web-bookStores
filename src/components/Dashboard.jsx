@@ -2038,7 +2038,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
             إضافة كتاب جديد
           </Button>
           <Button variant="outline" onClick={() => setImportOpen(true)}>
-            استيراد من ملف CSV
+            استيراد من ملف CSV/JSON
           </Button>
         </div>
       </div>
