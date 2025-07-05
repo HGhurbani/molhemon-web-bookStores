@@ -963,7 +963,26 @@ const SliderForm = ({ slider, onSubmit, onCancel }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="image_url">الرابط المباشر للصورة</Label>
-          <Input id="image_url" name="image_url" value={formData.image_url} onChange={handleChange} required />
+          <Input id="image_url" name="image_url" value={formData.image_url} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="image_file">أو قم برفع صورة</Label>
+          <input
+            id="image_file"
+            name="image_file"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () =>
+                  setFormData((prev) => ({ ...prev, image_url: reader.result }));
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          />
         </div>
         <div>
           <Label htmlFor="link">رابط عند النقر</Label>
@@ -1075,7 +1094,26 @@ const BannerForm = ({ banner, onSubmit, onCancel }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="bimage_url">الرابط المباشر للصورة</Label>
-          <Input id="bimage_url" name="image_url" value={formData.image_url} onChange={handleChange} required />
+          <Input id="bimage_url" name="image_url" value={formData.image_url} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="bimage_file">أو قم برفع صورة</Label>
+          <input
+            id="bimage_file"
+            name="bimage_file"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () =>
+                  setFormData((prev) => ({ ...prev, image_url: reader.result }));
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          />
         </div>
         <div>
           <Label htmlFor="blink">رابط عند النقر</Label>
