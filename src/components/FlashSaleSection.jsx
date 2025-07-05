@@ -101,17 +101,32 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
           <span className="text-[9px] sm:text-[10px] text-gray-600 mr-2 rtl:ml-2 rtl:mr-0">{Number(book.rating ?? 0).toFixed(1)}/5 ({book.reviews ?? 0})</span>
         </div>
 
-        <div className="flex items-baseline justify-between mb-1 sm:mb-1.5 w-full">
-          <span className="font-bold text-blue-600 text-xs sm:text-sm"><FormattedPrice book={book} /></span>
-          {book.originalPrice && (
-            <span className="text-gray-400 old-price text-[9px] sm:text-[10px] rtl:ml-1 rtl:mr-0">
-              <FormattedPrice value={book.originalPrice} />
-            </span>
-          )}
-        </div>
-         <p className="text-[9px] sm:text-[10px] text-gray-600 bg-gray-600/10 rounded-sm px-1 text-center">
-           وفر: <FormattedPrice value={(book.originalPrice && book.price ? (book.originalPrice - book.price) : 0)} />
-         </p>
+        {(() => {
+          const hasDiscount = book.price && book.originalPrice && book.price !== book.originalPrice;
+          return (
+            <>
+              <div className="flex items-baseline justify-between mb-1 sm:mb-1.5 w-full">
+                <span className="font-bold text-blue-600 text-xs sm:text-sm">
+                  {book.price ? (
+                    <FormattedPrice book={book} />
+                  ) : (
+                    <FormattedPrice value={book.originalPrice} />
+                  )}
+                </span>
+                {hasDiscount && (
+                  <span className="text-gray-400 old-price text-[9px] sm:text-[10px] rtl:ml-1 rtl:mr-0">
+                    <FormattedPrice value={book.originalPrice} />
+                  </span>
+                )}
+              </div>
+              {hasDiscount && (
+                <p className="text-[9px] sm:text-[10px] text-gray-600 bg-gray-600/10 rounded-sm px-1 text-center">
+                  وفر: <FormattedPrice value={book.originalPrice - book.price} />
+                </p>
+              )}
+            </>
+          );
+        })()}
     </div>
   </motion.div>
 );
