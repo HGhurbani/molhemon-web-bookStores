@@ -43,10 +43,10 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
       </Link>
       <p className="text-gray-500 text-[10px] sm:text-xs mb-1 sm:mb-2 hover:text-blue-500">{book.author}</p>
 
-      <div className="flex items-center mb-1 sm:mb-2 bg-gray-100 rounded-sm px-1 w-max">
-        <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600 fill-blue-600" />
-        <span className="text-[10px] sm:text-xs text-gray-600 mr-1.5 rtl:ml-1.5 rtl:mr-0">{book.rating.toFixed(1)}/5 ({book.reviews})</span>
-      </div>
+        <div className="flex items-center mb-1 sm:mb-2 bg-gray-100 rounded-sm px-1 w-max">
+          <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600 fill-blue-600" />
+          <span className="text-[10px] sm:text-xs text-gray-600 mr-1.5 rtl:ml-1.5 rtl:mr-0">{Number(book.rating ?? 0).toFixed(1)}/5 ({book.reviews ?? 0})</span>
+        </div>
 
       <div className="flex items-baseline mb-1 sm:mb-2">
         {book.originalPrice && (
