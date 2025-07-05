@@ -135,9 +135,9 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
           <DialogClose asChild>
             <Button variant="outline">إلغاء</Button>
           </DialogClose>
-          {rows.length > 0 && (
-            <Button onClick={handleImport}>استيراد</Button>
-          )}
+          <Button onClick={handleImport} disabled={!rows.length}>
+            استيراد
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
