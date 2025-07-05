@@ -43,7 +43,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import ExcelImportDialog from './ExcelImportDialog.jsx';
+import CsvImportDialog from './CsvImportDialog.jsx';
 
 import { Link } from 'react-router-dom';
 
@@ -252,7 +252,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
           </tbody>
         </table>
       </div>
-      <ExcelImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
+      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
     </motion.div>
   );
 };
@@ -2038,7 +2038,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
             إضافة كتاب جديد
           </Button>
           <Button variant="outline" onClick={() => setImportOpen(true)}>
-            استيراد من Excel
+            استيراد من ملف CSV
           </Button>
         </div>
       </div>
