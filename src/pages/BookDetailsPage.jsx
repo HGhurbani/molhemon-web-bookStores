@@ -10,10 +10,12 @@ import { BookCard } from '@/components/FlashSaleSection.jsx';
 import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
 import api from '@/lib/api.js';
+import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist }) => {
   const { id } = useParams();
   const location = useLocation();
+  const { currency } = useCurrency();
   const [book, setBook] = useState(location.state?.book || null);
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [activeTab, setActiveTab] = useState('details');
@@ -110,6 +112,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
     ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length
     : (book.rating ?? 0);
 
+  const displayPrice = getPriceForCurrency(book, currency.code) || book.originalPrice || book.price || 0;
+
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
       <nav className="text-sm text-gray-500 mb-4 sm:mb-6" aria-label="Breadcrumb">
@@ -131,9 +135,11 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         >
           <div className="relative aspect-[3/4] w-80 rounded-lg shadow-xl overflow-hidden">
             <img alt={`غلاف كتاب ${book.title}`} className="w-full h-full object-cover" src={book.coverImage || 'https://images.unsplash.com/photo-1572119003128-d110c07af847'} />
-            <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-              خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
-            </span>
+            {book.originalPrice && (
+              <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                خصم {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}%
+              </span>
+            )}
           </div>
           <div className="flex flex-col space-y-2 w-80">
             {hasReadSample && (
@@ -231,7 +237,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                       onChange={() => setSelectedFormat('book')}
                     />
                     <p className="text-sm font-medium mb-1">كتاب</p>
-                    <p className="text-lg font-bold text-blue-600"><FormattedPrice book={book} /></p>
+                    <p className="text-lg font-bold text-blue-600"><FormattedPrice value={displayPrice} /></p>
                     <p className="text-xs text-green-600">متوفر فوراً</p>
                   </label>
                 )}
@@ -256,7 +262,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                   {book.originalPrice && (
                     <span className="line-through text-red-500 mr-2 rtl:ml-2 rtl:mr-0"><FormattedPrice value={book.originalPrice} /></span>
                   )}
-                  <div className="text-2xl font-bold text-blue-600"><FormattedPrice book={book} /></div>
+                  <div className="text-2xl font-bold text-blue-600"><FormattedPrice value={displayPrice} /></div>
                 </div>
                 {book.originalPrice && (
                   <div className="text-green-600">وفر <FormattedPrice value={book.originalPrice - book.price} /></div>
