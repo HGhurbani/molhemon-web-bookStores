@@ -1978,7 +1978,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
 };
 
 
-const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureClick }) => {
+const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, handleFeatureClick }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
@@ -2018,9 +2018,27 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
   };
 
   const handleImportBooks = async (list) => {
+    let currentCategories = [...categories];
     for (const item of list) {
       try {
-        const data = { ...item, prices: { AED: item.price || 0 } };
+        let categoryId = item.category;
+        if (item.category) {
+          const existing = currentCategories.find(
+            c => c.id === item.category || c.name === item.category
+          );
+          if (!existing) {
+            const newCat = await api.addCategory({
+              name: item.category,
+              icon: 'BookOpen',
+            });
+            currentCategories = [newCat, ...currentCategories];
+            setCategories(prev => [newCat, ...prev]);
+            categoryId = newCat.id;
+          } else {
+            categoryId = existing.id;
+          }
+        }
+        const data = { ...item, category: categoryId, prices: { AED: item.price || 0 } };
         const newBook = await api.addBook(data);
         setBooks(prev => [newBook, ...prev]);
       } catch (err) {
@@ -2307,7 +2325,16 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         </div>
 
         {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
-        {dashboardSection === 'books' && <DashboardBooks books={books} setBooks={setBooks} authors={authors} categories={categories} handleFeatureClick={handleFeatureClick} />}
+        {dashboardSection === 'books' && (
+          <DashboardBooks
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            handleFeatureClick={handleFeatureClick}
+          />
+        )}
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
