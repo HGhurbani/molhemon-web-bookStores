@@ -21,9 +21,23 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    const lower = file.name.toLowerCase();
+    const isCsv = lower.endsWith('.csv');
+    const isJson = lower.endsWith('.json');
     const reader = new FileReader();
     reader.onload = (evt) => {
+      if (isJson) {
+        try {
+          let data = JSON.parse(evt.target.result);
+          if (!Array.isArray(data)) data = [data];
+          setHeaders(Object.keys(data[0] || {}));
+          setRows(data);
+        } catch {
+          setHeaders([]);
+          setRows([]);
+        }
+        return;
+      }
       let workbook;
       if (isCsv) {
         workbook = XLSX.read(evt.target.result, { type: 'string' });
@@ -36,7 +50,7 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
       setHeaders(Object.keys(json[0] || {}));
       setRows(json);
     };
-    if (isCsv) reader.readAsText(file);
+    if (isCsv || isJson) reader.readAsText(file);
     else reader.readAsArrayBuffer(file);
   };
 
@@ -62,12 +76,12 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="space-y-4">
         <DialogHeader>
-          <DialogTitle>استيراد كتب من ملف CSV</DialogTitle>
+          <DialogTitle>استيراد كتب من ملف CSV أو Excel أو JSON</DialogTitle>
         </DialogHeader>
         {!rows.length ? (
           <div>
-            <Label htmlFor="xls-file">اختر ملف CSV أو Excel</Label>
-            <Input id="xls-file" type="file" accept=".csv,.xls,.xlsx" onChange={handleFile} />
+            <Label htmlFor="xls-file">اختر ملف CSV أو Excel أو JSON</Label>
+            <Input id="xls-file" type="file" accept=".csv,.xls,.xlsx,.json" onChange={handleFile} />
           </div>
         ) : (
           <div className="space-y-3">
