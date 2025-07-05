@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from './ui/dialog.jsx';
 import { Button } from './ui/button.jsx';
 import { Input } from './ui/input.jsx';
@@ -29,40 +29,56 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
   const [rows, setRows] = useState([]);
   const [mapping, setMapping] = useState({});
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const lower = file.name.toLowerCase();
     const isCsv = lower.endsWith('.csv');
     const isJson = lower.endsWith('.json');
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      if (isJson) {
-        try {
-          let data = JSON.parse(evt.target.result);
-          if (!Array.isArray(data)) data = [data];
-          setHeaders(Object.keys(data[0] || {}));
-          setRows(data);
-        } catch {
-          setHeaders([]);
-          setRows([]);
-        }
-        return;
+
+    if (isJson) {
+      try {
+        let data = JSON.parse(await file.text());
+        if (!Array.isArray(data)) data = [data];
+        setHeaders(Object.keys(data[0] || {}));
+        setRows(data);
+      } catch {
+        setHeaders([]);
+        setRows([]);
       }
-      let workbook;
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    try {
       if (isCsv) {
-        workbook = XLSX.read(evt.target.result, { type: 'string' });
+        await workbook.csv.read(await file.text());
       } else {
-        const data = new Uint8Array(evt.target.result);
-        workbook = XLSX.read(data, { type: 'array' });
+        await workbook.xlsx.load(await file.arrayBuffer());
       }
-      const ws = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      setHeaders(Object.keys(json[0] || {}));
-      setRows(json);
-    };
-    if (isCsv || isJson) reader.readAsText(file);
-    else reader.readAsArrayBuffer(file);
+      const worksheet = workbook.worksheets[0];
+      const sheetValues = worksheet.getSheetValues();
+      const hdrs = (sheetValues[1] || []).slice(1).map(v => {
+        if (v && typeof v === 'object' && 'text' in v) return v.text;
+        return v ?? '';
+      });
+      const data = [];
+      for (let i = 2; i < sheetValues.length; i++) {
+        const row = sheetValues[i] || [];
+        const obj = {};
+        hdrs.forEach((h, idx) => {
+          let cell = row[idx + 1];
+          if (cell && typeof cell === 'object' && 'text' in cell) cell = cell.text;
+          obj[h] = cell ?? '';
+        });
+        if (Object.values(obj).some(val => val !== '')) data.push(obj);
+      }
+      setHeaders(hdrs);
+      setRows(data);
+    } catch {
+      setHeaders([]);
+      setRows([]);
+    }
   };
 
   const handleImport = async () => {
