@@ -602,19 +602,27 @@ app.put('/api/settings', async (req, res) => {
   res.json(rows[0]);
 });
 
-app.post('/api/google-merchant/import', async (_req, res) => {
-  const [rows] = await pool.query(
-    'SELECT googleMerchantId, googleApiKey FROM settings WHERE id=1'
-  );
-  const cfg = rows[0] || {};
-  if (!cfg.googleMerchantId || !cfg.googleApiKey) {
+app.post('/api/google-merchant/import', async (req, res) => {
+  let { googleMerchantId, googleApiKey } = req.body || {};
+
+  if (!googleMerchantId || !googleApiKey) {
+    const [rows] = await pool.query(
+      'SELECT googleMerchantId, googleApiKey FROM settings WHERE id=1'
+    );
+    const cfg = rows[0] || {};
+    googleMerchantId = googleMerchantId || cfg.googleMerchantId;
+    googleApiKey = googleApiKey || cfg.googleApiKey;
+  }
+
+  if (!googleMerchantId || !googleApiKey) {
     return res
       .status(400)
       .json({ error: 'Google Merchant configuration missing' });
   }
+
   try {
     const resp = await fetch(
-      `https://shoppingcontent.googleapis.com/content/v2.1/${cfg.googleMerchantId}/products?key=${cfg.googleApiKey}`
+      `https://shoppingcontent.googleapis.com/content/v2.1/${googleMerchantId}/products?key=${googleApiKey}`
     );
     const data = await resp.json();
     const products = data.resources || data.items || [];
