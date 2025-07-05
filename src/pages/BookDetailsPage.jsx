@@ -91,7 +91,9 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
 
   const description = book.description || "لا يوجد وصف متوفر لهذا الكتاب حاليًا. نعمل على توفير أوصاف شاملة لجميع كتبنا. شكرًا لتفهمكم.";
   const displayedDescription = showFullDescription ? description : `${description.substring(0, 250)}${description.length > 250 ? '...' : ''}`;
-  const avgRating = ratings.length ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : book.rating;
+  const avgRating = ratings.length
+    ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length
+    : (book.rating ?? 0);
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
@@ -146,7 +148,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <span className="mx-2">|</span>
             <span className="px-2 py-1 border rounded-full bg-white text-gray-800">{book.category}</span>
             <span className="mx-2">|</span>
-            <span className="flex items-center"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-1" />{avgRating.toFixed(1)}/5 ({ratings.length})</span>
+            <span className="flex items-center"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-1" />{Number(avgRating ?? 0).toFixed(1)}/5 ({ratings.length})</span>
             <span className="mx-2">|</span>
             <span>{book.salesRank || 0} نسخة مباعة</span>
           </div>
