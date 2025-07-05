@@ -65,15 +65,32 @@ const YouMayAlsoLikeSection = ({ books, handleAddToCart, handleToggleWishlist, w
                   <span className="text-[10px] sm:text-xs text-gray-600 mr-1.5 rtl:ml-1.5 rtl:mr-0">{Number(book.rating ?? 0).toFixed(1)}/5 ({book.reviews ?? 0})</span>
                 </div>
                 
-                <div className="flex items-baseline mb-1 sm:mb-2">
-                  {book.originalPrice && (
-                    <span className="text-gray-400 old-price text-[10px] sm:text-xs ml-1.5 rtl:mr-1.5 rtl:ml-0">
-                      <FormattedPrice value={book.originalPrice} />
-                    </span>
-                  )}
-                  <span className="font-bold text-blue-600 text-sm sm:text-lg"><FormattedPrice book={book} /></span>
-                </div>
-                 <p className="text-[10px] sm:text-xs text-blue-600 bg-blue-600/10 rounded-sm px-1 mb-2 sm:mb-3">وفر: <FormattedPrice value={book.originalPrice && book.price ? (book.originalPrice - book.price) : 0} /></p>
+                {(() => {
+                  const hasDiscount = book.price && book.originalPrice && book.price !== book.originalPrice;
+                  return (
+                    <>
+                      <div className="flex items-baseline mb-1 sm:mb-2">
+                        {hasDiscount && (
+                          <span className="text-gray-400 old-price text-[10px] sm:text-xs ml-1.5 rtl:mr-1.5 rtl:ml-0">
+                            <FormattedPrice value={book.originalPrice} />
+                          </span>
+                        )}
+                        <span className="font-bold text-blue-600 text-sm sm:text-lg">
+                          {book.price ? (
+                            <FormattedPrice book={book} />
+                          ) : (
+                            <FormattedPrice value={book.originalPrice} />
+                          )}
+                        </span>
+                      </div>
+                      {hasDiscount && (
+                        <p className="text-[10px] sm:text-xs text-blue-600 bg-blue-600/10 rounded-sm px-1 mb-2 sm:mb-3">
+                          وفر: <FormattedPrice value={book.originalPrice - book.price} />
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               
               <Button 
