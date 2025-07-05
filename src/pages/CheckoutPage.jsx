@@ -7,17 +7,18 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import { Lock, ShoppingBag, Truck, Tag, MessageSquare, MapPin } from 'lucide-react';
+import { Lock, ShoppingBag, Truck, MapPin } from 'lucide-react';
 import api from '@/lib/api.js';
 
 const CheckoutPage = ({ cart, setCart, setOrders }) => {
   const navigate = useNavigate();
-  // Mock user data for display, in a real app this would come from user context or API
   const [shippingAddress, setShippingAddress] = useState({
-    name: 'بروس وين',
-    street: '65، شارع 47، العجمان، إمارة عجمان',
-    city: 'عجمان',
-    country: 'الإمارات العربية المتحدة',
+    name: '',
+    email: '',
+    phone: '',
+    street: '',
+    city: '',
+    country: '',
   });
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(1);
@@ -58,18 +59,25 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!localStorage.getItem('customerLoggedIn')) {
+      toast({ title: 'يجب تسجيل الدخول لإتمام الشراء', variant: 'destructive' });
+      navigate('/login');
+      return;
+    }
+    const customerId = localStorage.getItem('currentUserId');
     const total = actualFinalTotal;
     const orderData = {
-      customer_id: null,
+      customer_id: customerId,
       seller_id: null,
       total,
       status: 'قيد المعالجة',
+      shipping: shippingAddress,
       items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
     };
     try {
       const newOrder = await api.addOrder(orderData);
       await api.addPayment({
-        customer_id: null,
+        customer_id: customerId,
         order_id: newOrder.id,
         subscription_id: null,
         payment_method_id: selectedPaymentMethod,
@@ -133,14 +141,58 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
                 <MapPin className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
                 عنوان الشحن
               </h2>
-              <div className="border border-gray-200 rounded-md p-4 flex justify-between items-center bg-gray-50">
+              <div className="border border-gray-200 rounded-md p-4 bg-gray-50 space-y-3">
                 <div>
-                  <p className="font-semibold text-gray-800">{shippingAddress.name}</p>
-                  <p className="text-sm text-gray-600">{shippingAddress.street}, {shippingAddress.city}, {shippingAddress.country}</p>
+                  <Label htmlFor="name">الاسم الكامل</Label>
+                  <Input
+                    id="name"
+                    value={shippingAddress.name}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, name: e.target.value })}
+                  />
                 </div>
-                <div className="flex space-x-2 rtl:space-x-reverse">
-                  <Button variant="outline" size="sm" onClick={() => toast({title: "تغيير العنوان", description: "🚧 هذه الميزة غير مطبقة بعد"})}>تغيير</Button>
-                  <Button variant="outline" size="sm" onClick={() => toast({title: "إضافة عنوان جديد", description: "🚧 هذه الميزة غير مطبقة بعد"})}>إضافة</Button>
+                <div>
+                  <Label htmlFor="email">البريد الإلكتروني</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={shippingAddress.email}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">رقم الهاتف</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={shippingAddress.phone}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="street">العنوان</Label>
+                  <Input
+                    id="street"
+                    value={shippingAddress.street}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="city">المدينة</Label>
+                    <Input
+                      id="city"
+                      value={shippingAddress.city}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="country">الدولة</Label>
+                    <Input
+                      id="country"
+                      value={shippingAddress.country}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
