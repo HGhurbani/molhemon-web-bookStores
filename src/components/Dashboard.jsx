@@ -978,6 +978,13 @@ const SliderForm = ({ slider, onSubmit, onCancel }) => {
             onChange={(e) => {
               const file = e.target.files[0];
               if (file) {
+                if (file.size > 1024 * 1024) {
+                  toast({
+                    title: 'حجم الصورة يتجاوز 1MB',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
                 const reader = new FileReader();
                 reader.onloadend = () =>
                   setFormData((prev) => ({ ...prev, image_url: reader.result }));
@@ -1109,6 +1116,13 @@ const BannerForm = ({ banner, onSubmit, onCancel }) => {
             onChange={(e) => {
               const file = e.target.files[0];
               if (file) {
+                if (file.size > 1024 * 1024) {
+                  toast({
+                    title: 'حجم الصورة يتجاوز 1MB',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
                 const reader = new FileReader();
                 reader.onloadend = () =>
                   setFormData((prev) => ({ ...prev, image_url: reader.result }));
