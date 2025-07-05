@@ -43,6 +43,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog.jsx';
 import { toast } from '@/components/ui/use-toast.js';
+import ExcelImportDialog from './ExcelImportDialog.jsx';
 
 import { Link } from 'react-router-dom';
 
@@ -251,6 +252,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
           </tbody>
         </table>
       </div>
+      <ExcelImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
     </motion.div>
   );
 };
@@ -1965,6 +1967,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
 const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureClick }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const handleAddBook = async (data) => {
     try {
@@ -2000,6 +2003,19 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
     }
   };
 
+  const handleImportBooks = async (list) => {
+    for (const item of list) {
+      try {
+        const data = { ...item, prices: { AED: item.price || 0 } };
+        const newBook = await api.addBook(data);
+        setBooks(prev => [newBook, ...prev]);
+      } catch (err) {
+        console.error('Import error', err);
+      }
+    }
+    toast({ title: 'تم الاستيراد بنجاح!' });
+  };
+
   if (showForm) {
     return <BookForm book={editingBook} onSubmit={editingBook ? handleEditBook : handleAddBook} onCancel={() => { setShowForm(false); setEditingBook(null); }} authors={authors} categories={categories} />;
   }
@@ -2013,13 +2029,18 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
     >
       <div className="flex flex-col sm:flex-row justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة الكتب</h2>
-        <Button 
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
-          onClick={() => { setEditingBook(null); setShowForm(true); }}
-        >
-          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-          إضافة كتاب جديد
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
+            onClick={() => { setEditingBook(null); setShowForm(true); }}
+          >
+            <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+            إضافة كتاب جديد
+          </Button>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            استيراد من Excel
+          </Button>
+        </div>
       </div>
 
       <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
