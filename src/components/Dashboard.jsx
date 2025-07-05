@@ -2023,24 +2023,30 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
       try {
         let categoryId = item.category;
         if (item.category) {
-          const existing = currentCategories.find(
-            c => c.id === item.category || c.name === item.category
-          );
-          if (!existing) {
-            const newCat = await api.addCategory({
-              name: item.category,
-              icon: 'BookOpen',
-            });
-            currentCategories = [newCat, ...currentCategories];
-            setCategories(prev => [newCat, ...prev]);
-            categoryId = newCat.id;
-          } else {
-            categoryId = existing.id;
+          const names = String(item.category)
+            .split(',')
+            .map((c) => c.trim())
+            .filter(Boolean);
+          for (let i = 0; i < names.length; i++) {
+            const name = names[i];
+            let existing = currentCategories.find(
+              (c) => c.id === name || c.name === name
+            );
+            if (!existing) {
+              existing = await api.addCategory({ name, icon: 'BookOpen' });
+              currentCategories = [...currentCategories, existing];
+              setCategories((prev) => [...prev, existing]);
+            }
+            if (i === 0) categoryId = existing.id;
           }
         }
-        const data = { ...item, category: categoryId, prices: { AED: item.price || 0 } };
+        const data = {
+          ...item,
+          category: categoryId,
+          prices: { AED: item.price || 0 },
+        };
         const newBook = await api.addBook(data);
-        setBooks(prev => [newBook, ...prev]);
+        setBooks((prev) => [newBook, ...prev]);
       } catch (err) {
         console.error('Import error', err);
       }
