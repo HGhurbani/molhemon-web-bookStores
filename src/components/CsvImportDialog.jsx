@@ -5,12 +5,23 @@ import { Button } from './ui/button.jsx';
 import { Input } from './ui/input.jsx';
 import { Label } from './ui/label.jsx';
 
+// Available book fields that can be mapped when importing
+// Feel free to extend this list if the schema changes
 const FIELDS = [
   { key: 'title', label: 'العنوان' },
   { key: 'author', label: 'المؤلف' },
   { key: 'price', label: 'السعر' },
+  { key: 'originalPrice', label: 'السعر الأصلي' },
   { key: 'category', label: 'الفئة' },
+  { key: 'coverImage', label: 'صورة الغلاف' },
   { key: 'description', label: 'الوصف' },
+  { key: 'tags', label: 'الوسوم' },
+  { key: 'type', label: 'نوع الكتاب' },
+  { key: 'deliveryMethod', label: 'طريقة التوصيل' },
+  { key: 'ebookFile', label: 'ملف إلكتروني' },
+  { key: 'audioFile', label: 'ملف صوتي' },
+  { key: 'sampleAudio', label: 'عينة صوتية' },
+  { key: 'imgPlaceholder', label: 'وصف الصورة' },
 ];
 
 export default function CsvImportDialog({ open, onOpenChange, onImport }) {
@@ -63,6 +74,7 @@ export default function CsvImportDialog({ open, onOpenChange, onImport }) {
         if (col) b[f.key] = r[col];
       });
       if (b.price) b.price = parseFloat(b.price) || 0;
+      if (b.originalPrice) b.originalPrice = parseFloat(b.originalPrice) || 0;
       return b;
     });
     await onImport(books);
