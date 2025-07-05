@@ -2113,6 +2113,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, handleFeatureCli
           </table>
         </div>
       </div>
+      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
     </motion.div>
   );
 };
