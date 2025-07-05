@@ -62,8 +62,23 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
 
   const authorDetails = authors.find(a => a.name === book?.author);
 
+  const hasReadSample = Boolean(book?.ebookFile);
+  const hasAudioSample = Boolean(book?.sampleAudio);
+
+  const hasBook = book?.type !== 'audio';
+  const hasAudiobook = Boolean(book?.audioFile || book?.sampleAudio);
+
+  const [selectedFormat, setSelectedFormat] = useState(
+    hasBook ? 'book' : hasAudiobook ? 'audio' : ''
+  );
+
+  useEffect(() => {
+    setSelectedFormat(hasBook ? 'book' : hasAudiobook ? 'audio' : '');
+  }, [book]);
+
   const onAddToCart = () => {
-    handleAddToCart({ ...book, quantity: 1 });
+    const type = selectedFormat === 'audio' ? 'audio' : book.type;
+    handleAddToCart({ ...book, quantity: 1, type });
   };
 
   const onToggleWishlist = () => {
@@ -121,16 +136,20 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             </span>
           </div>
           <div className="flex flex-col space-y-2 w-80">
-            <Link to={`/read/${book.id}`} className="w-full">
-              <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20">
-                <BookOpenText className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />اقرأ عينة
-              </Button>
-            </Link>
-            <Link to={`/listen/${book.id}`} className="w-full">
-              <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20">
-                <Headphones className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />عينة صوتية
-              </Button>
-            </Link>
+            {hasReadSample && (
+              <Link to={`/read/${book.id}`} className="w-full">
+                <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20">
+                  <BookOpenText className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />اقرأ عينة
+                </Button>
+              </Link>
+            )}
+            {hasAudioSample && (
+              <Link to={`/listen/${book.id}`} className="w-full">
+                <Button variant="ghost" className="w-full bg-purple-700/10 text-purple-700 hover:bg-purple-700/20">
+                  <Headphones className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-purple-700" />عينة صوتية
+                </Button>
+              </Link>
+            )}
           </div>
         </motion.div>
 
@@ -200,17 +219,37 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         >
           <div className="sticky top-24 space-y-4 mx-auto">
             <div className="bg-white rounded-lg shadow p-4 space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="border rounded-md p-2 text-center">
-                  <p className="text-sm font-medium mb-1">كتاب</p>
-                  <p className="text-lg font-bold text-blue-600"><FormattedPrice book={book} /></p>
-                  <p className="text-xs text-green-600">متوفر فوراً</p>
-                </div>
-                <div className="border rounded-md p-2 text-center">
-                  <p className="text-sm font-medium mb-1">كتاب صوتي</p>
-                  <p className="text-lg font-bold">0 د.إ</p>
-                  <p className="text-xs text-gray-600">مع عضوية</p>
-                </div>
+              <div className={`grid gap-2 ${hasBook && hasAudiobook ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {hasBook && (
+                  <label className={`border rounded-md p-2 text-center cursor-pointer ${selectedFormat === 'book' ? 'ring-2 ring-blue-600' : ''}`}> 
+                    <input
+                      type="radio"
+                      name="format"
+                      value="book"
+                      className="sr-only"
+                      checked={selectedFormat === 'book'}
+                      onChange={() => setSelectedFormat('book')}
+                    />
+                    <p className="text-sm font-medium mb-1">كتاب</p>
+                    <p className="text-lg font-bold text-blue-600"><FormattedPrice book={book} /></p>
+                    <p className="text-xs text-green-600">متوفر فوراً</p>
+                  </label>
+                )}
+                {hasAudiobook && (
+                  <label className={`border rounded-md p-2 text-center cursor-pointer ${selectedFormat === 'audio' ? 'ring-2 ring-blue-600' : ''}`}> 
+                    <input
+                      type="radio"
+                      name="format"
+                      value="audio"
+                      className="sr-only"
+                      checked={selectedFormat === 'audio'}
+                      onChange={() => setSelectedFormat('audio')}
+                    />
+                    <p className="text-sm font-medium mb-1">كتاب صوتي</p>
+                    <p className="text-lg font-bold">0 د.إ</p>
+                    <p className="text-xs text-gray-600">مع عضوية</p>
+                  </label>
+                )}
               </div>
               <div className="flex justify-between items-end text-sm">
                 <div>
@@ -224,7 +263,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                 )}
               </div>
               <div className="mb-3">
-                <Button onClick={onAddToCart} className="w-full bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0" />أضف إلى السلة</Button>
+                <Button onClick={onAddToCart} disabled={!selectedFormat} className="w-full bg-blue-600 hover:bg-blue-700 h-9"><ShoppingCart className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0" />أضف إلى السلة</Button>
               </div>
               <Button variant="secondary" className="w-full mb-3">اشتري الان بنقرة واحدة</Button>
               <div className="flex justify-around text-sm text-gray-600">

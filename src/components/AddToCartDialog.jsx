@@ -51,4 +51,4 @@ const AddToCartDialog = ({ open, onOpenChange, book, recommendedBooks, handleAdd
   )
 }
 
-export default AddToCartDialog
+export default AddToCartDialog;
