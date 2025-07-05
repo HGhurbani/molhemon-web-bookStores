@@ -10,7 +10,7 @@ const ListenSamplePage = ({ books }) => {
   const audioSrc = book.sampleAudio || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
   return (
     <div className="container mx-auto px-4 py-8 text-center">
-      <Link to={`/book/${id}`} className="text-blue-600 hover:underline block mb-4 text-right rtl:text-right">العودة لتفاصيل الكتاب</Link>
+      <Link to={`/book/${id}`} state={{ book }} className="text-blue-600 hover:underline block mb-4 text-right rtl:text-right">العودة لتفاصيل الكتاب</Link>
       <h1 className="text-2xl font-bold mb-4 rtl:text-right">{book.title}</h1>
       <audio controls src={audioSrc} className="w-full" />
     </div>
