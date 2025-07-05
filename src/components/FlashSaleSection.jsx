@@ -133,6 +133,10 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
 
 
 const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishlist, authors }) => {
+  const flashBooks = React.useMemo(
+    () => books.filter(b => b.price && b.originalPrice),
+    [books]
+  );
   return (
     <section className="py-8 sm:py-10">
 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 bg-white p-4 rounded-[18px]">
@@ -150,10 +154,10 @@ const FlashSaleSection = ({ books, handleAddToCart, handleToggleWishlist, wishli
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-          {books.slice(0,6).map((book, index) => (
-            <BookCard 
-              key={`${book.id}-${index}-flash`} 
-              book={book} 
+          {flashBooks.slice(0,6).map((book, index) => (
+            <BookCard
+              key={`${book.id}-${index}-flash`}
+              book={book}
               handleAddToCart={handleAddToCart} 
               handleToggleWishlist={handleToggleWishlist} 
               index={index}
