@@ -128,6 +128,25 @@ const firebaseApi = {
 
   getBookRatings: (bookId) => getCollection(`books/${bookId}/ratings`),
   addBookRating: (bookId, data) => addToCollection(`books/${bookId}/ratings`, data),
+  async getDashboardStats() {
+    const [bookSnap, authorSnap, paymentSnap, customerSnap] = await Promise.all([
+      getDocs(collection(db, 'books')),
+      getDocs(collection(db, 'authors')),
+      getDocs(collection(db, 'payments')),
+      getDocs(collection(db, 'customers')),
+    ]);
+    let sales = 0;
+    paymentSnap.forEach(d => {
+      const amt = d.data().amount;
+      if (amt) sales += Number(amt);
+    });
+    return {
+      books: bookSnap.size,
+      authors: authorSnap.size,
+      sales,
+      customers: customerSnap.size,
+    };
+  },
 };
 
 export default firebaseApi;

@@ -28,9 +28,9 @@ import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
-import { sellers as initialSellers, customers as initialCustomers, dashboardStats, footerLinks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
+import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
 import api from '@/lib/api.js';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 
 const App = () => {
   const [dashboardSection, setDashboardSection] = useState('overview');
@@ -40,6 +40,7 @@ const App = () => {
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
+  const [dashboardStatsState, setDashboardStatsState] = useState([]);
   const [sellers, setSellers] = useState(() => {
     const stored = localStorage.getItem('sellers');
     return stored ? JSON.parse(stored) : initialSellers;
@@ -93,7 +94,7 @@ const App = () => {
     if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, custData] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -106,6 +107,8 @@ const App = () => {
           api.getSliders(),
           api.getBanners(),
           api.getFeatures(),
+          api.getSellers(),
+          api.getCustomers(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -119,6 +122,15 @@ const App = () => {
         setHeroSlidesState(sliders);
         setBannersState(banners);
         setFeatures(feats);
+        setSellers(sellData);
+        setCustomers(custData);
+        const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+        setDashboardStatsState([
+          { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
+          { title: 'المؤلفون', value: a.length, icon: Users, color: 'bg-green-500' },
+          { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
+          { title: 'العملاء', value: custData.length, icon: Eye, color: 'bg-orange-500' },
+        ]);
       } catch (err) {
         console.error('API fetch failed', err);
       }
@@ -177,6 +189,16 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('features', JSON.stringify(features));
   }, [features]);
+
+  useEffect(() => {
+    const sales = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    setDashboardStatsState([
+      { title: 'إجمالي الكتب', value: books.length, icon: BookOpen, color: 'bg-blue-500' },
+      { title: 'المؤلفون', value: authors.length, icon: Users, color: 'bg-green-500' },
+      { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
+      { title: 'العملاء', value: customers.length, icon: Eye, color: 'bg-orange-500' },
+    ]);
+  }, [books, authors, payments, customers]);
 
   useEffect(() => {
     if (siteSettingsState.siteName) {
@@ -293,7 +315,7 @@ const App = () => {
               element={
                 isAdminLoggedIn ? (
                   <Dashboard
-                    dashboardStats={dashboardStats}
+                    dashboardStats={dashboardStatsState}
                     books={books}
                     authors={authors}
                     sellers={sellers}
