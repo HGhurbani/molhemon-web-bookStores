@@ -9,29 +9,35 @@ import BookBestsellerSection from '@/components/BookBestsellerSection.jsx';
 import FeaturesSection from '@/components/FeaturesSection.jsx';
 import { TrendingUp } from 'lucide-react';
 
-const HomePage = ({ 
-  books, 
-  authors, 
-  heroSlides, 
-  categories, 
-  recentSearchBooks, 
-  bestsellerBooks, 
+const HomePage = ({
+  books,
+  authors,
+  heroSlides,
+  categories,
+  recentSearchBooks,
+  bestsellerBooks,
   featuresData: features,
   banners,
-  handleAddToCart, 
+  handleAddToCart,
   handleToggleWishlist,
   wishlist, 
-  handleFeatureClick 
+  handleFeatureClick
 }) => {
+  const displayedCategories = React.useMemo(() => {
+    const list = categories.slice(0, 11);
+    if (categories.length > 11) {
+      list.push({ id: 'more', name: 'المزيد', icon: 'Menu' });
+    }
+    return list;
+  }, [categories]);
+
   return (
     <>
       <HeroSection slides={heroSlides} />
-      <CategoriesSection 
-        categories={categories} 
-      />
-      <FlashSaleSection 
-        books={books} 
-        handleAddToCart={handleAddToCart} 
+      <CategoriesSection categories={displayedCategories} />
+      <FlashSaleSection
+        books={books}
+        handleAddToCart={handleAddToCart}
         handleToggleWishlist={handleToggleWishlist}
         wishlist={wishlist}
       />
