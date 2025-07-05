@@ -25,6 +25,8 @@ npm run dev
 
 The app now reads and writes data directly from Firebase.
 
+Authentication uses Firebase Auth. New accounts are created with `createUserWithEmailAndPassword` and stored in the `users` collection in Firestore.
+
 ## Google Merchant Integration
 Set `GOOGLE_MERCHANT_ID` and `GOOGLE_API_KEY` in your `.env` file to enable importing products from Google Merchant Center. In the dashboard settings you can trigger "استيراد من Google Merchant" to fetch and add products as books.
 
