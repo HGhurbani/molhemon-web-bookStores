@@ -21,7 +21,7 @@ const EbookReaderPage = ({ books }) => {
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'}`} dir={dir}>
       <div className="container mx-auto px-4 py-6">
         <div className="mb-4 flex justify-between items-center">
-          <Link to={`/book/${id}`} className="text-blue-600 hover:underline">عودة لتفاصيل الكتاب</Link>
+          <Link to={`/book/${id}`} state={{ book }} className="text-blue-600 hover:underline">عودة لتفاصيل الكتاب</Link>
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <Button size="sm" variant="outline" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? 'وضع النهار' : 'وضع الليل'}

@@ -281,7 +281,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
                 <ul className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded-md mt-1 max-h-48 overflow-auto text-sm">
                   {suggestions.map((s) => (
                     <li key={s.id} className="px-3 py-2 hover:bg-gray-100">
-                      <Link to={`/book/${s.id}`}>{s.title}</Link>
+                      <Link to={`/book/${s.id}`} state={{ book: s }}>{s.title}</Link>
                     </li>
                   ))}
                 </ul>

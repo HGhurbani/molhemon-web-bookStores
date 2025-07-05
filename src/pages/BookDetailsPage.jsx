@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FormattedPrice from '@/components/FormattedPrice.jsx';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
@@ -13,7 +13,8 @@ import api from '@/lib/api.js';
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist }) => {
   const { id } = useParams();
-  const [book, setBook] = useState(null);
+  const location = useLocation();
+  const [book, setBook] = useState(location.state?.book || null);
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [activeTab, setActiveTab] = useState('details');
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -23,7 +24,11 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const [comment, setComment] = useState('');
 
   useEffect(() => {
-    const currentBook = books.find(b => b.id.toString() === id);
+    const stateBook = location.state?.book;
+    const currentBook = stateBook && stateBook.id.toString() === id
+      ? stateBook
+      : books.find(b => b.id.toString() === id);
+
     if (currentBook) {
       setBook(currentBook);
       const authorBooks = books.filter(b => b.author === currentBook.author && b.id !== currentBook.id);
@@ -34,7 +39,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
       setIsInWishlist(localWishlist.some(item => item.id === currentBook.id));
 
     }
-  }, [id, books]);
+  }, [id, books, location.state]);
 
   useEffect(() => {
     const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');

@@ -83,7 +83,7 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
                     <img alt={`غلاف كتاب ${item.title}`} className="w-full h-full object-cover" src={item.coverImage || 'https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg'} />
                   </div>
                   <div className="flex-grow">
-                    <Link to={`/book/${item.id}`} className="font-semibold text-gray-800 hover:text-blue-600 line-clamp-2">
+                    <Link to={`/book/${item.id}`} state={{ book: item }} className="font-semibold text-gray-800 hover:text-blue-600 line-clamp-2">
                       {item.title}
                     </Link>
                     <p className="text-gray-500 text-xs">{item.author}</p>

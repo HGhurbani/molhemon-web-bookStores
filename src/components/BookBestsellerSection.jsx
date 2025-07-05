@@ -22,7 +22,7 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
   >
     <div>
       <div className={`relative mb-3 sm:mb-4 ${square ? 'aspect-square' : 'aspect-[3/4]'} rounded-md overflow-hidden`}>
-        <Link to={`/book/${book.id}`}>
+        <Link to={`/book/${book.id}`} state={{ book }}>
           <img
             alt={`غلاف كتاب ${book.title}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -38,7 +38,7 @@ const BestsellerCard = ({ book, handleAddToCart, handleToggleWishlist, index, is
         </Button>
       </div>
 
-      <Link to={`/book/${book.id}`}>
+      <Link to={`/book/${book.id}`} state={{ book }}>
         <h3 className="font-semibold mb-1 text-xs sm:text-sm text-gray-800 truncate group-hover:text-blue-600">{book.title}</h3>
       </Link>
       <p className="text-gray-500 text-[10px] sm:text-xs mb-1 sm:mb-2 hover:text-blue-500">{book.author}</p>

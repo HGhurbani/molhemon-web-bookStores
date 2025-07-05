@@ -64,7 +64,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
   >
     <div>
       <div className={`relative mb-2 sm:mb-3 ${square ? 'aspect-square' : 'aspect-[3/4]'} rounded-md overflow-hidden group`}>
-        <Link to={`/book/${book.id}`}>
+        <Link to={`/book/${book.id}`} state={{ book }}>
           <img
             alt={`غلاف كتاب ${book.title}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -89,7 +89,7 @@ const BookCard = ({ book, handleAddToCart, handleToggleWishlist, index, isInWish
         </div>
       </div>
       
-      <Link to={`/book/${book.id}`}>
+      <Link to={`/book/${book.id}`} state={{ book }}>
         <h3 className="font-semibold mb-0.5 text-[11px] sm:text-xs text-gray-800 truncate group-hover:text-blue-600">{book.title}</h3>
       </Link>
       <Link to={`/author/${book.authorId || (authors.find(a=>a.name === book.author) || {}).id || 'unknown'}`}>
