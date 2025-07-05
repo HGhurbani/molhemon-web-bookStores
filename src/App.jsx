@@ -28,7 +28,7 @@ import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
-import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings } from '@/data/siteData.js';
+import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 
@@ -53,7 +53,10 @@ const App = () => {
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
-  const [paymentMethods, setPaymentMethods] = useState(() => JSON.parse(localStorage.getItem('paymentMethods') || '[]'));
+  const [paymentMethods, setPaymentMethods] = useState(() => {
+    const stored = localStorage.getItem('paymentMethods');
+    return stored ? JSON.parse(stored) : initialPaymentMethods;
+  });
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');

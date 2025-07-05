@@ -30,6 +30,9 @@ Authentication uses Firebase Auth. New accounts are created with `createUserWith
 ## Google Merchant Integration
 Set `GOOGLE_MERCHANT_ID` and `GOOGLE_API_KEY` in your `.env` file to enable importing products from Google Merchant Center. In the dashboard settings you can trigger "استيراد من Google Merchant" to fetch and add products as books.
 
+## Payment Methods
+Payment methods are stored in the `payment_methods` collection in Firestore. Each method can hold a JSON configuration containing your gateway keys (for example Stripe publishable/secret keys or PayPal client details). The dashboard lets you edit this JSON for every method. Only Firebase is required – no additional backend is needed for payments.
+
 ## Notes
 - Data in the dashboard is persisted in Firebase. The optional PHP backend is only used for the Google Merchant import.
 - If you need to build the project for production, run `npm run build` (requires installed dependencies).

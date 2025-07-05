@@ -298,3 +298,18 @@ export const siteSettings = {
   paypalClientId: '',
   paypalSecret: ''
 };
+
+export const paymentMethods = [
+  { id: 1, name: 'Stripe', test_mode: false, config: { publishableKey: '', secretKey: '' } },
+  { id: 2, name: 'PayPal', test_mode: false, config: { clientId: '', secret: '' } },
+  { id: 3, name: 'Mada', test_mode: false, config: { merchantId: '', terminalId: '' } },
+  { id: 4, name: 'Qitaf', test_mode: false, config: { merchantId: '', apiKey: '' } },
+  { id: 5, name: 'Cash on Delivery', test_mode: false, config: {} },
+  { id: 6, name: 'Tabby', test_mode: false, config: { apiKey: '', secretKey: '' } },
+  { id: 7, name: 'Tamara', test_mode: false, config: { apiKey: '', secretKey: '' } },
+  { id: 8, name: 'STC Pay', test_mode: false, config: { merchantId: '', secretKey: '' } },
+  { id: 9, name: 'Apple Pay', test_mode: false, config: { merchantId: '' } },
+  { id: 10, name: 'Fawry', test_mode: false, config: { merchantCode: '', secureKey: '' } },
+  { id: 11, name: 'PayFort', test_mode: false, config: { accessCode: '', merchantIdentifier: '', shaRequestPhrase: '', shaResponsePhrase: '' } },
+  { id: 12, name: 'MyFatoorah', test_mode: false, config: { apiKey: '' } }
+];
