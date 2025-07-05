@@ -5,6 +5,7 @@ import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
+import { paymentMethods as paymentMethodTemplates } from '@/data/siteData.js';
 import {
   BookOpen,
   Users,
@@ -1536,9 +1537,21 @@ const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
     test_mode: method?.test_mode || false,
     config: method?.config ? JSON.stringify(method.config, null, 2) : ''
   });
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+  const handleTemplateChange = (e) => {
+    const tpl = paymentMethodTemplates.find(t => t.id.toString() === e.target.value);
+    setSelectedTemplate(e.target.value);
+    if (tpl) {
+      setFormData({
+        name: tpl.name,
+        test_mode: tpl.test_mode,
+        config: JSON.stringify(tpl.config, null, 2)
+      });
+    }
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -1549,6 +1562,20 @@ const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
       <h3 className="text-xl font-semibold mb-5 text-gray-700">{method ? 'تعديل طريقة' : 'إضافة طريقة جديدة'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="templateSelect">اختر من النماذج</Label>
+          <select
+            id="templateSelect"
+            value={selectedTemplate}
+            onChange={handleTemplateChange}
+            className="w-full p-2 mt-1 border border-gray-300 rounded-md"
+          >
+            <option value="">-- اختر طريقة دفع --</option>
+            {paymentMethodTemplates.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
         <div>
           <Label htmlFor="mname">الاسم</Label>
           <Input id="mname" name="name" value={formData.name} onChange={handleChange} required />
