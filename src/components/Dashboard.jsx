@@ -1531,12 +1531,20 @@ const DashboardPayments = ({ payments, setPayments }) => {
 };
 
 const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', test_mode: false, ...method });
+  const [formData, setFormData] = useState({
+    name: method?.name || '',
+    test_mode: method?.test_mode || false,
+    config: method?.config ? JSON.stringify(method.config, null, 2) : ''
+  });
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
-  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { id, ...payload } = formData;
+    onSubmit(payload);
+  };
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
       <h3 className="text-xl font-semibold mb-5 text-gray-700">{method ? 'تعديل طريقة' : 'إضافة طريقة جديدة'}</h3>
@@ -1556,6 +1564,10 @@ const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
           />
           <Label htmlFor="mtest" className="!mb-0">وضع الاختبار</Label>
         </div>
+        <div>
+          <Label htmlFor="mconfig">الإعدادات (JSON)</Label>
+          <Textarea id="mconfig" name="config" value={formData.config} onChange={handleChange} rows={4} />
+        </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -1573,8 +1585,17 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
   const [editingMethod, setEditingMethod] = useState(null);
 
   const handleAdd = async (data) => {
+    let parsed;
+    if (data.config) {
+      try {
+        parsed = JSON.parse(data.config);
+      } catch {
+        toast({ title: 'صيغة JSON غير صالحة', variant: 'destructive' });
+        return;
+      }
+    }
     try {
-      const newItem = await api.addPaymentMethod(data);
+      const newItem = await api.addPaymentMethod({ ...data, config: parsed });
       setPaymentMethods(prev => [newItem, ...prev]);
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
@@ -1584,8 +1605,17 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
   };
 
   const handleEdit = async (data) => {
+    let parsed;
+    if (data.config) {
+      try {
+        parsed = JSON.parse(data.config);
+      } catch {
+        toast({ title: 'صيغة JSON غير صالحة', variant: 'destructive' });
+        return;
+      }
+    }
     try {
-      const updated = await api.updatePaymentMethod(editingMethod.id, data);
+      const updated = await api.updatePaymentMethod(editingMethod.id, { ...data, config: parsed });
       setPaymentMethods(prev => prev.map(m => m.id === updated.id ? updated : m));
       toast({ title: 'تم التعديل بنجاح!' });
       setShowForm(false);
@@ -1626,6 +1656,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">وضع الاختبار</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإعدادات</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -1635,6 +1666,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.id}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.name}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.test_mode ? 'نعم' : 'لا'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.config ? '✔' : '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingMethod(m); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
