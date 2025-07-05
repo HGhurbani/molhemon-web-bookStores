@@ -2139,7 +2139,10 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
 
   const handleImport = async () => {
     try {
-      await api.importGoogleMerchant();
+      await api.importGoogleMerchant({
+        googleMerchantId: formData.googleMerchantId,
+        googleApiKey: formData.googleApiKey,
+      });
       toast({ title: 'تم استيراد الكتب بنجاح!' });
     } catch (err) {
       toast({ title: 'خطأ في الاستيراد', variant: 'destructive' });

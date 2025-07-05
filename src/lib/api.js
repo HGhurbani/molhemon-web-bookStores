@@ -18,7 +18,11 @@ async function request(url, options = {}) {
 // Export Firebase API by default and keep Google Merchant import via legacy backend
 export const api = {
   ...firebaseApi,
-  importGoogleMerchant: () => request('/api/google-merchant/import', { method: 'POST' }),
+  importGoogleMerchant: (cfg = {}) =>
+    request('/api/google-merchant/import', {
+      method: 'POST',
+      body: JSON.stringify(cfg),
+    }),
 };
 
 export default api;
