@@ -372,7 +372,24 @@ const App = () => {
               <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
-              <Route path="/checkout" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CheckoutPage cart={cart} setCart={setCart} setOrders={setOrders} /></PageLayout></MainLayout>} />
+              <Route
+                path="/checkout"
+                element={
+                  isCustomerLoggedIn ? (
+                    <MainLayout siteSettings={siteSettingsState}>
+                      <PageLayout>
+                        <CheckoutPage
+                          cart={cart}
+                          setCart={setCart}
+                          setOrders={setOrders}
+                        />
+                      </PageLayout>
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
               <Route path="/profile" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
               <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><OrderDetailsPage /></PageLayout></MainLayout>} />
               <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
