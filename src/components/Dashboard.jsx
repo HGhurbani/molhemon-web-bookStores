@@ -78,7 +78,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
           </button>
         </div>
         
-        <nav className="space-y-1.5 flex-grow">
+        <nav className="space-y-1.5 flex-grow overflow-y-auto">
           {navItems.map(({ id, name, icon: IconComponent }) => (
             <button
               key={id}
