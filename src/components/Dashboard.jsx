@@ -252,7 +252,6 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
           </tbody>
         </table>
       </div>
-      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
     </motion.div>
   );
 };
