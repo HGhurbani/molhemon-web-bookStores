@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast.js';
 import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import Dashboard from '@/components/Dashboard.jsx';
+import SEO from '@/components/SEO.jsx';
 import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
 import AuthPage from '@/pages/AuthPage.jsx';
 
@@ -290,22 +291,29 @@ const App = () => {
   };
   
   const MainLayout = ({ children, siteSettings }) => (
-    <div className="min-h-screen bg-slate-100 text-gray-800">
-      <Header
-        handleFeatureClick={handleFeatureClick}
-        cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        isCustomerLoggedIn={isCustomerLoggedIn}
-        books={books}
-        categories={categoriesState}
-        siteSettings={siteSettings}
+    <>
+      <SEO
+        title={siteSettings.siteName}
+        description={siteSettings.description}
+        keywords="كتب, متجر كتب, كتب صوتية, كتب إلكترونية, دار نشر"
       />
-      {children}
-      <Footer
-        footerLinks={footerLinks}
-        handleFeatureClick={handleFeatureClick}
-        siteSettings={siteSettings}
-      />
-    </div>
+      <div className="min-h-screen bg-slate-100 text-gray-800">
+        <Header
+          handleFeatureClick={handleFeatureClick}
+          cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+          isCustomerLoggedIn={isCustomerLoggedIn}
+          books={books}
+          categories={categoriesState}
+          siteSettings={siteSettings}
+        />
+        {children}
+        <Footer
+          footerLinks={footerLinks}
+          handleFeatureClick={handleFeatureClick}
+          siteSettings={siteSettings}
+        />
+      </div>
+    </>
   );
 
   return (
