@@ -293,9 +293,9 @@ export const siteSettings = {
   twitter: '',
   instagram: '',
   themeColor: '#1D4ED8',
-  stripePublicKey: '',
+  stripePublicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY || '',
   stripeSecretKey: '',
-  paypalClientId: '',
+  paypalClientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || '',
   paypalSecret: ''
 };
 

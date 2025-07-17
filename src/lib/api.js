@@ -23,6 +23,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(cfg),
     }),
+  createStripePaymentIntent: (data) =>
+    request('/api/payment/stripe', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  createPayPalOrder: (data) =>
+    request('/api/payment/paypal', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 export default api;

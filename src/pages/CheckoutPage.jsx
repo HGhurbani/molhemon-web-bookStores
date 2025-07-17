@@ -75,6 +75,17 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
       items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
     };
     try {
+      if (selectedPaymentMethod === 1) {
+        await api.createStripePaymentIntent({
+          amount: Math.round(total * 100),
+          currency: currency.code.toLowerCase(),
+        });
+      } else if (selectedPaymentMethod === 2) {
+        await api.createPayPalOrder({
+          amount: total.toFixed(2),
+          currency: currency.code,
+        });
+      }
       const newOrder = await api.addOrder(orderData);
       await api.addPayment({
         customer_id: customerId,
