@@ -89,8 +89,9 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
         <div className="border-t border-slate-700/50 pt-5 sm:pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] sm:text-xs text-white">
           <p>جميع الحقوق محفوظة © {new Date().getFullYear()} {siteSettings.siteName || 'ملهمون'}</p>
           <div className="flex space-x-2.5 sm:space-x-3 rtl:space-x-reverse mt-2 sm:mt-0">
-            <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('privacy-policy')}}>سياسة الخصوصية</a>
-            <a href="#" className="hover:text-blue-200" onClick={(e) => {e.preventDefault(); handleFeatureClick('terms-of-use')}}>شروط الاستخدام</a>
+            <Link to="/privacy-policy" className="hover:text-blue-200">سياسة الخصوصية</Link>
+            <Link to="/terms-of-service" className="hover:text-blue-200">شروط الاستخدام</Link>
+            <Link to="/return-policy" className="hover:text-blue-200">سياسة الإرجاع</Link>
           </div>
         </div>
       </div>
