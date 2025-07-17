@@ -183,7 +183,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -195,7 +195,7 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
       setShowForm(false);
       setEditingAuthor(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -204,9 +204,9 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
     try {
       await api.deleteAuthor(id);
       setAuthors(prev => prev.filter(a => a.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -360,7 +360,7 @@ const DashboardCategories = ({ categories, setCategories }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -372,7 +372,7 @@ const DashboardCategories = ({ categories, setCategories }) => {
       setShowForm(false);
       setEditingCategory(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -381,9 +381,9 @@ const DashboardCategories = ({ categories, setCategories }) => {
     try {
       await api.deleteCategory(id);
       setCategories(prev => prev.filter(c => c.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -486,7 +486,7 @@ const DashboardSellers = ({ sellers, setSellers }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -498,7 +498,7 @@ const DashboardSellers = ({ sellers, setSellers }) => {
       setShowForm(false);
       setEditingSeller(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -507,9 +507,9 @@ const DashboardSellers = ({ sellers, setSellers }) => {
     try {
       await api.deleteSeller(id);
       setSellers(prev => prev.filter(s => s.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -603,7 +603,7 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -615,7 +615,7 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
       setShowForm(false);
       setEditingCustomer(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -624,9 +624,9 @@ const DashboardCustomers = ({ customers, setCustomers }) => {
     try {
       await api.deleteCustomer(id);
       setCustomers(prev => prev.filter(c => c.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -796,7 +796,7 @@ const DashboardUsers = ({ users, setUsers }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -808,7 +808,7 @@ const DashboardUsers = ({ users, setUsers }) => {
       setShowForm(false);
       setEditingUser(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -817,9 +817,9 @@ const DashboardUsers = ({ users, setUsers }) => {
     try {
       await api.deleteUser(id);
       setUsers(prev => prev.filter(u => u.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -878,7 +878,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -890,7 +890,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
       setShowForm(false);
       setEditingPlan(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -899,9 +899,9 @@ const DashboardPlans = ({ plans, setPlans }) => {
     try {
       await api.deletePlan(id);
       setPlans(prev => prev.filter(p => p.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1024,7 +1024,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1036,7 +1036,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
       setShowForm(false);
       setEditing(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1045,9 +1045,9 @@ const DashboardSliders = ({ sliders, setSliders }) => {
     try {
       await api.deleteSlider(id);
       setSliders(prev => prev.filter(s => s.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1166,7 +1166,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1178,7 +1178,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
       setShowForm(false);
       setEditing(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1187,9 +1187,9 @@ const DashboardBanners = ({ banners, setBanners }) => {
     try {
       await api.deleteBanner(id);
       setBanners(prev => prev.filter(b => b.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1301,7 +1301,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1313,7 +1313,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
       setShowForm(false);
       setEditing(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1322,9 +1322,9 @@ const DashboardFeatures = ({ features, setFeatures }) => {
     try {
       await api.deleteFeature(id);
       setFeatures(prev => prev.filter(f => f.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1439,7 +1439,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
       setOrders(orders.map(o => o.id === id ? updatedOrder : o));
       toast({ title: 'تم تحديث حالة الطلب' });
     } catch (e) {
-      toast({ title: 'حدث خطأ أثناء التحديث', variant: 'destructive' });
+      toast({ title: 'حدث خطأ أثناء التحديث. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1448,9 +1448,9 @@ const DashboardOrders = ({ orders, setOrders }) => {
     try {
       await api.deleteOrder(id);
       setOrders(orders.filter(o => o.id !== id));
-      toast({ title: 'تم حذف الطلب', variant: 'destructive' });
+      toast({ title: 'تم حذف الطلب' });
     } catch (e) {
-      toast({ title: 'حدث خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'حدث خطأ أثناء الحذف. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1503,9 +1503,9 @@ const DashboardPayments = ({ payments, setPayments }) => {
     try {
       await api.deletePayment(id);
       setPayments(payments.filter(p => p.id !== id));
-      toast({ title: 'تم حذف عملية الدفع', variant: 'destructive' });
+      toast({ title: 'تم حذف عملية الدفع' });
     } catch (e) {
-      toast({ title: 'حدث خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'حدث خطأ أثناء الحذف. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1642,7 +1642,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1663,7 +1663,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
       setShowForm(false);
       setEditingMethod(null);
     } catch {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1672,9 +1672,9 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
     try {
       await api.deletePaymentMethod(id);
       setPaymentMethods(prev => prev.filter(m => m.id !== id));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -1989,7 +1989,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الإضافة', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -2001,7 +2001,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
       setShowForm(false);
       setEditingBook(null);
     } catch (e) {
-      toast({ title: 'خطأ أثناء التعديل', variant: 'destructive' });
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -2010,9 +2010,9 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
     try {
       await api.deleteBook(bookId);
       setBooks(prev => prev.filter(b => b.id !== bookId));
-      toast({ title: 'تم الحذف بنجاح!', variant: 'destructive' });
+      toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
-      toast({ title: 'خطأ أثناء الحذف', variant: 'destructive' });
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -2171,7 +2171,7 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
       setSiteSettings(updated);
       toast({ title: 'تم حفظ الإعدادات بنجاح!' });
     } catch (err) {
-      toast({ title: 'خطأ أثناء الحفظ', variant: 'destructive' });
+      toast({ title: 'تعذر حفظ البيانات. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
@@ -2183,7 +2183,7 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
       });
       toast({ title: 'تم استيراد الكتب بنجاح!' });
     } catch (err) {
-      toast({ title: 'خطأ في الاستيراد', variant: 'destructive' });
+      toast({ title: 'تعذر استيراد البيانات. حاول مجدداً.', variant: 'destructive' });
     }
   };
 

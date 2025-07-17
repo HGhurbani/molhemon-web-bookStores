@@ -101,7 +101,7 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
       setCart([]);
       localStorage.setItem('cart', '[]');
     } catch (err) {
-      toast({ title: 'حدث خطأ أثناء إنشاء الطلب', variant: 'destructive' });
+      toast({ title: 'تعذر إنشاء الطلب. حاول مجدداً.', variant: 'destructive' });
     }
     navigate('/');
   };
