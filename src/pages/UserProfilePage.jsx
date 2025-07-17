@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog.jsx';
 import { User, ShoppingBag, Heart, Settings, LogOut, Edit2, MapPin, CreditCard as CreditCardIcon, Bell, Gift, Shield } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { toast } from '@/components/ui/use-toast.js';
@@ -22,13 +23,24 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     phone: '+971 50 123 4567',
     profilePicture: 'https://images.unsplash.com/photo-1572119003128-d110c07af847'
   });
-   const [addresses, setAddresses] = useState([
-    { id: 1, name: 'المنزل', street: 'شارع الشيخ زايد', city: 'دبي', country: 'الإمارات', default: true },
-    { id: 2, name: 'العمل', street: 'أبراج الإمارات', city: 'دبي', country: 'الإمارات', default: false },
-  ]);
-  const [paymentMethods, setPaymentMethods] = useState([
-    { id: 1, type: 'Visa', last4: '4242', expiry: '12/25', default: true },
-  ]);
+  const [addresses, setAddresses] = useState(() => {
+    const stored = localStorage.getItem('addresses');
+    return stored
+      ? JSON.parse(stored)
+      : [
+          { id: 1, name: 'المنزل', street: 'شارع الشيخ زايد', city: 'دبي', country: 'الإمارات', default: true },
+        ];
+  });
+  const [paymentMethods, setPaymentMethods] = useState(() => {
+    const stored = localStorage.getItem('userPaymentMethods');
+    return stored
+      ? JSON.parse(stored)
+      : [{ id: 1, type: 'Visa', last4: '4242', expiry: '12/25', default: true }];
+  });
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [newAddress, setNewAddress] = useState({ name: '', street: '', city: '', country: '' });
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [newPayment, setNewPayment] = useState({ type: '', last4: '', expiry: '' });
 
 
   useEffect(() => {
@@ -64,11 +76,44 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
     toast({ title: "تم الحذف من المفضلة", description: `تم حذف "${book.title}" من قائمة الرغبات.`, variant: "destructive" });
   };
+
+  const handleSaveAddress = () => {
+    let updated;
+    if (newAddress.id) {
+      updated = addresses.map(a => (a.id === newAddress.id ? newAddress : a));
+    } else {
+      const id = Math.max(0, ...addresses.map(a => a.id)) + 1;
+      updated = [...addresses, { ...newAddress, id }];
+    }
+    setAddresses(updated);
+    localStorage.setItem('addresses', JSON.stringify(updated));
+    setNewAddress({ name: '', street: '', city: '', country: '' });
+    setAddressDialogOpen(false);
+  };
+
+  const handleSavePayment = () => {
+    const id = Math.max(0, ...paymentMethods.map(p => p.id)) + 1;
+    const updated = [...paymentMethods, { ...newPayment, id }];
+    setPaymentMethods(updated);
+    localStorage.setItem('userPaymentMethods', JSON.stringify(updated));
+    setNewPayment({ type: '', last4: '', expiry: '' });
+    setPaymentDialogOpen(false);
+  };
   
-  const handleAddAddress = () => handleFeatureClick('add-address');
-  const handleEditAddress = (id) => handleFeatureClick(`edit-address-${id}`);
-  const handleDeleteAddress = (id) => handleFeatureClick(`delete-address-${id}`);
-  const handleAddPaymentMethod = () => handleFeatureClick('add-payment-method');
+  const handleAddAddress = () => setAddressDialogOpen(true);
+  const handleEditAddress = (id) => {
+    const addr = addresses.find(a => a.id === id);
+    if (addr) {
+      setNewAddress(addr);
+      setAddressDialogOpen(true);
+    }
+  };
+  const handleDeleteAddress = (id) => {
+    const updated = addresses.filter(a => a.id !== id);
+    setAddresses(updated);
+    localStorage.setItem('addresses', JSON.stringify(updated));
+  };
+  const handleAddPaymentMethod = () => setPaymentDialogOpen(true);
 
 
   const navSections = [
@@ -228,7 +273,11 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                       <p className="text-sm text-gray-500">تنتهي في: {pm.expiry}</p>
                     </div>
                   </div>
-                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleFeatureClick(`delete-payment-${pm.id}`)}>حذف</Button>
+                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => {
+                     const updated = paymentMethods.filter(p => p.id !== pm.id);
+                     setPaymentMethods(updated);
+                     localStorage.setItem('userPaymentMethods', JSON.stringify(updated));
+                   }}>حذف</Button>
                 </div>
               ))}
             </div>
@@ -326,6 +375,39 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           {renderContent()}
         </main>
       </div>
+
+      <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>إضافة عنوان</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input placeholder="اسم العنوان" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
+            <Input placeholder="الشارع" value={newAddress.street} onChange={e => setNewAddress({ ...newAddress, street: e.target.value })} />
+            <Input placeholder="المدينة" value={newAddress.city} onChange={e => setNewAddress({ ...newAddress, city: e.target.value })} />
+            <Input placeholder="الدولة" value={newAddress.country} onChange={e => setNewAddress({ ...newAddress, country: e.target.value })} />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button onClick={handleSaveAddress}>حفظ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>إضافة طريقة دفع</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input placeholder="نوع البطاقة" value={newPayment.type} onChange={e => setNewPayment({ ...newPayment, type: e.target.value })} />
+            <Input placeholder="آخر أربعة أرقام" value={newPayment.last4} onChange={e => setNewPayment({ ...newPayment, last4: e.target.value })} />
+            <Input placeholder="تاريخ الانتهاء" value={newPayment.expiry} onChange={e => setNewPayment({ ...newPayment, expiry: e.target.value })} />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button onClick={handleSavePayment}>حفظ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

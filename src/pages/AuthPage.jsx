@@ -5,7 +5,14 @@ import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  OAuthProvider,
+} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase.js';
 
@@ -55,8 +62,25 @@ const AuthPage = ({ onLogin }) => {
     }
   };
 
-  const handleSocialClick = () => {
-    toast({ title: 'هذه الميزة غير مطبقة بعد' });
+  const handleSocialClick = async (providerId) => {
+    try {
+      let provider;
+      if (providerId === 'google') provider = new GoogleAuthProvider();
+      else if (providerId === 'facebook') provider = new FacebookAuthProvider();
+      else if (providerId === 'apple') provider = new OAuthProvider('apple.com');
+      const { user } = await signInWithPopup(auth, provider);
+      await setDoc(
+        doc(db, 'users', user.uid),
+        { name: user.displayName, email: user.email, role: 'customer' },
+        { merge: true }
+      );
+      localStorage.setItem('customerLoggedIn', 'true');
+      localStorage.setItem('currentUserId', user.uid);
+      onLogin();
+      navigate('/profile');
+    } catch (err) {
+      toast({ title: 'تعذر تسجيل الدخول بالحساب', variant: 'destructive' });
+    }
   };
 
   return (
@@ -130,13 +154,13 @@ const AuthPage = ({ onLogin }) => {
           </form>
           <div className="my-6 text-center text-sm">أو التسجيل بواسطة</div>
           <div className="flex gap-2 justify-center">
-            <Button variant="outline" size="icon" onClick={handleSocialClick}>
+            <Button variant="outline" size="icon" onClick={() => handleSocialClick('google')}>
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleSocialClick}>
+            <Button variant="outline" size="icon" onClick={() => handleSocialClick('apple')}>
              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="h-5 w-5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleSocialClick}>
+            <Button variant="outline" size="icon" onClick={() => handleSocialClick('facebook')}>
               <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" className="h-5 w-5" />
             </Button>
           </div>
