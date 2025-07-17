@@ -39,3 +39,6 @@ Server side integrations for Stripe and PayPal are available. Set `STRIPE_SECRET
 - Data in the dashboard is persisted in Firebase. The optional PHP backend is only used for the Google Merchant import.
 - If you need to build the project for production, run `npm run build` (requires installed dependencies).
 - Category management forms still include a dropdown to select an icon from the `lucide-react` library.
+
+## Legal
+Placeholder documents for a privacy policy, terms of service and return policy are available in the `legal/` directory. Review and adapt them to comply with GDPR, CCPA and other relevant regulations.

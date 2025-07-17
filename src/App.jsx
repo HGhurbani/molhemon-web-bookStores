@@ -27,6 +27,9 @@ import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
 import EbookReaderPage from '@/pages/EbookReaderPage.jsx';
 import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage.jsx';
+import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
+import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 
 import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
@@ -406,6 +409,9 @@ const App = () => {
               <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
               <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
               <Route path="/player/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPlayerPage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/privacy-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><PrivacyPolicyPage /></PageLayout></MainLayout>} />
+              <Route path="/terms-of-service" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><TermsOfServicePage /></PageLayout></MainLayout>} />
+              <Route path="/return-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReturnPolicyPage /></PageLayout></MainLayout>} />
               <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
         </AnimatePresence>
