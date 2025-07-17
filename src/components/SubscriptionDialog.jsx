@@ -27,7 +27,7 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
       toast({ title: 'تم الاشتراك بنجاح!' });
       onOpenChange(false);
     } catch (e) {
-      toast({ title: 'خطأ أثناء الاشتراك', variant: 'destructive' });
+      toast({ title: 'تعذر إتمام الاشتراك. حاول مجدداً.', variant: 'destructive' });
     }
   };
 

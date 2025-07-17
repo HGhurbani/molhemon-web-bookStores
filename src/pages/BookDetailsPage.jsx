@@ -98,7 +98,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
       setComment('');
       toast({ title: 'تم إضافة تقييمك' });
     } catch (err) {
-      toast({ title: 'خطأ أثناء إضافة التقييم', variant: 'destructive' });
+      toast({ title: 'تعذر إضافة التقييم. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
