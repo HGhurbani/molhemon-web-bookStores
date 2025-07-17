@@ -511,6 +511,64 @@ app.delete('/api/payments/:id', async (req, res) => {
   res.sendStatus(204);
 });
 
+// Payment gateway integrations
+app.post('/api/payment/stripe', async (req, res) => {
+  const { amount, currency = 'usd' } = req.body || {};
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).json({ error: 'Stripe not configured' });
+  }
+  try {
+    const body = new URLSearchParams({ amount: String(amount), currency });
+    const resp = await fetch('https://api.stripe.com/v1/payment_intents', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    });
+    const data = await resp.json();
+    res.json({ clientSecret: data.client_secret });
+  } catch (err) {
+    console.error('Stripe request failed', err);
+    res.status(500).json({ error: 'Stripe request failed' });
+  }
+});
+
+app.post('/api/payment/paypal', async (req, res) => {
+  const { amount, currency = 'USD' } = req.body || {};
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_SECRET) {
+    return res.status(500).json({ error: 'PayPal not configured' });
+  }
+  try {
+    const authResp = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
+    });
+    const { access_token } = await authResp.json();
+    const orderResp = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{ amount: { currency_code: currency, value: amount } }],
+      }),
+    });
+    const data = await orderResp.json();
+    res.json(data);
+  } catch (err) {
+    console.error('PayPal request failed', err);
+    res.status(500).json({ error: 'PayPal request failed' });
+  }
+});
+
 // Slider Images
 app.get('/api/sliders', async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM sliders ORDER BY id DESC');
