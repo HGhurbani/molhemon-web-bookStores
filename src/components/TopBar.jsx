@@ -5,18 +5,21 @@ import { Link } from 'react-router-dom';
 import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe, Headphones, BookOpen } from 'lucide-react'; // Ensure Headphones and BookOpen are imported
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
+import { useLanguage, useTranslation, languages } from '@/lib/languageContext.jsx';
 
 const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
+  const { language, setLanguage } = useLanguage();
+  const t = useTranslation();
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
     { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },
     { icon: BookOpen, text: 'كتاب إلكتروني', action: 'ebook-top', link: '/category/ebooks' }, // Assuming a category for ebooks or similar
     { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' }, // THIS IS THE MODIFIED ITEM
     { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
-    { icon: Box, text: 'تتبع الطلب', action: 'track-order-top', link: '/profile?tab=orders' },
-    { icon: Download, text: 'حمل تطبيقنا', action: 'download-app-top' },
-    { icon: HelpCircle, text: 'مساعدة', action: 'help-top' },
-    { icon: MapPin, text: 'مواقعنا', action: 'locations-top' },
+    { icon: Box, text: t('trackOrder'), action: 'track-order-top', link: '/profile?tab=orders' },
+    { icon: Download, text: t('downloadApp'), action: 'download-app-top' },
+    { icon: HelpCircle, text: t('help'), action: 'help-top' },
+    { icon: MapPin, text: t('locations'), action: 'locations-top' },
   ];
 
   return (
@@ -84,17 +87,16 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
                 <Globe className="w-3 h-3 ml-2 rtl:mr-2 rtl:ml-0" />
-                English
+                {language.name}
                 <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
-              <DropdownMenuItem onClick={() => handleFeatureClick('change-language-ar')} className="hover:bg-blue-50">
-                العربية
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleFeatureClick('change-language-fr')} className="hover:bg-blue-50">
-                Français
-              </DropdownMenuItem>
+              {languages.map(l => (
+                <DropdownMenuItem key={l.code} onClick={() => handleFeatureClick(`change-language-${l.code}`)} className="hover:bg-blue-50">
+                  {l.name}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

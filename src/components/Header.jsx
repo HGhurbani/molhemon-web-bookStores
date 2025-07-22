@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
+import { useLanguage, useTranslation, languages } from '@/lib/languageContext.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +35,8 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   });
   const [randomSuggestions, setRandomSuggestions] = useState([]);
   const { currency, setCurrency, currencies } = useCurrency();
+  const { language, setLanguage } = useLanguage();
+  const t = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -199,13 +202,13 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   <span>كتاب مسموع</span>
 </Link>
             <span className="mx-2">|</span>
-            <button onClick={() => handleFeatureClick('track-order-top')} className="hover:text-blue-200">تتبع الطلب</button>
+           <button onClick={() => handleFeatureClick('track-order-top')} className="hover:text-blue-200">{t('trackOrder')}</button>
             <span className="mx-2">|</span>
-            <button onClick={() => handleFeatureClick('download-app-top')} className="hover:text-blue-200">حمل تطبيقنا</button>
+           <button onClick={() => handleFeatureClick('download-app-top')} className="hover:text-blue-200">{t('downloadApp')}</button>
             <span className="mx-2">|</span>
-            <button onClick={() => handleFeatureClick('help-top')} className="hover:text-blue-200">المساعدة</button>
+           <button onClick={() => handleFeatureClick('help-top')} className="hover:text-blue-200">{t('help')}</button>
             <span className="mx-2">|</span>
-            <button onClick={() => handleFeatureClick('locations-top')} className="hover:text-blue-200">مواقعنا</button>
+           <button onClick={() => handleFeatureClick('locations-top')} className="hover:text-blue-200">{t('locations')}</button>
           </div>
           <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
             <DropdownMenu>
@@ -228,17 +231,16 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
-                  العربية
+                  {language.name}
                   <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
-                <DropdownMenuItem onClick={() => handleFeatureClick('change-language-en')} className="hover:bg-blue-50">
-                  English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleFeatureClick('change-language-fr')} className="hover:bg-blue-50">
-                  Français
-                </DropdownMenuItem>
+                {languages.map(l => (
+                  <DropdownMenuItem key={l.code} onClick={() => handleFeatureClick(`change-language-${l.code}`)} className="hover:bg-blue-50">
+                    {l.name}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

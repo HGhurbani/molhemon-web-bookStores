@@ -35,11 +35,13 @@ import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
+import { useLanguage, languages } from '@/lib/languageContext.jsx';
 
 const App = () => {
   const [dashboardSection, setDashboardSection] = useState('overview');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(localStorage.getItem('adminLoggedIn') === 'true');
   const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(localStorage.getItem('customerLoggedIn') === 'true');
+  const { setLanguage } = useLanguage();
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState([]);
@@ -213,6 +215,13 @@ const App = () => {
     }
   }, [siteSettingsState.siteName]);
 
+  useEffect(() => {
+    if (siteSettingsState.defaultLanguage) {
+      const lang = languages.find(l => l.code === siteSettingsState.defaultLanguage);
+      if (lang) setLanguage(lang);
+    }
+  }, [siteSettingsState.defaultLanguage, setLanguage]);
+
   const handleAddToCart = (book) => {
     setCart((prevCart) => {
       const existingBook = prevCart.find(item => item.id === book.id);
@@ -270,6 +279,14 @@ const App = () => {
       setIsCustomerLoggedIn(false);
       toast({ title: 'تم تسجيل الخروج' });
       return;
+    }
+    if (feature.startsWith('change-language-')) {
+      const code = feature.split('change-language-')[1];
+      const lang = languages.find(l => l.code === code);
+      if (lang) {
+        setLanguage(lang);
+        return;
+      }
     }
     toast({
       title: "🚧 هذه الميزة غير مطبقة بعد",

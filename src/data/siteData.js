@@ -289,6 +289,8 @@ export const siteSettings = {
   contactEmail: 'info@molhemoon.com',
   contactPhone: '0097165551184',
   address: 'الإمارات العربية المتحدة',
+  languages: 'ar,en',
+  defaultLanguage: 'ar',
   facebook: '',
   twitter: '',
   instagram: '',
