@@ -1938,6 +1938,11 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     deliveryMethod: '',
     ebookFile: '',
     audioFile: '',
+    narrator: '',
+    audioLanguage: '',
+    durationHours: '',
+    durationMinutes: '',
+    durationSeconds: '',
     tags: '',
     coverImage: '',
     ...(book ? (({ rating, reviews, ...rest }) => rest)(book) : {}),
@@ -1955,7 +1960,11 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
       acc[c.code] = parseFloat(formData[`price${c.code}`] || 0);
       return acc;
     }, {});
-    onSubmit({ ...formData, price: prices.AED, prices });
+    const duration =
+      (parseInt(formData.durationHours || 0, 10) * 3600) +
+      (parseInt(formData.durationMinutes || 0, 10) * 60) +
+      parseInt(formData.durationSeconds || 0, 10);
+    onSubmit({ ...formData, price: prices.AED, prices, duration });
   };
 
   return (
@@ -2061,7 +2070,22 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
                     const file = e.target.files[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onloadend = () => setFormData(prev => ({ ...prev, audioFile: reader.result }));
+                      reader.onloadend = () => {
+                        setFormData(prev => ({ ...prev, audioFile: reader.result }));
+                        const audio = new Audio(reader.result);
+                        audio.onloadedmetadata = () => {
+                          const dur = audio.duration;
+                          const hrs = Math.floor(dur / 3600);
+                          const mins = Math.floor((dur % 3600) / 60);
+                          const secs = Math.floor(dur % 60);
+                          setFormData(prev => ({
+                            ...prev,
+                            durationHours: String(hrs),
+                            durationMinutes: String(mins),
+                            durationSeconds: String(secs),
+                          }));
+                        };
+                      };
                       reader.readAsDataURL(file);
                     }
                   }}
@@ -2071,6 +2095,28 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
               <div>
                 <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
                 <Input id="sampleAudio" name="sampleAudio" value={formData.sampleAudio} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="narrator">الراوي</Label>
+                <Input id="narrator" name="narrator" value={formData.narrator} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="audioLanguage">اللغة</Label>
+                <Input id="audioLanguage" name="audioLanguage" value={formData.audioLanguage} onChange={handleChange} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="durationHours">الساعات</Label>
+                  <Input id="durationHours" name="durationHours" type="number" value={formData.durationHours} onChange={handleChange} />
+                </div>
+                <div>
+                  <Label htmlFor="durationMinutes">الدقائق</Label>
+                  <Input id="durationMinutes" name="durationMinutes" type="number" value={formData.durationMinutes} onChange={handleChange} />
+                </div>
+                <div>
+                  <Label htmlFor="durationSeconds">الثواني</Label>
+                  <Input id="durationSeconds" name="durationSeconds" type="number" value={formData.durationSeconds} onChange={handleChange} />
+                </div>
               </div>
             </>
           )}
