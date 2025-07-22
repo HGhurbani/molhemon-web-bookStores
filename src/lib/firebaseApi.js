@@ -117,6 +117,8 @@ const firebaseApi = {
 
   getSubscriptions: () => getCollection('subscriptions'),
   addSubscription: (data) => addToCollection('subscriptions', data),
+  updateSubscription: (id, data) => updateCollection('subscriptions', id, data),
+  deleteSubscription: (id) => deleteFromCollection('subscriptions', id),
 
   getSettings: async () => {
     const snap = await getDoc(doc(db, 'settings', 'main'));

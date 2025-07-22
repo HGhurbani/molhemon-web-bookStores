@@ -64,6 +64,7 @@ const App = () => {
     return stored ? JSON.parse(stored) : initialPaymentMethods;
   });
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
+  const [subscriptions, setSubscriptions] = useState(() => JSON.parse(localStorage.getItem('subscriptions') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
     const stored = localStorage.getItem('siteSettings');
     return stored ? { ...initialSiteSettings, ...JSON.parse(stored) } : initialSiteSettings;
@@ -103,7 +104,7 @@ const App = () => {
     if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, custData] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, custData, subs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -118,6 +119,7 @@ const App = () => {
           api.getFeatures(),
           api.getSellers(),
           api.getCustomers(),
+          api.getSubscriptions(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -133,6 +135,7 @@ const App = () => {
         setFeatures(feats);
         setSellers(sellData);
         setCustomers(custData);
+        setSubscriptions(subs);
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
         setDashboardStatsState([
           { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
@@ -182,6 +185,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('plans', JSON.stringify(plans));
   }, [plans]);
+
+  useEffect(() => {
+    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+  }, [subscriptions]);
 
   useEffect(() => {
     localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
@@ -356,6 +363,7 @@ const App = () => {
                     payments={payments}
                     paymentMethods={paymentMethods}
                     plans={plans}
+                    subscriptions={subscriptions}
                     dashboardSection={dashboardSection}
                     setDashboardSection={setDashboardSection}
                     handleFeatureClick={handleFeatureClick}
@@ -368,6 +376,7 @@ const App = () => {
                     setPayments={setPayments}
                     setPaymentMethods={setPaymentMethods}
                     setPlans={setPlans}
+                    setSubscriptions={setSubscriptions}
                     users={users}
                     setUsers={setUsers}
                     siteSettings={siteSettingsState}
