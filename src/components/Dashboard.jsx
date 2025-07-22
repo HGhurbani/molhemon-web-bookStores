@@ -30,7 +30,8 @@ import {
   X,
   Save,
   Image,
-  Zap
+  Zap,
+  Headphones
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -55,6 +56,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
   const navItems = [
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
+    { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones },
     { id: 'authors', name: 'المؤلفون', icon: Users },
     { id: 'sellers', name: 'البائعون', icon: Store },
     { id: 'categories', name: 'الأصناف', icon: BookOpen },
@@ -1919,7 +1921,7 @@ const DashboardOverview = ({ dashboardStats }) => (
 );
 
 
-const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
+const BookForm = ({ book, onSubmit, onCancel, authors, categories, defaultType = '' }) => {
   const initialPrices = currencies.reduce((acc, c) => {
     acc[`price${c.code}`] = book?.prices?.[c.code] ?? (c.code === 'AED' ? book?.price ?? '' : '');
     return acc;
@@ -1933,7 +1935,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
     category: '',
     description: '',
     imgPlaceholder: '',
-    type: '',
+    type: defaultType,
     sampleAudio: '',
     deliveryMethod: '',
     ebookFile: '',
@@ -2157,10 +2159,12 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories }) => {
 };
 
 
-const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, handleFeatureClick }) => {
+const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, handleFeatureClick, filterType, defaultType }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
+
+  const filteredBooks = filterType ? books.filter(b => b.type === filterType) : books;
 
   const handleAddBook = async (data) => {
     try {
@@ -2234,7 +2238,19 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
   };
 
   if (showForm) {
-    return <BookForm book={editingBook} onSubmit={editingBook ? handleEditBook : handleAddBook} onCancel={() => { setShowForm(false); setEditingBook(null); }} authors={authors} categories={categories} />;
+    return (
+      <BookForm
+        book={editingBook}
+        onSubmit={editingBook ? handleEditBook : handleAddBook}
+        onCancel={() => {
+          setShowForm(false);
+          setEditingBook(null);
+        }}
+        authors={authors}
+        categories={categories}
+        defaultType={defaultType}
+      />
+    );
   }
 
   return (
@@ -2245,7 +2261,9 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
       transition={{ duration: 0.3 }}
     >
       <div className="flex flex-col sm:flex-row justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة الكتب</h2>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">
+          {filterType === 'audio' ? 'قائمة الكتب الصوتية' : 'قائمة الكتب'}
+        </h2>
         <div className="flex gap-2">
           <Button
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
@@ -2273,7 +2291,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {books.map((book) => (
+              {filteredBooks.map((book) => (
                 <tr key={book.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
@@ -2495,6 +2513,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
+    audiobooks: 'الكتب الصوتية',
     authors: 'المؤلفون',
     sellers: 'البائعون',
     orders: 'الطلبات',
@@ -2531,6 +2550,18 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
             categories={categories}
             setCategories={setCategories}
             handleFeatureClick={handleFeatureClick}
+          />
+        )}
+        {dashboardSection === 'audiobooks' && (
+          <DashboardBooks
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            handleFeatureClick={handleFeatureClick}
+            filterType="audio"
+            defaultType="audio"
           />
         )}
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
