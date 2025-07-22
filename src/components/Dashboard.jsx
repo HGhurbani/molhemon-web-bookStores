@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { currencies } from '@/lib/currencyContext.jsx';
+import { languages } from '@/lib/languageContext.jsx';
 import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
@@ -2231,6 +2232,18 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
           <div>
             <Label htmlFor="themeColor">اللون الرئيسي</Label>
             <Input id="themeColor" name="themeColor" type="color" value={formData.themeColor} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="defaultLanguage">اللغة الافتراضية</Label>
+            <select id="defaultLanguage" name="defaultLanguage" value={formData.defaultLanguage} onChange={handleChange} className="w-full border rounded p-2">
+              {languages.map(l => (
+                <option key={l.code} value={l.code}>{l.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="languages">اللغات المتاحة (افصل بينها بفاصلة)</Label>
+            <Input id="languages" name="languages" value={formData.languages} onChange={handleChange} />
           </div>
           <div className="md:col-span-2 border-t pt-4">
             <h4 className="font-semibold mb-2">إعدادات الدفع</h4>
