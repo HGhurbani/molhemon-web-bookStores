@@ -31,7 +31,8 @@ import {
   Save,
   Image,
   Zap,
-  Headphones
+  Headphones,
+  Boxes
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -57,6 +58,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
     { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
     { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones },
+    { id: 'inventory', name: 'إدارة المخزون', icon: Boxes },
     { id: 'authors', name: 'المؤلفون', icon: Users },
     { id: 'sellers', name: 'البائعون', icon: Store },
     { id: 'categories', name: 'الأصناف', icon: BookOpen },
@@ -1860,6 +1862,52 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
   );
 };
 
+const DashboardInventory = ({ books, setBooks }) => {
+  const handleChange = (id, value) => {
+    setBooks(prev => prev.map(b => b.id === id ? { ...b, stock: value } : b));
+  };
+  const handleSave = async (id, stock) => {
+    try {
+      const updated = await api.updateBook(id, { stock: Number(stock) });
+      setBooks(prev => prev.map(b => b.id === id ? updated : b));
+      toast({ title: 'تم تحديث المخزون' });
+    } catch {
+      toast({ title: 'حدث خطأ أثناء الحفظ', variant: 'destructive' });
+    }
+  };
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">إدارة المخزون</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[400px]">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتاب</th>
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المخزون</th>
+                <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {books.map(b => (
+                <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.title}</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
+                    <Input type="number" value={b.stock || 0} onChange={e => handleChange(b.id, e.target.value)} className="w-24" />
+                  </td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
+                    <Button size="sm" onClick={() => handleSave(b.id, b.stock)}>حفظ</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const DashboardOverview = ({ dashboardStats }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1933,6 +1981,7 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, defaultType =
     authorId: '',
     originalPrice: '',
     category: '',
+    stock: '',
     description: '',
     imgPlaceholder: '',
     type: defaultType,
@@ -1966,7 +2015,13 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, defaultType =
       (parseInt(formData.durationHours || 0, 10) * 3600) +
       (parseInt(formData.durationMinutes || 0, 10) * 60) +
       parseInt(formData.durationSeconds || 0, 10);
-    onSubmit({ ...formData, price: prices.AED, prices, duration });
+    onSubmit({
+      ...formData,
+      price: prices.AED,
+      prices,
+      duration,
+      stock: parseInt(formData.stock || 0, 10),
+    });
   };
 
   return (
@@ -2019,6 +2074,10 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, defaultType =
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <Label htmlFor="stock">المخزون</Label>
+            <Input id="stock" name="stock" type="number" value={formData.stock} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="type">نوع الكتاب</Label>
@@ -2286,6 +2345,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العنوان</th>
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المؤلف</th>
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">السعر</th>
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المخزون</th>
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التقييم</th>
                 <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
               </tr>
@@ -2314,6 +2374,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
                       <FormattedPrice book={book} />
                     </span>
                   </td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.stock ?? 0}</td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
@@ -2514,6 +2575,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
     audiobooks: 'الكتب الصوتية',
+    inventory: 'إدارة المخزون',
     authors: 'المؤلفون',
     sellers: 'البائعون',
     orders: 'الطلبات',
@@ -2563,6 +2625,9 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
             filterType="audio"
             defaultType="audio"
           />
+        )}
+        {dashboardSection === 'inventory' && (
+          <DashboardInventory books={books} setBooks={setBooks} />
         )}
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
