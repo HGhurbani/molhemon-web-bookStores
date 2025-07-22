@@ -24,6 +24,7 @@ import {
   Edit,
   Trash2,
   Star,
+  Crown,
   Home,
   Menu,
   X,
@@ -63,6 +64,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
+    { id: 'subscriptions', name: 'العضويات', icon: Crown },
     { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
     { id: 'banners', name: 'البانرات', icon: Image },
@@ -945,6 +947,137 @@ const DashboardPlans = ({ plans, setPlans }) => {
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingPlan(p); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(p.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const SubscriptionForm = ({ subscription, customers, plans, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({
+    customer_id: '',
+    plan_id: '',
+    status: 'نشط',
+    ...subscription,
+  });
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{subscription ? 'تعديل العضوية' : 'إضافة عضوية جديدة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="customer">العميل</Label>
+          <select id="customer" name="customer_id" value={formData.customer_id} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md" required>
+            <option value="">-- اختر عميل --</option>
+            {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label htmlFor="plan">الخطة</Label>
+          <select id="plan" name="plan_id" value={formData.plan_id} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md" required>
+            <option value="">-- اختر خطة --</option>
+            {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label htmlFor="status">الحالة</Label>
+          <Input id="status" name="status" value={formData.status} onChange={handleChange} />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {subscription ? 'حفظ التعديلات' : 'إضافة العضوية'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardSubscriptions = ({ subscriptions, setSubscriptions, customers, plans }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addSubscription(data);
+      setSubscriptions(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateSubscription(editing.id, data);
+      setSubscriptions(prev => prev.map(s => s.id === updated.id ? updated : s));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditing(null);
+    } catch (e) {
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
+    try {
+      await api.deleteSubscription(id);
+      setSubscriptions(prev => prev.filter(s => s.id !== id));
+      toast({ title: 'تم الحذف بنجاح!' });
+    } catch (e) {
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <SubscriptionForm subscription={editing} customers={customers} plans={plans} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">العضويات</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة عضوية
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العميل</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الخطة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">تاريخ البداية</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">تاريخ الانتهاء</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
+              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {subscriptions.map(s => (
+              <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{customers.find(c => c.id === s.customer_id)?.name || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{plans.find(p => p.id === s.plan_id)?.name || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.start_date ? s.start_date.substring(0,10) : '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.end_date ? s.end_date.substring(0,10) : '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.status}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(s); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </td>
               </tr>
@@ -2312,7 +2445,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, paymentMethods, plans, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, paymentMethods, plans, subscriptions, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setSubscriptions, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -2324,6 +2457,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     payments: 'المدفوعات',
     'payment-methods': 'طرق الدفع',
     plans: 'خطط الاشتراك',
+    subscriptions: 'العضويات',
     features: 'المميزات',
     sliders: 'السلايدر',
     banners: 'البانرات',
@@ -2362,6 +2496,14 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
+        {dashboardSection === 'subscriptions' && (
+          <DashboardSubscriptions
+            subscriptions={subscriptions}
+            setSubscriptions={setSubscriptions}
+            customers={customers}
+            plans={plans}
+          />
+        )}
         {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
         {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
