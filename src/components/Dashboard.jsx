@@ -567,9 +567,21 @@ const DashboardSellers = ({ sellers, setSellers }) => {
 };
 
 const BranchForm = ({ branch, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', address: '', phone: '', ...branch });
+  const defaultHours = { sun: '', mon: '', tue: '', wed: '', thu: '', fri: '', sat: '' };
+  const [formData, setFormData] = useState(() => ({
+    name: '',
+    address: '',
+    phone: '',
+    email: '',
+    code: '',
+    hours: defaultHours,
+    ...branch,
+    hours: { ...defaultHours, ...(branch?.hours || {}) },
+  }));
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleHoursChange = (day, value) =>
+    setFormData(prev => ({ ...prev, hours: { ...prev.hours, [day]: value } }));
 
   const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
 
@@ -588,6 +600,27 @@ const BranchForm = ({ branch, onSubmit, onCancel }) => {
         <div>
           <Label htmlFor="bphone">الهاتف</Label>
           <Input id="bphone" name="phone" value={formData.phone} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="bemail">البريد الإلكتروني</Label>
+          <Input id="bemail" name="email" value={formData.email} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="bcode">كود الفرع</Label>
+          <Input id="bcode" name="code" value={formData.code} onChange={handleChange} />
+        </div>
+        <div>
+          <Label>ساعات العمل (لكل يوم)</Label>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            {Object.keys(formData.hours).map(day => (
+              <Input
+                key={day}
+                placeholder={day}
+                value={formData.hours[day]}
+                onChange={e => handleHoursChange(day, e.target.value)}
+              />
+            ))}
+          </div>
         </div>
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
@@ -659,6 +692,8 @@ const DashboardBranches = ({ branches, setBranches }) => {
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العنوان</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الهاتف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد الإلكتروني</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكود</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -668,6 +703,8 @@ const DashboardBranches = ({ branches, setBranches }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.name}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.address}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.phone}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.email}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.code}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingBranch(b); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
