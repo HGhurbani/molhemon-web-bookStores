@@ -31,6 +31,7 @@ import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage.jsx';
 import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
 import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
+import ScrollToTop from '@/components/ScrollToTop.jsx';
 
 import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
@@ -345,6 +346,7 @@ const App = () => {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="font-sans" dir="rtl">
         <AnimatePresence mode="wait">
           <Routes>
