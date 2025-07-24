@@ -14,7 +14,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
   const topNavItems = [
     { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },
     { icon: BookOpen, text: 'كتاب إلكتروني', action: 'ebook-top', link: '/category/ebooks' }, // Assuming a category for ebooks or similar
-    { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' }, // THIS IS THE MODIFIED ITEM
+    { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' },
     { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
     { icon: Box, text: t('trackOrder'), action: 'track-order-top', link: '/profile?tab=orders' },
     { icon: Download, text: t('downloadApp'), action: 'download-app-top' },
