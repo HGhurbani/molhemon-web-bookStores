@@ -209,6 +209,11 @@ export const sellers = [
   { id: 2, name: 'دار الحكمة', email: 'contact@hikma.ae', phone: '+971 50 333 4444' },
 ];
 
+export const branches = [
+  { id: 1, name: 'الفرع الرئيسي', address: 'دبي، الإمارات', phone: '+971 4 123 4567' },
+  { id: 2, name: 'فرع أبوظبي', address: 'أبوظبي، الإمارات', phone: '+971 2 765 4321' },
+];
+
 export const customers = [
   { id: 1, name: 'أحمد محمد', email: 'ahmed@example.com', phone: '+971 55 111 1111' },
   { id: 2, name: 'سارة علي', email: 'sara@example.com', phone: '+971 55 222 2222' },

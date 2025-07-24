@@ -90,6 +90,11 @@ const firebaseApi = {
   updateSeller: (id, data) => updateCollection('sellers', id, data),
   deleteSeller: (id) => deleteFromCollection('sellers', id),
 
+  getBranches: () => getCollection('branches'),
+  addBranch: (data) => addToCollection('branches', data),
+  updateBranch: (id, data) => updateCollection('branches', id, data),
+  deleteBranch: (id) => deleteFromCollection('branches', id),
+
   getCustomers: () => getCollection('customers'),
   addCustomer: (data) => addToCollection('customers', data),
   updateCustomer: (id, data) => updateCollection('customers', id, data),
