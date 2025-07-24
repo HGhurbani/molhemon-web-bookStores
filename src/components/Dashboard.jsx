@@ -32,7 +32,8 @@ import {
   Image,
   Zap,
   Headphones,
-  Boxes
+  Boxes,
+  MapPin
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -61,6 +62,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'inventory', name: 'إدارة المخزون', icon: Boxes },
     { id: 'authors', name: 'المؤلفون', icon: Users },
     { id: 'sellers', name: 'البائعون', icon: Store },
+    { id: 'branches', name: 'الفروع', icon: MapPin },
     { id: 'categories', name: 'الأصناف', icon: BookOpen },
     { id: 'orders', name: 'الطلبات', icon: Package },
     { id: 'customers', name: 'العملاء', icon: UserCheck },
@@ -553,6 +555,123 @@ const DashboardSellers = ({ sellers, setSellers }) => {
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingSeller(s); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const BranchForm = ({ branch, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ name: '', address: '', phone: '', ...branch });
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{branch ? 'تعديل الفرع' : 'إضافة فرع جديد'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="bname">الاسم</Label>
+          <Input id="bname" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="baddress">العنوان</Label>
+          <Input id="baddress" name="address" value={formData.address} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="bphone">الهاتف</Label>
+          <Input id="bphone" name="phone" value={formData.phone} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {branch ? 'حفظ التعديلات' : 'إضافة الفرع'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardBranches = ({ branches, setBranches }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editingBranch, setEditingBranch] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newBranch = await api.addBranch(data);
+      setBranches(prev => [newBranch, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch (e) {
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateBranch(editingBranch.id, data);
+      setBranches(prev => prev.map(b => b.id === updated.id ? updated : b));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditingBranch(null);
+    } catch (e) {
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
+    try {
+      await api.deleteBranch(id);
+      setBranches(prev => prev.filter(b => b.id !== id));
+      toast({ title: 'تم الحذف بنجاح!' });
+    } catch (e) {
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <BranchForm branch={editingBranch} onSubmit={editingBranch ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingBranch(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة الفروع</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingBranch(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة فرع
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">العنوان</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الهاتف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {branches.map(b => (
+              <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.address}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.phone}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingBranch(b); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(b.id)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </td>
               </tr>
@@ -2570,7 +2689,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categories, orders, payments, paymentMethods, plans, subscriptions, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setSubscriptions, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, plans, subscriptions, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setSubscriptions, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -2578,6 +2697,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
     inventory: 'إدارة المخزون',
     authors: 'المؤلفون',
     sellers: 'البائعون',
+    branches: 'الفروع',
     orders: 'الطلبات',
     customers: 'العملاء',
     users: 'المستخدمون',
@@ -2631,6 +2751,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, customers, categor
         )}
         {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
+        {dashboardSection === 'branches' && <DashboardBranches branches={branches} setBranches={setBranches} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
         {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
