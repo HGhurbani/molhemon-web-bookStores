@@ -33,7 +33,7 @@ import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
 
-import { sellers as initialSellers, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
+import { sellers as initialSellers, branches as initialBranches, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, languages } from '@/lib/languageContext.jsx';
@@ -51,6 +51,10 @@ const App = () => {
   const [sellers, setSellers] = useState(() => {
     const stored = localStorage.getItem('sellers');
     return stored ? JSON.parse(stored) : initialSellers;
+  });
+  const [branches, setBranches] = useState(() => {
+    const stored = localStorage.getItem('branches');
+    return stored ? JSON.parse(stored) : initialBranches;
   });
   const [customers, setCustomers] = useState(() => {
     const stored = localStorage.getItem('customers');
@@ -105,7 +109,7 @@ const App = () => {
     if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, custData, subs] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, branchData, custData, subs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -119,6 +123,7 @@ const App = () => {
           api.getBanners(),
           api.getFeatures(),
           api.getSellers(),
+          api.getBranches(),
           api.getCustomers(),
           api.getSubscriptions(),
         ]);
@@ -135,6 +140,7 @@ const App = () => {
         setBannersState(banners);
         setFeatures(feats);
         setSellers(sellData);
+        setBranches(branchData);
         setCustomers(custData);
         setSubscriptions(subs);
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -165,6 +171,9 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('sellers', JSON.stringify(sellers));
   }, [sellers]);
+  useEffect(() => {
+    localStorage.setItem('branches', JSON.stringify(branches));
+  }, [branches]);
 
   useEffect(() => {
     localStorage.setItem('customers', JSON.stringify(customers));
@@ -359,6 +368,7 @@ const App = () => {
                     books={books}
                     authors={authors}
                     sellers={sellers}
+                    branches={branches}
                     customers={customers}
                     categories={categoriesState}
                     orders={orders}
@@ -372,6 +382,7 @@ const App = () => {
                     setBooks={setBooks}
                     setAuthors={setAuthors}
                     setSellers={setSellers}
+                    setBranches={setBranches}
                     setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
