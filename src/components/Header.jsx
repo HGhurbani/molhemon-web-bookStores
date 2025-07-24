@@ -39,6 +39,16 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   const t = useTranslation();
   const navigate = useNavigate();
 
+  const [hideTopRow, setHideTopRow] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHideTopRow(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     if (books.length) {
       const randomTitles = [...books]
@@ -187,9 +197,8 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
     <>
     <header className="bg-blue-600 text-white sticky top-0 z-50 rounded-b-2xl mb-4">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top Bar - Visible on all screens now, but adjusts layout */}
-        <div className="flex items-center justify-between text-xs py-2 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0"> {/* Removed hidden sm:flex */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
+        <div className={`flex items-center justify-between text-xs overflow-x-auto whitespace-nowrap pb-1 sm:pb-0 transition-all duration-300 ${hideTopRow ? 'max-h-0 opacity-0 overflow-hidden py-0' : 'py-2 max-h-20'}`}>
+          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
             {renderUserSection()}
             <span className="mx-2">|</span>
             <Link to="/ebooks" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200">
@@ -210,7 +219,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
             <span className="mx-2">|</span>
            <button onClick={() => handleFeatureClick('locations-top')} className="hover:text-blue-200">{t('locations')}</button>
           </div>
-          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"> {/* Added flex-shrink-0 */}
+          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
