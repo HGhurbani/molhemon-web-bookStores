@@ -2360,7 +2360,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{book.title}</div>
-                      </div>
+                      </div>2
                     </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{book.author}</td>
