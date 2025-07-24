@@ -210,8 +210,40 @@ export const sellers = [
 ];
 
 export const branches = [
-  { id: 1, name: 'الفرع الرئيسي', address: 'دبي، الإمارات', phone: '+971 4 123 4567' },
-  { id: 2, name: 'فرع أبوظبي', address: 'أبوظبي، الإمارات', phone: '+971 2 765 4321' },
+  {
+    id: 1,
+    name: 'الفرع الرئيسي',
+    address: 'دبي، الإمارات',
+    phone: '+971 4 123 4567',
+    email: 'main@example.com',
+    code: 'DXB',
+    hours: {
+      sun: '9-5',
+      mon: '9-5',
+      tue: '9-5',
+      wed: '9-5',
+      thu: '9-5',
+      fri: '',
+      sat: ''
+    }
+  },
+  {
+    id: 2,
+    name: 'فرع أبوظبي',
+    address: 'أبوظبي، الإمارات',
+    phone: '+971 2 765 4321',
+    email: 'abudhabi@example.com',
+    code: 'AUH',
+    hours: {
+      sun: '9-5',
+      mon: '9-5',
+      tue: '9-5',
+      wed: '9-5',
+      thu: '9-5',
+      fri: '',
+      sat: ''
+    }
+  }
 ];
 
 export const customers = [
