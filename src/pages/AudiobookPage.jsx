@@ -47,19 +47,41 @@ const AudiobookPage = () => {
       >
         {/* Background Grid - Clear and visible book covers */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="grid grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-3 p-6 opacity-100"> {/* Changed opacity to 100 */}
-            {infiniteBooks.slice(0, 24).map((book, index) => (
-              <div
-                key={`bg-book-${book.id}-${index}`}
-                className="aspect-square"
-              >
-                <img
-                  src={book.cover}
-                  alt={book.title}
-                  className="w-full h-full object-cover rounded-md shadow-sm"
-                />
-              </div>
-            ))}
+          <div className="flex flex-col gap-3 p-6">
+            <div
+              className="flex gap-3 animate-scroll-right"
+              style={{ width: '200%' }}
+            >
+              {sampleBooks.concat(sampleBooks).map((book, index) => (
+                <div
+                  key={`row1-book-${book.id}-${index}`}
+                  className="aspect-square w-24 md:w-28 lg:w-32 flex-shrink-0"
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="w-full h-full object-cover rounded-md shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
+            <div
+              className="flex gap-3 animate-scroll-left"
+              style={{ width: '200%' }}
+            >
+              {sampleBooks.concat(sampleBooks).map((book, index) => (
+                <div
+                  key={`row2-book-${book.id}-${index}`}
+                  className="aspect-square w-24 md:w-28 lg:w-32 flex-shrink-0"
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="w-full h-full object-cover rounded-md shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
