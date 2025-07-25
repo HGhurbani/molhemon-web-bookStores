@@ -2234,8 +2234,8 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, defaultType =
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = (e) => {
@@ -2649,11 +2649,18 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, h
 
 
 const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
-  const [formData, setFormData] = useState(siteSettings);
+  const [formData, setFormData] = useState({
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
+    translationApiKey: '',
+    autoTranslate: false,
+    ...siteSettings,
+  });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -2724,6 +2731,26 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
           <div className="md:col-span-2">
             <Label htmlFor="languages">اللغات المتاحة (افصل بينها بفاصلة)</Label>
             <Input id="languages" name="languages" value={formData.languages} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="translationApiKey">مفتاح الترجمة</Label>
+            <Input id="translationApiKey" name="translationApiKey" value={formData.translationApiKey} onChange={handleChange} />
+          </div>
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <input id="autoTranslate" name="autoTranslate" type="checkbox" checked={formData.autoTranslate} onChange={handleChange} className="w-4 h-4" />
+            <Label htmlFor="autoTranslate" className="!mb-0">تفعيل الترجمة التلقائية</Label>
+          </div>
+          <div>
+            <Label htmlFor="seoTitle">عنوان SEO</Label>
+            <Input id="seoTitle" name="seoTitle" value={formData.seoTitle} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="seoDescription">وصف SEO</Label>
+            <Textarea id="seoDescription" name="seoDescription" value={formData.seoDescription} onChange={handleChange} rows={2} />
+          </div>
+          <div>
+            <Label htmlFor="seoKeywords">كلمات SEO</Label>
+            <Input id="seoKeywords" name="seoKeywords" value={formData.seoKeywords} onChange={handleChange} />
           </div>
           <div className="md:col-span-2 border-t pt-4">
             <h4 className="font-semibold mb-2">إعدادات الدفع</h4>

@@ -335,7 +335,12 @@ export const siteSettings = {
   stripePublicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY || '',
   stripeSecretKey: '',
   paypalClientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || '',
-  paypalSecret: ''
+  paypalSecret: '',
+  translationApiKey: '',
+  autoTranslate: false,
+  seoTitle: '',
+  seoDescription: '',
+  seoKeywords: ''
 };
 
 export const paymentMethods = [

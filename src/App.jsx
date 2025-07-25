@@ -349,9 +349,9 @@ const App = () => {
   const MainLayout = ({ children, siteSettings }) => (
     <>
       <SEO
-        title={siteSettings.siteName}
-        description={siteSettings.description}
-        keywords="كتب, متجر كتب, كتب صوتية, كتب إلكترونية, دار نشر"
+        title={siteSettings.seoTitle || siteSettings.siteName}
+        description={siteSettings.seoDescription || siteSettings.description}
+        keywords={siteSettings.seoKeywords || 'كتب, متجر كتب, كتب صوتية, كتب إلكترونية, دار نشر'}
       />
       <div className="min-h-screen bg-slate-100 text-gray-800">
         <Header
