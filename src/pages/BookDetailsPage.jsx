@@ -12,7 +12,7 @@ import { toast } from "@/components/ui/use-toast.js";
 import api from '@/lib/api.js';
 import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 
-const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist }) => {
+const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist, onOpenChat }) => {
   const { id } = useParams();
   const location = useLocation();
   const { currency } = useCurrency();
@@ -276,12 +276,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() =>
-                    toast({
-                      title: 'دردشة',
-                      description: '🚧 هذه الميزة غير مطبقة بعد',
-                    })
-                  }
+                  onClick={() => onOpenChat({ type: 'seller', name: book.seller || book.author })}
                   className="px-2"
                 >
                   <i className="fa-solid fa-comments text-blue-600 ml-2 rtl:mr-2 rtl:ml-0" />

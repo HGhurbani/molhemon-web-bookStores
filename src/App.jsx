@@ -33,6 +33,7 @@ import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
 import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
+import ChatWidget from '@/components/ChatWidget.jsx';
 
 import { sellers as initialSellers, branches as initialBranches, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
@@ -48,6 +49,8 @@ const App = () => {
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatContact, setChatContact] = useState({ type: 'admin', name: 'الدعم' });
   const [dashboardStatsState, setDashboardStatsState] = useState([]);
   const [sellers, setSellers] = useState(() => {
     const stored = localStorage.getItem('sellers');
@@ -290,6 +293,11 @@ const App = () => {
       }
     });
   };
+
+  const handleOpenChat = (contact = { type: 'admin', name: 'الدعم' }) => {
+    setChatContact(contact);
+    setChatOpen(true);
+  };
   
   const handleFeatureClick = (feature) => {
     if (feature === 'logout') {
@@ -428,7 +436,7 @@ const App = () => {
               }
             />
             <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={features} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} onOpenChat={handleOpenChat} /></PageLayout></MainLayout>} />
               <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
               <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
@@ -475,6 +483,11 @@ const App = () => {
           handleToggleWishlist={handleToggleWishlist}
           wishlist={wishlist}
           authors={authors}
+        />
+        <ChatWidget
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          contact={chatContact}
         />
       </div>
     </Router>
