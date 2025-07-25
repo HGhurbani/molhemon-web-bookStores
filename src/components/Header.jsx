@@ -211,7 +211,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   <span>كتاب مسموع</span>
 </Link>
             <span className="mx-2">|</span>
-           <button onClick={() => handleFeatureClick('track-order-top')} className="hover:text-blue-200">{t('trackOrder')}</button>
+           <Link to="/track-order" className="hover:text-blue-200">{t('trackOrder')}</Link>
             <span className="mx-2">|</span>
            <button onClick={() => handleFeatureClick('download-app-top')} className="hover:text-blue-200">{t('downloadApp')}</button>
             <span className="mx-2">|</span>

@@ -16,7 +16,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
     { icon: BookOpen, text: 'كتاب إلكتروني', action: 'ebook-top', link: '/category/ebooks' }, // Assuming a category for ebooks or similar
     { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' },
     { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
-    { icon: Box, text: t('trackOrder'), action: 'track-order-top', link: '/profile?tab=orders' },
+    { icon: Box, text: t('trackOrder'), action: 'track-order-top', link: '/track-order' },
     { icon: Download, text: t('downloadApp'), action: 'download-app-top' },
     { icon: HelpCircle, text: t('help'), action: 'help-top' },
     { icon: MapPin, text: t('locations'), action: 'locations-top' },
