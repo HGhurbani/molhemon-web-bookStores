@@ -19,6 +19,7 @@ import CartPage from '@/pages/CartPage.jsx';
 import CheckoutPage from '@/pages/CheckoutPage.jsx';
 import UserProfilePage from '@/pages/UserProfilePage.jsx';
 import OrderDetailsPage from '@/pages/OrderDetailsPage.jsx';
+import DashboardOrderDetailsPage from '@/pages/DashboardOrderDetailsPage.jsx';
 import NotFoundPage from '@/pages/NotFoundPage.jsx';
 import AudiobookPage from '@/pages/AudiobookPage.jsx';
 import EbookPage from '@/pages/EbookPage.jsx';
@@ -401,6 +402,16 @@ const App = () => {
                     features={features}
                     setFeatures={setFeatures}
                   />
+                ) : (
+                  <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
+                )
+              }
+            />
+            <Route
+              path="/admin/orders/:id"
+              element={
+                isAdminLoggedIn ? (
+                  <DashboardOrderDetailsPage />
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
                 )

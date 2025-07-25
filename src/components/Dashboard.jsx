@@ -1771,7 +1771,9 @@ const DashboardOrders = ({ orders, setOrders }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
-                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setSelectedOrder(o); setDialogOpen(true); }}><Eye className="w-4 h-4" /></Button>
+                    <Button asChild size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8">
+                      <Link to={`/admin/orders/${o.id}`}><Eye className="w-4 h-4" /></Link>
+                    </Button>
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteOrder(o.id)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </td>
