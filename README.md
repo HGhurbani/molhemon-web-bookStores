@@ -28,7 +28,7 @@ The app now reads and writes data directly from Firebase.
 Authentication uses Firebase Auth. New accounts are created with `createUserWithEmailAndPassword` and stored in the `users` collection in Firestore. The login form also supports signing in with Google, Facebook or Apple accounts via Firebase providers.
 
 ## Google Merchant Integration
-Set `GOOGLE_MERCHANT_ID` and `GOOGLE_API_KEY` in your `.env` file to enable importing products from Google Merchant Center. In the dashboard settings you can trigger "استيراد من Google Merchant" to fetch and add products as books.
+Set `GOOGLE_MERCHANT_ID` and `GOOGLE_API_KEY` in your `.env` file to enable importing products from Google Merchant Center. A dedicated **Google Merchant** section is now available in the dashboard where you can manage these credentials and trigger "استيراد من Google Merchant" to fetch and add products as books.
 
 ## Payment Methods
 Payment methods are stored in the `payment_methods` collection in Firestore. Each method can hold a JSON configuration containing your gateway keys (for example Stripe publishable/secret keys or PayPal client details). The dashboard lets you edit this JSON for every method. When creating a new method you can now choose from a list of popular gateways (Stripe, PayPal, STC Pay and others) and their basic configuration template will be filled in automatically.
