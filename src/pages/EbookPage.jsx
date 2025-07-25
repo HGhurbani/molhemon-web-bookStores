@@ -80,20 +80,25 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+              className={`bg-white rounded-2xl shadow-lg border p-6 ${plan.featured ? 'border-orange-400' : 'border-gray-200'}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                  {plan.name}
+                  {plan.featured && (
+                    <span className="ml-2 rtl:mr-2 text-xs text-orange-600 font-semibold">الأكثر شيوعاً</span>
+                  )}
+                </h3>
                 <div className="mb-4">
                   <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
                   <span className="text-gray-600 text-sm mr-1">{plan.duration} يوم</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-700 mb-6 text-center">{plan.description}</p>
+              <p className="text-sm text-gray-700 mb-6 text-center" dangerouslySetInnerHTML={{ __html: plan.description }} />
               <Button className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]" onClick={() => toast({ title: `تم اختيار ${plan.name}` })}>
                 اختر باقتك
               </Button>
