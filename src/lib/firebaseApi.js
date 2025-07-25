@@ -7,6 +7,10 @@ import {
   doc,
   getDoc,
   setDoc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -44,6 +48,30 @@ async function setSingletonDoc(name, data) {
   return { id: snap.id, ...snap.data() };
 }
 
+async function fetchAllMessages() {
+  const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function fetchUserMessages({ userId, email }) {
+  const q = query(
+    collection(db, 'messages'),
+    where(userId ? 'userId' : 'email', '==', userId || email),
+    orderBy('createdAt', 'asc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function createMessage(data) {
+  return addToCollection('messages', { ...data, createdAt: serverTimestamp() });
+}
+
+async function modifyMessage(id, data) {
+  return updateCollection('messages', id, data);
+}
+
 const firebaseApi = {
   getBooks: () => getCollection('books'),
   addBook: (data) => addToCollection('books', data),
@@ -69,6 +97,7 @@ const firebaseApi = {
   addUser: (data) => addToCollection('users', data),
   updateUser: (id, data) => updateCollection('users', id, data),
   deleteUser: (id) => deleteFromCollection('users', id),
+  getUser: (id) => getDocById('users', id),
 
   getSliders: () => getCollection('sliders'),
   addSlider: (data) => addToCollection('sliders', data),
@@ -124,6 +153,11 @@ const firebaseApi = {
   addSubscription: (data) => addToCollection('subscriptions', data),
   updateSubscription: (id, data) => updateCollection('subscriptions', id, data),
   deleteSubscription: (id) => deleteFromCollection('subscriptions', id),
+
+  getMessages: () => fetchAllMessages(),
+  getUserMessages: (params) => fetchUserMessages(params),
+  addMessage: (data) => createMessage(data),
+  updateMessage: (id, data) => modifyMessage(id, data),
 
   getSettings: async () => {
     const snap = await getDoc(doc(db, 'settings', 'main'));

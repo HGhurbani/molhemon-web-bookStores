@@ -68,6 +68,7 @@ const App = () => {
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
+  const [messages, setMessages] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState(() => {
     const stored = localStorage.getItem('paymentMethods');
     return stored ? JSON.parse(stored) : initialPaymentMethods;
@@ -111,9 +112,11 @@ const App = () => {
     if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
     const storedFeatures = localStorage.getItem('features');
     if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
+    const storedMessages = localStorage.getItem('messages');
+    if (storedMessages) setMessages(JSON.parse(storedMessages));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, branchData, custData, subs] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -130,6 +133,7 @@ const App = () => {
           api.getBranches(),
           api.getCustomers(),
           api.getSubscriptions(),
+          api.getMessages(),
         ]);
         setBooks(b);
         setAuthors(a);
@@ -147,6 +151,7 @@ const App = () => {
         setBranches(branchData);
         setCustomers(custData);
         setSubscriptions(subs);
+        setMessages(msgs);
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
         setDashboardStatsState([
           { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
@@ -219,6 +224,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('features', JSON.stringify(features));
   }, [features]);
+
+  useEffect(() => {
+    localStorage.setItem('messages', JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     const sales = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
@@ -401,6 +410,8 @@ const App = () => {
                     setSubscriptions={setSubscriptions}
                     users={users}
                     setUsers={setUsers}
+                    messages={messages}
+                    setMessages={setMessages}
                     siteSettings={siteSettingsState}
                     setSiteSettings={setSiteSettingsState}
                     sliders={heroSlidesState}

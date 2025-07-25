@@ -33,7 +33,8 @@ import {
   Zap,
   Headphones,
   Boxes,
-  MapPin
+  MapPin,
+  MessageCircle
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -71,6 +72,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'subscriptions', name: 'العضويات', icon: Crown },
+    { id: 'messages', name: 'الرسائل', icon: MessageCircle },
     { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
     { id: 'banners', name: 'البانرات', icon: Image },
@@ -1673,6 +1675,64 @@ const DashboardFeatures = ({ features, setFeatures }) => {
   );
 };
 
+const DashboardMessages = ({ messages, setMessages }) => {
+  const [replyMap, setReplyMap] = useState({});
+
+  const handleReply = async (id) => {
+    const text = replyMap[id];
+    if (!text) return;
+    try {
+      const updated = await api.updateMessage(id, { reply: text });
+      setMessages((prev) => prev.map((m) => (m.id === id ? updated : m)));
+      setReplyMap((prev) => ({ ...prev, [id]: '' }));
+      toast({ title: 'تم إرسال الرد' });
+    } catch {
+      toast({ title: 'حدث خطأ أثناء الإرسال', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">رسائل العملاء</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الرسالة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الرد</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {messages.map((m) => (
+              <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.email}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.text}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  {m.reply ? (
+                    m.reply
+                  ) : (
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <input
+                        className="border rounded px-2 py-1 text-sm"
+                        value={replyMap[m.id] || ''}
+                        onChange={(e) => setReplyMap((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                      />
+                      <Button size="sm" onClick={() => handleReply(m.id)}>إرسال</Button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
   if (!order) return null;
   const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
@@ -2728,7 +2788,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, plans, subscriptions, users, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setSubscriptions, setUsers, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -2744,6 +2804,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     'payment-methods': 'طرق الدفع',
     plans: 'خطط الاشتراك',
     subscriptions: 'العضويات',
+    messages: 'الرسائل',
     features: 'المميزات',
     sliders: 'السلايدر',
     banners: 'البانرات',
@@ -2805,6 +2866,9 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
             customers={customers}
             plans={plans}
           />
+        )}
+        {dashboardSection === 'messages' && (
+          <DashboardMessages messages={messages} setMessages={setMessages} />
         )}
         {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
