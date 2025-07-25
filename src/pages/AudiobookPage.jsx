@@ -43,7 +43,7 @@ const AudiobookPage = () => {
       <motion.section
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative h-[500px] sm:h-[600px] overflow-hidden rounded-xl shadow-2xl bg-blue-950 text-white mt-8"
+        className="relative h-[420px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-xl shadow-2xl bg-blue-950 text-white mt-8"
       >
         {/* Background Grid - Clear and visible book covers */}
         <div className="absolute inset-0 overflow-hidden">
@@ -89,7 +89,7 @@ const AudiobookPage = () => {
         <div className="inset-0 bg-blue-950/80"></div>
 
         {/* Content - Text positioned on the right side at the bottom */}
-        <div className="absolute bottom-0 right-0 p-6 sm:p-8 z-10 text-left rtl:text-right max-w-lg"> {/* Adjusted positioning and text alignment */}
+        <div className="absolute bottom-0 left-0 right-0 sm:left-auto sm:right-0 p-6 sm:p-8 z-10 text-center sm:text-left rtl:text-right max-w-none sm:max-w-lg"> {/* Adjusted positioning and text alignment */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">
             اختر باقة الاستماع المناسبة لك
           </h1>
@@ -112,7 +112,7 @@ const AudiobookPage = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <div className="relative w-48 h-64 sm:w-60 sm:h-80 flex-shrink-0 z-30 mb-[50px] md:mt-[-260px] mr-0 md:mr-16 lg:ml-24"> {/* Added negative margin-bottom and right margin for positioning */}
+        <div className="relative w-40 h-56 sm:w-48 sm:h-64 md:w-60 md:h-80 flex-shrink-0 z-30 -mt-20 mx-auto md:mx-0 mb-12 md:mt-[-260px] md:mr-16 lg:ml-24"> {/* Added negative margin-bottom and right margin for positioning */}
           <img
             src="https://darmolhimon.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-13-at-10.40.18-AM-300x450.jpeg"
             alt="روميليا والأسد"
