@@ -41,6 +41,7 @@ import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
+import RichTextEditor from './RichTextEditor.jsx';
 import {
   Dialog,
   DialogContent,
@@ -456,7 +457,11 @@ const DashboardCategories = ({ categories, setCategories }) => {
 const SellerForm = ({ seller, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', ...seller });
 
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+  const handleDescChange = (html) => setFormData(prev => ({ ...prev, description: html }));
 
   const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
 
@@ -847,6 +852,7 @@ const PlanForm = ({ plan, onSubmit, onCancel }) => {
     price: '',
     duration: '',
     description: '',
+    featured: false,
     plan_type: 'membership',
     package_type: 'ebook',
     ...plan,
@@ -881,7 +887,11 @@ const PlanForm = ({ plan, onSubmit, onCancel }) => {
         </div>
         <div>
           <Label htmlFor="pdesc">الوصف</Label>
-          <Textarea id="pdesc" name="description" value={formData.description} onChange={handleChange} rows={3} />
+          <RichTextEditor value={formData.description} onChange={handleDescChange} className="mt-1" />
+        </div>
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <input id="featured" type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} />
+          <Label htmlFor="featured">مميزة</Label>
         </div>
         <div>
           <Label htmlFor="plan_type">نوع الخطة</Label>
@@ -1095,6 +1105,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المدة</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">النوع</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">نوع الباقة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">مميزة</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
             </tr>
           </thead>
@@ -1107,6 +1118,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.duration}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.plan_type}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.package_type || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{p.featured ? '✔' : '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm">
                   <div className="flex space-x-2 rtl:space-x-reverse justify-center">
                     <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingPlan(p); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
