@@ -33,6 +33,7 @@ import {
   Zap,
   Headphones,
   Boxes,
+  ShoppingCart,
   MapPin,
   MessageCircle
 } from 'lucide-react';
@@ -70,6 +71,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'users', name: 'المستخدمون', icon: User },
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
+    { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'subscriptions', name: 'العضويات', icon: Crown },
     { id: 'messages', name: 'الرسائل', icon: MessageCircle },
@@ -2652,17 +2654,6 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
     }
   };
 
-  const handleImport = async () => {
-    try {
-      await api.importGoogleMerchant({
-        googleMerchantId: formData.googleMerchantId,
-        googleApiKey: formData.googleApiKey,
-      });
-      toast({ title: 'تم استيراد الكتب بنجاح!' });
-    } catch (err) {
-      toast({ title: 'تعذر استيراد البيانات. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
 
   return (
     <motion.div
@@ -2740,16 +2731,78 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
             <Label htmlFor="paypalSecret">PayPal Secret</Label>
             <Input id="paypalSecret" name="paypalSecret" value={formData.paypalSecret} onChange={handleChange} />
           </div>
-          <div className="md:col-span-2 border-t pt-4">
-            <h4 className="font-semibold mb-2">Google Merchant</h4>
-          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            حفظ الإعدادات
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardGoogleMerchant = ({ siteSettings, setSiteSettings }) => {
+  const [formData, setFormData] = useState({
+    googleMerchantId: siteSettings.googleMerchantId || '',
+    googleApiKey: siteSettings.googleApiKey || '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = await api.updateSettings(formData);
+      setSiteSettings((prev) => ({ ...prev, ...updated }));
+      toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+    } catch (err) {
+      toast({ title: 'تعذر حفظ البيانات. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      await api.importGoogleMerchant({
+        googleMerchantId: formData.googleMerchantId,
+        googleApiKey: formData.googleApiKey,
+      });
+      toast({ title: 'تم استيراد الكتب بنجاح!' });
+    } catch (err) {
+      toast({ title: 'تعذر استيراد البيانات. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
+    >
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">Google Merchant</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="googleMerchantId">Merchant ID</Label>
-            <Input id="googleMerchantId" name="googleMerchantId" value={formData.googleMerchantId || ''} onChange={handleChange} />
+            <Input
+              id="googleMerchantId"
+              name="googleMerchantId"
+              value={formData.googleMerchantId}
+              onChange={handleChange}
+            />
           </div>
           <div>
             <Label htmlFor="googleApiKey">API Key</Label>
-            <Input id="googleApiKey" name="googleApiKey" value={formData.googleApiKey || ''} onChange={handleChange} />
+            <Input
+              id="googleApiKey"
+              name="googleApiKey"
+              value={formData.googleApiKey}
+              onChange={handleChange}
+            />
           </div>
         </div>
         <div className="flex justify-between">
@@ -2802,6 +2855,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     users: 'المستخدمون',
     payments: 'المدفوعات',
     'payment-methods': 'طرق الدفع',
+    'google-merchant': 'Google Merchant',
     plans: 'خطط الاشتراك',
     subscriptions: 'العضويات',
     messages: 'الرسائل',
@@ -2856,6 +2910,12 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
         {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
         {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
         {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
+        {dashboardSection === 'google-merchant' && (
+          <DashboardGoogleMerchant
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+          />
+        )}
         {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
