@@ -859,6 +859,7 @@ const PlanForm = ({ plan, onSubmit, onCancel }) => {
   });
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleDescChange = (html) => setFormData(prev => ({ ...prev, description: html }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
