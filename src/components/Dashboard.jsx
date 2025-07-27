@@ -52,6 +52,7 @@ import {
 } from '@/components/ui/dialog.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import CsvImportDialog from './CsvImportDialog.jsx';
+import ChatWidget from './ChatWidget.jsx';
 
 import { Link } from 'react-router-dom';
 
@@ -1690,60 +1691,53 @@ const DashboardFeatures = ({ features, setFeatures }) => {
   );
 };
 
-const DashboardMessages = ({ messages, setMessages }) => {
-  const [replyMap, setReplyMap] = useState({});
+const DashboardMessages = ({ messages }) => {
+  const [activeUser, setActiveUser] = useState(null);
 
-  const handleReply = async (id) => {
-    const text = replyMap[id];
-    if (!text) return;
-    try {
-      const updated = await api.updateMessage(id, { reply: text });
-      setMessages((prev) => prev.map((m) => (m.id === id ? updated : m)));
-      setReplyMap((prev) => ({ ...prev, [id]: '' }));
-      toast({ title: 'تم إرسال الرد' });
-    } catch {
-      toast({ title: 'حدث خطأ أثناء الإرسال', variant: 'destructive' });
-    }
-  };
+  const threads = React.useMemo(() => {
+    const map = new Map();
+    messages.forEach((m) => {
+      const key = m.userId || m.email;
+      if (!map.has(key)) {
+        map.set(key, { userId: m.userId, email: m.email, name: m.name });
+      }
+    });
+    return Array.from(map.values());
+  }, [messages]);
 
   return (
     <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <h2 className="text-2xl font-semibold text-gray-700 mb-3">رسائل العملاء</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">دردشات العملاء</h2>
       <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
         <table className="w-full min-w-[400px]">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
               <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الرسالة</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الرد</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">&nbsp;</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {messages.map((m) => (
-              <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.name}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.email}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{m.text}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm">
-                  {m.reply ? (
-                    m.reply
-                  ) : (
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <input
-                        className="border rounded px-2 py-1 text-sm"
-                        value={replyMap[m.id] || ''}
-                        onChange={(e) => setReplyMap((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                      />
-                      <Button size="sm" onClick={() => handleReply(m.id)}>إرسال</Button>
-                    </div>
-                  )}
+            {threads.map((t) => (
+              <tr key={t.userId || t.email} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{t.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{t.email}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <Button size="sm" onClick={() => setActiveUser(t)}>محادثة</Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {activeUser && (
+        <ChatWidget
+          open={!!activeUser}
+          onOpenChange={() => setActiveUser(null)}
+          contact={{ type: 'user', name: activeUser.name }}
+          targetUser={activeUser}
+        />
+      )}
     </motion.div>
   );
 };
@@ -2941,7 +2935,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
           />
         )}
         {dashboardSection === 'messages' && (
-          <DashboardMessages messages={messages} setMessages={setMessages} />
+          <DashboardMessages messages={messages} />
         )}
         {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
