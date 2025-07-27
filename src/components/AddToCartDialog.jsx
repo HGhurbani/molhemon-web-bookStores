@@ -2,17 +2,16 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Dialog, DialogContent } from '@/components/ui/dialog.jsx'
 import { Button } from '@/components/ui/button.jsx'
-import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx'
 import * as DialogPrimitive from '@radix-ui/react-dialog' // Ensure this is imported for DialogPrimitive.Close
 import { CheckCircle2 } from 'lucide-react'; // Importing a check icon for success
 
 
-const AddToCartDialog = ({ open, onOpenChange, book, recommendedBooks, handleAddToCart, handleToggleWishlist, wishlist, authors }) => {
+const AddToCartDialog = ({ open, onOpenChange, book, handleAddToCart, handleToggleWishlist, wishlist, authors }) => {
   if (!book) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl space-y-6">
+      <DialogContent className="space-y-6 sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-4xl">
         {/* Close Button at Top Right of the DialogContent */}
         <DialogPrimitive.Close className='absolute top-3 left-3 text-gray-500 hover:text-gray-700'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="lucide lucide-x h-5 w-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -38,14 +37,6 @@ const AddToCartDialog = ({ open, onOpenChange, book, recommendedBooks, handleAdd
           </div>
         </div>
 
-        {/* You May Also Like Section */}
-        <YouMayAlsoLikeSection
-          books={recommendedBooks}
-          handleAddToCart={handleAddToCart}
-          handleToggleWishlist={handleToggleWishlist}
-          wishlist={wishlist}
-          authors={authors}
-        />
       </DialogContent>
     </Dialog>
   )
