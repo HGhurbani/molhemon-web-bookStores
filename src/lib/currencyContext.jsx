@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const defaultCurrencies = [
   {
@@ -24,16 +24,39 @@ export const getStoredCurrencies = () => {
   }
 };
 
-export const currencies = getStoredCurrencies();
-
-const CurrencyContext = createContext({ currency: currencies[0], setCurrency: () => {}, currencies });
+const CurrencyContext = createContext({
+  currency: defaultCurrencies[0],
+  setCurrency: () => {},
+  currencies: defaultCurrencies,
+  setCurrencies: () => {},
+});
 
 export const useCurrency = () => useContext(CurrencyContext);
 
 export const CurrencyProvider = ({ children }) => {
+  const [currencies, setCurrencies] = useState(getStoredCurrencies());
   const [currency, setCurrency] = useState(currencies[0]);
+
+  useEffect(() => {
+    localStorage.setItem('currencies', JSON.stringify(currencies));
+  }, [currencies]);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'currencies') {
+        const updated = getStoredCurrencies();
+        setCurrencies(updated);
+        if (!updated.find((c) => c.code === currency.code)) {
+          setCurrency(updated[0]);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [currency]);
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, currencies }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, currencies, setCurrencies }}>
       {children}
     </CurrencyContext.Provider>
   );
