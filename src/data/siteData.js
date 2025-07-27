@@ -333,11 +333,7 @@ export const siteSettings = {
   facebook: '',
   twitter: '',
   instagram: '',
-  themeColor: '#1D4ED8',
-  stripePublicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY || '',
-  stripeSecretKey: '',
-  paypalClientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || '',
-  paypalSecret: ''
+  themeColor: '#1D4ED8'
 };
 
 export const paymentMethods = [
