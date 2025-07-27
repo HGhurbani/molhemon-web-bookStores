@@ -1,15 +1,26 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from './api.js';
 
-export const languages = [
+export const defaultLanguages = [
   { code: 'ar', name: 'العربية' },
   { code: 'en', name: 'English' },
 ];
 
-const LanguageContext = createContext({ language: languages[0], setLanguage: () => {}, languages });
+export const getStoredLanguages = () => {
+  try {
+    const stored = localStorage.getItem('languages');
+    return stored ? JSON.parse(stored) : defaultLanguages;
+  } catch {
+    return defaultLanguages;
+  }
+};
+
+const LanguageContext = createContext({ language: defaultLanguages[0], setLanguage: () => {}, languages: defaultLanguages, setLanguages: () => {} });
 
 export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider = ({ children }) => {
+  const [languages, setLanguages] = useState(getStoredLanguages());
   const [language, setLanguage] = useState(() => {
     const stored = localStorage.getItem('language');
     return languages.find(l => l.code === stored) || languages[0];
@@ -21,8 +32,26 @@ export const LanguageProvider = ({ children }) => {
     document.documentElement.dir = language.code === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
+  useEffect(() => {
+    localStorage.setItem('languages', JSON.stringify(languages));
+  }, [languages]);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'languages') {
+        const updated = getStoredLanguages();
+        setLanguages(updated);
+        if (!updated.find(l => l.code === language.code)) {
+          setLanguage(updated[0]);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, languages }}>
+    <LanguageContext.Provider value={{ language, setLanguage, languages, setLanguages }}>
       {children}
     </LanguageContext.Provider>
   );

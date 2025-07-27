@@ -32,6 +32,7 @@ import {
   Zap,
   Headphones,
   Boxes,
+  Globe,
   ShoppingCart,
   MapPin,
   MessageCircle
@@ -73,6 +74,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'payments', name: 'المدفوعات', icon: CreditCard },
     { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
     { id: 'currencies', name: 'العملات', icon: DollarSign },
+    { id: 'languages', name: 'اللغات', icon: Globe },
     { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'subscriptions', name: 'العضويات', icon: Crown },
@@ -2210,6 +2212,119 @@ const DashboardCurrencies = ({ currencies, setCurrencies }) => {
   );
 };
 
+const LanguageForm = ({ language, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({ code: '', name: '', ...language });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  const handleSubmit = (e) => { e.preventDefault(); onSubmit(formData); };
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{language ? 'تعديل اللغة' : 'إضافة لغة جديدة'}</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="code">الكود</Label>
+          <Input id="code" name="code" value={formData.code} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="name">الاسم</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+          <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {language ? 'حفظ التعديلات' : 'إضافة اللغة'}
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const DashboardLanguages = ({ languages, setLanguages }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const handleAdd = async (data) => {
+    try {
+      const newItem = await api.addLanguage(data);
+      setLanguages(prev => [newItem, ...prev]);
+      toast({ title: 'تمت الإضافة بنجاح!' });
+      setShowForm(false);
+    } catch {
+      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleEdit = async (data) => {
+    try {
+      const updated = await api.updateLanguage(editing.id, data);
+      setLanguages(prev => prev.map(l => l.id === updated.id ? updated : l));
+      toast({ title: 'تم التعديل بنجاح!' });
+      setShowForm(false);
+      setEditing(null);
+    } catch {
+      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirmDelete()) return;
+    try {
+      await api.deleteLanguage(id);
+      setLanguages(prev => prev.filter(l => l.id !== id));
+      toast({ title: 'تم الحذف بنجاح!' });
+    } catch {
+      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  if (showForm) {
+    return <LanguageForm language={editing} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+  }
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">اللغات</h2>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+          إضافة لغة
+        </Button>
+      </div>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[350px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكود</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {languages.map(l => (
+              <tr key={l.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.id}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.code}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(l); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(l.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const DashboardInventory = ({ books, setBooks }) => {
   const handleChange = (id, value) => {
     setBooks(prev => prev.map(b => b.id === id ? { ...b, stock: value } : b));
@@ -2989,7 +3104,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const sectionTitles = {
     overview: 'نظرة عامة',
     books: 'إدارة الكتب',
@@ -3003,6 +3118,8 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     users: 'المستخدمون',
     payments: 'المدفوعات',
     'payment-methods': 'طرق الدفع',
+    currencies: 'العملات',
+    languages: 'اللغات',
     'google-merchant': 'Google Merchant',
     plans: 'خطط الاشتراك',
     subscriptions: 'العضويات',
@@ -3061,6 +3178,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
         {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
         {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
         {dashboardSection === 'currencies' && <DashboardCurrencies currencies={currencies} setCurrencies={setCurrencies} />}
+        {dashboardSection === 'languages' && <DashboardLanguages languages={languages} setLanguages={setLanguages} />}
         {dashboardSection === 'google-merchant' && (
           <DashboardGoogleMerchant
             siteSettings={siteSettings}

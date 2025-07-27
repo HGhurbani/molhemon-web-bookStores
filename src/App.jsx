@@ -40,13 +40,13 @@ import ChatWidget from '@/components/ChatWidget.jsx';
 import { sellers as initialSellers, branches as initialBranches, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
-import { useLanguage, languages } from '@/lib/languageContext.jsx';
+import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
 
 const App = () => {
   const [dashboardSection, setDashboardSection] = useState('overview');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(localStorage.getItem('adminLoggedIn') === 'true');
   const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(localStorage.getItem('customerLoggedIn') === 'true');
-  const { setLanguage } = useLanguage();
+  const { setLanguage, setLanguages, languages } = useLanguage();
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [books, setBooks] = useState([]);
@@ -123,7 +123,7 @@ const App = () => {
     if (storedMessages) setMessages(JSON.parse(storedMessages));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, currenciesData, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -132,6 +132,7 @@ const App = () => {
           api.getPayments(),
           api.getPaymentMethods(),
           api.getCurrencies(),
+          api.getLanguages(),
           api.getPlans(),
           api.getUsers(),
           api.getSliders(),
@@ -152,6 +153,7 @@ const App = () => {
         setPaymentMethods(methods);
         setCurrenciesState(currenciesData);
         setCurrenciesContext(currenciesData);
+        setLanguages(languagesData.length ? languagesData : defaultLanguages);
         setPlans(p);
         setUsers(u);
         setHeroSlidesState(sliders);
@@ -265,7 +267,7 @@ const App = () => {
       const lang = languages.find(l => l.code === siteSettingsState.defaultLanguage);
       if (lang) setLanguage(lang);
     }
-  }, [siteSettingsState.defaultLanguage, setLanguage]);
+  }, [siteSettingsState.defaultLanguage, setLanguage, languages]);
 
   useEffect(() => {
     if (!currenciesState.length) return;
@@ -435,6 +437,8 @@ const App = () => {
                     setPaymentMethods={setPaymentMethods}
                     currencies={currenciesState}
                     setCurrencies={setCurrenciesState}
+                    languages={languages}
+                    setLanguages={setLanguages}
                     setPlans={setPlans}
                     setSubscriptions={setSubscriptions}
                     users={users}
