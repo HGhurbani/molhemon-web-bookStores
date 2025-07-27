@@ -17,8 +17,11 @@ const ChatWidget = ({
   const [email, setEmail] = useState('');
   const [userId, setUserId] = useState('');
   const messagesRef = useRef(null);
+  const isLoggedIn =
+    !!targetUser || localStorage.getItem('customerLoggedIn') === 'true';
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     if (targetUser) {
       setUserId(targetUser.userId || '');
       setName(targetUser.name || '');
@@ -26,7 +29,7 @@ const ChatWidget = ({
       return;
     }
     const id = localStorage.getItem('currentUserId');
-    if (localStorage.getItem('customerLoggedIn') === 'true' && id) {
+    if (id) {
       setUserId(id);
       api.getUser(id).then((u) => {
         if (u) {
@@ -35,7 +38,7 @@ const ChatWidget = ({
         }
       });
     }
-  }, [targetUser]);
+  }, [targetUser, isLoggedIn]);
 
   useEffect(() => {
     if (!userId && !email) return;
@@ -57,6 +60,7 @@ const ChatWidget = ({
   }, [messages, open]);
 
   const send = async () => {
+    if (!isLoggedIn) return;
     const trimmed = text.trim();
     if (!trimmed) return;
     if (!name || !email) return;
@@ -73,7 +77,21 @@ const ChatWidget = ({
 
   return (
     <>
-      {open && (
+      {open && !isLoggedIn && (
+        <div className="fixed bottom-0 left-4 rtl:left-auto rtl:right-4 w-80 bg-white rounded-t-lg shadow-lg flex flex-col">
+          <div className="flex items-center justify-between p-3 border-b">
+            <span className="font-semibold text-sm">{contact.name}</span>
+            <button className="text-gray-500 hover:text-gray-700" onClick={() => onOpenChange(false)}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-4 text-sm text-center">يجب تسجيل الدخول لاستخدام الدردشة</div>
+          <div className="p-3 border-t bg-white flex justify-center">
+            <a href="/auth" className="text-blue-600 hover:underline">تسجيل الدخول</a>
+          </div>
+        </div>
+      )}
+      {open && isLoggedIn && (
         <div className="fixed bottom-0 left-4 rtl:left-auto rtl:right-4 w-80 bg-white rounded-t-lg shadow-lg flex flex-col">
           <div className="flex items-center justify-between p-3 border-b">
             <span className="font-semibold text-sm">{contact.name}</span>
