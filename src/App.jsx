@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useCurrency } from '@/lib/currencyContext.jsx';
+import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
@@ -96,7 +96,7 @@ const App = () => {
   });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
-  const { setCurrencies: setCurrenciesContext } = useCurrency();
+  const { setCurrencies: setCurrenciesContext, setCurrency } = useCurrency();
 
   const bestsellerBooks = React.useMemo(() => {
     return [...books].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6);
@@ -266,6 +266,18 @@ const App = () => {
       if (lang) setLanguage(lang);
     }
   }, [siteSettingsState.defaultLanguage, setLanguage]);
+
+  useEffect(() => {
+    if (!currenciesState.length) return;
+    const defCode = siteSettingsState.defaultCurrency;
+    if (siteSettingsState.detectCurrencyByCountry) {
+      const cur = detectUserCurrency(currenciesState, defCode);
+      setCurrency(cur);
+    } else if (defCode) {
+      const found = currenciesState.find(c => c.code === defCode);
+      if (found) setCurrency(found);
+    }
+  }, [currenciesState, siteSettingsState.defaultCurrency, siteSettingsState.detectCurrencyByCountry, setCurrency]);
 
   const handleAddToCart = (book) => {
     setCart((prevCart) => {

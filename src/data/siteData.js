@@ -328,6 +328,8 @@ export const siteSettings = {
   address: 'الإمارات العربية المتحدة',
   languages: 'ar,en',
   defaultLanguage: 'ar',
+  defaultCurrency: 'AED',
+  detectCurrencyByCountry: false,
   facebook: '',
   twitter: '',
   instagram: '',
