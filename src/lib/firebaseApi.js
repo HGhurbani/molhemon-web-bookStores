@@ -99,6 +99,17 @@ const firebaseApi = {
   deleteUser: (id) => deleteFromCollection('users', id),
   getUser: (id) => getDocById('users', id),
 
+  // User specific subcollections
+  getUserAddresses: (userId) => getCollection(`users/${userId}/addresses`),
+  addUserAddress: (userId, data) => addToCollection(`users/${userId}/addresses`, data),
+  updateUserAddress: (userId, id, data) => updateCollection(`users/${userId}/addresses`, id, data),
+  deleteUserAddress: (userId, id) => deleteFromCollection(`users/${userId}/addresses`, id),
+
+  getUserPaymentMethods: (userId) => getCollection(`users/${userId}/payment_methods`),
+  addUserPaymentMethod: (userId, data) => addToCollection(`users/${userId}/payment_methods`, data),
+  updateUserPaymentMethod: (userId, id, data) => updateCollection(`users/${userId}/payment_methods`, id, data),
+  deleteUserPaymentMethod: (userId, id) => deleteFromCollection(`users/${userId}/payment_methods`, id),
+
   getSliders: () => getCollection('sliders'),
   addSlider: (data) => addToCollection('sliders', data),
   updateSlider: (id, data) => updateCollection('sliders', id, data),
