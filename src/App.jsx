@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useCurrency } from '@/lib/currencyContext.jsx';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
@@ -95,6 +96,7 @@ const App = () => {
   });
   const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const [cartDialogBook, setCartDialogBook] = useState(null);
+  const { setCurrencies: setCurrenciesContext } = useCurrency();
 
   const bestsellerBooks = React.useMemo(() => {
     return [...books].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6);
@@ -149,6 +151,7 @@ const App = () => {
         setPayments(pay);
         setPaymentMethods(methods);
         setCurrenciesState(currenciesData);
+        setCurrenciesContext(currenciesData);
         setPlans(p);
         setUsers(u);
         setHeroSlidesState(sliders);
@@ -210,6 +213,7 @@ const App = () => {
 
   useEffect(() => {
     localStorage.setItem('currencies', JSON.stringify(currenciesState));
+    setCurrenciesContext(currenciesState);
   }, [currenciesState]);
 
   useEffect(() => {
