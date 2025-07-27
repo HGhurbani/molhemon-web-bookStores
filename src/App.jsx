@@ -29,6 +29,7 @@ import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
 import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
 import EbookReaderPage from '@/pages/EbookReaderPage.jsx';
 import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
+import SubscriptionCheckoutPage from '@/pages/SubscriptionCheckoutPage.jsx';
 import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage.jsx';
 import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
@@ -496,6 +497,20 @@ const App = () => {
                           setCart={setCart}
                           setOrders={setOrders}
                         />
+                      </PageLayout>
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+              <Route
+                path="/subscribe/:planId"
+                element={
+                  isCustomerLoggedIn ? (
+                    <MainLayout siteSettings={siteSettingsState}>
+                      <PageLayout>
+                        <SubscriptionCheckoutPage />
                       </PageLayout>
                     </MainLayout>
                   ) : (

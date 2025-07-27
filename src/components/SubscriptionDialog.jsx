@@ -6,10 +6,11 @@ import { ChevronLeft, X } from 'lucide-react';
 import FormattedPrice from './FormattedPrice.jsx';
 import api from '@/lib/api.js';
 import { toast } from '@/components/ui/use-toast.js';
-import { purchasePlan } from '@/lib/subscriptionUtils.js';
+import { useNavigate } from 'react-router-dom';
 
 const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
   const [plans, setPlans] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -21,15 +22,9 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
     })();
   }, []);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = () => {
     if (!plans.length) return;
-    try {
-      await purchasePlan(api, plans[0]);
-      toast({ title: 'تم الاشتراك بنجاح!' });
-      onOpenChange(false);
-    } catch (e) {
-      toast({ title: 'تعذر إتمام الاشتراك. حاول مجدداً.', variant: 'destructive' });
-    }
+    navigate(`/subscribe/${plans[0].id}`);
   };
 
   return (
