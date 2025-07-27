@@ -6,6 +6,7 @@ import { ChevronLeft, X } from 'lucide-react';
 import FormattedPrice from './FormattedPrice.jsx';
 import api from '@/lib/api.js';
 import { toast } from '@/components/ui/use-toast.js';
+import { purchasePlan } from '@/lib/subscriptionUtils.js';
 
 const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
   const [plans, setPlans] = useState([]);
@@ -23,7 +24,7 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
   const handleSubscribe = async () => {
     if (!plans.length) return;
     try {
-      await api.addSubscription({ customer_id: 1, plan_id: plans[0].id });
+      await purchasePlan(api, plans[0]);
       toast({ title: 'تم الاشتراك بنجاح!' });
       onOpenChange(false);
     } catch (e) {
