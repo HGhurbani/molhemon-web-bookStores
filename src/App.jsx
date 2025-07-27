@@ -471,7 +471,20 @@ const App = () => {
                   )
                 }
               />
-              <Route path="/profile" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><UserProfilePage handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route
+                path="/profile"
+                element={
+                  isCustomerLoggedIn ? (
+                    <MainLayout siteSettings={siteSettingsState}>
+                      <PageLayout>
+                        <UserProfilePage handleFeatureClick={handleFeatureClick} />
+                      </PageLayout>
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
               <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><OrderDetailsPage /></PageLayout></MainLayout>} />
               <Route path="/track-order" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><TrackOrderPage /></PageLayout></MainLayout>} />
               <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />

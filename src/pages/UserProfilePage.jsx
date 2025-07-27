@@ -16,27 +16,10 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const [wishlist, setWishlist] = useState([]);
-  const [orders, setOrders] = useState([]); // Placeholder for orders
-  const [userData, setUserData] = useState({
-    name: 'بروس وين',
-    email: 'bruce@wayne.com',
-    phone: '+971 50 123 4567',
-    profilePicture: 'https://images.unsplash.com/photo-1572119003128-d110c07af847'
-  });
-  const [addresses, setAddresses] = useState(() => {
-    const stored = localStorage.getItem('addresses');
-    return stored
-      ? JSON.parse(stored)
-      : [
-          { id: 1, name: 'المنزل', street: 'شارع الشيخ زايد', city: 'دبي', country: 'الإمارات', default: true },
-        ];
-  });
-  const [paymentMethods, setPaymentMethods] = useState(() => {
-    const stored = localStorage.getItem('userPaymentMethods');
-    return stored
-      ? JSON.parse(stored)
-      : [{ id: 1, type: 'Visa', last4: '4242', expiry: '12/25', default: true }];
-  });
+  const [orders, setOrders] = useState([]);
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '', profilePicture: '' });
+  const [addresses, setAddresses] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [newAddress, setNewAddress] = useState({ name: '', street: '', city: '', country: '' });
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -52,10 +35,26 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     setWishlist(storedWishlist);
     (async () => {
       try {
-        const ordersData = await api.getOrders();
-        setOrders(ordersData);
+        const uid = localStorage.getItem('currentUserId');
+        if (!uid) return;
+        const [user, addr, pay, ordersData] = await Promise.all([
+          api.getUser(uid),
+          api.getUserAddresses(uid),
+          api.getUserPaymentMethods(uid),
+          api.getOrders(),
+        ]);
+        if (user) setUserData({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          profilePicture: user.profilePicture || '',
+        });
+        setAddresses(addr || []);
+        setPaymentMethods(pay || []);
+        const filteredOrders = (ordersData || []).filter(o => o.customer_id === uid);
+        setOrders(filteredOrders);
       } catch (e) {
-        console.error('Failed to fetch orders', e);
+        console.error('Failed to fetch profile data', e);
       }
     })();
   }, []);
@@ -65,9 +64,16 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     setSearchParams({ tab });
   };
   
-  const handleUpdateProfile = (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    toast({ title: "تم تحديث الملف الشخصي بنجاح!" });
+    const uid = localStorage.getItem('currentUserId');
+    if (!uid) return;
+    try {
+      await api.updateUser(uid, userData);
+      toast({ title: "تم تحديث الملف الشخصي بنجاح!" });
+    } catch {
+      toast({ title: "تعذر تحديث الملف الشخصي", variant: "destructive" });
+    }
   };
 
   const handleToggleWishlist = (book) => {
@@ -77,27 +83,37 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     toast({ title: "تم الحذف من المفضلة", description: `تم حذف "${book.title}" من قائمة الرغبات.`, variant: "destructive" });
   };
 
-  const handleSaveAddress = () => {
+  const handleSaveAddress = async () => {
+    const uid = localStorage.getItem('currentUserId');
+    if (!uid) return;
     let updated;
-    if (newAddress.id) {
-      updated = addresses.map(a => (a.id === newAddress.id ? newAddress : a));
-    } else {
-      const id = Math.max(0, ...addresses.map(a => a.id)) + 1;
-      updated = [...addresses, { ...newAddress, id }];
+    try {
+      if (newAddress.id) {
+        await api.updateUserAddress(uid, newAddress.id, newAddress);
+        updated = addresses.map(a => (a.id === newAddress.id ? newAddress : a));
+      } else {
+        const added = await api.addUserAddress(uid, newAddress);
+        updated = [...addresses, added];
+      }
+      setAddresses(updated);
+      setNewAddress({ name: '', street: '', city: '', country: '' });
+      setAddressDialogOpen(false);
+    } catch {
+      toast({ title: 'تعذر حفظ العنوان', variant: 'destructive' });
     }
-    setAddresses(updated);
-    localStorage.setItem('addresses', JSON.stringify(updated));
-    setNewAddress({ name: '', street: '', city: '', country: '' });
-    setAddressDialogOpen(false);
   };
 
-  const handleSavePayment = () => {
-    const id = Math.max(0, ...paymentMethods.map(p => p.id)) + 1;
-    const updated = [...paymentMethods, { ...newPayment, id }];
-    setPaymentMethods(updated);
-    localStorage.setItem('userPaymentMethods', JSON.stringify(updated));
-    setNewPayment({ type: '', last4: '', expiry: '' });
-    setPaymentDialogOpen(false);
+  const handleSavePayment = async () => {
+    const uid = localStorage.getItem('currentUserId');
+    if (!uid) return;
+    try {
+      const added = await api.addUserPaymentMethod(uid, newPayment);
+      setPaymentMethods([...paymentMethods, added]);
+      setNewPayment({ type: '', last4: '', expiry: '' });
+      setPaymentDialogOpen(false);
+    } catch {
+      toast({ title: 'تعذر حفظ طريقة الدفع', variant: 'destructive' });
+    }
   };
   
   const handleAddAddress = () => setAddressDialogOpen(true);
@@ -108,10 +124,16 @@ const UserProfilePage = ({ handleFeatureClick }) => {
       setAddressDialogOpen(true);
     }
   };
-  const handleDeleteAddress = (id) => {
-    const updated = addresses.filter(a => a.id !== id);
-    setAddresses(updated);
-    localStorage.setItem('addresses', JSON.stringify(updated));
+  const handleDeleteAddress = async (id) => {
+    const uid = localStorage.getItem('currentUserId');
+    if (!uid) return;
+    try {
+      await api.deleteUserAddress(uid, id);
+      const updated = addresses.filter(a => a.id !== id);
+      setAddresses(updated);
+    } catch {
+      toast({ title: 'تعذر حذف العنوان', variant: 'destructive' });
+    }
   };
   const handleAddPaymentMethod = () => setPaymentDialogOpen(true);
 
@@ -273,11 +295,24 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                       <p className="text-sm text-gray-500">تنتهي في: {pm.expiry}</p>
                     </div>
                   </div>
-                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => {
-                     const updated = paymentMethods.filter(p => p.id !== pm.id);
-                     setPaymentMethods(updated);
-                     localStorage.setItem('userPaymentMethods', JSON.stringify(updated));
-                   }}>حذف</Button>
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     className="text-red-600 hover:text-red-700"
+                     onClick={async () => {
+                       const uid = localStorage.getItem('currentUserId');
+                       if (!uid) return;
+                       try {
+                         await api.deleteUserPaymentMethod(uid, pm.id);
+                         const updated = paymentMethods.filter(p => p.id !== pm.id);
+                         setPaymentMethods(updated);
+                       } catch {
+                         toast({ title: 'تعذر حذف طريقة الدفع', variant: 'destructive' });
+                       }
+                     }}
+                   >
+                     حذف
+                   </Button>
                 </div>
               ))}
             </div>
