@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-export const currencies = [
+export const defaultCurrencies = [
   {
     code: 'AED',
     name: 'الدرهم الإماراتي',
@@ -14,6 +14,17 @@ export const currencies = [
     symbol: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Saudi_Riyal_Symbol.svg/512px-Saudi_Riyal_Symbol.svg.png',
   },
 ];
+
+export const getStoredCurrencies = () => {
+  try {
+    const stored = localStorage.getItem('currencies');
+    return stored ? JSON.parse(stored) : defaultCurrencies;
+  } catch {
+    return defaultCurrencies;
+  }
+};
+
+export const currencies = getStoredCurrencies();
 
 const CurrencyContext = createContext({ currency: currencies[0], setCurrency: () => {}, currencies });
 

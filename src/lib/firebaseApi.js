@@ -88,6 +88,11 @@ const firebaseApi = {
   updateCategory: (id, data) => updateCollection('categories', id, data),
   deleteCategory: (id) => deleteFromCollection('categories', id),
 
+  getCurrencies: () => getCollection('currencies'),
+  addCurrency: (data) => addToCollection('currencies', data),
+  updateCurrency: (id, data) => updateCollection('currencies', id, data),
+  deleteCurrency: (id) => deleteFromCollection('currencies', id),
+
   getOrders: () => getCollection('orders'),
   addOrder: (data) => addToCollection('orders', data),
   updateOrder: (id, data) => updateCollection('orders', id, data),
