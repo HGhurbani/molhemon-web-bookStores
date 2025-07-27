@@ -74,6 +74,10 @@ const App = () => {
     const stored = localStorage.getItem('paymentMethods');
     return stored ? JSON.parse(stored) : initialPaymentMethods;
   });
+  const [currenciesState, setCurrenciesState] = useState(() => {
+    const stored = localStorage.getItem('currencies');
+    return stored ? JSON.parse(stored) : [];
+  });
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [subscriptions, setSubscriptions] = useState(() => JSON.parse(localStorage.getItem('subscriptions') || '[]'));
   const [siteSettingsState, setSiteSettingsState] = useState(() => {
@@ -117,7 +121,7 @@ const App = () => {
     if (storedMessages) setMessages(JSON.parse(storedMessages));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, currenciesData, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -125,6 +129,7 @@ const App = () => {
           api.getOrders(),
           api.getPayments(),
           api.getPaymentMethods(),
+          api.getCurrencies(),
           api.getPlans(),
           api.getUsers(),
           api.getSliders(),
@@ -143,6 +148,7 @@ const App = () => {
         setOrders(o);
         setPayments(pay);
         setPaymentMethods(methods);
+        setCurrenciesState(currenciesData);
         setPlans(p);
         setUsers(u);
         setHeroSlidesState(sliders);
@@ -201,6 +207,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('paymentMethods', JSON.stringify(paymentMethods));
   }, [paymentMethods]);
+
+  useEffect(() => {
+    localStorage.setItem('currencies', JSON.stringify(currenciesState));
+  }, [currenciesState]);
 
   useEffect(() => {
     localStorage.setItem('plans', JSON.stringify(plans));
@@ -407,6 +417,8 @@ const App = () => {
                     setOrders={setOrders}
                     setPayments={setPayments}
                     setPaymentMethods={setPaymentMethods}
+                    currencies={currenciesState}
+                    setCurrencies={setCurrenciesState}
                     setPlans={setPlans}
                     setSubscriptions={setSubscriptions}
                     users={users}
