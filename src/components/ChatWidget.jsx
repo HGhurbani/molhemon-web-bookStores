@@ -74,7 +74,7 @@ const ChatWidget = ({
   return (
     <>
       {open && (
-        <div className="fixed bottom-0 left-4 rtl:left-auto rtl:right-4 w-80 bg-white rounded-t-lg shadow-lg flex flex-col">
+        <div className="fixed bottom-0 left-4 rtl:right-auto rtl:right-4 w-80 bg-white rounded-t-lg shadow-lg flex flex-col">
           <div className="flex items-center justify-between p-3 border-b">
             <span className="font-semibold text-sm">{contact.name}</span>
             <button className="text-gray-500 hover:text-gray-700" onClick={() => onOpenChange(false)}>

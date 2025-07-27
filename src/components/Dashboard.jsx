@@ -2971,10 +2971,7 @@ const DashboardSettings = ({ siteSettings, setSiteSettings, currencies = [] }) =
             />
             <Label htmlFor="detectCurrencyByCountry" className="!mb-0">استخدام عملة الزائر تلقائياً</Label>
           </div>
-          <div className="md:col-span-2">
-            <Label htmlFor="languages">اللغات المتاحة (افصل بينها بفاصلة)</Label>
-            <Input id="languages" name="languages" value={formData.languages} onChange={handleChange} />
-          </div>
+         
         </div>
         <div className="flex justify-end">
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
