@@ -139,14 +139,14 @@ const AudiobookPage = () => {
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
-              className={`relative bg-white rounded-2xl shadow-lg border p-6 ${plan.featured ? 'border-orange-400 ring-2 ring-orange-400 scale-105' : 'border-gray-200'}`}
+              className={`relative bg-white rounded-2xl shadow-lg border p-6 ${plan.featured ? 'border-blue-400 ring-2 ring-blue-400 scale-105' : 'border-gray-200'}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
               {plan.featured && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-400 text-white text-xs px-3 py-1 rounded-full">الأكثر شيوعاً</span>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">الأكثر شيوعاً</span>
               )}
               <div className="text-center mb-6 mt-2">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">

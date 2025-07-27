@@ -95,14 +95,7 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
           </div>
         </div>
       </div>
-      <Button 
-        className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-2.5 sm:p-3 z-50"
-        size="icon"
-        aria-label="فتح نافذة الدردشة"
-        onClick={() => handleFeatureClick('chat-support')}
-      >
-        <MessageSquare className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </Button>
+     
     </footer>
     </>
   );
