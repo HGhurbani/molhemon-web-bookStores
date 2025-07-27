@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import { toast } from '@/components/ui/use-toast.js';
@@ -26,14 +27,10 @@ const AudiobookPage = () => {
   const infiniteBooks = Array(15).fill(sampleBooks.slice(0, 10)).flat();
 
   const [plans, setPlans] = useState([]);
+  const navigate = useNavigate();
 
-  const handlePlanSelect = async (plan) => {
-    try {
-      await purchasePlan(api, plan);
-      toast({ title: `تم الاشتراك في ${plan.name}` });
-    } catch (e) {
-      toast({ title: 'تعذر إتمام الاشتراك. حاول مجدداً.', variant: 'destructive' });
-    }
+  const handlePlanSelect = (plan) => {
+    navigate(`/subscribe/${plan.id}`);
   };
 
   useEffect(() => {

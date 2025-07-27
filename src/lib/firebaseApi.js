@@ -166,6 +166,7 @@ const firebaseApi = {
   deleteCoupon: (id) => deleteFromCollection('coupons', id),
 
   getPlans: (params) => getCollection('plans'),
+  getPlan: (id) => getDocById('plans', id),
   addPlan: (data) => addToCollection('plans', data),
   updatePlan: (id, data) => updateCollection('plans', id, data),
   deletePlan: (id) => deleteFromCollection('plans', id),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { toast } from '@/components/ui/use-toast.js';
@@ -10,6 +10,7 @@ import { Check, Award, Star } from 'lucide-react';
 
 const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wishlist, handleFeatureClick }) => {
   const [localWishlist, setLocalWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLocalWishlist(JSON.parse(localStorage.getItem('wishlist') || '[]'));
@@ -28,13 +29,8 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
 
   const [plans, setPlans] = useState([]);
 
-  const handlePlanSelect = async (plan) => {
-    try {
-      await purchasePlan(api, plan);
-      toast({ title: `تم الاشتراك في ${plan.name}` });
-    } catch (e) {
-      toast({ title: 'تعذر إتمام الاشتراك. حاول مجدداً.', variant: 'destructive' });
-    }
+  const handlePlanSelect = (plan) => {
+    navigate(`/subscribe/${plan.id}`);
   };
 
   useEffect(() => {
