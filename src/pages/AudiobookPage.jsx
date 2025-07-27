@@ -4,6 +4,7 @@ import { Check, Award, Star, Play, Clock, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import api from '@/lib/api.js';
+import { purchasePlan } from '@/lib/subscriptionUtils.js';
 
 const AudiobookPage = () => {
   // Mock data
@@ -25,6 +26,15 @@ const AudiobookPage = () => {
   const infiniteBooks = Array(15).fill(sampleBooks.slice(0, 10)).flat();
 
   const [plans, setPlans] = useState([]);
+
+  const handlePlanSelect = async (plan) => {
+    try {
+      await purchasePlan(api, plan);
+      toast({ title: `تم الاشتراك في ${plan.name}` });
+    } catch (e) {
+      toast({ title: 'تعذر إتمام الاشتراك. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -158,7 +168,10 @@ const AudiobookPage = () => {
                 </div>
               </div>
               <p className="text-sm text-gray-700 mb-6 text-center" dangerouslySetInnerHTML={{ __html: plan.description }} />
-              <Button className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]" onClick={() => toast({ title: `تم اختيار ${plan.name}` })}>
+              <Button
+                className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]"
+                onClick={() => handlePlanSelect(plan)}
+              >
                 اختر باقتك
               </Button>
             </motion.div>
