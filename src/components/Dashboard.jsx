@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { languages } from '@/lib/languageContext.jsx';
+import { defaultLanguages as languages } from '@/lib/languageContext.jsx';
 import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
