@@ -24,6 +24,38 @@ export const getStoredCurrencies = () => {
   }
 };
 
+const getStoredCurrency = () => {
+  try {
+    return localStorage.getItem('currency');
+  } catch {
+    return null;
+  }
+};
+
+export const countryCurrencyMap = {
+  AE: 'AED',
+  SA: 'SAR',
+  US: 'USD',
+  EG: 'EGP',
+  KW: 'KWD',
+  QA: 'QAR'
+};
+
+export const detectUserCurrency = (currencies, defaultCode) => {
+  try {
+    const locale = navigator.language || '';
+    const region = locale.split('-')[1]?.toUpperCase();
+    const code = countryCurrencyMap[region];
+    if (code) {
+      const found = currencies.find(c => c.code === code);
+      if (found) return found;
+    }
+  } catch {
+    // ignore
+  }
+  return currencies.find(c => c.code === defaultCode) || currencies[0];
+};
+
 const CurrencyContext = createContext({
   currency: defaultCurrencies[0],
   setCurrency: () => {},
@@ -35,7 +67,20 @@ export const useCurrency = () => useContext(CurrencyContext);
 
 export const CurrencyProvider = ({ children }) => {
   const [currencies, setCurrencies] = useState(getStoredCurrencies());
-  const [currency, setCurrency] = useState(currencies[0]);
+  const [currency, setCurrencyState] = useState(() => {
+    const stored = getStoredCurrency();
+    const found = currencies.find(c => c.code === stored);
+    return found || currencies[0];
+  });
+
+  const setCurrency = (cur) => {
+    setCurrencyState(cur);
+    try {
+      localStorage.setItem('currency', cur.code);
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('currencies', JSON.stringify(currencies));

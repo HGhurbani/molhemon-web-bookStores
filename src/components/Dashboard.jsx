@@ -2764,12 +2764,12 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
 };
 
 
-const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
+const DashboardSettings = ({ siteSettings, setSiteSettings, currencies = [] }) => {
   const [formData, setFormData] = useState(siteSettings);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -2836,6 +2836,25 @@ const DashboardSettings = ({ siteSettings, setSiteSettings }) => {
                 <option key={l.code} value={l.code}>{l.name}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <Label htmlFor="defaultCurrency">العملة الافتراضية</Label>
+            <select id="defaultCurrency" name="defaultCurrency" value={formData.defaultCurrency} onChange={handleChange} className="w-full border rounded p-2">
+              {currencies.map(c => (
+                <option key={c.code} value={c.code}>{c.name} | {c.code}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <input
+              id="detectCurrencyByCountry"
+              name="detectCurrencyByCountry"
+              type="checkbox"
+              checked={formData.detectCurrencyByCountry || false}
+              onChange={handleChange}
+              className="w-4 h-4"
+            />
+            <Label htmlFor="detectCurrencyByCountry" className="!mb-0">استخدام عملة الزائر تلقائياً</Label>
           </div>
           <div className="md:col-span-2">
             <Label htmlFor="languages">اللغات المتاحة (افصل بينها بفاصلة)</Label>
@@ -3066,7 +3085,11 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
         {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
         {dashboardSection === 'settings' && (
-          <DashboardSettings siteSettings={siteSettings} setSiteSettings={setSiteSettings} />
+          <DashboardSettings
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+            currencies={currencies}
+          />
         )}
       </main>
     </div>
