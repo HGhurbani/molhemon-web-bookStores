@@ -504,7 +504,6 @@ const App = () => {
           open={cartDialogOpen}
           onOpenChange={setCartDialogOpen}
           book={cartDialogBook}
-          recommendedBooks={books.filter(b => cartDialogBook ? b.id !== cartDialogBook.id : true).slice(0,6)}
           handleAddToCart={handleAddToCart}
           handleToggleWishlist={handleToggleWishlist}
           wishlist={wishlist}
