@@ -5,10 +5,10 @@ import { Link } from 'react-router-dom';
 import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe, Headphones, BookOpen } from 'lucide-react'; // Ensure Headphones and BookOpen are imported
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
-import { useLanguage, useTranslation, languages } from '@/lib/languageContext.jsx';
+import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
 
 const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, languages } = useLanguage();
   const t = useTranslation();
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [

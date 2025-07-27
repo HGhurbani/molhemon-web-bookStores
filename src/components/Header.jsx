@@ -21,7 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
-import { useLanguage, useTranslation, languages } from '@/lib/languageContext.jsx';
+import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
 
 const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +35,7 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   });
   const [randomSuggestions, setRandomSuggestions] = useState([]);
   const { currency, setCurrency, currencies } = useCurrency();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, languages } = useLanguage();
   const t = useTranslation();
   const navigate = useNavigate();
 
