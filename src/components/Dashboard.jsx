@@ -60,93 +60,70 @@ const confirmDelete = () => window.confirm('هل أنت متأكد من الحذ
 
 const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen }) => {
   const navItems = [
-    { id: 'overview', name: 'نظرة عامة', icon: BarChart3, color: 'text-blue-400' },
-    { id: 'books', name: 'إدارة الكتب', icon: BookOpen, color: 'text-green-400' },
-    { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones, color: 'text-purple-400' },
-    { id: 'inventory', name: 'إدارة المخزون', icon: Boxes, color: 'text-orange-400' },
-    { id: 'authors', name: 'المؤلفون', icon: Users, color: 'text-indigo-400' },
-    { id: 'sellers', name: 'البائعون', icon: Store, color: 'text-pink-400' },
-    { id: 'branches', name: 'الفروع', icon: MapPin, color: 'text-red-400' },
-    { id: 'categories', name: 'الأصناف', icon: BookOpen, color: 'text-teal-400' },
-    { id: 'orders', name: 'الطلبات', icon: Package, color: 'text-amber-400' },
-    { id: 'customers', name: 'العملاء', icon: UserCheck, color: 'text-cyan-400' },
-    { id: 'users', name: 'المستخدمون', icon: User, color: 'text-lime-400' },
-    { id: 'payments', name: 'المدفوعات', icon: CreditCard, color: 'text-emerald-400' },
-    { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet, color: 'text-violet-400' },
-    { id: 'currencies', name: 'العملات', icon: DollarSign, color: 'text-yellow-400' },
-    { id: 'languages', name: 'اللغات', icon: Globe, color: 'text-blue-400' },
-    { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart, color: 'text-green-400' },
-    { id: 'plans', name: 'الخطط', icon: DollarSign, color: 'text-purple-400' },
-    { id: 'subscriptions', name: 'العضويات', icon: Crown, color: 'text-yellow-400' },
-    { id: 'messages', name: 'الرسائل', icon: MessageCircle, color: 'text-pink-400' },
-    { id: 'features', name: 'المميزات', icon: Zap, color: 'text-orange-400' },
-    { id: 'sliders', name: 'السلايدر', icon: Image, color: 'text-indigo-400' },
-    { id: 'banners', name: 'البانرات', icon: Image, color: 'text-cyan-400' },
-    { id: 'settings', name: 'الإعدادات', icon: Settings, color: 'text-gray-400' }
+    { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
+    { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
+    { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones },
+    { id: 'inventory', name: 'إدارة المخزون', icon: Boxes },
+    { id: 'authors', name: 'المؤلفون', icon: Users },
+    { id: 'sellers', name: 'البائعون', icon: Store },
+    { id: 'branches', name: 'الفروع', icon: MapPin },
+    { id: 'categories', name: 'الأصناف', icon: BookOpen },
+    { id: 'orders', name: 'الطلبات', icon: Package },
+    { id: 'customers', name: 'العملاء', icon: UserCheck },
+    { id: 'users', name: 'المستخدمون', icon: User },
+    { id: 'payments', name: 'المدفوعات', icon: CreditCard },
+    { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
+    { id: 'currencies', name: 'العملات', icon: DollarSign },
+    { id: 'languages', name: 'اللغات', icon: Globe },
+    { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
+    { id: 'plans', name: 'الخطط', icon: DollarSign },
+    { id: 'subscriptions', name: 'العضويات', icon: Crown },
+    { id: 'messages', name: 'الرسائل', icon: MessageCircle },
+    { id: 'features', name: 'المميزات', icon: Zap },
+    { id: 'sliders', name: 'السلايدر', icon: Image },
+    { id: 'banners', name: 'البانرات', icon: Image },
+    { id: 'settings', name: 'الإعدادات', icon: Settings }
   ];
 
   return (
     <>
-      <div className={`sidebar-nav w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-100 p-6 flex flex-col h-screen sm:sticky top-0 transform transition-all duration-300 ease-in-out fixed z-50 sm:relative shadow-2xl ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">لوحة التحكم</h1>
-              <p className="text-xs text-slate-400">دار الملهمون</p>
-            </div>
-          </div>
-          <button 
-            className="sm:hidden p-2 rounded-lg hover:bg-slate-700 transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
+      <div className={`sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
+        <div className="flex items-center justify-between mb-8">
+           <img alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
+          <button className="sm:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <nav className="space-y-2 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
-          {navItems.map(({ id, name, icon: IconComponent, color }) => (
+        <nav className="space-y-1.5 flex-grow overflow-y-auto">
+          {navItems.map(({ id, name, icon: IconComponent }) => (
             <button
               key={id}
-              className={`nav-item w-full flex items-center p-4 text-sm rounded-xl transition-all duration-200 group relative overflow-hidden ${
+              className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
                 dashboardSection === id
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105 border border-blue-400/50'
-                  : 'hover:bg-slate-700/70 hover:text-white hover:scale-102 hover:shadow-md'
+                  ? 'active bg-blue-600 text-white shadow-md'
+                  : 'hover:bg-slate-700 hover:text-white'
               }`}
               onClick={() => {
                 setDashboardSection(id);
                 setSidebarOpen(false);
               }}
             >
-              <div className={`p-2 rounded-lg mr-4 rtl:ml-4 rtl:mr-0 transition-all duration-200 ${
-                dashboardSection === id 
-                  ? 'bg-white/20' 
-                  : 'bg-slate-700/50 group-hover:bg-slate-600/50'
-              }`}>
-                <IconComponent className={`w-5 h-5 ${dashboardSection === id ? 'text-white' : color}`} />
-              </div>
-              <span className="font-medium">{name}</span>
-              {dashboardSection === id && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
-              )}
+              <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
+              {name}
             </button>
           ))}
         </nav>
-        
-        <div className="mt-6 pt-6 border-t border-slate-700">
-          <Button
-            asChild
-            variant="outline"
-            className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-slate-500 transition-all duration-200"
-          >
-            <Link to="/" className="flex items-center justify-center">
-              <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-              العودة للموقع
-            </Link>
-          </Button>
-        </div>
+        <Button
+          asChild
+          variant="outline"
+          className="w-full mt-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+        >
+          <Link to="/">
+            <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+            العودة للموقع
+          </Link>
+        </Button>
       </div>
     </>
   );
@@ -167,16 +144,8 @@ const AuthorForm = ({ author, onSubmit, onCancel }) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-8 rounded-2xl shadow-2xl bg-white border border-gray-100">
-      <div className="flex items-center space-x-4 rtl:space-x-reverse mb-8">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-          <Users className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h3 className="text-2xl font-bold text-gray-800">{author ? 'تعديل المؤلف' : 'إضافة مؤلف جديد'}</h3>
-          <p className="text-gray-500 text-sm">قم بإدخال بيانات المؤلف بدقة</p>
-        </div>
-      </div>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 rounded-xl shadow-lg bg-white">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">{author ? 'تعديل المؤلف' : 'إضافة مؤلف جديد'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="name">الاسم</Label>
@@ -266,70 +235,39 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
     <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="flex flex-col sm:flex-row justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">قائمة المؤلفين</h2>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 px-6 py-3 rounded-xl font-semibold" onClick={() => { setEditingAuthor(null); setShowForm(true); }}>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingAuthor(null); setShowForm(true); }}>
           <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-          إضافة مؤلف جديد
+          إضافة مؤلف
         </Button>
       </div>
-      <div className="dashboard-card rounded-2xl shadow-xl overflow-hidden bg-white border border-gray-100">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[400px]">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-              <tr>
-                <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">الاسم</th>
-                <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">الكتب</th>
-                <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">المباعة</th>
-                <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">المتابعون</th>
-                <th className="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">الإجراءات</th>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المباعة</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المتابعون</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {authors.map(a => (
+              <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{a.name}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.booksCount}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.soldCount}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700 text-center">{a.followers}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingAuthor(a); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteAuthor(a.id)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {authors.map((a, index) => (
-                <motion.tr 
-                  key={a.id} 
-                  className="hover:bg-blue-50/50 transition-all duration-200 group"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.3 }}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 rtl:ml-3 rtl:mr-0">
-                        {a.name.charAt(0)}
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900">{a.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {a.booksCount}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      {a.soldCount}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                      {a.followers}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex space-x-2 rtl:space-x-reverse justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-9 h-9 rounded-xl hover:shadow-md transition-all duration-200" onClick={() => { setEditingAuthor(a); setShowForm(true); }}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-9 h-9 rounded-xl hover:shadow-md transition-all duration-200" onClick={() => handleDeleteAuthor(a.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </motion.div>
   );
@@ -2434,32 +2372,24 @@ const DashboardInventory = ({ books, setBooks }) => {
 };
 
 const DashboardOverview = ({ dashboardStats }) => (
-  <div className="space-y-8">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {dashboardStats.map((stat, index) => {
         const IconComponent = stat.icon;
-        const gradients = [
-          'from-blue-500 to-blue-600',
-          'from-green-500 to-green-600', 
-          'from-purple-500 to-purple-600',
-          'from-orange-500 to-orange-600'
-        ];
         return (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.4 }}
-            className={`stats-card p-6 rounded-2xl shadow-xl flex items-center justify-between bg-gradient-to-br ${gradients[index % gradients.length]} text-white hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden`}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            className="stats-card p-5 rounded-xl shadow-lg flex items-center justify-between bg-gradient-to-br from-blue-500 to-purple-600 text-white"
           >
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-            <div className="relative z-10">
-              <p className="text-white/80 text-sm font-medium mb-1">{stat.title}</p>
-              <p className="text-3xl font-bold mb-1">{stat.value}</p>
-              <div className="w-12 h-1 bg-white/30 rounded-full"></div>
+            <div>
+              <p className="text-blue-100 text-sm">{stat.title}</p>
+              <p className="text-2xl font-bold">{stat.value}</p>
             </div>
-            <div className={`p-4 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg`}>
-              <IconComponent className="w-8 h-8" />
+            <div className={`p-2.5 rounded-full bg-white/20`}>
+              <IconComponent className="w-6 h-6" />
             </div>
           </motion.div>
         );
@@ -2467,48 +2397,33 @@ const DashboardOverview = ({ dashboardStats }) => (
     }</div>
 
     <motion.div 
-      className="dashboard-card p-8 rounded-2xl shadow-xl bg-white border border-gray-100"
+      className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
+      transition={{ delay: 0.2, duration: 0.3 }}
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-gray-800">النشاط الأخير</h3>
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-500">مباشر</span>
-        </div>
-      </div>
-      <div className="space-y-4">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">النشاط الأخير</h3>
+      <div className="space-y-3">
         {[
-          { action: 'طلب جديد', details: 'طلب #1234 - 3 كتب', time: 'منذ 5 دقائق', icon: Package, iconColor: 'text-blue-500', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
-          { action: 'كتاب جديد', details: 'تم إضافة "رواية جديدة"', time: 'منذ 15 دقيقة', icon: BookOpen, iconColor: 'text-green-500', bgColor: 'bg-green-50', borderColor: 'border-green-200' },
-          { action: 'مراجعة جديدة', details: 'تقييم 5 نجوم لكتاب "الحديث الصامت"', time: 'منذ 30 دقيقة', icon: UserCheck, iconColor: 'text-purple-500', bgColor: 'bg-purple-50', borderColor: 'border-purple-200' },
-          { action: 'عميل جديد', details: 'انضم أحمد محمد للموقع', time: 'منذ ساعة', icon: Users, iconColor: 'text-orange-500', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' }
+          { action: 'طلب جديد', details: 'طلب #1234 - 3 كتب', time: 'منذ 5 دقائق', icon: Package, iconColor: 'text-blue-500' },
+          { action: 'كتاب جديد', details: 'تم إضافة "رواية جديدة"', time: 'منذ 15 دقيقة', icon: BookOpen, iconColor: 'text-green-500' },
+          { action: 'مراجعة جديدة', details: 'تقييم 5 نجوم لكتاب "الحديث الصامت"', time: 'منذ 30 دقيقة', icon: UserCheck, iconColor: 'text-purple-500' },
+          { action: 'عميل جديد', details: 'انضم أحمد محمد للموقع', time: 'منذ ساعة', icon: Users, iconColor: 'text-orange-500' }
         ].map((activity, index) => {
           const ActivityIcon = activity.icon;
           return (
-            <motion.div 
-              key={index} 
-              className={`flex items-center justify-between p-4 ${activity.bgColor} hover:shadow-md rounded-xl transition-all duration-200 border ${activity.borderColor} cursor-pointer group`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + index * 0.1, duration: 0.3 }}
-            >
+            <div key={index} className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
               <div className="flex items-center">
-                <div className={`p-3 rounded-xl mr-4 rtl:ml-4 rtl:mr-0 ${activity.iconColor.replace('text-', 'bg-')}/20 group-hover:scale-110 transition-transform duration-200`}>
-                    <ActivityIcon className={`w-6 h-6 ${activity.iconColor}`} />
+                <div className={`p-2 rounded-full mr-3 rtl:ml-3 rtl:mr-0 ${activity.iconColor} bg-opacity-10 ${activity.iconColor.replace('text-', 'bg-')}`}>
+                    <ActivityIcon className={`w-5 h-5 ${activity.iconColor}`} />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-800 mb-1">{activity.action}</p>
-                  <p className="text-gray-600 text-sm">{activity.details}</p>
+                  <p className="font-medium text-sm text-gray-800">{activity.action}</p>
+                  <p className="text-gray-600 text-xs">{activity.details}</p>
                 </div>
               </div>
-              <div className="text-left rtl:text-right">
-                <span className="text-gray-500 text-sm font-medium">{activity.time}</span>
-                <div className="w-2 h-2 bg-gray-300 rounded-full mt-1 ml-auto rtl:mr-auto rtl:ml-0"></div>
-              </div>
-            </motion.div>
+              <span className="text-gray-500 text-xs">{activity.time}</span>
+            </div>
           );
         })
       }</div>
@@ -3198,22 +3113,11 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     <div className="min-h-screen bg-slate-100 flex text-gray-800 relative">
       <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
-        <div className="flex items-center justify-between mb-8 sm:mb-10">
-          <button 
-            className="sm:hidden p-3 rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" 
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="w-6 h-6 text-gray-700" />
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <button className="sm:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <BarChart3 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-1">{sectionTitles[dashboardSection]}</h1>
-              <p className="text-gray-500 text-sm">إدارة وتحكم شامل بالنظام</p>
-            </div>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
         </div>
 
         {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
