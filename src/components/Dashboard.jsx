@@ -78,6 +78,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
     { id: 'plans', name: 'الخطط', icon: DollarSign },
     { id: 'subscriptions', name: 'العضويات', icon: Crown },
+    { id: 'ratings', name: 'تقييمات الكتب', icon: Star },
     { id: 'messages', name: 'الرسائل', icon: MessageCircle },
     { id: 'features', name: 'المميزات', icon: Zap },
     { id: 'sliders', name: 'السلايدر', icon: Image },
@@ -1744,6 +1745,53 @@ const DashboardMessages = ({ messages }) => {
   );
 };
 
+const DashboardRatings = ({ ratings, setRatings, books }) => {
+  const getBookTitle = (id) => books.find(b => b.id === id)?.title || 'غير معروف';
+
+  const handleDelete = async (r) => {
+    if (!confirmDelete()) return;
+    try {
+      await api.deleteRating(r.bookId, r.id);
+      setRatings(prev => prev.filter(x => x.id !== r.id));
+      toast({ title: 'تم حذف التقييم' });
+    } catch (e) {
+      toast({ title: 'تعذر الحذف', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">تقييمات الكتب</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتاب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التقييم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التعليق</th>
+              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {ratings.map((r) => (
+              <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{getBookTitle(r.bookId)}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{r.rating}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{r.comment || ''}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(r)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
 const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
   if (!order) return null;
   const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
@@ -3153,6 +3201,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     'google-merchant': 'Google Merchant',
     plans: 'خطط الاشتراك',
     subscriptions: 'العضويات',
+    ratings: 'تقييمات الكتب',
     messages: 'الرسائل',
     features: 'المميزات',
     sliders: 'السلايدر',
@@ -3160,6 +3209,20 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     settings: 'الإعدادات',
   };
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ratings, setRatings] = useState([]);
+
+  useEffect(() => {
+    if (dashboardSection === 'ratings') {
+      (async () => {
+        try {
+          const r = await api.getAllRatings();
+          setRatings(r);
+        } catch (err) {
+          console.error('Failed to load ratings', err);
+        }
+      })();
+    }
+  }, [dashboardSection]);
 
   return (
     <div className="min-h-screen bg-slate-100 flex text-gray-800 relative">
@@ -3225,6 +3288,9 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
             customers={customers}
             plans={plans}
           />
+        )}
+        {dashboardSection === 'ratings' && (
+          <DashboardRatings ratings={ratings} setRatings={setRatings} books={books} />
         )}
         {dashboardSection === 'messages' && (
           <DashboardMessages messages={messages} />
