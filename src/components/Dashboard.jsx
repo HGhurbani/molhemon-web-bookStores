@@ -2493,7 +2493,17 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, d
       animate={{ opacity: 1, y: 0 }}
       className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
     >
-      <h3 className="text-xl font-semibold mb-5 text-gray-700">{book ? 'تعديل الكتاب' : 'إضافة كتاب جديد'}</h3>
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">
+        {book
+          ? 'تعديل الكتاب'
+          : defaultType === 'audio'
+          ? 'إضافة كتاب صوتي جديد'
+          : defaultType === 'ebook'
+          ? 'إضافة كتاب إلكتروني جديد'
+          : defaultType === 'physical'
+          ? 'إضافة كتاب ورقي جديد'
+          : 'إضافة كتاب جديد'}
+      </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -2793,7 +2803,13 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
             onClick={() => { setEditingBook(null); setShowForm(true); }}
           >
             <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-            إضافة كتاب جديد
+            {filterType === 'audio'
+              ? 'إضافة كتاب صوتي جديد'
+              : filterType === 'ebook'
+              ? 'إضافة كتاب إلكتروني جديد'
+              : filterType === 'physical'
+              ? 'إضافة كتاب ورقي جديد'
+              : 'إضافة كتاب جديد'}
           </Button>
           <Button variant="outline" onClick={() => setImportOpen(true)}>
             استيراد من ملف CSV/JSON
@@ -2875,6 +2891,42 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
       </div>
       <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
     </motion.div>
+  );
+};
+const DashboardBooksTabs = (props) => {
+  const [tab, setTab] = useState('ebook');
+
+  return (
+    <div className="space-y-5">
+      <div className="border-b flex gap-2">
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            tab === 'ebook'
+              ? 'border-blue-600 text-blue-600 font-semibold'
+              : 'border-transparent text-gray-600'
+          }`}
+          onClick={() => setTab('ebook')}
+        >
+          الكتب الإلكترونية
+        </button>
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            tab === 'physical'
+              ? 'border-blue-600 text-blue-600 font-semibold'
+              : 'border-transparent text-gray-600'
+          }`}
+          onClick={() => setTab('physical')}
+        >
+          الكتب الورقية
+        </button>
+      </div>
+      {tab === 'ebook' && (
+        <DashboardBooks {...props} filterType="ebook" defaultType="ebook" />
+      )}
+      {tab === 'physical' && (
+        <DashboardBooks {...props} filterType="physical" defaultType="physical" />
+      )}
+    </div>
   );
 };
 
@@ -3122,7 +3174,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
 
         {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
         {dashboardSection === 'books' && (
-          <DashboardBooks
+          <DashboardBooksTabs
             books={books}
             setBooks={setBooks}
             authors={authors}
