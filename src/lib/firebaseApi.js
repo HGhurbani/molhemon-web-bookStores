@@ -1,5 +1,6 @@
 import {
   collection,
+  collectionGroup,
   getDocs,
   addDoc,
   updateDoc,
@@ -191,6 +192,13 @@ const firebaseApi = {
 
   getBookRatings: (bookId) => getCollection(`books/${bookId}/ratings`),
   addBookRating: (bookId, data) => addToCollection(`books/${bookId}/ratings`, data),
+  async getAllRatings() {
+    const snap = await getDocs(collectionGroup(db, 'ratings'));
+    return snap.docs.map(d => ({ id: d.id, bookId: d.ref.parent.parent.id, ...d.data() }));
+  },
+  async deleteRating(bookId, ratingId) {
+    await deleteDoc(doc(db, `books/${bookId}/ratings/${ratingId}`));
+  },
   async getDashboardStats() {
     const [bookSnap, authorSnap, paymentSnap, customerSnap] = await Promise.all([
       getDocs(collection(db, 'books')),
