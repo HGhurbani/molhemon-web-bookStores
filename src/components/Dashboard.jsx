@@ -237,6 +237,30 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'sliders', name: 'السلايدر', nameEn: 'Sliders', icon: Image, badge: null },
     { id: 'banners', name: 'البانرات', nameEn: 'Banners', icon: Image, badge: null },
     { id: 'settings', name: 'الإعدادات', nameEn: 'Settings', icon: Settings, badge: null }
+    { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
+    { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
+    { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones },
+    { id: 'inventory', name: 'إدارة المخزون', icon: Boxes },
+    { id: 'authors', name: 'المؤلفون', icon: Users },
+    { id: 'sellers', name: 'البائعون', icon: Store },
+    { id: 'branches', name: 'الفروع', icon: MapPin },
+    { id: 'categories', name: 'الأصناف', icon: BookOpen },
+    { id: 'orders', name: 'الطلبات', icon: Package },
+    { id: 'customers', name: 'العملاء', icon: UserCheck },
+    { id: 'users', name: 'المستخدمون', icon: User },
+    { id: 'payments', name: 'المدفوعات', icon: CreditCard },
+    { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
+    { id: 'currencies', name: 'العملات', icon: DollarSign },
+    { id: 'languages', name: 'اللغات', icon: Globe },
+    { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
+    { id: 'plans', name: 'الخطط', icon: DollarSign },
+    { id: 'subscriptions', name: 'العضويات', icon: Crown },
+    { id: 'ratings', name: 'تقييمات الكتب', icon: Star },
+    { id: 'messages', name: 'الرسائل', icon: MessageCircle },
+    { id: 'features', name: 'المميزات', icon: Zap },
+    { id: 'sliders', name: 'السلايدر', icon: Image },
+    { id: 'banners', name: 'البانرات', icon: Image },
+    { id: 'settings', name: 'الإعدادات', icon: Settings }
   ];
 
   return (
@@ -635,6 +659,56 @@ const DataTable = ({
 
 // Enhanced Chart Component
 const SalesChart = () => {
+const DashboardRatings = ({ ratings, setRatings, books }) => {
+  const getBookTitle = (id) => books.find(b => b.id === id)?.title || 'غير معروف';
+
+  const handleDelete = async (r) => {
+    if (!confirmDelete()) return;
+    try {
+      await api.deleteRating(r.bookId, r.id);
+      setRatings(prev => prev.filter(x => x.id !== r.id));
+      toast({ title: 'تم حذف التقييم' });
+    } catch (e) {
+      toast({ title: 'تعذر الحذف', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-3">تقييمات الكتب</h2>
+      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
+        <table className="w-full min-w-[400px]">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتاب</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التقييم</th>
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التعليق</th>
+              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {ratings.map((r) => (
+              <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{getBookTitle(r.bookId)}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{r.rating}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{r.comment || ''}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
+                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(r)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelete }) => {
+  if (!order) return null;
+  const statuses = ['قيد المعالجة', 'قيد الشحن', 'تم التوصيل', 'ملغي'];
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -1181,6 +1255,187 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies })
       className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm"
     >
       <div className="flex items-center justify-between mb-8">
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">
+        {book
+          ? 'تعديل الكتاب'
+          : defaultType === 'audio'
+          ? 'إضافة كتاب صوتي جديد'
+          : defaultType === 'ebook'
+          ? 'إضافة كتاب إلكتروني جديد'
+          : defaultType === 'physical'
+          ? 'إضافة كتاب ورقي جديد'
+          : 'إضافة كتاب جديد'}
+      </h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="title">العنوان</Label>
+            <Input id="title" name="title" value={formData.title} onChange={handleChange} required />
+          </div>
+          <div>
+            <Label htmlFor="authorId">المؤلف</Label>
+            <select id="authorId" name="authorId" value={formData.authorId} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-md">
+              <option value="">اختر مؤلف</option>
+              {authors.map(author => (
+                <option key={author.id} value={author.id}>{author.name}</option>
+              ))}
+            </select>
+          </div>
+          {currencies.map(c => (
+            <div key={c.code}>
+              <Label htmlFor={`price${c.code}`} className="flex items-center gap-1">
+                السعر ({c.name})
+                <img alt={`علم ${c.name}`} className="w-4 h-3 object-contain ml-1 rtl:mr-1 rtl:ml-0" src={c.flag} />
+              </Label>
+              <Input
+                id={`price${c.code}`}
+                name={`price${c.code}`}
+                type="number"
+                value={formData[`price${c.code}`]}
+                onChange={handleChange}
+                {...(c.code === 'AED' ? { required: true } : {})}
+              />
+            </div>
+          ))}
+          <div>
+            <Label htmlFor="originalPrice">السعر الأصلي (اختياري)</Label>
+            <Input id="originalPrice" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="category">الفئة</Label>
+            <select id="category" name="category" value={formData.category} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md">
+              <option value="">اختر فئة</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="stock">المخزون</Label>
+            <Input id="stock" name="stock" type="number" value={formData.stock} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="type">نوع الكتاب</Label>
+            <select
+              id="type"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">اختر نوع الكتاب</option>
+              <option value="physical">كتاب ورقي (يتم توصيله)</option>
+              <option value="ebook">كتاب إلكتروني</option>
+              <option value="audio">كتاب صوتي</option>
+            </select>
+          </div>
+          {formData.type === 'physical' && (
+            <div>
+              <Label htmlFor="deliveryMethod">طريقة التوصيل</Label>
+              <Input id="deliveryMethod" name="deliveryMethod" value={formData.deliveryMethod} onChange={handleChange} />
+            </div>
+          )}
+          {formData.type === 'ebook' && (
+            <div>
+              <Label htmlFor="ebookFile">الملف الإلكتروني</Label>
+              <input
+                id="ebookFile"
+                name="ebookFile"
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => setFormData(prev => ({ ...prev, ebookFile: reader.result }));
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
+          {formData.type === 'audio' && (
+            <>
+              <div>
+                <Label htmlFor="audioFile">الملف الصوتي</Label>
+                <input
+                  id="audioFile"
+                  name="audioFile"
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData(prev => ({ ...prev, audioFile: reader.result }));
+                        const audio = new Audio(reader.result);
+                        audio.onloadedmetadata = () => {
+                          const dur = audio.duration;
+                          const hrs = Math.floor(dur / 3600);
+                          const mins = Math.floor((dur % 3600) / 60);
+                          const secs = Math.floor(dur % 60);
+                          setFormData(prev => ({
+                            ...prev,
+                            durationHours: String(hrs),
+                            durationMinutes: String(mins),
+                            durationSeconds: String(secs),
+                          }));
+                        };
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
+                <Input id="sampleAudio" name="sampleAudio" value={formData.sampleAudio} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="narrator">الراوي</Label>
+                <Input id="narrator" name="narrator" value={formData.narrator} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="audioLanguage">اللغة</Label>
+                <Input id="audioLanguage" name="audioLanguage" value={formData.audioLanguage} onChange={handleChange} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="durationHours">الساعات</Label>
+                  <Input id="durationHours" name="durationHours" type="number" value={formData.durationHours} onChange={handleChange} />
+                </div>
+                <div>
+                  <Label htmlFor="durationMinutes">الدقائق</Label>
+                  <Input id="durationMinutes" name="durationMinutes" type="number" value={formData.durationMinutes} onChange={handleChange} />
+                </div>
+                <div>
+                  <Label htmlFor="durationSeconds">الثواني</Label>
+                  <Input id="durationSeconds" name="durationSeconds" type="number" value={formData.durationSeconds} onChange={handleChange} />
+                </div>
+              </div>
+            </>
+          )}
+          <div>
+            <Label htmlFor="tags">الوسوم</Label>
+            <Input id="tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="مثال: دراما, مغامرة" />
+          </div>
+          <div>
+            <Label htmlFor="coverImage">صورة الغلاف</Label>
+            <input id="coverImage" name="coverImage" type="file" accept="image/*" onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => setFormData(prev => ({ ...prev, coverImage: reader.result }));
+                reader.readAsDataURL(file);
+              }
+            }} className="w-full p-2 border border-gray-300 rounded-md" />
+          </div>
+          <div>
+            <Label htmlFor="imgPlaceholder">وصف الصورة (لـ Unsplash)</Label>
+            <Input id="imgPlaceholder" name="imgPlaceholder" value={formData.imgPlaceholder} onChange={handleChange} />
+          </div>
+        </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             {book ? 'تعديل الكتاب' : 'إضافة كتاب جديد'}
@@ -1310,6 +1565,34 @@ const DashboardBooks = ({ books, setBooks, authors, categories, currencies }) =>
             alt={book.title}
             className="w-full h-full object-cover"
           />
+  return (
+    <motion.div 
+      className="space-y-5"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">
+          {filterType === 'audio' ? 'قائمة الكتب الصوتية' : 'قائمة الكتب'}
+        </h2>
+        <div className="flex gap-2">
+          <Button
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
+            onClick={() => { setEditingBook(null); setShowForm(true); }}
+          >
+            <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+            {filterType === 'audio'
+              ? 'إضافة كتاب صوتي جديد'
+              : filterType === 'ebook'
+              ? 'إضافة كتاب إلكتروني جديد'
+              : filterType === 'physical'
+              ? 'إضافة كتاب ورقي جديد'
+              : 'إضافة كتاب جديد'}
+          </Button>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            استيراد من ملف CSV/JSON
+          </Button>
         </div>
       )
     },
@@ -1344,6 +1627,65 @@ const DashboardBooks = ({ books, setBooks, authors, categories, currencies }) =>
           {desc?.substring(0, 50)}...
         </div>
       )
+      </div>
+      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImportBooks} />
+    </motion.div>
+  );
+};
+const DashboardBooksTabs = (props) => {
+  const [tab, setTab] = useState('ebook');
+
+  return (
+    <div className="space-y-5">
+      <div className="border-b flex gap-2">
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            tab === 'ebook'
+              ? 'border-blue-600 text-blue-600 font-semibold'
+              : 'border-transparent text-gray-600'
+          }`}
+          onClick={() => setTab('ebook')}
+        >
+          الكتب الإلكترونية
+        </button>
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            tab === 'physical'
+              ? 'border-blue-600 text-blue-600 font-semibold'
+              : 'border-transparent text-gray-600'
+          }`}
+          onClick={() => setTab('physical')}
+        >
+          الكتب الورقية
+        </button>
+      </div>
+      {tab === 'ebook' && (
+        <DashboardBooks {...props} filterType="ebook" defaultType="ebook" />
+      )}
+      {tab === 'physical' && (
+        <DashboardBooks {...props} filterType="physical" defaultType="physical" />
+      )}
+    </div>
+  );
+};
+
+
+const DashboardSettings = ({ siteSettings, setSiteSettings, currencies = [] }) => {
+  const [formData, setFormData] = useState(siteSettings);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = await api.updateSettings(formData);
+      setSiteSettings(updated);
+      toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+    } catch (err) {
+      toast({ title: 'تعذر حفظ البيانات. حاول مجدداً.', variant: 'destructive' });
     }
   ];
 
@@ -1368,6 +1710,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, currencies }) =>
         </div>
       </motion.div>
 
+
       <DataTable
         title="قائمة الكتب"
         data={books}
@@ -1380,6 +1723,228 @@ const DashboardBooks = ({ books, setBooks, authors, categories, currencies }) =>
         filterable={true}
         exportable={true}
       />
+const DashboardGoogleMerchant = ({ siteSettings, setSiteSettings }) => {
+  const [formData, setFormData] = useState({
+    googleMerchantId: siteSettings.googleMerchantId || '',
+    googleApiKey: siteSettings.googleApiKey || '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = await api.updateSettings(formData);
+      setSiteSettings((prev) => ({ ...prev, ...updated }));
+      toast({ title: 'تم حفظ الإعدادات بنجاح!' });
+    } catch (err) {
+      toast({ title: 'تعذر حفظ البيانات. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      await api.importGoogleMerchant({
+        googleMerchantId: formData.googleMerchantId,
+        googleApiKey: formData.googleApiKey,
+      });
+      toast({ title: 'تم استيراد الكتب بنجاح!' });
+    } catch (err) {
+      toast({ title: 'تعذر استيراد البيانات. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
+    >
+      <h3 className="text-xl font-semibold mb-5 text-gray-700">Google Merchant</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="googleMerchantId">Merchant ID</Label>
+            <Input
+              id="googleMerchantId"
+              name="googleMerchantId"
+              value={formData.googleMerchantId}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="googleApiKey">API Key</Label>
+            <Input
+              id="googleApiKey"
+              name="googleApiKey"
+              value={formData.googleApiKey}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <Button type="button" onClick={handleImport} variant="outline">
+            استيراد من Google Merchant
+          </Button>
+          <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            حفظ الإعدادات
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+};
+
+const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
+  <motion.div
+    className="dashboard-card p-10 rounded-xl shadow-lg text-center flex flex-col items-center justify-center min-h-[350px] bg-white"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-5 flex items-center justify-center shadow-lg">
+      <Settings className="w-8 h-8 text-white" />
+    </div>
+    <h3 className="text-xl font-semibold text-gray-700 mb-2">قسم {sectionName}</h3>
+    <p className="text-gray-600 text-sm mb-5">هذا القسم قيد التطوير حالياً. نعمل بجد لإتاحته قريباً!</p>
+    <Button 
+      onClick={() => handleFeatureClick('section-development-request')}
+      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
+    >
+      طلب تطوير هذا القسم
+    </Button>
+  </motion.div>
+);
+
+
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+  const sectionTitles = {
+    overview: 'نظرة عامة',
+    books: 'إدارة الكتب',
+    audiobooks: 'الكتب الصوتية',
+    inventory: 'إدارة المخزون',
+    authors: 'المؤلفون',
+    sellers: 'البائعون',
+    branches: 'الفروع',
+    orders: 'الطلبات',
+    customers: 'العملاء',
+    users: 'المستخدمون',
+    payments: 'المدفوعات',
+    'payment-methods': 'طرق الدفع',
+    currencies: 'العملات',
+    languages: 'اللغات',
+    'google-merchant': 'Google Merchant',
+    plans: 'خطط الاشتراك',
+    subscriptions: 'العضويات',
+    ratings: 'تقييمات الكتب',
+    messages: 'الرسائل',
+    features: 'المميزات',
+    sliders: 'السلايدر',
+    banners: 'البانرات',
+    settings: 'الإعدادات',
+  };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ratings, setRatings] = useState([]);
+
+  useEffect(() => {
+    if (dashboardSection === 'ratings') {
+      (async () => {
+        try {
+          const r = await api.getAllRatings();
+          setRatings(r);
+        } catch (err) {
+          console.error('Failed to load ratings', err);
+        }
+      })();
+    }
+  }, [dashboardSection]);
+
+  return (
+    <div className="min-h-screen bg-slate-100 flex text-gray-800 relative">
+      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <button className="sm:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="w-6 h-6" />
+          </button>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
+        </div>
+
+        {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
+        {dashboardSection === 'books' && (
+          <DashboardBooksTabs
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            currencies={currencies}
+            handleFeatureClick={handleFeatureClick}
+          />
+        )}
+        {dashboardSection === 'audiobooks' && (
+          <DashboardBooks
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            currencies={currencies}
+            handleFeatureClick={handleFeatureClick}
+            filterType="audio"
+            defaultType="audio"
+          />
+        )}
+        {dashboardSection === 'inventory' && (
+          <DashboardInventory books={books} setBooks={setBooks} />
+        )}
+        {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
+        {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
+        {dashboardSection === 'branches' && <DashboardBranches branches={branches} setBranches={setBranches} />}
+        {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
+        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
+        {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
+        {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
+        {dashboardSection === 'currencies' && <DashboardCurrencies currencies={currencies} setCurrencies={setCurrencies} />}
+        {dashboardSection === 'languages' && <DashboardLanguages languages={languages} setLanguages={setLanguages} />}
+        {dashboardSection === 'google-merchant' && (
+          <DashboardGoogleMerchant
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+          />
+        )}
+        {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
+        {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
+        {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
+        {dashboardSection === 'subscriptions' && (
+          <DashboardSubscriptions
+            subscriptions={subscriptions}
+            setSubscriptions={setSubscriptions}
+            customers={customers}
+            plans={plans}
+          />
+        )}
+        {dashboardSection === 'ratings' && (
+          <DashboardRatings ratings={ratings} setRatings={setRatings} books={books} />
+        )}
+        {dashboardSection === 'messages' && (
+          <DashboardMessages messages={messages} />
+        )}
+        {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
+        {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
+        {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
+        {dashboardSection === 'settings' && (
+          <DashboardSettings
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+            currencies={currencies}
+          />
+        )}
+      </main>
     </div>
   );
 };
