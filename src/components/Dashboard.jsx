@@ -3179,135 +3179,14 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
       طلب تطوير هذا القسم
     </Button>
   </motion.div>
+)
+import React from 'react';
+
+const Dashboard = () => (
+  <div className="p-6">
+    <h1 className="text-2xl font-bold">Dashboard</h1>
+    <p>هذه الصفحة قيد التطوير.</p>
+  </div>
 );
-
-
-const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
-  const sectionTitles = {
-    overview: 'نظرة عامة',
-    books: 'إدارة الكتب',
-    audiobooks: 'الكتب الصوتية',
-    inventory: 'إدارة المخزون',
-    authors: 'المؤلفون',
-    sellers: 'البائعون',
-    branches: 'الفروع',
-    orders: 'الطلبات',
-    customers: 'العملاء',
-    users: 'المستخدمون',
-    payments: 'المدفوعات',
-    'payment-methods': 'طرق الدفع',
-    currencies: 'العملات',
-    languages: 'اللغات',
-    'google-merchant': 'Google Merchant',
-    plans: 'خطط الاشتراك',
-    subscriptions: 'العضويات',
-    ratings: 'تقييمات الكتب',
-    messages: 'الرسائل',
-    features: 'المميزات',
-    sliders: 'السلايدر',
-    banners: 'البانرات',
-    settings: 'الإعدادات',
-  };
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ratings, setRatings] = useState([]);
-
-  useEffect(() => {
-    if (dashboardSection === 'ratings') {
-      (async () => {
-        try {
-          const r = await api.getAllRatings();
-          setRatings(r);
-        } catch (err) {
-          console.error('Failed to load ratings', err);
-        }
-      })();
-    }
-  }, [dashboardSection]);
-
-  return (
-    <div className="min-h-screen bg-slate-100 flex text-gray-800 relative">
-      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <button className="sm:hidden" onClick={() => setSidebarOpen(true)}>
-            <Menu className="w-6 h-6" />
-          </button>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
-        </div>
-
-        {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
-        {dashboardSection === 'books' && (
-          <DashboardBooksTabs
-            books={books}
-            setBooks={setBooks}
-            authors={authors}
-            categories={categories}
-            setCategories={setCategories}
-            currencies={currencies}
-            handleFeatureClick={handleFeatureClick}
-          />
-        )}
-        {dashboardSection === 'audiobooks' && (
-          <DashboardBooks
-            books={books}
-            setBooks={setBooks}
-            authors={authors}
-            categories={categories}
-            setCategories={setCategories}
-            currencies={currencies}
-            handleFeatureClick={handleFeatureClick}
-            filterType="audio"
-            defaultType="audio"
-          />
-        )}
-        {dashboardSection === 'inventory' && (
-          <DashboardInventory books={books} setBooks={setBooks} />
-        )}
-        {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
-        {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
-        {dashboardSection === 'branches' && <DashboardBranches branches={branches} setBranches={setBranches} />}
-        {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
-        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
-        {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
-        {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
-        {dashboardSection === 'currencies' && <DashboardCurrencies currencies={currencies} setCurrencies={setCurrencies} />}
-        {dashboardSection === 'languages' && <DashboardLanguages languages={languages} setLanguages={setLanguages} />}
-        {dashboardSection === 'google-merchant' && (
-          <DashboardGoogleMerchant
-            siteSettings={siteSettings}
-            setSiteSettings={setSiteSettings}
-          />
-        )}
-        {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
-        {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
-        {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
-        {dashboardSection === 'subscriptions' && (
-          <DashboardSubscriptions
-            subscriptions={subscriptions}
-            setSubscriptions={setSubscriptions}
-            customers={customers}
-            plans={plans}
-          />
-        )}
-        {dashboardSection === 'ratings' && (
-          <DashboardRatings ratings={ratings} setRatings={setRatings} books={books} />
-        )}
-        {dashboardSection === 'messages' && (
-          <DashboardMessages messages={messages} />
-        )}
-        {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
-        {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
-        {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
-        {dashboardSection === 'settings' && (
-          <DashboardSettings
-            siteSettings={siteSettings}
-            setSiteSettings={setSiteSettings}
-            currencies={currencies}
-          />
-        )}
-      </main>
-    </div>
-  );
-};
 
 export default Dashboard;
