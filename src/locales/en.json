@@ -76,5 +76,16 @@
   "three_months": "3m",
   "one_year": "1y",
   "store_overview_message": "Here's What's Happening With Your Store Today",
-  "see_more": "See more"
+  "see_more": "See more",
+  "show": "Show",
+  "this_month": "This Month",
+  "order_delivering": "Order Delivering",
+  "pending_review": "Pending Review",
+  "pending_payment": "Pending Payment",
+  "in_progress": "In Progress",
+  "paid": "Paid",
+  "credit_card": "Credit Card",
+  "cash_on_delivery": "Cash on Delivery",
+  "apple_pay": "Apple Pay",
+  "showing_entries": "Showing 1 to 10 of 50 entries"
 }

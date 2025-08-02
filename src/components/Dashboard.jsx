@@ -1835,6 +1835,7 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
 };
 
 const DashboardOrders = ({ orders, setOrders }) => {
+  const { t } = useTranslation();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -1864,14 +1865,14 @@ const DashboardOrders = ({ orders, setOrders }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { title: 'Payment Refund', value: '15', change: '+34.5%', icon: MessageCircle, color: 'purple' },
-          { title: 'Orders Cancel', value: '45', change: '-8.5%', icon: Package, color: 'blue' },
-          { title: 'Order Shipped', value: '964', change: '+14.5%', icon: Package, color: 'blue' },
-          { title: 'Order Delivering', value: '265', change: '+43.5%', icon: Package, color: 'blue' },
-          { title: 'Pending Review', value: '63', change: '+34.5%', icon: Package, color: 'purple' },
-          { title: 'Pending Payment', value: '40', change: '-8.5%', icon: Package, color: 'purple' },
-          { title: 'Delivered', value: '1,040', change: '+14.5%', icon: Package, color: 'blue' },
-          { title: 'In Progress', value: '300', change: '+43.5%', icon: Package, color: 'blue' }
+          { title: t('payment_refund'), value: '15', change: '+34.5%', icon: MessageCircle, color: 'purple' },
+          { title: t('orders_cancel'), value: '45', change: '-8.5%', icon: Package, color: 'blue' },
+          { title: t('order_shipped'), value: '964', change: '+14.5%', icon: Package, color: 'blue' },
+          { title: t('order_delivering'), value: '265', change: '+43.5%', icon: Package, color: 'blue' },
+          { title: t('pending_review'), value: '63', change: '+34.5%', icon: Package, color: 'purple' },
+          { title: t('pending_payment'), value: '40', change: '-8.5%', icon: Package, color: 'purple' },
+          { title: t('delivered'), value: '1,040', change: '+14.5%', icon: Package, color: 'blue' },
+          { title: t('in_progress'), value: '300', change: '+43.5%', icon: Package, color: 'blue' }
         ].map((stat, index) => {
           const IconComponent = stat.icon;
           const colorClasses = {
@@ -1912,10 +1913,10 @@ const DashboardOrders = ({ orders, setOrders }) => {
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Orders</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('orders')}</h2>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Show:</span>
+                <span className="text-sm text-gray-600">{t('show')}:</span>
                 <select className="border border-gray-300 rounded px-2 py-1 text-sm">
                   <option>10</option>
                 </select>
@@ -1924,12 +1925,12 @@ const DashboardOrders = ({ orders, setOrders }) => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder={t('search')}
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
                 />
               </div>
               <select className="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option>This Month</option>
+                <option>{t('this_month')}</option>
               </select>
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1949,15 +1950,15 @@ const DashboardOrders = ({ orders, setOrders }) => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created at</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordered at</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('order')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('customer_name')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('created_at')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ordered_at')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('total_amount')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payment_status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payment_method')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('delivery_status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('action')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -1974,25 +1975,25 @@ const DashboardOrders = ({ orders, setOrders }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.amount}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.paymentStatus === 'Paid' 
-                        ? 'bg-green-100 text-green-800' 
+                      order.paymentStatus === 'Paid'
+                        ? 'bg-green-100 text-green-800'
                         : order.paymentStatus === 'Unpaid'
                         ? 'bg-gray-100 text-gray-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {order.paymentStatus}
+                      {t(order.paymentStatus.toLowerCase())}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.paymentMethod}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t(order.paymentMethod.toLowerCase().replace(/ /g, '_'))}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.deliveryStatus === 'Completed' 
-                        ? 'bg-green-100 text-green-800' 
+                      order.deliveryStatus === 'Completed'
+                        ? 'bg-green-100 text-green-800'
                         : order.deliveryStatus === 'Waiting'
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {order.deliveryStatus}
+                      {t(order.deliveryStatus.toLowerCase())}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -2021,7 +2022,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
 
         <div className="px-6 py-3 border-t border-gray-200">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Showing 1 to 10 of 50 entries</span>
+              <span className="text-sm text-gray-700">{t('showing_entries')}</span>
             <div className="flex items-center space-x-2">
               <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">«</button>
               <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">‹</button>
