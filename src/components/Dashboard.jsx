@@ -66,10 +66,11 @@ import { Link } from 'react-router-dom';
 const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
 
 const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       <div className="flex items-center space-x-4 rtl:space-x-reverse">
-        <button 
+        <button
           className="sm:hidden p-2 text-gray-400 hover:text-gray-600"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
@@ -79,7 +80,7 @@ const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
           <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Search..."
+            placeholder={t('search')}
             className="pl-10 rtl:pr-10 rtl:pl-3 w-80"
           />
         </div>
@@ -2530,7 +2531,7 @@ const DashboardOverview = ({ dashboardStats }) => {
     </div>
 
     {/* Sales Report Chart */}
-    <motion.div 
+    <motion.div
       className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -2538,11 +2539,11 @@ const DashboardOverview = ({ dashboardStats }) => {
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Your sales report</h3>
-          <p className="text-gray-600 text-sm">Look at your sales</p>
+          <h3 className="text-lg font-semibold text-gray-900">{t('your_sales_report')}</h3>
+          <p className="text-gray-600 text-sm">{t('look_at_your_sales')}</p>
         </div>
         <select className="text-sm border border-gray-300 rounded px-3 py-1">
-          <option>Total Sales</option>
+          <option>{t('total_sales')}</option>
         </select>
       </div>
       
@@ -2557,21 +2558,21 @@ const DashboardOverview = ({ dashboardStats }) => {
       </div>
 
       <div className="flex space-x-2 mb-4">
-        {['1d', '7d', '30d', '3m', '1y'].map((period, index) => (
+        {['one_day', 'seven_days', 'thirty_days', 'three_months', 'one_year'].map((periodKey, index) => (
           <button
-            key={period}
+            key={periodKey}
             className={`px-3 py-1 text-sm rounded ${
               index === 0 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {period}
+            {t(periodKey)}
           </button>
         ))}
       </div>
 
       {/* Chart Placeholder */}
       <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-        <div className="text-gray-500 text-sm">Chart visualization would go here</div>
+        <div className="text-gray-500 text-sm">{t('chart_placeholder')}</div>
       </div>
     </motion.div>
 
@@ -2583,13 +2584,13 @@ const DashboardOverview = ({ dashboardStats }) => {
       transition={{ delay: 0.3, duration: 0.3 }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Latest Transaction</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('latest_transactions')}</h3>
         <div className="flex items-center space-x-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Search"
+              placeholder={t('search')}
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
             />
           </div>
@@ -2605,19 +2606,19 @@ const DashboardOverview = ({ dashboardStats }) => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('order')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('items')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('format')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('date')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('price')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('status')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {[
-              { order: '#6574555646', item: 'Kingdom of Ash and Blood', format: 'Hardback', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
-              { order: '#6574555647', item: 'What remain of the remains', format: 'eBook (ePub)', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
-              { order: '#6574555648', item: 'The Forsaken King', format: 'eBook (PDF)', date: '27/04/2025', price: '45.00 AED', status: 'Canceled' }
+              { order: '#6574555646', item: 'Kingdom of Ash and Blood', format: 'غلاف صلب', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
+              { order: '#6574555647', item: 'What remain of the remains', format: 'كتاب إلكتروني (ePub)', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
+              { order: '#6574555648', item: 'The Forsaken King', format: 'كتاب إلكتروني (PDF)', date: '27/04/2025', price: '45.00 AED', status: 'Canceled' }
             ].map((transaction, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.order}</td>
@@ -2627,11 +2628,11 @@ const DashboardOverview = ({ dashboardStats }) => {
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.price}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    transaction.status === 'Completed' 
-                      ? 'bg-green-100 text-green-800' 
+                    transaction.status === 'Completed'
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {transaction.status}
+                    {transaction.status === 'Completed' ? t('completed') : t('cancel')}
                   </span>
                 </td>
               </tr>
@@ -2649,12 +2650,12 @@ const DashboardOverview = ({ dashboardStats }) => {
       transition={{ delay: 0.4, duration: 0.3 }}
     >
       <div className="flex items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Congratulations</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('congratulations')}</h3>
         <span className="ml-2 text-2xl">🎉</span>
       </div>
-      <p className="text-gray-600 mb-4">Here's What's Happening With Your Store Today</p>
+      <p className="text-gray-600 mb-4">{t('store_overview_message')}</p>
       <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-        See more
+        {t('see_more')}
       </button>
     </motion.div>
   </div>
