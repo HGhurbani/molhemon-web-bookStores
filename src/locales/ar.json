@@ -76,5 +76,16 @@
   "three_months": "٣ أشهر",
   "one_year": "سنة واحدة",
   "store_overview_message": "إليك ما يحدث في متجرك اليوم",
-  "see_more": "عرض المزيد"
+  "see_more": "عرض المزيد",
+  "show": "عرض",
+  "this_month": "هذا الشهر",
+  "order_delivering": "جاري تسليم الطلب",
+  "pending_review": "قيد المراجعة",
+  "pending_payment": "قيد الدفع",
+  "in_progress": "قيد التنفيذ",
+  "paid": "مدفوع",
+  "credit_card": "بطاقة الائتمان",
+  "cash_on_delivery": "الدفع عند الاستلام",
+  "apple_pay": "آبل باي",
+  "showing_entries": "عرض 1 إلى 10 من أصل 50 إدخال"
 }
