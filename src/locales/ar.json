@@ -60,5 +60,21 @@
   "shipped": "مشحون",
   "delivered": "مسلم",
   "pending": "معلق",
-  "processing": "قيد المعالجة"
-} 
+  "processing": "قيد المعالجة",
+  "your_sales_report": "تقرير مبيعاتك",
+  "look_at_your_sales": "راقب مبيعاتك",
+  "total_sales": "إجمالي المبيعات",
+  "chart_placeholder": "سيظهر الرسم البياني هنا",
+  "items": "العناصر",
+  "format": "الصيغة",
+  "date": "التاريخ",
+  "price": "السعر",
+  "status": "الحالة",
+  "one_day": "١ يوم",
+  "seven_days": "٧ أيام",
+  "thirty_days": "٣٠ يوم",
+  "three_months": "٣ أشهر",
+  "one_year": "سنة واحدة",
+  "store_overview_message": "إليك ما يحدث في متجرك اليوم",
+  "see_more": "عرض المزيد"
+}
