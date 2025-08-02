@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { defaultLanguages as languages } from '@/lib/languageContext.jsx';
 import api from '@/lib/api.js';
 import FormattedPrice from './FormattedPrice.jsx';
@@ -35,7 +36,11 @@ import {
   Globe,
   ShoppingCart,
   MapPin,
-  MessageCircle
+  MessageCircle,
+  Bell,
+  LogOut,
+  Mail,
+  Search
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -53,78 +58,111 @@ import {
 import { toast } from '@/components/ui/use-toast.js';
 import CsvImportDialog from './CsvImportDialog.jsx';
 import ChatWidget from './ChatWidget.jsx';
+import DashboardChat from './DashboardChat.jsx';
+import DashboardLanguages from './DashboardLanguages.jsx';
 
 import { Link } from 'react-router-dom';
 
 const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
 
+const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
+  return (
+    <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <button 
+          className="sm:hidden p-2 text-gray-400 hover:text-gray-600"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="relative">
+          <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search..."
+            className="pl-10 rtl:pr-10 rtl:pl-3 w-80"
+          />
+        </div>
+      </div>
+      <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <button className="p-2 text-gray-400 hover:text-gray-600">
+          <Bell className="w-5 h-5" />
+        </button>
+        <button className="p-2 text-gray-400 hover:text-gray-600">
+          <Mail className="w-5 h-5" />
+        </button>
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <img
+            src="https://ui-avatars.com/api/?name=Bruce+Wayne&background=6366f1&color=fff"
+            alt="Bruce Wayne"
+            className="w-8 h-8 rounded-full"
+          />
+          <div className="text-sm">
+            <p className="font-medium text-gray-900">Bruce Wayne</p>
+            <p className="text-gray-500">brucewayne@gmail.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen }) => {
+  const { t } = useTranslation();
+  
   const navItems = [
-    { id: 'overview', name: 'نظرة عامة', icon: BarChart3 },
-    { id: 'books', name: 'إدارة الكتب', icon: BookOpen },
-    { id: 'audiobooks', name: 'الكتب الصوتية', icon: Headphones },
-    { id: 'inventory', name: 'إدارة المخزون', icon: Boxes },
-    { id: 'authors', name: 'المؤلفون', icon: Users },
-    { id: 'sellers', name: 'البائعون', icon: Store },
-    { id: 'branches', name: 'الفروع', icon: MapPin },
-    { id: 'categories', name: 'الأصناف', icon: BookOpen },
-    { id: 'orders', name: 'الطلبات', icon: Package },
-    { id: 'customers', name: 'العملاء', icon: UserCheck },
-    { id: 'users', name: 'المستخدمون', icon: User },
-    { id: 'payments', name: 'المدفوعات', icon: CreditCard },
-    { id: 'payment-methods', name: 'طرق الدفع', icon: Wallet },
-    { id: 'currencies', name: 'العملات', icon: DollarSign },
-    { id: 'languages', name: 'اللغات', icon: Globe },
-    { id: 'google-merchant', name: 'Google Merchant', icon: ShoppingCart },
-    { id: 'plans', name: 'الخطط', icon: DollarSign },
-    { id: 'subscriptions', name: 'العضويات', icon: Crown },
-    { id: 'ratings', name: 'تقييمات الكتب', icon: Star },
-    { id: 'messages', name: 'الرسائل', icon: MessageCircle },
-    { id: 'features', name: 'المميزات', icon: Zap },
-    { id: 'sliders', name: 'السلايدر', icon: Image },
-    { id: 'banners', name: 'البانرات', icon: Image },
-    { id: 'settings', name: 'الإعدادات', icon: Settings }
+    { id: 'overview', name: t('overview'), icon: BarChart3 },
+    { id: 'categories', name: t('categories'), icon: Package },
+    { id: 'authors', name: t('authors'), icon: Users },
+    { id: 'books', name: t('books'), icon: BookOpen },
+    { id: 'audiobooks', name: t('audiobooks'), icon: Headphones },
+    { id: 'orders', name: t('orders'), icon: Package },
+    { id: 'subscriptions', name: t('subscriptions'), icon: Crown },
+    { id: 'inventory', name: t('inventory'), icon: Boxes },
+    { id: 'payments', name: t('payments'), icon: CreditCard },
+    { id: 'customers', name: t('customers'), icon: UserCheck },
+    { id: 'analytics', name: t('analytics'), icon: BarChart3 },
+    { id: 'messages', name: t('messages'), icon: MessageCircle },
+    { id: 'notifications', name: t('notifications'), icon: Bell },
+    { id: 'promotions', name: t('promotions'), icon: Zap },
+    { id: 'branches', name: t('branches'), icon: MapPin },
+    { id: 'marketing', name: t('marketing'), icon: Globe },
+    { id: 'languages', name: t('languages'), icon: Globe },
+    { id: 'settings', name: t('settings'), icon: Settings },
+    { id: 'logout', name: t('logout'), icon: LogOut }
   ];
 
   return (
     <>
-      <div className={`sidebar-nav w-64 bg-slate-800 text-slate-100 p-5 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
-        <div className="flex items-center justify-between mb-8">
-           <img alt="شعار ملهمون في لوحة التحكم" className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0" src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png" />
-          <button className="sm:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="w-5 h-5" />
-          </button>
+      <div className={`sidebar-nav w-64 bg-white border-r border-gray-200 flex flex-col h-screen sm:sticky top-0 transform transition-transform duration-200 fixed z-50 sm:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
+        {/* Logo Section */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-purple-600 mb-1">ملهمون</h1>
+            <p className="text-sm text-gray-600">READIN للنشر والتوزيع</p>
+          </div>
         </div>
         
-        <nav className="space-y-1.5 flex-grow overflow-y-auto">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
           {navItems.map(({ id, name, icon: IconComponent }) => (
             <button
               key={id}
-              className={`nav-item w-full flex items-center p-3 text-sm rounded-lg transition-all duration-200 ${
-                dashboardSection === id
-                  ? 'active bg-blue-600 text-white shadow-md'
-                  : 'hover:bg-slate-700 hover:text-white'
-              }`}
               onClick={() => {
                 setDashboardSection(id);
                 setSidebarOpen(false);
               }}
+              className={`w-full flex items-center space-x-3 rtl:space-x-reverse px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                dashboardSection === id 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
             >
-              <IconComponent className="w-5 h-5 mr-3 rtl:ml-3 rtl:mr-0" />
-              {name}
+              <IconComponent className={`w-5 h-5 ${dashboardSection === id ? 'text-blue-600' : 'text-gray-600'}`} />
+              <span>{name}</span>
             </button>
           ))}
         </nav>
-        <Button
-          asChild
-          variant="outline"
-          className="w-full mt-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
-        >
-          <Link to="/">
-            <Home className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-            العودة للموقع
-          </Link>
-        </Button>
       </div>
     </>
   );
@@ -1695,54 +1733,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
 };
 
 const DashboardMessages = ({ messages }) => {
-  const [activeUser, setActiveUser] = useState(null);
-
-  const threads = React.useMemo(() => {
-    const map = new Map();
-    messages.forEach((m) => {
-      const key = m.userId || m.email;
-      if (!map.has(key)) {
-        map.set(key, { userId: m.userId, email: m.email, name: m.name });
-      }
-    });
-    return Array.from(map.values());
-  }, [messages]);
-
-  return (
-    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <h2 className="text-2xl font-semibold text-gray-700 mb-3">دردشات العملاء</h2>
-      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
-        <table className="w-full min-w-[400px]">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">البريد</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {threads.map((t) => (
-              <tr key={t.userId || t.email} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{t.name}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{t.email}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">
-                  <Button size="sm" onClick={() => setActiveUser(t)}>محادثة</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {activeUser && (
-        <ChatWidget
-          open={!!activeUser}
-          onOpenChange={() => setActiveUser(null)}
-          contact={{ type: 'user', name: activeUser.name }}
-          targetUser={activeUser}
-        />
-      )}
-    </motion.div>
-  );
+  return <DashboardChat messages={messages} />;
 };
 
 const DashboardRatings = ({ ratings, setRatings, books }) => {
@@ -1868,39 +1859,190 @@ const DashboardOrders = ({ orders, setOrders }) => {
   };
 
   return (
-    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <h2 className="text-2xl font-semibold text-gray-700 mb-3">الطلبات الواردة</h2>
-      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
-        <table className="w-full min-w-[400px]">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">رقم الطلب</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">التاريخ</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجمالي</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الحالة</th>
-              <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {orders.map((o) => (
-              <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.id}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.date}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700"><FormattedPrice value={o.total} /></td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{o.status}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm">
-                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
-                    <Button asChild size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8">
-                      <Link to={`/admin/orders/${o.id}`}><Eye className="w-4 h-4" /></Link>
-                    </Button>
-                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteOrder(o.id)}><Trash2 className="w-4 h-4" /></Button>
+    <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[
+          { title: 'Payment Refund', value: '15', change: '+34.5%', icon: MessageCircle, color: 'purple' },
+          { title: 'Orders Cancel', value: '45', change: '-8.5%', icon: Package, color: 'blue' },
+          { title: 'Order Shipped', value: '964', change: '+14.5%', icon: Package, color: 'blue' },
+          { title: 'Order Delivering', value: '265', change: '+43.5%', icon: Package, color: 'blue' },
+          { title: 'Pending Review', value: '63', change: '+34.5%', icon: Package, color: 'purple' },
+          { title: 'Pending Payment', value: '40', change: '-8.5%', icon: Package, color: 'purple' },
+          { title: 'Delivered', value: '1,040', change: '+14.5%', icon: Package, color: 'blue' },
+          { title: 'In Progress', value: '300', change: '+43.5%', icon: Package, color: 'blue' }
+        ].map((stat, index) => {
+          const IconComponent = stat.icon;
+          const colorClasses = {
+            blue: 'bg-blue-50 border-blue-200 text-blue-600',
+            purple: 'bg-purple-50 border-purple-200 text-purple-600'
+          };
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <div className="flex items-center mt-1">
+                    <span className={`text-sm font-medium ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.change}
+                    </span>
+                    <svg className={`w-4 h-4 ml-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.change.startsWith('+') ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"} />
+                    </svg>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                <div className={`p-3 rounded-lg ${colorClasses[stat.color]}`}>
+                  <IconComponent className="w-6 h-6" />
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
+
+      {/* Orders Table */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Orders</h2>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Show:</span>
+                <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+                  <option>10</option>
+                </select>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+              </div>
+              <select className="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option>This Month</option>
+              </select>
+              <button className="p-2 text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+              </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created at</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordered at</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {[
+                { order: '#11341134', customer: 'Lily Williams', created: '15 May 2025', ordered: 'Mobile App', amount: '$160.00', paymentStatus: 'Paid', paymentMethod: 'Credit Card', deliveryStatus: 'Completed' },
+                { order: '#11341135', customer: 'John Doe', created: '15 May 2025', ordered: 'Website', amount: '$120.00', paymentStatus: 'Unpaid', paymentMethod: 'Cash on Delivery', deliveryStatus: 'Waiting' },
+                { order: '#11341136', customer: 'Jane Smith', created: '15 May 2025', ordered: 'Mobile App', amount: '$200.00', paymentStatus: 'Refund', paymentMethod: 'Apple Pay', deliveryStatus: 'Cancel' }
+              ].map((order, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.order}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customer}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.created}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.ordered}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.amount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      order.paymentStatus === 'Paid' 
+                        ? 'bg-green-100 text-green-800' 
+                        : order.paymentStatus === 'Unpaid'
+                        ? 'bg-gray-100 text-gray-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {order.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.paymentMethod}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      order.deliveryStatus === 'Completed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : order.deliveryStatus === 'Waiting'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {order.deliveryStatus}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center space-x-2">
+                      <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                      </button>
+                      <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button className="p-1 text-gray-400 hover:text-red-600">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="px-6 py-3 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">Showing 1 to 10 of 50 entries</span>
+            <div className="flex items-center space-x-2">
+              <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">«</button>
+              <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">‹</button>
+              {[1, 2, 3, 4, 5].map(page => (
+                <button
+                  key={page}
+                  className={`px-3 py-1 text-sm border rounded ${
+                    page === 1 
+                      ? 'bg-blue-600 text-white border-blue-600' 
+                      : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">›</button>
+              <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">»</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <OrderDetailsDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -2291,87 +2433,7 @@ const LanguageForm = ({ language, onSubmit, onCancel }) => {
   );
 };
 
-const DashboardLanguages = ({ languages, setLanguages }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-
-  const handleAdd = async (data) => {
-    try {
-      const newItem = await api.addLanguage(data);
-      setLanguages(prev => [newItem, ...prev]);
-      toast({ title: 'تمت الإضافة بنجاح!' });
-      setShowForm(false);
-    } catch {
-      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  const handleEdit = async (data) => {
-    try {
-      const updated = await api.updateLanguage(editing.id, data);
-      setLanguages(prev => prev.map(l => l.id === updated.id ? updated : l));
-      toast({ title: 'تم التعديل بنجاح!' });
-      setShowForm(false);
-      setEditing(null);
-    } catch {
-      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirmDelete()) return;
-    try {
-      await api.deleteLanguage(id);
-      setLanguages(prev => prev.filter(l => l.id !== id));
-      toast({ title: 'تم الحذف بنجاح!' });
-    } catch {
-      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  if (showForm) {
-    return <LanguageForm language={editing} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
-  }
-
-  return (
-    <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex flex-col sm:flex-row justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3 sm:mb-0">اللغات</h2>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-          إضافة لغة
-        </Button>
-      </div>
-      <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
-        <table className="w-full min-w-[350px]">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المعرف</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكود</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الاسم</th>
-              <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {languages.map(l => (
-              <tr key={l.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.id}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.code}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{l.name}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm">
-                  <div className="flex space-x-2 rtl:space-x-reverse justify-center">
-                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditing(l); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(l.id)}><Trash2 className="w-4 h-4" /></Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
-  );
-};
+// DashboardLanguages component is now imported from separate file
 
 const DashboardInventory = ({ books, setBooks }) => {
   const handleChange = (id, value) => {
@@ -2419,65 +2481,185 @@ const DashboardInventory = ({ books, setBooks }) => {
   );
 };
 
-const DashboardOverview = ({ dashboardStats }) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      {dashboardStats.map((stat, index) => {
+const DashboardOverview = ({ dashboardStats }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[
+          { title: t('total_products'), value: '236', change: '+4.5%', icon: Boxes, color: 'blue' },
+          { title: t('completed_orders'), value: '128', change: '+4.5%', icon: Package, color: 'green' },
+          { title: t('canceled_orders'), value: '16', change: '+4.5%', icon: X, color: 'red' },
+          { title: t('top_products'), value: '120', change: '+4.5%', icon: Star, color: 'purple' }
+        ].map((stat, index) => {
         const IconComponent = stat.icon;
+        const colorClasses = {
+          blue: 'bg-blue-50 border-blue-200 text-blue-600',
+          green: 'bg-green-50 border-green-200 text-green-600',
+          red: 'bg-red-50 border-red-200 text-red-600',
+          purple: 'bg-purple-50 border-purple-200 text-purple-600'
+        };
         return (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.3 }}
-            className="stats-card p-5 rounded-xl shadow-lg flex items-center justify-between bg-gradient-to-br from-blue-500 to-purple-600 text-white"
+            className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm"
           >
-            <div>
-              <p className="text-blue-100 text-sm">{stat.title}</p>
-              <p className="text-2xl font-bold">{stat.value}</p>
-            </div>
-            <div className={`p-2.5 rounded-full bg-white/20`}>
-              <IconComponent className="w-6 h-6" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <div className="flex items-center mt-1">
+                  <span className="text-green-600 text-sm font-medium">{stat.change}</span>
+                  <svg className="w-4 h-4 text-green-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                </div>
+              </div>
+              <div className={`p-3 rounded-lg ${colorClasses[stat.color]}`}>
+                <IconComponent className="w-6 h-6" />
+              </div>
             </div>
           </motion.div>
         );
-      })
-    }</div>
+      })}
+    </div>
 
+    {/* Sales Report Chart */}
     <motion.div 
-      className="dashboard-card p-6 rounded-xl shadow-lg bg-white"
+      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.3 }}
     >
-      <h3 className="text-xl font-semibold mb-5 text-gray-700">النشاط الأخير</h3>
-      <div className="space-y-3">
-        {[
-          { action: 'طلب جديد', details: 'طلب #1234 - 3 كتب', time: 'منذ 5 دقائق', icon: Package, iconColor: 'text-blue-500' },
-          { action: 'كتاب جديد', details: 'تم إضافة "رواية جديدة"', time: 'منذ 15 دقيقة', icon: BookOpen, iconColor: 'text-green-500' },
-          { action: 'مراجعة جديدة', details: 'تقييم 5 نجوم لكتاب "الحديث الصامت"', time: 'منذ 30 دقيقة', icon: UserCheck, iconColor: 'text-purple-500' },
-          { action: 'عميل جديد', details: 'انضم أحمد محمد للموقع', time: 'منذ ساعة', icon: Users, iconColor: 'text-orange-500' }
-        ].map((activity, index) => {
-          const ActivityIcon = activity.icon;
-          return (
-            <div key={index} className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
-              <div className="flex items-center">
-                <div className={`p-2 rounded-full mr-3 rtl:ml-3 rtl:mr-0 ${activity.iconColor} bg-opacity-10 ${activity.iconColor.replace('text-', 'bg-')}`}>
-                    <ActivityIcon className={`w-5 h-5 ${activity.iconColor}`} />
-                </div>
-                <div>
-                  <p className="font-medium text-sm text-gray-800">{activity.action}</p>
-                  <p className="text-gray-600 text-xs">{activity.details}</p>
-                </div>
-              </div>
-              <span className="text-gray-500 text-xs">{activity.time}</span>
-            </div>
-          );
-        })
-      }</div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Your sales report</h3>
+          <p className="text-gray-600 text-sm">Look at your sales</p>
+        </div>
+        <select className="text-sm border border-gray-300 rounded px-3 py-1">
+          <option>Total Sales</option>
+        </select>
+      </div>
+      
+      <div className="mb-4">
+        <div className="text-3xl font-bold text-gray-900">4,650.80 AED</div>
+        <div className="flex items-center">
+          <span className="text-green-600 text-sm font-medium">4,236.48 (+4.5%)</span>
+          <svg className="w-4 h-4 text-green-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="flex space-x-2 mb-4">
+        {['1d', '7d', '30d', '3m', '1y'].map((period, index) => (
+          <button
+            key={period}
+            className={`px-3 py-1 text-sm rounded ${
+              index === 0 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            {period}
+          </button>
+        ))}
+      </div>
+
+      {/* Chart Placeholder */}
+      <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+        <div className="text-gray-500 text-sm">Chart visualization would go here</div>
+      </div>
+    </motion.div>
+
+    {/* Latest Transactions */}
+    <motion.div 
+      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.3 }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Latest Transaction</h3>
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+            />
+          </div>
+          <input
+            type="date"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            defaultValue="2025-04-24"
+          />
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {[
+              { order: '#6574555646', item: 'Kingdom of Ash and Blood', format: 'Hardback', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
+              { order: '#6574555647', item: 'What remain of the remains', format: 'eBook (ePub)', date: '27/04/2025', price: '45.00 AED', status: 'Completed' },
+              { order: '#6574555648', item: 'The Forsaken King', format: 'eBook (PDF)', date: '27/04/2025', price: '45.00 AED', status: 'Canceled' }
+            ].map((transaction, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.order}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.item}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{transaction.format}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{transaction.date}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.price}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    transaction.status === 'Completed' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {transaction.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+
+    {/* Congratulations Section */}
+    <motion.div 
+      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.3 }}
+    >
+      <div className="flex items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Congratulations</h3>
+        <span className="ml-2 text-2xl">🎉</span>
+      </div>
+      <p className="text-gray-600 mb-4">Here's What's Happening With Your Store Today</p>
+      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+        See more
+      </button>
     </motion.div>
   </div>
-);
+  );
+};
 
 
 const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, defaultType = '' }) => {
@@ -3179,14 +3361,137 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
       طلب تطوير هذا القسم
     </Button>
   </motion.div>
-)
-import React from 'react';
-
-const Dashboard = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold">Dashboard</h1>
-    <p>هذه الصفحة قيد التطوير.</p>
-  </div>
 );
+
+
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+  const { t } = useTranslation();
+  
+  const sectionTitles = {
+    overview: t('overview'),
+    books: t('books'),
+    audiobooks: t('audiobooks'),
+    inventory: t('inventory'),
+    authors: t('authors'),
+    sellers: t('authors'), // يمكن تغييرها لاحقاً
+    branches: t('branches'),
+    orders: t('orders'),
+    customers: t('customers'),
+    users: t('users'),
+    payments: t('payments'),
+    'payment-methods': t('payments'), // يمكن تغييرها لاحقاً
+    currencies: t('payments'), // يمكن تغييرها لاحقاً
+    languages: t('languages'),
+    'google-merchant': 'Google Merchant',
+    plans: t('subscriptions'), // يمكن تغييرها لاحقاً
+    subscriptions: t('subscriptions'),
+    ratings: t('books'), // يمكن تغييرها لاحقاً
+    messages: t('messages'),
+    features: t('books'), // يمكن تغييرها لاحقاً
+    sliders: t('books'), // يمكن تغييرها لاحقاً
+    banners: t('books'), // يمكن تغييرها لاحقاً
+    settings: t('settings'),
+  };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ratings, setRatings] = useState([]);
+
+  useEffect(() => {
+    if (dashboardSection === 'ratings') {
+      (async () => {
+        try {
+          const r = await api.getAllRatings();
+          setRatings(r);
+        } catch (err) {
+          console.error('Failed to load ratings', err);
+        }
+      })();
+    }
+  }, [dashboardSection]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex text-gray-800 relative">
+      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col">
+        <DashboardHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
+          </div>
+
+        {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} />}
+        {dashboardSection === 'books' && (
+          <DashboardBooksTabs
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            currencies={currencies}
+            handleFeatureClick={handleFeatureClick}
+          />
+        )}
+        {dashboardSection === 'audiobooks' && (
+          <DashboardBooks
+            books={books}
+            setBooks={setBooks}
+            authors={authors}
+            categories={categories}
+            setCategories={setCategories}
+            currencies={currencies}
+            handleFeatureClick={handleFeatureClick}
+            filterType="audio"
+            defaultType="audio"
+          />
+        )}
+        {dashboardSection === 'inventory' && (
+          <DashboardInventory books={books} setBooks={setBooks} />
+        )}
+        {dashboardSection === 'authors' && <DashboardAuthors authors={authors} setAuthors={setAuthors} />}
+        {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
+        {dashboardSection === 'branches' && <DashboardBranches branches={branches} setBranches={setBranches} />}
+        {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
+        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
+        {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
+        {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
+        {dashboardSection === 'currencies' && <DashboardCurrencies currencies={currencies} setCurrencies={setCurrencies} />}
+        {dashboardSection === 'languages' && <DashboardLanguages />}
+        {dashboardSection === 'google-merchant' && (
+          <DashboardGoogleMerchant
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+          />
+        )}
+        {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
+        {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
+        {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
+        {dashboardSection === 'subscriptions' && (
+          <DashboardSubscriptions
+            subscriptions={subscriptions}
+            setSubscriptions={setSubscriptions}
+            customers={customers}
+            plans={plans}
+          />
+        )}
+        {dashboardSection === 'ratings' && (
+          <DashboardRatings ratings={ratings} setRatings={setRatings} books={books} />
+        )}
+        {dashboardSection === 'messages' && (
+          <DashboardMessages messages={messages} />
+        )}
+        {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
+        {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
+        {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
+        {dashboardSection === 'settings' && (
+          <DashboardSettings
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
+            currencies={currencies}
+          />
+        )}
+      </main>
+      </div>
+    </div>
+  );
+};
 
 export default Dashboard;
