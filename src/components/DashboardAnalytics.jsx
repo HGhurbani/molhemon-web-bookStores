@@ -95,15 +95,37 @@ const DashboardAnalytics = ({ books, orders, payments, users }) => {
     }
   ];
 
-  // بيانات المبيعات حسب البلدان
-  const salesByCountries = [
-    { country: 'الإمارات العربية المتحدة', flag: '🇦🇪', sales: '45,680.00 د.إ', change: '+18.5%', trend: 'up' },
-    { country: 'المملكة العربية السعودية', flag: '🇸🇦', sales: '38,420.00 ريال', change: '+12.3%', trend: 'up' },
-    { country: 'مصر', flag: '🇪🇬', sales: '28,750.00 جنيه', change: '+9.8%', trend: 'up' },
-    { country: 'قطر', flag: '🇶🇦', sales: '22,180.00 ريال', change: '+7.2%', trend: 'up' },
-    { country: 'الكويت', flag: '🇰🇼', sales: '18,950.00 دينار', change: '-3.4%', trend: 'down' },
-    { country: 'عُمان', flag: '🇴🇲', sales: '15,680.00 ريال', change: '+5.6%', trend: 'up' }
-  ];
+  // بيانات المبيعات حسب البلدان المحسوبة من الطلبات الفعلية
+  const countryInfo = {
+    SA: { name: 'المملكة العربية السعودية', flag: '🇸🇦' },
+    AE: { name: 'الإمارات العربية المتحدة', flag: '🇦🇪' },
+    KW: { name: 'الكويت', flag: '🇰🇼' },
+    QA: { name: 'قطر', flag: '🇶🇦' },
+    BH: { name: 'البحرين', flag: '🇧🇭' },
+    OM: { name: 'عُمان', flag: '🇴🇲' },
+    EG: { name: 'مصر', flag: '🇪🇬' },
+    JO: { name: 'الأردن', flag: '🇯🇴' },
+    LB: { name: 'لبنان', flag: '🇱🇧' },
+    MA: { name: 'المغرب', flag: '🇲🇦' },
+    TN: { name: 'تونس', flag: '🇹🇳' },
+    DZ: { name: 'الجزائر', flag: '🇩🇿' }
+  };
+
+  const salesByCountries = orders && orders.length > 0
+    ? Object.entries(orders.reduce((acc, order) => {
+        const code = order?.shipping?.country || order.shippingCountry;
+        const amount = Number(order.total || order.orderTotal || 0);
+        if (!code) return acc;
+        acc[code] = (acc[code] || 0) + amount;
+        return acc;
+      }, {})).map(([code, total]) => ({
+        country: countryInfo[code]?.name || code,
+        flag: countryInfo[code]?.flag || '🏳️',
+        sales: `${total.toFixed(2)} د.إ`,
+        change: '+0%',
+        trend: 'up'
+      }))
+    : [];
 
   // المنتجات الشائعة من البيانات الحقيقية
   const popularProducts = books && books.length > 0 ? books.slice(0, 5).map(book => ({
@@ -328,21 +350,22 @@ const DashboardAnalytics = ({ books, orders, payments, users }) => {
           </div>
           
           <div className="space-y-4">
-            {salesByCountries.map((country, index) => (
+            {salesByCountries.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <span className="text-lg">{country.flag}</span>
+                  <span className="text-lg">{item.flag}</span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{country.sales}</p>
+                    <p className="text-sm font-medium text-gray-900">{item.country}</p>
+                    <p className="text-sm text-gray-600">{item.sales}</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <span className={`text-sm font-medium ${
-                    country.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    item.trend === 'up' ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {country.change}
+                    {item.change}
                   </span>
-                  {country.trend === 'up' ? (
+                  {item.trend === 'up' ? (
                     <ArrowUpRight className="w-4 h-4 text-green-600 mr-1" />
                   ) : (
                     <ArrowDownRight className="w-4 h-4 text-red-600 mr-1" />
