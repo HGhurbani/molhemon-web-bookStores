@@ -468,9 +468,9 @@ const App = () => {
                 ) : (
                   <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
                 )
-              }
-            />
-            <Route
+                                }
+                />
+                <Route
               path="/login"
               element={
                 isCustomerLoggedIn ? (

@@ -33,6 +33,15 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  updateSettings: async (settings) => {
+    // Simulate API call for now - replace with actual API endpoint
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Settings updated:', settings);
+        resolve(settings);
+      }, 500);
+    });
+  },
 };
 
 export default api;

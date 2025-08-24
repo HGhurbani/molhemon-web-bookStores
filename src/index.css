@@ -128,7 +128,7 @@
 }
 
 .sidebar-nav {
-  background: hsl(225 25% 18%);
+  background: hsl(0, 0%, 100%);
   overflow-y: auto;
 }
 .sidebar-nav .nav-item.active {

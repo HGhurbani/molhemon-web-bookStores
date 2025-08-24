@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import { Lock, ShoppingBag, Truck, MapPin } from 'lucide-react';
+import { Lock, ShoppingBag, Truck, MapPin, Globe, Clock, Package } from 'lucide-react';
 import api from '@/lib/api.js';
+import ShippingService from '@/lib/shippingService.js';
 
 const CheckoutPage = ({ cart, setCart, setOrders }) => {
   const navigate = useNavigate();
@@ -18,44 +19,96 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
     phone: '',
     street: '',
     city: '',
-    country: '',
+    country: 'SA', // افتراضي السعودية
   });
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(1);
-
-  useEffect(() => {
-    api.getPaymentMethods().then((data) => {
-      setPaymentMethods(data);
-      if (data[0]) setSelectedPaymentMethod(data[0].id);
-    }).catch(() => {});
-  }, []);
+  const [shippingService, setShippingService] = useState(null);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState('standard');
+  const [availableShippingOptions, setAvailableShippingOptions] = useState([]);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [shippingDetails, setShippingDetails] = useState(null);
 
   const { currency } = useCurrency();
   const totalPrice = cart.reduce((sum, item) => sum + getPriceForCurrency(item, currency.code) * item.quantity, 0);
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Example logic for shipping and discounts based on total price
-  const freeShippingThreshold = 150.00; // Example: Free shipping over 150 AED
+  // قائمة الدول المتاحة
+  const countries = [
+    { code: 'SA', name: 'المملكة العربية السعودية', flag: '🇸🇦' },
+    { code: 'AE', name: 'الإمارات العربية المتحدة', flag: '🇦🇪' },
+    { code: 'KW', name: 'الكويت', flag: '🇰🇼' },
+    { code: 'QA', name: 'قطر', flag: '🇶🇦' },
+    { code: 'BH', name: 'البحرين', flag: '🇧🇭' },
+    { code: 'OM', name: 'عمان', flag: '🇴🇲' },
+    { code: 'EG', name: 'مصر', flag: '🇪🇬' },
+    { code: 'JO', name: 'الأردن', flag: '🇯🇴' },
+    { code: 'LB', name: 'لبنان', flag: '🇱🇧' },
+    { code: 'MA', name: 'المغرب', flag: '🇲🇦' },
+    { code: 'TN', name: 'تونس', flag: '🇹🇳' },
+    { code: 'DZ', name: 'الجزائر', flag: '🇩🇿' }
+  ];
+
+  useEffect(() => {
+    // تحميل طرق الدفع
+    api.getPaymentMethods().then((data) => {
+      setPaymentMethods(data);
+      if (data[0]) setSelectedPaymentMethod(data[0].id);
+    }).catch(() => {});
+
+    // تحميل إعدادات الشحن
+    api.getSettings().then((settings) => {
+      const service = new ShippingService(settings);
+      setShippingService(service);
+      updateShippingOptions(service, shippingAddress.country, totalPrice);
+    }).catch(() => {
+      // استخدام إعدادات افتراضية
+      const defaultService = createDefaultShippingService();
+      setShippingService(defaultService);
+      updateShippingOptions(defaultService, shippingAddress.country, totalPrice);
+    });
+  }, []);
+
+  // تحديث خيارات الشحن عند تغيير الدولة أو إجمالي الطلب
+  useEffect(() => {
+    if (shippingService) {
+      updateShippingOptions(shippingService, shippingAddress.country, totalPrice);
+    }
+  }, [shippingAddress.country, totalPrice, shippingService]);
+
+  // تحديث خيارات الشحن
+  const updateShippingOptions = (service, country, orderTotal) => {
+    const options = service.getAvailableShippingOptions(country, orderTotal);
+    setAvailableShippingOptions(options);
+    
+    // تحديد طريقة الشحن الافتراضية
+    if (options.length > 0) {
+      const defaultMethod = options.find(opt => opt.method === selectedShippingMethod) || options[0];
+      setSelectedShippingMethod(defaultMethod.method);
+      setShippingCost(defaultMethod.cost);
+      setShippingDetails(defaultMethod);
+    }
+  };
+
+  // تحديث طريقة الشحن
+  const handleShippingMethodChange = (method) => {
+    setSelectedShippingMethod(method);
+    const selectedOption = availableShippingOptions.find(opt => opt.method === method);
+    if (selectedOption) {
+      setShippingCost(selectedOption.cost);
+      setShippingDetails(selectedOption);
+    }
+  };
+
+  // تحديث عنوان الشحن
+  const handleAddressChange = (field, value) => {
+    setShippingAddress(prev => ({ ...prev, [field]: value }));
+  };
+
   const hasPhysical = cart.some(item => item.type === 'physical' || !item.type);
-  const shippingCost = hasPhysical
-    ? (totalPrice >= freeShippingThreshold ? 0 : 25.00)
-    : 0;
-
-  // This is based on the image's total pricing, which seems to imply an existing discount
-  const imageDisplayedProductSubtotal = 45.00 + 60.00; // From the image, two items
-  const imageDisplayedShipping = 10.00;
-  const imageDisplayedTotal = 115.00;
-
-  // Let's use these values for the summary to match the image exactly if cart has 2 specific items,
-  // otherwise, use dynamic calculation.
-  const isCartMatchingImageExample = cart.length === 2 && 
-                                     cart.some(item => item.title === 'قبل أن تختار الدواء') &&
-                                     cart.some(item => item.title === 'حوار داخلي');
-
   const actualProductSubtotal = totalPrice;
-  const actualShippingCost = shippingCost;
-  const actualFinalTotal = totalPrice + shippingCost;
-
+  const actualShippingCost = hasPhysical ? shippingCost : 0;
+  const actualFinalTotal = actualProductSubtotal + actualShippingCost;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,16 +117,25 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
       navigate('/login');
       return;
     }
+
     const customerId = localStorage.getItem('currentUserId');
     const total = actualFinalTotal;
+    
     const orderData = {
       customer_id: customerId,
       seller_id: null,
       total,
       status: 'قيد المعالجة',
-      shipping: shippingAddress,
+      shipping: {
+        ...shippingAddress,
+        method: selectedShippingMethod,
+        cost: actualShippingCost,
+        details: shippingDetails,
+        estimatedDays: shippingDetails?.estimatedDays || 'غير محدد'
+      },
       items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
     };
+
     try {
       if (selectedPaymentMethod === 1) {
         await api.createStripePaymentIntent({
@@ -86,6 +148,7 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
           currency: currency.code,
         });
       }
+      
       const newOrder = await api.addOrder(orderData);
       await api.addPayment({
         customer_id: customerId,
@@ -96,242 +159,297 @@ const CheckoutPage = ({ cart, setCart, setOrders }) => {
         amount: total,
         status: 'paid'
       });
+      
       setOrders(prev => [newOrder, ...(prev || [])]);
       toast({ title: 'تم استلام الطلب بنجاح!' });
       setCart([]);
-      localStorage.setItem('cart', '[]');
-    } catch (err) {
-      toast({ title: 'تعذر إنشاء الطلب. حاول مجدداً.', variant: 'destructive' });
+      navigate('/orders');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast({ title: 'حدث خطأ أثناء إنشاء الطلب', variant: 'destructive' });
     }
-    navigate('/');
   };
 
-  if (cart.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <ShoppingCart className="w-24 h-24 mx-auto text-gray-300 mb-6" />
-        <h1 className="text-3xl font-bold text-gray-700 mb-3">لا يوجد شيء للدفع</h1>
-        <p className="text-gray-500 mb-6">سلة التسوق فارغة. أضف بعض المنتجات أولاً.</p>
-        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
-          <Link to="/">العودة للتسوق</Link>
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-6 sm:py-8">
-      <nav className="text-sm text-gray-500 mb-4 sm:mb-6" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex space-x-2 rtl:space-x-reverse">
-          <li><Link to="/" className="hover:text-blue-600">الرئيسية</Link></li>
-          <li><span>/</span></li>
-          <li className="text-gray-700" aria-current="page">الدفع</li>
-        </ol>
-      </nav>
-
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 text-right"
-      >
-        الدفع
-      </motion.h1>
-
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Shipping Address & Products */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg space-y-6"
-          >
-            {/* Shipping Address Section */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                <MapPin className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
-                عنوان الشحن
-              </h2>
-              <div className="border border-gray-200 rounded-md p-4 bg-gray-50 space-y-3">
-                <div>
-                  <Label htmlFor="name">الاسم الكامل</Label>
-                  <Input
-                    id="name"
-                    value={shippingAddress.name}
-                    onChange={(e) => setShippingAddress({ ...shippingAddress, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">البريد الإلكتروني</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={shippingAddress.email}
-                    onChange={(e) => setShippingAddress({ ...shippingAddress, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">رقم الهاتف</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={shippingAddress.phone}
-                    onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="street">العنوان</Label>
-                  <Input
-                    id="street"
-                    value={shippingAddress.street}
-                    onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div>
-                    <Label htmlFor="city">المدينة</Label>
-                    <Input
-                      id="city"
-                      value={shippingAddress.city}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">الدولة</Label>
-                    <Input
-                      id="country"
-                      value={shippingAddress.country}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
-                    />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
+          {/* Left Column - Checkout Form */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-6">إتمام الطلب</h1>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Shipping Address */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+                    عنوان الشحن
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">الاسم الكامل</Label>
+                      <Input
+                        id="name"
+                        value={shippingAddress.name}
+                        onChange={(e) => handleAddressChange('name', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">البريد الإلكتروني</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={shippingAddress.email}
+                        onChange={(e) => handleAddressChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">رقم الهاتف</Label>
+                      <Input
+                        id="phone"
+                        value={shippingAddress.phone}
+                        onChange={(e) => handleAddressChange('phone', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country">الدولة</Label>
+                      <select
+                        id="country"
+                        value={shippingAddress.country}
+                        onChange={(e) => handleAddressChange('country', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      >
+                        {countries.map(country => (
+                          <option key={country.code} value={country.code}>
+                            {country.flag} {country.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="street">العنوان التفصيلي</Label>
+                      <Input
+                        id="street"
+                        value={shippingAddress.street}
+                        onChange={(e) => handleAddressChange('street', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city">المدينة</Label>
+                      <Input
+                        id="city"
+                        value={shippingAddress.city}
+                        onChange={(e) => handleAddressChange('city', e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {/* Shipping Method Selection */}
+                {hasPhysical && (
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                      <Truck className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+                      طريقة الشحن
+                    </h2>
+                    
+                    {availableShippingOptions.length > 0 ? (
+                      <div className="space-y-3">
+                        {availableShippingOptions.map((option) => (
+                          <div
+                            key={option.method}
+                            className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                              selectedShippingMethod === option.method
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => handleShippingMethodChange(option.method)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                                <input
+                                  type="radio"
+                                  name="shippingMethod"
+                                  checked={selectedShippingMethod === option.method}
+                                  onChange={() => handleShippingMethodChange(option.method)}
+                                  className="w-4 h-4 text-blue-600 border-gray-300"
+                                />
+                                <div>
+                                  <h3 className="font-medium text-gray-900">
+                                    {option.method === 'standard' ? 'الشحن العادي' :
+                                     option.method === 'express' ? 'الشحن السريع' :
+                                     option.method === 'pickup' ? 'استلام من المتجر' : option.method}
+                                  </h3>
+                                  <p className="text-sm text-gray-500 flex items-center">
+                                    <Clock className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                                    {option.estimatedDays}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {option.freeShipping ? (
+                                    <span className="text-green-600">مجاني</span>
+                                  ) : (
+                                    <FormattedPrice amount={option.cost} currency={currency.code} />
+                                  )}
+                                </p>
+                                {option.company && (
+                                  <p className="text-sm text-gray-500">
+                                    <Package className="w-4 h-4 inline mr-1 rtl:ml-1 rtl:mr-0" />
+                                    {option.company.name}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Truck className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                        <p>لا توجد خيارات شحن متاحة لهذه الدولة</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Payment Method */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <Lock className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+                    طريقة الدفع
+                  </h2>
+                  
+                  <div className="space-y-3">
+                    {paymentMethods.map((method) => (
+                      <div
+                        key={method.id}
+                        className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                          selectedPaymentMethod === method.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => setSelectedPaymentMethod(method.id)}
+                      >
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            checked={selectedPaymentMethod === method.id}
+                            onChange={() => setSelectedPaymentMethod(method.id)}
+                            className="w-4 h-4 text-blue-600 border-gray-300"
+                          />
+                          <span className="font-medium text-gray-700">{method.name}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
+                >
+                  إتمام الطلب
+                </Button>
+              </form>
             </div>
+          </div>
 
-            {/* Required Products Section */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center justify-between">
-                <span className="flex items-center">
-                  <ShoppingBag className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
-                  المنتجات المطلوبة
-                </span>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm font-normal text-gray-600">
-                    {/* Placeholder checkbox for "شركة هاي هاوس" */}
-                    <input type="checkbox" id="companyCheckbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" defaultChecked/>
-                    <label htmlFor="companyCheckbox">شركة هاي هاوس</label>
-                </div>
+          {/* Right Column - Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
+              <h2 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                <ShoppingBag className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+                ملخص الطلب
               </h2>
-              <div className="space-y-4">
-                {cart.map(item => (
-                  <div key={item.id} className="flex justify-between items-start text-sm border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                      <div className="w-16 h-20 rounded-md overflow-hidden flex-shrink-0">
-                        <img  alt={item.title} className="w-full h-full object-cover" src={item.coverImage || 'https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg'} />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{item.title}</p>
-                        <p className="text-xs text-gray-500">الكمية: {item.quantity}</p>
-                        <p className="text-xs text-gray-500">{item.author}</p>
-                      </div>
+              
+              {/* Cart Items */}
+              <div className="space-y-4 mb-6">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <img
+                      src={item.cover}
+                      alt={item.title}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900">{item.title}</h3>
+                      <p className="text-sm text-gray-500">الكمية: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-800"><FormattedPrice value={getPriceForCurrency(item, currency.code) * item.quantity} /></p>
-                      {item.originalPrice && (
-                        <p className="text-[10px] text-red-500 line-through"><FormattedPrice value={item.originalPrice} /></p>
-                      )}
+                      <p className="font-medium text-gray-900">
+                        <FormattedPrice amount={getPriceForCurrency(item, currency.code) * item.quantity} currency={currency.code} />
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
               
-              <div className="mt-6 space-y-4">
-                <Label htmlFor="sellerMessage">رسالة للبائع</Label>
-                <Input id="sellerMessage" placeholder="اكتب رسالة للبائع..." />
-
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-gray-600 flex items-center">
-                    <Truck className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 text-blue-600" />
-                    خيار الشحن:
+              {/* Order Summary */}
+              <div className="border-t border-gray-200 pt-4 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">إجمالي المنتجات:</span>
+                  <span className="font-medium">
+                    <FormattedPrice amount={actualProductSubtotal} currency={currency.code} />
                   </span>
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Button variant="outline" size="sm" className="bg-green-100 text-green-700 cursor-default">
-                        ضمان التوصيل خلال 9 - 12 مارس
-                    </Button>
-                    <Button variant="link" size="sm" className="px-0 text-blue-600">
-                        تتبع رسالتك
-                    </Button>
+                </div>
+                
+                {hasPhysical && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">الشحن:</span>
+                    <span className="font-medium">
+                      {shippingCost === 0 ? (
+                        <span className="text-green-600">مجاني</span>
+                      ) : (
+                        <FormattedPrice amount={shippingCost} currency={currency.code} />
+                      )}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="flex justify-between">
+                    <span className="text-lg font-semibold text-gray-900">الإجمالي:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      <FormattedPrice amount={actualFinalTotal} currency={currency.code} />
+                    </span>
                   </div>
                 </div>
-
-                <div className="flex justify-between items-center text-sm font-semibold text-gray-700 border-t pt-4 mt-4">
-                    <span>المجموع الفرعي للمنتج:</span>
-                    <span><FormattedPrice value={actualProductSubtotal} /></span>
-                </div>
               </div>
+              
+              {/* Shipping Info */}
+              {hasPhysical && shippingDetails && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-medium text-gray-800 mb-2">معلومات الشحن</h3>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>طريقة الشحن: {shippingDetails.method === 'standard' ? 'الشحن العادي' :
+                                       shippingDetails.method === 'express' ? 'الشحن السريع' :
+                                       shippingDetails.method === 'pickup' ? 'استلام من المتجر' : shippingDetails.method}</p>
+                    <p>مدة التوصيل: {shippingDetails.estimatedDays}</p>
+                    {shippingDetails.company && (
+                      <p>شركة الشحن: {shippingDetails.company.name}</p>
+                    )}
+                    {shippingDetails.country && (
+                      <p>الدولة: {countries.find(c => c.code === shippingDetails.country)?.name}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </motion.div>
-
-          {/* Right Column: Payment Methods & Final Summary */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-1"
-          >
-            <div className="bg-white p-6 rounded-lg shadow-lg sticky top-24 space-y-6">
-              {/* Payment Methods Section */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">طريقة الدفع</h2>
-                <div className="space-y-2">
-                  {paymentMethods.map((m) => (
-                    <label key={m.id} className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        value={m.id}
-                        checked={selectedPaymentMethod === m.id}
-                        onChange={() => setSelectedPaymentMethod(m.id)}
-                        className="form-radio h-4 w-4 text-blue-600"
-                      />
-                      <span className="text-sm text-gray-700">{m.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Coupon Section (Based on the "اخر أو ادخل الرمز" part of the image) */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">قسيمة دارموهيمون</h2>
-                <div className="flex items-center gap-2">
-                    <Input placeholder="أدخل أو اختر الرمز" className="flex-grow" />
-                    <Button variant="outline">تطبيق</Button>
-                </div>
-              </div>
-
-              {/* Final Summary */}
-              <div className="border-t pt-4 space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">المجموع الفرعي للمنتجات:</span>
-                  <span className="font-medium text-gray-800"><FormattedPrice value={actualProductSubtotal} /></span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">المجموع الفرعي للشحن:</span>
-                  <span className="font-medium text-gray-800"><FormattedPrice value={actualShippingCost} /></span>
-                </div>
-                <div className="flex justify-between text-lg font-bold border-t pt-3 mt-3">
-                  <span className="text-gray-800">إجمالي الدفع:</span>
-                  <span className="text-blue-600"><FormattedPrice value={actualFinalTotal} /></span>
-                </div>
-              </div>
-
-              <Button type="submit" size="lg" className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-lg py-3">
-                <Lock className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0" />
-                تأكيد الطلب
-              </Button>
-            </div>
-          </motion.div>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

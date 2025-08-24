@@ -333,7 +333,281 @@ export const siteSettings = {
   facebook: '',
   twitter: '',
   instagram: '',
-  themeColor: '#1D4ED8'
+  themeColor: '#1D4ED8',
+  // New settings structure
+  about: {
+    pageTitle: 'About Us',
+    urlSlug: '/about-us',
+    metaTitle: '',
+    metaDescription: '',
+    headerTitle: 'Get to Know Darmolhimon',
+    headerSubtitle: 'Your trusted platform for books, eBooks, and audiobooks',
+    mainDescription: 'how Darmolhimon started, what you believe in, and how you help readers today.',
+    missionStatement: 'To make literature and knowledge accessible in every format for everyone, everywhere.',
+    visionStatement: 'To be the leading digital and physical bookstore platform in Southeast Asia.',
+    coreValues: [
+      { icon: 'Accessibility icon.JPG', title: 'Accessibility', description: 'Short 1-2 sentence value explanation' }
+    ],
+    heroImage: '',
+    companyName: '',
+    establishedYear: '',
+    contactEmail: '',
+    whatsappPhone: '',
+    status: 'active'
+  },
+  checkout: {
+    contactMethod: 'phone',
+    fullName: 'last',
+    companyName: 'dont',
+    addressLine2: 'dont',
+    shippingPhone: 'dont'
+  },
+  connection: {
+    socialMedia: {
+      facebook: { url: 'https://facebook.com/darmolhimon', enabled: true },
+      instagram: { url: 'https://instagram.com/darmolhimon', enabled: true },
+      tiktok: { url: 'https://instagram.com/darmolhimon', enabled: true },
+      twitter: { url: 'https://x.com/darmolhimon', enabled: true },
+      youtube: { url: 'https://youtube.com/@darmolhimon', enabled: true },
+      linkedin: { url: 'https://linkedin.com/company/darmolhimon', enabled: true }
+    },
+    whatsapp: {
+      number: '',
+      message: 'Hi Darmolhimon, I\'d like to ask about a book.',
+      days: 'Monday - Friday',
+      from: '08.00',
+      to: '22.00',
+      showFloating: true
+    }
+  },
+  payments: {
+    paymentMethods: {
+      visa: { 
+        enabled: true, 
+        name: 'Visa', 
+        apiKey: '', 
+        secretKey: '', 
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      mastercard: { 
+        enabled: true, 
+        name: 'Mastercard', 
+        apiKey: '', 
+        secretKey: '', 
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      amex: { 
+        enabled: false, 
+        name: 'American Express', 
+        apiKey: '', 
+        secretKey: '', 
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      paypal: { 
+        enabled: false, 
+        name: 'PayPal', 
+        clientId: '', 
+        secret: '', 
+        testMode: true,
+        connected: false,
+        icon: '🅿️'
+      },
+      applePay: { 
+        enabled: false, 
+        name: 'Apple Pay', 
+        merchantId: '', 
+        certificate: '',
+        connected: false,
+        icon: '🍎'
+      },
+      googlePay: { 
+        enabled: false, 
+        name: 'Google Pay', 
+        merchantId: '', 
+        apiKey: '',
+        connected: false,
+        icon: '📱'
+      },
+      bankTransfer: { 
+        enabled: false, 
+        name: 'تحويل بنكي', 
+        accountNumber: '', 
+        bankName: '',
+        connected: false,
+        icon: '🏦'
+      },
+      cashOnDelivery: { 
+        enabled: true, 
+        name: 'الدفع عند الاستلام', 
+        maxAmount: 1000,
+        connected: true,
+        icon: '💵'
+      },
+      bitcoin: { 
+        enabled: false, 
+        name: 'Bitcoin', 
+        walletAddress: '',
+        connected: false,
+        icon: '₿'
+      },
+      ethereum: { 
+        enabled: false, 
+        name: 'Ethereum', 
+        walletAddress: '',
+        connected: false,
+        icon: 'Ξ'
+      },
+      mada: { 
+        enabled: true, 
+        name: 'مدى', 
+        merchantId: '', 
+        apiKey: '',
+        connected: false,
+        icon: '💳'
+      },
+      stcPay: { 
+        enabled: false, 
+        name: 'STC Pay', 
+        merchantId: '', 
+        apiKey: '',
+        connected: false,
+        icon: '📱'
+      },
+      tabby: { 
+        enabled: false, 
+        name: 'تابي', 
+        apiKey: '', 
+        secretKey: '',
+        testMode: true,
+        connected: false,
+        icon: '🛒'
+      },
+      tamara: { 
+        enabled: false, 
+        name: 'تمارا', 
+        apiKey: '', 
+        secretKey: '',
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      qitaf: { 
+        enabled: false, 
+        name: 'قطف', 
+        merchantId: '', 
+        apiKey: '',
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      fawry: { 
+        enabled: false, 
+        name: 'فوري', 
+        merchantCode: '', 
+        secureKey: '',
+        testMode: true,
+        connected: false,
+        icon: '🏪'
+      },
+      payfort: { 
+        enabled: false, 
+        name: 'PayFort', 
+        accessCode: '', 
+        merchantIdentifier: '',
+        shaRequestPhrase: '',
+        shaResponsePhrase: '',
+        testMode: true,
+        connected: false,
+        icon: '💳'
+      },
+      myfatoorah: { 
+        enabled: false, 
+        name: 'ماي فاتورة', 
+        apiKey: '',
+        testMode: true,
+        connected: false,
+        icon: '📄'
+      }
+    },
+    currency: 'SAR',
+    taxRate: 15,
+    autoCapture: true,
+    refundPolicy: 'full',
+    buyerAccounts: {
+      enabled: true,
+      autoLink: true,
+      requireVerification: true
+    }
+  },
+  store: {
+    name: 'ملهمون',
+    description: 'دار ملهمون للنشر والتوزيع',
+    logo: '',
+    address: 'الإمارات العربية المتحدة',
+    phone: '0097165551184',
+    email: 'info@molhemoon.com',
+    businessHours: {
+      monday: { open: '09:00', close: '18:00', closed: false },
+      tuesday: { open: '09:00', close: '18:00', closed: false },
+      wednesday: { open: '09:00', close: '18:00', closed: false },
+      thursday: { open: '09:00', close: '18:00', closed: false },
+      friday: { open: '09:00', close: '18:00', closed: false },
+      saturday: { open: '09:00', close: '18:00', closed: false },
+      sunday: { open: '09:00', close: '18:00', closed: false }
+    }
+  },
+  shipping: {
+    methods: {
+      standard: { enabled: true, name: 'الشحن العادي', price: 15, days: '3-5 أيام' },
+      express: { enabled: true, name: 'الشحن السريع', price: 25, days: '1-2 أيام' },
+      overnight: { enabled: false, name: 'الشحن الفوري', price: 50, days: '24 ساعة' }
+    },
+    freeShippingThreshold: 200,
+    maxShippingDistance: 100
+  },
+  locations: {
+    branches: [
+      {
+        name: 'الفرع الرئيسي',
+        address: 'الإمارات العربية المتحدة',
+        phone: '0097165551184',
+        email: 'info@molhemoon.com',
+        coordinates: { lat: 25.2048, lng: 55.2708 }
+      }
+    ]
+  },
+  notifications: {
+    email: {
+      orderConfirmation: true,
+      orderShipped: true,
+      orderDelivered: true,
+      newProducts: false,
+      promotions: false
+    },
+    sms: {
+      orderConfirmation: false,
+      orderShipped: false,
+      orderDelivered: false,
+      promotions: false
+    },
+    push: {
+      orderUpdates: true,
+      newProducts: false,
+      promotions: false
+    }
+  },
+  terms: {
+    termsOfService: 'شروط وأحكام استخدام الموقع...',
+    privacyPolicy: 'سياسة الخصوصية...',
+    returnPolicy: 'سياسة الإرجاع والاستبدال...',
+    shippingPolicy: 'سياسة الشحن والتوصيل...'
+  }
 };
 
 export const paymentMethods = [
