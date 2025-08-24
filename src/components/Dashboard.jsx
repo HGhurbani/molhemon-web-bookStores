@@ -129,7 +129,7 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'subscriptions', name: t('subscriptions'), icon: Crown },
     { id: 'inventory', name: t('inventory'), icon: Boxes },
     { id: 'payments', name: t('payments'), icon: CreditCard },
-    { id: 'customers', name: t('customers'), icon: UserCheck },
+    { id: 'users', name: t('users'), icon: UserCheck },
     { id: 'analytics', name: t('analytics'), icon: BarChart3 },
     { id: 'messages', name: t('messages'), icon: MessageCircle },
     { id: 'notifications', name: t('notifications'), icon: Bell },
@@ -865,112 +865,6 @@ const CustomerForm = ({ customer, onSubmit, onCancel }) => {
   );
 };
 
-const DashboardCustomers = ({ customers, setCustomers }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState(null);
-
-  const handleAdd = async (data) => {
-    try {
-      const newCustomer = await api.addCustomer(data);
-      setCustomers(prev => [newCustomer, ...prev]);
-      toast({ title: 'تمت الإضافة بنجاح!' });
-      setShowForm(false);
-    } catch (e) {
-      toast({ title: 'تعذر إضافة العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  const handleEdit = async (data) => {
-    try {
-      const updated = await api.updateCustomer(editingCustomer.id, data);
-      setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
-      toast({ title: 'تم التعديل بنجاح!' });
-      setShowForm(false);
-      setEditingCustomer(null);
-    } catch (e) {
-      toast({ title: 'تعذر تعديل العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirmDelete()) return;
-    try {
-      await api.deleteCustomer(id);
-      setCustomers(prev => prev.filter(c => c.id !== id));
-      toast({ title: 'تم الحذف بنجاح!' });
-    } catch (e) {
-      toast({ title: 'تعذر حذف العنصر. حاول مجدداً.', variant: 'destructive' });
-    }
-  };
-
-  if (showForm) {
-    return <CustomerForm customer={editingCustomer} onSubmit={editingCustomer ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingCustomer(null); }} />;
-  }
-
-  return (
-    <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Customers Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">العملاء</h2>
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <span className="text-sm text-gray-600">عرض:</span>
-                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="البحث في العملاء..."
-                  className="pl-10 rtl:pr-10 rtl:pl-3 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white w-64"
-                />
-              </div>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingCustomer(null); setShowForm(true); }}>
-                <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-                إضافة عميل
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">الاسم</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">البريد الإلكتروني</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">الهاتف</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {customers.map(c => (
-                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{c.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{c.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{c.phone}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                    <div className="flex space-x-2 rtl:space-x-reverse justify-center">
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingCustomer(c); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </motion.div>
-  );
-}; 
-
 const PlanForm = ({ plan, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -1284,7 +1178,7 @@ const DashboardPlans = ({ plans, setPlans }) => {
   );
 };
 
-const SubscriptionForm = ({ subscription, customers, plans, onSubmit, onCancel }) => {
+const SubscriptionForm = ({ subscription, users, plans, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     customer_id: '',
     plan_id: '',
@@ -1298,10 +1192,10 @@ const SubscriptionForm = ({ subscription, customers, plans, onSubmit, onCancel }
       <h3 className="text-xl font-semibold mb-5 text-gray-700">{subscription ? 'تعديل العضوية' : 'إضافة عضوية جديدة'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label htmlFor="customer">العميل</Label>
-          <select id="customer" name="customer_id" value={formData.customer_id} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md" required>
-            <option value="">-- اختر عميل --</option>
-            {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          <Label htmlFor="user">المستخدم</Label>
+          <select id="user" name="customer_id" value={formData.customer_id} onChange={handleChange} className="w-full p-2 mt-1 border border-gray-300 rounded-md" required>
+            <option value="">-- اختر مستخدم --</option>
+            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
         </div>
         <div>
@@ -1327,7 +1221,7 @@ const SubscriptionForm = ({ subscription, customers, plans, onSubmit, onCancel }
   );
 };
 
-const DashboardSubscriptions = ({ subscriptions, setSubscriptions, customers, plans }) => {
+const DashboardSubscriptions = ({ subscriptions, setSubscriptions, users, plans }) => {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -1366,7 +1260,7 @@ const DashboardSubscriptions = ({ subscriptions, setSubscriptions, customers, pl
   };
 
   if (showForm) {
-    return <SubscriptionForm subscription={editing} customers={customers} plans={plans} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
+    return <SubscriptionForm subscription={editing} users={users} plans={plans} onSubmit={editing ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditing(null); }} />;
   }
 
   return (
@@ -1395,7 +1289,7 @@ const DashboardSubscriptions = ({ subscriptions, setSubscriptions, customers, pl
             {subscriptions.map(s => (
               <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.id}</td>
-                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{customers.find(c => c.id === s.customer_id)?.name || '-'}</td>
+                <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{users.find(u => u.id === s.customer_id)?.name || '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{plans.find(p => p.id === s.plan_id)?.name || '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.start_date ? s.start_date.substring(0,10) : '-'}</td>
                 <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{s.end_date ? s.end_date.substring(0,10) : '-'}</td>
@@ -3286,7 +3180,7 @@ const DashboardInventory = ({ books, setBooks }) => {
   );
 };
 
-const DashboardOverview = ({ dashboardStats, books, orders, payments, customers }) => {
+const DashboardOverview = ({ dashboardStats, books, orders, payments }) => {
   const { t } = useTranslation();
   
   // حساب البيانات الحقيقية
@@ -4123,7 +4017,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customers, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCustomers, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
@@ -4133,7 +4027,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     totalBooks: 0,
     totalAuthors: 0,
     totalSales: 0,
-    totalCustomers: 0,
+    totalUsers: 0,
     totalOrders: 0,
     totalRevenue: 0,
     monthlyGrowth: 0,
@@ -4193,7 +4087,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
           totalBooks: dashboardStats.books,
           totalAuthors: dashboardStats.authors,
           totalSales: dashboardStats.sales,
-          totalCustomers: dashboardStats.customers,
+          totalUsers: dashboardStats.users,
           totalOrders,
           totalRevenue,
           monthlyGrowth,
@@ -4220,7 +4114,6 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
     sellers: t('authors'), // يمكن تغييرها لاحقاً
     branches: t('branches'),
     orders: t('orders'),
-    customers: t('customers'),
     users: t('users'),
     payments: t('payments'),
     'payment-methods': t('payments'), // يمكن تغييرها لاحقاً
@@ -4263,7 +4156,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{sectionTitles[dashboardSection]}</h1>
         </div>
 
-        {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} books={books} orders={orders} payments={payments} customers={customers} />}
+        {dashboardSection === 'overview' && <DashboardOverview dashboardStats={dashboardStats} books={books} orders={orders} payments={payments} />}
         {dashboardSection === 'books' && (
           <DashboardBooksTabs
             books={books}
@@ -4306,14 +4199,13 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
             setSiteSettings={setSiteSettings}
           />
         )}
-        {dashboardSection === 'customers' && <DashboardCustomers customers={customers} setCustomers={setCustomers} />}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
         {dashboardSection === 'subscriptions' && (
           <DashboardSubscriptions
             subscriptions={subscriptions}
             setSubscriptions={setSubscriptions}
-            customers={customers}
+            users={users}
             plans={plans}
           />
         )}
@@ -4331,7 +4223,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
             books={books}
             orders={orders}
             payments={payments}
-            customers={customers}
+            users={users}
           />
         )}
         {dashboardSection === 'settings' && (
