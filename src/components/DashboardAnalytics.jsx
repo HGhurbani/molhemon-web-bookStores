@@ -40,6 +40,8 @@ const DashboardAnalytics = ({ books, orders, payments, customers }) => {
   const completedOrders = orders?.filter(o => o.status === 'تم التوصيل').length || 0;
   const cancelledOrders = orders?.filter(o => o.status === 'ملغي').length || 0;
   const bestProducts = books?.filter(b => b.rating >= 4).length || 0;
+  const totalCustomers = customers?.length || 0;
+  const totalSales = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
   // بيانات KPI الرئيسية
   const kpiData = [
@@ -73,6 +75,22 @@ const DashboardAnalytics = ({ books, orders, payments, customers }) => {
       change: '+15.2%',
       trend: 'up',
       icon: Trophy,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'إجمالي العملاء',
+      value: totalCustomers.toString(),
+      change: '+0%',
+      trend: 'up',
+      icon: Users,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'إجمالي المبيعات',
+      value: `${totalSales.toFixed(2)} د.إ`,
+      change: '+0%',
+      trend: 'up',
+      icon: DollarSign,
       color: 'bg-purple-100 text-purple-600'
     }
   ];
@@ -252,9 +270,13 @@ const DashboardAnalytics = ({ books, orders, payments, customers }) => {
           </div>
           
           <div className="mb-6">
-            <p className="text-3xl font-bold text-gray-900 mb-2">156,420.80 د.إ</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2">
+              {totalSales.toFixed(2)} د.إ
+            </p>
             <div className="flex items-center">
-              <span className="text-sm text-gray-600">142,180.50</span>
+              <span className="text-sm text-gray-600">
+                {(totalSales * 0.9).toFixed(2)}
+              </span>
               <span className="text-sm text-green-600 mr-2">(+10.2%)</span>
               <ArrowUpRight className="w-4 h-4 text-green-600 mr-1" />
             </div>

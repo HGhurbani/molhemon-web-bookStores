@@ -4326,7 +4326,14 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
         {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}
         {dashboardSection === 'banners' && <DashboardBanners banners={banners} setBanners={setBanners} />}
-        {dashboardSection === 'analytics' && <DashboardAnalytics />}
+        {dashboardSection === 'analytics' && (
+          <DashboardAnalytics
+            books={books}
+            orders={orders}
+            payments={payments}
+            customers={customers}
+          />
+        )}
         {dashboardSection === 'settings' && (
           <DashboardSettings
             siteSettings={siteSettings}
