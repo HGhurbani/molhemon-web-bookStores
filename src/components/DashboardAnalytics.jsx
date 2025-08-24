@@ -30,7 +30,7 @@ import {
   Truck
 } from 'lucide-react';
 
-const DashboardAnalytics = ({ books, orders, payments, customers }) => {
+const DashboardAnalytics = ({ books, orders, payments, users }) => {
   const [timeRange, setTimeRange] = useState('7d');
   const [activeTab, setActiveTab] = useState('جديد');
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
@@ -40,7 +40,7 @@ const DashboardAnalytics = ({ books, orders, payments, customers }) => {
   const completedOrders = orders?.filter(o => o.status === 'تم التوصيل').length || 0;
   const cancelledOrders = orders?.filter(o => o.status === 'ملغي').length || 0;
   const bestProducts = books?.filter(b => b.rating >= 4).length || 0;
-  const totalCustomers = customers?.length || 0;
+  const totalUsers = users?.length || 0;
   const totalSales = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
   // بيانات KPI الرئيسية
@@ -78,8 +78,8 @@ const DashboardAnalytics = ({ books, orders, payments, customers }) => {
       color: 'bg-purple-100 text-purple-600'
     },
     {
-      title: 'إجمالي العملاء',
-      value: totalCustomers.toString(),
+      title: 'إجمالي المستخدمين',
+      value: totalUsers.toString(),
       change: '+0%',
       trend: 'up',
       icon: Users,

@@ -246,7 +246,7 @@ export const branches = [
   }
 ];
 
-export const customers = [
+export const users = [
   { id: 1, name: 'أحمد محمد', email: 'ahmed@example.com', phone: '+971 55 111 1111' },
   { id: 2, name: 'سارة علي', email: 'sara@example.com', phone: '+971 55 222 2222' },
 ];

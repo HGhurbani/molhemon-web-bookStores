@@ -38,7 +38,7 @@ import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
 import ChatWidget from '@/components/ChatWidget.jsx';
 
-import { sellers as initialSellers, branches as initialBranches, customers as initialCustomers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
+import { sellers as initialSellers, branches as initialBranches, users as initialUsers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
@@ -63,11 +63,10 @@ const App = () => {
     const stored = localStorage.getItem('branches');
     return stored ? JSON.parse(stored) : initialBranches;
   });
-  const [customers, setCustomers] = useState(() => {
-    const stored = localStorage.getItem('customers');
-    return stored ? JSON.parse(stored) : initialCustomers;
+  const [users, setUsers] = useState(() => {
+    const stored = localStorage.getItem('users');
+    return stored ? JSON.parse(stored) : initialUsers;
   });
-  const [users, setUsers] = useState([]);
   const [categoriesState, setCategoriesState] = useState([]);
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
@@ -124,7 +123,7 @@ const App = () => {
     if (storedMessages) setMessages(JSON.parse(storedMessages));
     (async () => {
       try {
-        const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, custData, subs, msgs] = await Promise.all([
+        const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
           api.getBooks(),
           api.getAuthors(),
           api.getCategories(),
@@ -141,7 +140,6 @@ const App = () => {
           api.getFeatures(),
           api.getSellers(),
           api.getBranches(),
-          api.getCustomers(),
           api.getSubscriptions(),
           api.getMessages(),
         ]);
@@ -162,7 +160,6 @@ const App = () => {
         setFeatures(feats);
         setSellers(sellData);
         setBranches(branchData);
-        setCustomers(custData);
         setSubscriptions(subs);
         setMessages(msgs);
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -170,7 +167,7 @@ const App = () => {
           { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
           { title: 'المؤلفون', value: a.length, icon: Users, color: 'bg-green-500' },
           { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
-          { title: 'العملاء', value: custData.length, icon: Eye, color: 'bg-orange-500' },
+          { title: 'المستخدمون', value: u.length, icon: Eye, color: 'bg-orange-500' },
         ]);
       } catch (err) {
         console.error('API fetch failed', err);
@@ -198,8 +195,8 @@ const App = () => {
   }, [branches]);
 
   useEffect(() => {
-    localStorage.setItem('customers', JSON.stringify(customers));
-  }, [customers]);
+    localStorage.setItem('users', JSON.stringify(users));
+  }, [users]);
 
 
   useEffect(() => {
@@ -253,9 +250,9 @@ const App = () => {
       { title: 'إجمالي الكتب', value: books.length, icon: BookOpen, color: 'bg-blue-500' },
       { title: 'المؤلفون', value: authors.length, icon: Users, color: 'bg-green-500' },
       { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
-      { title: 'العملاء', value: customers.length, icon: Eye, color: 'bg-orange-500' },
+      { title: 'المستخدمون', value: users.length, icon: Eye, color: 'bg-orange-500' },
     ]);
-  }, [books, authors, payments, customers]);
+  }, [books, authors, payments, users]);
 
   useEffect(() => {
     if (siteSettingsState.siteName) {
@@ -417,7 +414,6 @@ const App = () => {
                     authors={authors}
                     sellers={sellers}
                     branches={branches}
-                    customers={customers}
                     categories={categoriesState}
                     orders={orders}
                     payments={payments}
@@ -431,7 +427,6 @@ const App = () => {
                     setAuthors={setAuthors}
                     setSellers={setSellers}
                     setBranches={setBranches}
-                    setCustomers={setCustomers}
                     setCategories={setCategoriesState}
                     setOrders={setOrders}
                     setPayments={setPayments}

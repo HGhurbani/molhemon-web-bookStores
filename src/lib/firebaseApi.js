@@ -146,10 +146,6 @@ const firebaseApi = {
   updateBranch: (id, data) => updateCollection('branches', id, data),
   deleteBranch: (id) => deleteFromCollection('branches', id),
 
-  getCustomers: () => getCollection('customers'),
-  addCustomer: (data) => addToCollection('customers', data),
-  updateCustomer: (id, data) => updateCollection('customers', id, data),
-  deleteCustomer: (id) => deleteFromCollection('customers', id),
 
   getPayments: () => getCollection('payments'),
   addPayment: (data) => addToCollection('payments', data),
@@ -200,11 +196,11 @@ const firebaseApi = {
     await deleteDoc(doc(db, `books/${bookId}/ratings/${ratingId}`));
   },
   async getDashboardStats() {
-    const [bookSnap, authorSnap, paymentSnap, customerSnap] = await Promise.all([
+    const [bookSnap, authorSnap, paymentSnap, userSnap] = await Promise.all([
       getDocs(collection(db, 'books')),
       getDocs(collection(db, 'authors')),
       getDocs(collection(db, 'payments')),
-      getDocs(collection(db, 'customers')),
+      getDocs(collection(db, 'users')),
     ]);
     let sales = 0;
     paymentSnap.forEach(d => {
@@ -215,7 +211,7 @@ const firebaseApi = {
       books: bookSnap.size,
       authors: authorSnap.size,
       sales,
-      customers: customerSnap.size,
+      users: userSnap.size,
     };
   },
 };
