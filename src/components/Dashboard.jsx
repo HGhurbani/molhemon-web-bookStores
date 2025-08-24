@@ -63,6 +63,7 @@ import DashboardChat from './DashboardChat.jsx';
 import DashboardLanguages from './DashboardLanguages.jsx';
 import DashboardAnalytics from './DashboardAnalytics.jsx';
 import DashboardSettings from './DashboardSettings.jsx';
+import DataTable from './DataTable.jsx';
 
 import { Link } from 'react-router-dom';
 import firebaseApi from '../lib/firebaseApi';
@@ -278,70 +279,23 @@ const DashboardAuthors = ({ authors, setAuthors }) => {
   if (showForm) {
     return <AuthorForm author={editingAuthor} onSubmit={editingAuthor ? handleEditAuthor : handleAddAuthor} onCancel={() => { setShowForm(false); setEditingAuthor(null); }} />;
   }
+  const columns = [
+    { key: 'name', header: 'الاسم' },
+    { key: 'booksCount', header: 'الكتب' },
+    { key: 'soldCount', header: 'المباعة' },
+    { key: 'followers', header: 'المتابعون' },
+  ];
 
   return (
-    <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Authors Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">المؤلفون</h2>
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <span className="text-sm text-gray-600">عرض:</span>
-                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="البحث في المؤلفين..."
-                  className="pl-10 rtl:pr-10 rtl:pl-3 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white w-64"
-                />
-              </div>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white" onClick={() => { setEditingAuthor(null); setShowForm(true); }}>
-                <Plus className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-                إضافة مؤلف
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">الاسم</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">الكتب</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">المباعة</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">المتابعون</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {authors.map(a => (
-                <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{a.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{a.booksCount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{a.soldCount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{a.followers}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                    <div className="flex space-x-2 rtl:space-x-reverse justify-center">
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-blue-100 hover:text-blue-700 w-8 h-8" onClick={() => { setEditingAuthor(a); setShowForm(true); }}><Edit className="w-4 h-4" /></Button>
-                      <Button size="icon" variant="ghost" className="text-slate-500 hover:bg-red-100 hover:text-red-700 w-8 h-8" onClick={() => handleDeleteAuthor(a.id)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </motion.div>
+    <DataTable
+      title="المؤلفون"
+      data={authors}
+      columns={columns}
+      onAdd={() => { setEditingAuthor(null); setShowForm(true); }}
+      onEdit={(author) => { setEditingAuthor(author); setShowForm(true); }}
+      onDelete={handleDeleteAuthor}
+      addButtonText="إضافة مؤلف"
+    />
   );
 };
 
@@ -2215,6 +2169,76 @@ const DashboardOrders = ({ orders, setOrders }) => {
     );
   }
 
+  const columns = [
+    { key: 'id', header: 'رقم الطلب', render: id => `#${id}` },
+    { key: 'customerName', header: 'اسم العميل' },
+    { key: 'date', header: 'التاريخ' },
+    { key: 'total', header: 'المبلغ الإجمالي', render: total => `${total} AED` },
+    {
+      key: 'paymentStatus',
+      header: 'حالة الدفع',
+      render: status => (
+        <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+          status === 'Paid'
+            ? 'bg-green-100 text-green-800'
+            : status === 'Unpaid'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {status === 'Paid' ? 'مدفوع' : status === 'Unpaid' ? 'غير مدفوع' : 'مسترد'}
+        </span>
+      )
+    },
+    { key: 'paymentMethod', header: 'طريقة الدفع' },
+    {
+      key: 'status',
+      header: 'حالة التوصيل',
+      render: status => (
+        <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+          status === 'تم التوصيل'
+            ? 'bg-green-100 text-green-800'
+            : status === 'قيد الشحن'
+            ? 'bg-blue-100 text-blue-800'
+            : status === 'قيد المعالجة'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {status}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'الإجراءات',
+      render: (_ , order) => (
+        <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse">
+          <button
+            onClick={() => handleViewOrder(order)}
+            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+            title="عرض التفاصيل"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تحميل">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+          </button>
+          <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تعديل">
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDeleteOrder(order.id)}
+            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+            title="حذف"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       {/* Summary Cards */}
@@ -2263,139 +2287,7 @@ const DashboardOrders = ({ orders, setOrders }) => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">الطلبات</h2>
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <span className="text-sm text-gray-600">عرض:</span>
-                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="البحث في الطلبات..."
-                  className="pl-10 rtl:pr-10 rtl:pl-3 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white w-64"
-                />
-              </div>
-              <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                <option>هذا الشهر</option>
-                <option>الشهر الماضي</option>
-                <option>آخر 3 أشهر</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">رقم الطلب</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">اسم العميل</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">التاريخ</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">المبلغ الإجمالي</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">حالة الدفع</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">طريقة الدفع</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">حالة التوصيل</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {allOrders.map((order, index) => (
-                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">#{order.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customerName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">{order.total} AED</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      order.paymentStatus === 'Paid' 
-                        ? 'bg-green-100 text-green-800' 
-                        : order.paymentStatus === 'Unpaid'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {order.paymentStatus === 'Paid' ? 'مدفوع' : 
-                       order.paymentStatus === 'Unpaid' ? 'غير مدفوع' : 'مسترد'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.paymentMethod}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      order.status === 'تم التوصيل' 
-                        ? 'bg-green-100 text-green-800' 
-                        : order.status === 'قيد الشحن'
-                        ? 'bg-blue-100 text-blue-800'
-                        : order.status === 'قيد المعالجة'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse">
-                      <button 
-                        onClick={() => handleViewOrder(order)}
-                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="عرض التفاصيل"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تحميل">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                      </button>
-                      <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تعديل">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteOrder(order.id)}
-                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors" 
-                        title="حذف"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">عرض 1 إلى 10 من {allOrders.length} طلب</span>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <button className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition-colors">«</button>
-              <button className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition-colors">‹</button>
-              {[1, 2, 3, 4, 5].map(page => (
-                <button
-                  key={page}
-                  className={`px-3 py-2 text-sm border rounded-lg transition-colors ${
-                    page === 1 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600' 
-                      : 'border-gray-300 hover:bg-white'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition-colors">›</button>
-              <button className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition-colors">»</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DataTable title="الطلبات" data={allOrders} columns={columns} />
     </motion.div>
   );
 };
