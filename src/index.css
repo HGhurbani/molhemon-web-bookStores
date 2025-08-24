@@ -197,3 +197,29 @@
   transform: translateY(-50%) rotate(-10deg);
   transform-origin: center right;
 }
+
+@layer base {
+  table {
+    @apply w-full text-sm;
+  }
+
+  thead {
+    @apply bg-gray-50;
+  }
+
+  th {
+    @apply px-6 py-3 text-right rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider;
+  }
+
+  tbody {
+    @apply divide-y divide-gray-200;
+  }
+
+  tbody tr {
+    @apply hover:bg-gray-50 transition-colors;
+  }
+
+  td {
+    @apply px-6 py-4 whitespace-nowrap text-gray-900;
+  }
+}
