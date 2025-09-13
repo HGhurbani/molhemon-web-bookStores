@@ -1,18 +1,34 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDbW7bX1m10rPyLtqxdec6f8I7u09-Dcq0",
-  authDomain: "molhem-book-store.firebaseapp.com",
-  projectId: "molhem-book-store",
-  storageBucket: "molhem-book-store.appspot.com",
-  messagingSenderId: "405854542171",
-  appId: "1:405854542171:web:f5ec90eca02e261da8a27e",
-  measurementId: "G-J7N2QML49Z"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// التحقق من صحة الإعدادات
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error('Firebase configuration is missing. Please check your environment variables.');
+}
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// إعداد Firebase Storage مع إعدادات CORS محسنة
+export const storage = getStorage(app, firebaseConfig.storageBucket);
+
+// إعدادات إضافية للتطوير (اختياري)
+if (import.meta.env.VITE_APP_ENV === 'development') {
+  console.log('Firebase initialized in development mode');
+  // يمكن إضافة إعدادات التطوير هنا
+}
+
 export default app;

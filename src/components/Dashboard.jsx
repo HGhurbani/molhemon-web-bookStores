@@ -41,10 +41,14 @@ import {
   LogOut,
   Mail,
   Search,
-  Truck
+  Truck,
+  PenTool,
+  HelpCircle,
+  Shield
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
+import PaymentMethodsManagement from '@/pages/PaymentMethodsManagement.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
 import RichTextEditor from './RichTextEditor.jsx';
@@ -67,10 +71,14 @@ import DataTable from './DataTable.jsx';
 
 import { Link } from 'react-router-dom';
 import firebaseApi from '../lib/firebaseApi';
+import authManager from '../lib/authManager';
 import { useLanguage } from '../lib/languageContext';
 import { useCurrency } from '../lib/currencyContext';
 import { useNavigate } from 'react-router-dom';
-import ShippingManagement from './ShippingManagement.jsx';
+import ShippingMethodsManagement from '@/pages/ShippingMethodsManagement.jsx';
+import UserRoleManager from './UserRoleManager.jsx';
+import { processBookFile } from '@/lib/fileUtils.js';
+import UnifiedOrderDetails from './UnifiedOrderDetails.jsx';
 
 const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
 
@@ -116,7 +124,7 @@ const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen }) => {
+const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, handleFeatureClick }) => {
   const { t } = useTranslation();
   
   const navItems = [
@@ -129,7 +137,9 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'subscriptions', name: t('subscriptions'), icon: Crown },
     { id: 'inventory', name: t('inventory'), icon: Boxes },
     { id: 'payments', name: t('payments'), icon: CreditCard },
+    { id: 'payment-methods', name: 'إدارة طرق الدفع', icon: CreditCard },
     { id: 'users', name: t('users'), icon: UserCheck },
+    { id: 'user-roles', name: 'إدارة الأدوار', icon: Shield },
     { id: 'analytics', name: t('analytics'), icon: BarChart3 },
     { id: 'messages', name: t('messages'), icon: MessageCircle },
     { id: 'notifications', name: t('notifications'), icon: Bell },
@@ -138,6 +148,10 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
     { id: 'shipping', name: 'إدارة الشحن', icon: Truck },
     { id: 'marketing', name: t('marketing'), icon: Globe },
     { id: 'languages', name: t('languages'), icon: Globe },
+    { id: 'pages', name: 'إدارة الصفحات', icon: BookOpen },
+    { id: 'blog', name: 'إدارة المدونة', icon: PenTool },
+    { id: 'help', name: 'مركز المساعدة', icon: HelpCircle },
+    { id: 'distributors', name: 'إدارة الموزعين', icon: MapPin },
     { id: 'settings', name: t('settings'), icon: Settings },
     { id: 'logout', name: t('logout'), icon: LogOut }
   ];
@@ -159,16 +173,28 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
             <button
               key={id}
               onClick={() => {
-                setDashboardSection(id);
-                setSidebarOpen(false);
+                if (id === 'logout') {
+                  handleFeatureClick('logout');
+                } else {
+                  setDashboardSection(id);
+                  setSidebarOpen(false);
+                }
               }}
               className={`w-full flex items-center space-x-3 rtl:space-x-reverse px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                dashboardSection === id 
-                  ? 'bg-[#E8E8FF] text-[#5C5CFF]' 
-                  : 'text-[#777777] hover:bg-gray-50 hover:text-gray-900'
+                id === 'logout' 
+                  ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                  : dashboardSection === id 
+                    ? 'bg-[#E8E8FF] text-[#5C5CFF]' 
+                    : 'text-[#777777] hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <IconComponent className={`w-5 h-5 ${dashboardSection === id ? 'text-[#5C5CFF]' : 'text-[#777777]'}`} />
+              <IconComponent className={`w-5 h-5 ${
+                id === 'logout' 
+                  ? 'text-red-600' 
+                  : dashboardSection === id 
+                    ? 'text-[#5C5CFF]' 
+                    : 'text-[#777777]'
+              }`} />
               <span>{name}</span>
             </button>
           ))}
@@ -180,11 +206,36 @@ const DashboardSidebar = ({ dashboardSection, setDashboardSection, sidebarOpen, 
 
 
 const AuthorForm = ({ author, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', bio: '', image: '', imgPlaceholder: '', followers: 0, ...author });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    bio: '', 
+    image: '', 
+    imgPlaceholder: '', 
+    followers: 0,
+    socialMedia: {
+      facebook: '',
+      twitter: '',
+      instagram: '',
+      linkedin: '',
+      youtube: '',
+      website: ''
+    },
+    ...author 
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSocialMediaChange = (platform, value) => {
+    setFormData(prev => ({
+      ...prev,
+      socialMedia: {
+        ...prev.socialMedia,
+        [platform]: value
+      }
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -226,6 +277,68 @@ const AuthorForm = ({ author, onSubmit, onCancel }) => {
             className="w-full p-2 border border-gray-300 rounded-md"
           />
         </div>
+        
+        {/* وسائل التواصل الاجتماعي */}
+        <div className="border-t pt-4">
+          <Label className="text-lg font-semibold text-gray-700 mb-3 block">وسائل التواصل الاجتماعي</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="facebook" className="text-sm text-gray-600">فيسبوك</Label>
+              <Input 
+                id="facebook" 
+                placeholder="رابط صفحة فيسبوك" 
+                value={formData.socialMedia?.facebook || ''} 
+                onChange={(e) => handleSocialMediaChange('facebook', e.target.value)} 
+              />
+            </div>
+            <div>
+              <Label htmlFor="twitter" className="text-sm text-gray-600">تويتر</Label>
+              <Input 
+                id="twitter" 
+                placeholder="رابط حساب تويتر" 
+                value={formData.socialMedia?.twitter || ''} 
+                onChange={(e) => handleSocialMediaChange('twitter', e.target.value)} 
+              />
+            </div>
+            <div>
+              <Label htmlFor="instagram" className="text-sm text-gray-600">إنستغرام</Label>
+              <Input 
+                id="instagram" 
+                placeholder="رابط حساب إنستغرام" 
+                value={formData.socialMedia?.instagram || ''} 
+                onChange={(e) => handleSocialMediaChange('instagram', e.target.value)} 
+              />
+            </div>
+            <div>
+              <Label htmlFor="linkedin" className="text-sm text-gray-600">لينكد إن</Label>
+              <Input 
+                id="linkedin" 
+                placeholder="رابط حساب لينكد إن" 
+                value={formData.socialMedia?.linkedin || ''} 
+                onChange={(e) => handleSocialMediaChange('linkedin', e.target.value)} 
+              />
+            </div>
+            <div>
+              <Label htmlFor="youtube" className="text-sm text-gray-600">يوتيوب</Label>
+              <Input 
+                id="youtube" 
+                placeholder="رابط قناة يوتيوب" 
+                value={formData.socialMedia?.youtube || ''} 
+                onChange={(e) => handleSocialMediaChange('youtube', e.target.value)} 
+              />
+            </div>
+            <div>
+              <Label htmlFor="website" className="text-sm text-gray-600">الموقع الإلكتروني</Label>
+              <Input 
+                id="website" 
+                placeholder="رابط الموقع الإلكتروني" 
+                value={formData.socialMedia?.website || ''} 
+                onChange={(e) => handleSocialMediaChange('website', e.target.value)} 
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end space-x-3 rtl:space-x-reverse">
           <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
           <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -1797,6 +1910,7 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
+        <DialogTitle className="sr-only">تفاصيل الطلب #{order.id}</DialogTitle>
         {/* رأس ملون */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 flex items-center justify-between">
           <div>
@@ -1820,7 +1934,12 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
             </div>
             <div className="text-sm text-gray-500">
               <div>التاريخ: <span className="font-semibold text-gray-700">{order.date}</span></div>
-              <div>طريقة الدفع: <span className="font-semibold text-gray-700">{order.paymentMethod || 'بطاقة ائتمان'}</span></div>
+              <div>طريقة الدفع: <span className="font-semibold text-gray-700">
+                {order.paymentMethod && typeof order.paymentMethod === 'object' 
+                  ? order.paymentMethod.name || order.paymentMethod.gateway || 'بطاقة ائتمان'
+                  : order.paymentMethod || 'بطاقة ائتمان'
+                }
+              </span></div>
             </div>
           </div>
 
@@ -1845,7 +1964,7 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
                       </td>
                       <td className="py-2 font-medium text-gray-800">{item.title}</td>
                       <td className="py-2">{item.quantity}</td>
-                      <td className="py-2 font-semibold text-blue-700">{item.price * item.quantity} AED</td>
+                      <td className="py-2 font-semibold text-blue-700">{item.price * item.quantity} {order.currency || 'SAR'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1853,28 +1972,6 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
             </div>
           </div>
 
-          {/* ملخص الطلب */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t pt-4 mt-2">
-            <div className="space-y-1">
-              <div className="text-gray-700 font-semibold">ملخص الطلب</div>
-              <div className="text-sm text-gray-600">الإجمالي: <span className="font-bold text-blue-700">{order.total} AED</span></div>
-              <div className="text-sm text-gray-600">حالة الدفع: <span className="font-semibold text-green-600">{order.paymentStatus || 'مدفوع'}</span></div>
-              <div className="text-sm text-gray-600">حالة التوصيل: <span className="font-semibold text-blue-600">{order.status}</span></div>
-            </div>
-            <div className="flex flex-col gap-2 md:items-end">
-              <label htmlFor="status" className="text-sm text-gray-700 font-medium mb-1">تغيير حالة الطلب</label>
-              <select
-                id="status"
-                value={order.status}
-                onChange={(e) => onUpdateStatus(order.id, e.target.value)}
-                className="w-48 p-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400"
-              >
-                {statuses.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
 
           {/* أزرار الإجراءات */}
           <div className="flex flex-row-reverse gap-3 pt-4 border-t mt-2">
@@ -1892,39 +1989,213 @@ const OrderDetailsDialog = ({ open, onOpenChange, order, onUpdateStatus, onDelet
   );
 };
 
-const DashboardOrders = ({ orders, setOrders }) => {
+const DashboardOrders = ({ orders, setOrders, books = [] }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    paymentStatus: 'all',
+    search: '',
+    dateRange: 'all'
+  });
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
 
-  const handleUpdateStatus = async (id, status) => {
+  // تحميل الطلبات من Firebase
+  useEffect(() => {
+    const loadOrders = async () => {
+      setIsLoading(true);
+      try {
+        // انتظار تهيئة نظام المصادقة
+        await authManager.waitForInitialization();
+        
+        // التحقق من الأذونات
+        if (!authManager.isManager()) {
+          authManager.showPermissionError('الطلبات');
+          setIsLoading(false);
+          return;
+        }
+        
+        // جلب الطلبات من API
+        let ordersData;
+        try {
+          ordersData = await api.orders.getAll();
+        } catch (apiError) {
+          console.error('API error, trying direct Firebase call:', apiError);
+          // جرب جلب البيانات مباشرة من Firebase
+          ordersData = await firebaseApi.getOrders();
+          
+          // التأكد من وجود معرفات للطلبات
+          if (Array.isArray(ordersData)) {
+            ordersData = ordersData.map(order => {
+              if (!order.id && order.orderNumber) {
+                console.warn('Order ID missing in Firebase data, using orderNumber:', order.orderNumber);
+                order.id = order.orderNumber;
+              }
+              return order;
+            });
+          }
+        }
+        
+        // إذا كان ordersData كائن وليس مصفوفة، جرب استخراج البيانات
+        let ordersArray = [];
+        if (Array.isArray(ordersData)) {
+          ordersArray = ordersData;
+        } else if (ordersData && typeof ordersData === 'object') {
+          // إذا كان كائن، جرب استخراج البيانات
+          if (ordersData.orders && Array.isArray(ordersData.orders)) {
+            ordersArray = ordersData.orders;
+          } else if (ordersData.data && Array.isArray(ordersData.data)) {
+            ordersArray = ordersData.data;
+          } else {
+            // جرب تحويل الكائن إلى مصفوفة
+            ordersArray = Object.values(ordersData);
+          }
+        }
+        
+        // التأكد من وجود معرفات للطلبات في المصفوفة النهائية
+        ordersArray = ordersArray.map(order => {
+          if (!order.id && order.orderNumber) {
+            console.warn('Order ID missing in final array, using orderNumber:', order.orderNumber);
+            order.id = order.orderNumber;
+          }
+          return order;
+        });
+        
+        console.log('Final orders array:', ordersArray);
+        
+        // إذا لم توجد طلبات، أضف طلب تجريبي للاختبار
+        if (ordersArray.length === 0) {
+          console.log('No orders found, creating sample order for testing...');
+          const sampleOrder = {
+            id: 'sample-order-1',
+            orderNumber: 'ORD-001',
+            customerId: 'sample-customer',
+            customerName: 'عميل تجريبي',
+            customerEmail: 'customer@example.com',
+            customerPhone: '+966501234567',
+            customerAddress: {
+              name: 'عميل تجريبي',
+              street: 'شارع الملك فهد',
+              city: 'الرياض',
+              postalCode: '12345',
+              country: 'SA'
+            },
+            items: [
+              {
+                id: 'item-1',
+                name: 'كتاب تجريبي',
+                type: 'physical',
+                price: 50,
+                quantity: 1,
+                weight: 0.5
+              }
+            ],
+            subtotal: 50,
+            shippingCost: 15,
+            taxAmount: 7.5,
+            totalAmount: 72.5,
+            currency: 'SAR',
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentMethod: 'manual',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          ordersArray = [sampleOrder];
+          console.log('Added sample order:', sampleOrder);
+        }
+        
+        setOrders(ordersArray);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        if (error.code === 'permission-denied') {
+          authManager.showPermissionError('الطلبات');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [setOrders]);
+
+  const handleUpdateStatus = async (id, status, notes = '') => {
+    // التحقق من صحة المعاملات
+    if (!id) {
+      console.error('Order ID is required for status update');
+      toast({ 
+        title: 'خطأ في تحديث حالة الطلب', 
+        description: 'معرف الطلب مطلوب',
+        type: 'error'
+      });
+      return;
+    }
+    
+    if (!status) {
+      console.error('Status is required for status update');
+      toast({ 
+        title: 'خطأ في تحديث حالة الطلب', 
+        description: 'حالة الطلب مطلوبة',
+        type: 'error'
+      });
+      return;
+    }
+    
     try {
-      const updatedOrder = await api.updateOrder(id, { status });
-      setOrders(orders.map(o => o.id === id ? updatedOrder : o));
+      console.log('Updating order status:', { id, status, notes });
+      const updatedOrder = await api.orders.updateStatus(id, status, notes);
+      const currentOrders = Array.isArray(orders) ? orders : [];
+      setOrders(currentOrders.map(o => o.id === id ? updatedOrder : o));
       if (selectedOrder && selectedOrder.id === id) {
         setSelectedOrder(updatedOrder);
       }
-      toast({ title: 'تم تحديث حالة الطلب' });
+      toast({ 
+        title: 'تم تحديث حالة الطلب بنجاح',
+        type: 'success'
+      });
     } catch (e) {
-      toast({ title: 'حدث خطأ أثناء التحديث. حاول مجدداً.', variant: 'destructive' });
+      console.error('Error updating order status:', e);
+      toast({ 
+        title: 'خطأ في تحديث حالة الطلب', 
+        description: e.message || 'حدث خطأ غير متوقع',
+        type: 'error'
+      });
     }
   };
 
   const handleDeleteOrder = async (id) => {
-    if (!confirmDelete()) return;
+    if (!window.confirm('هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.')) return;
     try {
-      await api.deleteOrder(id);
-      setOrders(orders.filter(o => o.id !== id));
+      // إذا كان المعرف فارغ، استخدم orderNumber للبحث
+      if (!id) {
+        console.warn('Order ID is missing for deletion');
+        toast({ title: 'لا يمكن حذف الطلب - معرف الطلب غير موجود', variant: 'destructive' });
+        return;
+      }
+      
+      await api.orders.delete(id);
+      const currentOrders = Array.isArray(orders) ? orders : [];
+      setOrders(currentOrders.filter(o => o.id !== id));
       if (selectedOrder && selectedOrder.id === id) {
         setSelectedOrder(null);
         setShowOrderDetails(false);
       }
-      toast({ title: 'تم حذف الطلب' });
+      toast({ title: 'تم حذف الطلب بنجاح' });
     } catch (e) {
+      console.error('Error deleting order:', e);
       toast({ title: 'حدث خطأ أثناء الحذف. حاول مجدداً.', variant: 'destructive' });
     }
   };
 
   const handleViewOrder = (order) => {
+    // إذا لم يكن هناك معرف، استخدم orderNumber كمعرف مؤقت
+    if (!order.id) {
+      console.warn('Order ID is missing, using orderNumber as fallback:', order.orderNumber);
+      order.id = order.orderNumber || `temp-${Date.now()}`;
+    }
+    
     setSelectedOrder(order);
     setShowOrderDetails(true);
   };
@@ -1934,122 +2205,47 @@ const DashboardOrders = ({ orders, setOrders }) => {
     setSelectedOrder(null);
   };
 
-  // استخدام البيانات الحقيقية مع إضافة بيانات تجريبية إذا لم تكن موجودة
-  const allOrders = orders && orders.length > 0 ? orders : [
-    {
-      id: '11331133',
-      customerName: 'Mc Cartney',
-      customerEmail: 'mc.cartney@gmail.com',
-      customerPhone: '009716012345',
-      date: '15 May 2025',
-      total: 105.00,
-      paymentMethod: 'Master Card',
-      paymentStatus: 'Paid',
-      status: 'قيد المعالجة',
-      shippingAddress: 'Cayan Tower, 65, 47 Street, Al sawan, Ajman, 78856, United Arab Emirates 009716012345',
-      items: [
-        {
-          id: '1',
-          title: 'Before You Choose Medicine',
-          author: 'Lily Williams',
-          quantity: 1,
-          price: 45.00,
-          originalPrice: 60.00,
-          image: 'https://via.placeholder.com/40x60/6366f1/fff?text=Book',
-          status: 'Ready'
-        },
-        {
-          id: '2',
-          title: 'Internal Conversation',
-          author: 'Lara Croft',
-          quantity: 1,
-          price: 60.00,
-          originalPrice: 75.00,
-          image: 'https://via.placeholder.com/40x60/10b981/fff?text=Book',
-          status: 'Ready'
-        }
-      ]
-    },
-    {
-      id: '11341134',
-      customerName: 'Lily Williams',
-      customerEmail: 'lily.williams@example.com',
-      customerPhone: '+971-50-123-4567',
-      date: '15 May 2025',
-      total: 160.00,
-      paymentMethod: 'Credit Card',
-      paymentStatus: 'Paid',
-      status: 'قيد الشحن',
-      items: [
-        {
-          id: '1',
-          title: 'What Remain Of The Remains',
-          author: 'Lily Williams',
-          quantity: 2,
-          price: 45.00,
-          originalPrice: 45.00,
-          image: 'https://via.placeholder.com/40x60/6366f1/fff?text=Book',
-          status: 'Ready'
-        },
-        {
-          id: '2',
-          title: 'Kingdom of Ash and Blood',
-          author: 'John Smith',
-          quantity: 1,
-          price: 70.00,
-          originalPrice: 70.00,
-          image: 'https://via.placeholder.com/40x60/10b981/fff?text=Book',
-          status: 'Ready'
-        }
-      ]
-    },
-    {
-      id: '11341135',
-      customerName: 'John Doe',
-      customerEmail: 'john.doe@example.com',
-      customerPhone: '+971-55-987-6543',
-      date: '14 May 2025',
-      total: 120.00,
-      paymentMethod: 'Cash on Delivery',
-      paymentStatus: 'Unpaid',
-      status: 'قيد المعالجة',
-      items: [
-        {
-          id: '3',
-          title: 'The Forsaken King',
-          author: 'Jane Doe',
-          quantity: 1,
-          price: 120.00,
-          originalPrice: 120.00,
-          image: 'https://via.placeholder.com/40x60/f59e0b/fff?text=Book',
-          status: 'Pending'
-        }
-      ]
-    },
-    {
-      id: '11341136',
-      customerName: 'Jane Smith',
-      customerEmail: 'jane.smith@example.com',
-      customerPhone: '+971-52-456-7890',
-      date: '13 May 2025',
-      total: 200.00,
-      paymentMethod: 'Apple Pay',
-      paymentStatus: 'Refund',
-      status: 'ملغي',
-      items: [
-        {
-          id: '4',
-          title: 'The Silent Echo',
-          author: 'Mike Johnson',
-          quantity: 1,
-          price: 200.00,
-          originalPrice: 200.00,
-          image: 'https://via.placeholder.com/40x60/ef4444/fff?text=Book',
-          status: 'Cancelled'
-        }
-      ]
+  // فلترة وترتيب الطلبات
+  const ordersArray = Array.isArray(orders) ? orders : [];
+  const filteredOrders = ordersArray.filter(order => {
+    // فلترة حسب الحالة
+    if (filters.status !== 'all' && order.status !== filters.status) {
+      return false;
     }
-  ];
+    
+    // فلترة حسب حالة الدفع
+    if (filters.paymentStatus !== 'all' && order.paymentStatus !== filters.paymentStatus) {
+      return false;
+    }
+    
+    // فلترة حسب البحث
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      const searchableFields = [
+        order.orderNumber || order.id,
+        order.customerName || '',
+        order.customerEmail || '',
+        order.customerPhone || ''
+      ];
+      
+      if (!searchableFields.some(field => field.toLowerCase().includes(searchTerm))) {
+        return false;
+      }
+    }
+    
+    return true;
+  }).sort((a, b) => {
+    const aValue = a[sortBy] || '';
+    const bValue = b[sortBy] || '';
+    
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  const allOrders = Array.isArray(filteredOrders) ? filteredOrders : [];
 
   // إذا كان يتم عرض تفاصيل الطلب
   if (showOrderDetails && selectedOrder) {
@@ -2059,47 +2255,176 @@ const DashboardOrders = ({ orders, setOrders }) => {
         onBack={handleBackToOrders}
         onUpdateStatus={handleUpdateStatus}
         onDelete={handleDeleteOrder}
+        books={books}
       />
     );
   }
 
+  // عرض loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">جاري تحميل الطلبات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // عرض رسالة عندما لا توجد طلبات
+  if (!isLoading && allOrders.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد طلبات</h3>
+            <p className="text-gray-600">لم يتم العثور على أي طلبات في النظام</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const columns = [
-    { key: 'id', header: 'رقم الطلب', render: id => `#${id}` },
-    { key: 'customerName', header: 'اسم العميل' },
-    { key: 'date', header: 'التاريخ' },
-    { key: 'total', header: 'المبلغ الإجمالي', render: total => `${total} AED` },
+    { 
+      key: 'orderNumber', 
+      header: 'رقم الطلب', 
+      render: (orderNumber, order) => orderNumber || `#${order.id?.slice(-8)?.toUpperCase() || 'N/A'}` 
+    },
+    { 
+      key: 'customerName', 
+      header: 'اسم العميل',
+      render: (name, order) => name || order.customerName || 'غير محدد'
+    },
+    { 
+      key: 'createdAt', 
+      header: 'التاريخ',
+      render: (dateValue) => {
+        if (!dateValue) return 'غير محدد';
+        
+        try {
+          let date;
+          
+          // التعامل مع Firebase Timestamp
+          if (dateValue && typeof dateValue === 'object' && dateValue.toDate) {
+            date = dateValue.toDate();
+          } else if (dateValue && typeof dateValue === 'object' && dateValue.seconds) {
+            // التعامل مع Firebase Timestamp في شكل object
+            date = new Date(dateValue.seconds * 1000);
+          } else if (typeof dateValue === 'string' || typeof dateValue === 'number') {
+            date = new Date(dateValue);
+          } else {
+            return 'غير محدد';
+          }
+          
+          if (isNaN(date.getTime())) return 'غير محدد';
+          return date.toLocaleDateString('ar-SA');
+        } catch (error) {
+          console.error('Error formatting date in table:', error, 'Value:', dateValue);
+          return 'غير محدد';
+        }
+      }
+    },
+    { 
+      key: 'totalAmount', 
+      header: 'المبلغ الإجمالي', 
+      render: (total, order) => {
+        // حساب المبلغ الإجمالي بشكل صحيح مع التحقق من طريقة الشحن
+        const subtotal = order.subtotal || 0;
+        const taxAmount = order.taxAmount || 0;
+        const discountAmount = order.discountAmount || 0;
+        
+        // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
+        const shippingMethod = order.shippingMethod;
+        const isPickup = shippingMethod === 'pickup' || 
+                        shippingMethod?.name === 'استلام من المتجر' ||
+                        shippingMethod?.id === 'pickup' ||
+                        shippingMethod?.type === 'pickup';
+        
+        const shippingCost = isPickup ? 0 : (order.shippingCost || 0);
+        
+        // حساب الإجمالي: المجموع الفرعي - الخصم + الشحن + الضريبة
+        const calculatedTotal = subtotal - discountAmount + shippingCost + taxAmount;
+        
+        const currency = order.currency || 'SAR';
+        return `${calculatedTotal.toFixed(2)} ${currency}`;
+      }
+    },
     {
       key: 'paymentStatus',
       header: 'حالة الدفع',
-      render: status => (
-        <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-          status === 'Paid'
-            ? 'bg-green-100 text-green-800'
-            : status === 'Unpaid'
-            ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {status === 'Paid' ? 'مدفوع' : status === 'Unpaid' ? 'غير مدفوع' : 'مسترد'}
-        </span>
-      )
+      render: (status, order) => {
+        const paymentStatus = status || order.paymentStatus || 'pending';
+        const statusMap = {
+          'paid': { label: 'مدفوع', class: 'bg-green-100 text-green-800' },
+          'pending': { label: 'في الانتظار', class: 'bg-yellow-100 text-yellow-800' },
+          'failed': { label: 'فشل', class: 'bg-red-100 text-red-800' },
+          'refunded': { label: 'مسترد', class: 'bg-gray-100 text-gray-800' }
+        };
+        const statusInfo = statusMap[paymentStatus] || statusMap['pending'];
+        
+        return (
+          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.class}`}>
+            {statusInfo.label}
+          </span>
+        );
+      }
     },
-    { key: 'paymentMethod', header: 'طريقة الدفع' },
+    { 
+      key: 'paymentMethod', 
+      header: 'طريقة الدفع',
+      render: (method, order) => {
+        // معالجة طريقة الدفع من البيانات الفعلية
+        const paymentMethod = method || order.paymentMethod;
+        
+        if (typeof paymentMethod === 'object' && paymentMethod !== null) {
+          return paymentMethod.name || paymentMethod.displayName || paymentMethod.gateway || 'غير محدد';
+        }
+        
+        if (typeof paymentMethod === 'string' && paymentMethod.trim()) {
+          // معالجة طرق الدفع المختلفة
+          const method = paymentMethod.toLowerCase();
+          if (method.includes('cash') || method.includes('cod') || method.includes('استلام')) {
+            return 'الدفع عند الاستلام';
+          }
+          if (method.includes('card') || method.includes('بطاقة')) {
+            return 'بطاقة ائتمان';
+          }
+          if (method.includes('bank') || method.includes('بنك')) {
+            return 'تحويل بنكي';
+          }
+          return paymentMethod;
+        }
+        
+        return 'غير محدد';
+      }
+    },
     {
       key: 'status',
-      header: 'حالة التوصيل',
-      render: status => (
-        <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-          status === 'تم التوصيل'
-            ? 'bg-green-100 text-green-800'
-            : status === 'قيد الشحن'
-            ? 'bg-blue-100 text-blue-800'
-            : status === 'قيد المعالجة'
-            ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {status}
-        </span>
-      )
+      header: 'حالة الطلب',
+      render: (status, order) => {
+        const orderStatus = status || order.status || 'pending';
+        const statusMap = {
+          'pending': { label: 'قيد المراجعة', class: 'bg-yellow-100 text-yellow-800' },
+          'confirmed': { label: 'مؤكد', class: 'bg-blue-100 text-white' },
+          'shipped': { label: 'تم الشحن', class: 'bg-purple-100 text-purple-800' },
+          'delivered': { label: 'تم التوصيل', class: 'bg-green-100 text-green-800' },
+          'cancelled': { label: 'ملغي', class: 'bg-red-100 text-red-800' }
+        };
+        const statusInfo = statusMap[orderStatus] || statusMap['pending'];
+        
+        return (
+          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.class}`}>
+            {statusInfo.label}
+          </span>
+        );
+      }
     },
     {
       key: 'actions',
@@ -2112,14 +2437,6 @@ const DashboardOrders = ({ orders, setOrders }) => {
             title="عرض التفاصيل"
           >
             <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تحميل">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-          </button>
-          <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" title="تعديل">
-            <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleDeleteOrder(order.id)}
@@ -2135,13 +2452,90 @@ const DashboardOrders = ({ orders, setOrders }) => {
 
   return (
     <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Filters and Search */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">البحث</label>
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="ابحث برقم الطلب، اسم العميل، البريد الإلكتروني..."
+                value={filters.search}
+                onChange={(e) => setFilters({...filters, search: e.target.value})}
+                className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+          
+          {/* Status Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({...filters, status: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">جميع الحالات</option>
+              <option value="pending">قيد المراجعة</option>
+              <option value="confirmed">مؤكد</option>
+              <option value="shipped">تم الشحن</option>
+              <option value="delivered">تم التوصيل</option>
+              <option value="cancelled">ملغي</option>
+            </select>
+          </div>
+          
+          {/* Payment Status Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">حالة الدفع</label>
+            <select
+              value={filters.paymentStatus}
+              onChange={(e) => setFilters({...filters, paymentStatus: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">جميع الحالات</option>
+              <option value="pending">في الانتظار</option>
+              <option value="paid">مدفوع</option>
+              <option value="failed">فشل</option>
+              <option value="refunded">مسترد</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: 'إجمالي الطلبات', value: allOrders.length.toString(), change: '+34.5%', icon: Package, color: 'blue' },
-          { title: 'الطلبات المكتملة', value: allOrders.filter(o => o.status === 'تم التوصيل').length.toString(), change: '+14.5%', icon: Package, color: 'green' },
-          { title: 'الطلبات قيد المعالجة', value: allOrders.filter(o => o.status === 'قيد المعالجة').length.toString(), change: '+43.5%', icon: Package, color: 'orange' },
-          { title: 'الطلبات الملغية', value: allOrders.filter(o => o.status === 'ملغي').length.toString(), change: '-8.5%', icon: Package, color: 'red' }
+          { 
+            title: 'إجمالي الطلبات', 
+            value: allOrders.length.toString(), 
+            change: '+12.5%', 
+            icon: Package, 
+            color: 'blue' 
+          },
+          { 
+            title: 'الطلبات المكتملة', 
+            value: allOrders.filter(o => o.status === 'delivered' || o.status === 'تم التوصيل').length.toString(), 
+            change: '+8.2%', 
+            icon: Package, 
+            color: 'green' 
+          },
+          { 
+            title: 'الطلبات قيد المراجعة', 
+            value: allOrders.filter(o => o.status === 'pending' || o.status === 'قيد المراجعة').length.toString(), 
+            change: '+15.3%', 
+            icon: Package, 
+            color: 'orange' 
+          },
+          { 
+            title: 'الطلبات الملغية', 
+            value: allOrders.filter(o => o.status === 'cancelled' || o.status === 'ملغي').length.toString(), 
+            change: '-2.1%', 
+            icon: Package, 
+            color: 'red' 
+          }
         ].map((stat, index) => {
           const IconComponent = stat.icon;
           const colorClasses = {
@@ -2187,14 +2581,95 @@ const DashboardOrders = ({ orders, setOrders }) => {
 };
 
 // مكون عرض تفاصيل الطلب الجديد
-const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
+const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] }) => {
+  const [newStatus, setNewStatus] = useState(order.status || 'pending');
+  const [statusNotes, setStatusNotes] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // تسجيل بيانات الطلب للتأكد من وجود المعرف
+  console.log('OrderDetailsView - Order data:', order);
+  console.log('OrderDetailsView - Order ID:', order.id);
+  console.log('OrderDetailsView - Order keys:', Object.keys(order));
+
+  // دالة مساعدة لتنسيق التواريخ
+  const formatDate = (dateValue) => {
+    if (!dateValue) return 'غير محدد';
+    
+    try {
+      let date;
+      
+      // التعامل مع Firebase Timestamp
+      if (dateValue && typeof dateValue === 'object' && dateValue.toDate) {
+        date = dateValue.toDate();
+      } else if (dateValue && typeof dateValue === 'object' && dateValue.seconds) {
+        // التعامل مع Firebase Timestamp في شكل object
+        date = new Date(dateValue.seconds * 1000);
+      } else if (typeof dateValue === 'string' || typeof dateValue === 'number') {
+        date = new Date(dateValue);
+      } else {
+        return 'غير محدد';
+      }
+      
+      if (isNaN(date.getTime())) {
+        return 'غير محدد';
+      }
+      
+      return date.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Value:', dateValue);
+      return 'غير محدد';
+    }
+  };
+
   const statuses = [
-    { value: 'قيد المعالجة', label: 'قيد المعالجة', color: 'bg-yellow-100 text-yellow-800', icon: '⏳' },
-    { value: 'قيد الشحن', label: 'قيد الشحن', color: 'bg-blue-100 text-blue-800', icon: '🚚' },
-    { value: 'تم التوصيل', label: 'تم التوصيل', color: 'bg-green-100 text-green-800', icon: '✅' },
-    { value: 'ملغي', label: 'ملغي', color: 'bg-red-100 text-red-800', icon: '❌' },
+    { value: 'pending', label: 'قيد المراجعة', color: 'bg-yellow-100 text-yellow-800', icon: '⏳' },
+    { value: 'confirmed', label: 'مؤكد', color: 'bg-blue-100 text-white', icon: '✅' },
+    { value: 'shipped', label: 'تم الشحن', color: 'bg-purple-100 text-purple-800', icon: '🚚' },
+    { value: 'delivered', label: 'تم التوصيل', color: 'bg-green-100 text-green-800', icon: '🎉' },
+    { value: 'cancelled', label: 'ملغي', color: 'bg-red-100 text-red-800', icon: '❌' },
   ];
   const statusObj = statuses.find(s => s.value === order.status) || statuses[0];
+
+  const handleStatusUpdate = async () => {
+    if (newStatus === order.status) return;
+    
+    // التحقق من وجود معرف الطلب
+    if (!order.id) {
+      console.error('Order ID is missing:', order);
+      toast({ 
+        title: 'خطأ في تحديث حالة الطلب', 
+        description: 'معرف الطلب غير موجود',
+        type: 'error'
+      });
+      return;
+    }
+    
+    setIsUpdating(true);
+    try {
+      console.log('Updating order status:', { orderId: order.id, status: newStatus, notes: statusNotes });
+      await onUpdateStatus(order.id, newStatus, statusNotes);
+      setStatusNotes('');
+      toast({ 
+        title: 'تم تحديث حالة الطلب بنجاح',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({ 
+        title: 'خطأ في تحديث حالة الطلب', 
+        description: error.message || 'حدث خطأ غير متوقع',
+        type: 'error'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -2211,8 +2686,12 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
               </svg>
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">#{order.id}</h1>
-              <p className="text-sm text-gray-500">Order / Order Details / #{order.id} - {order.date}</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {order.orderNumber || `#${order.id?.slice(-8)?.toUpperCase() || 'N/A'}`}
+              </h1>
+              <p className="text-sm text-gray-500">
+                الطلبات / تفاصيل الطلب / {order.orderNumber || order.id} - {order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : 'غير محدد'}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -2227,17 +2706,57 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
           </div>
         </div>
 
+        {/* Status Update Section */}
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">تحديث حالة الطلب</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">الحالة الجديدة</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {statuses.map(status => (
+                  <option key={status.value} value={status.value}>
+                    {status.icon} {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">ملاحظات (اختياري)</label>
+              <input
+                type="text"
+                value={statusNotes}
+                onChange={(e) => setStatusNotes(e.target.value)}
+                placeholder="أضف ملاحظة حول التحديث..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleStatusUpdate}
+                disabled={isUpdating || newStatus === order.status}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isUpdating ? 'جاري التحديث...' : 'تحديث الحالة'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <button className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors">
-              إرجاع
+            <button 
+              onClick={() => onDelete(order.id)}
+              className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              حذف الطلب
             </button>
             <button className="px-4 py-2 text-sm font-medium text-orange-600 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors">
-              استرداد
-            </button>
-            <button className="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-              تعديل الطلب
+              طباعة الفاتورة
             </button>
           </div>
           <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
@@ -2248,26 +2767,120 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
         {/* Progress Bar */}
         <div className="mb-6">
           <h3 className="text-sm font-medium text-gray-700 mb-3">التقدم</h3>
+          
+          {/* شريط التقدم البصري */}
+          <div className="mb-4">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
+                style={{
+                  width: `${(() => {
+                    const isOrdered = true;
+                    const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed';
+                    const isShipped = order.status === 'shipped' || order.status === 'delivered';
+                    const isDelivered = order.status === 'delivered';
+                    const isRated = !!order.rating;
+                    
+                    let progress = 0;
+                    if (isOrdered) progress += 20;
+                    if (isPaid) progress += 20;
+                    if (isShipped) progress += 20;
+                    if (isDelivered) progress += 20;
+                    if (isRated) progress += 20;
+                    
+                    return progress;
+                  })()}%`
+                }}
+              ></div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1 text-center">
+              {(() => {
+                const isOrdered = true;
+                const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed';
+                const isShipped = order.status === 'shipped' || order.status === 'delivered';
+                const isDelivered = order.status === 'delivered';
+                const isRated = !!order.rating;
+                
+                let progress = 0;
+                if (isOrdered) progress += 20;
+                if (isPaid) progress += 20;
+                if (isShipped) progress += 20;
+                if (isDelivered) progress += 20;
+                if (isRated) progress += 20;
+                
+                return `${progress}% مكتمل`;
+              })()}
+            </div>
+          </div>
+          
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {[
-              { step: 'تم الطلب', icon: '📄', date: '04-03-2025 11:04', completed: true },
-              { step: 'تم الدفع', icon: '💰', date: '115.00 Đ - 04-03-2025 11:04', completed: true },
-              { step: 'تم الشحن', icon: '🚚', date: '04-03-2025 11:04', completed: false },
-              { step: 'تم الاستلام', icon: '📦', date: '04-03-2025 11:04', completed: false },
-              { step: 'تم التقييم', icon: '⭐', date: '04-03-2025 11:04', completed: false }
+            {(() => {
+              // تحديد التقدم الحقيقي بناءً على حالة الطلب
+              const isOrdered = true; // الطلب موجود
+              const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed';
+              const isShipped = order.status === 'shipped' || order.status === 'delivered';
+              const isDelivered = order.status === 'delivered';
+              const isRated = !!order.rating;
+
+              return [
+                { 
+                  step: 'تم الطلب', 
+                  icon: '📄', 
+                  date: formatDate(order.createdAt),
+                  completed: isOrdered,
+                  status: 'مكتمل'
+                },
+                { 
+                  step: 'تم الدفع', 
+                  icon: '💰', 
+                  date: isPaid ? formatDate(order.paymentDate || order.createdAt) : 'لم يتم الدفع',
+                  completed: isPaid,
+                  status: isPaid ? 'مكتمل' : 'في الانتظار'
+                },
+                { 
+                  step: 'تم الشحن', 
+                  icon: '🚚', 
+                  date: isShipped ? formatDate(order.shippedDate || order.createdAt) : 'لم يتم الشحن',
+                  completed: isShipped,
+                  status: isShipped ? 'مكتمل' : (isPaid ? 'قيد التحضير' : 'في الانتظار')
+                },
+                { 
+                  step: 'تم التوصيل', 
+                  icon: '📦', 
+                  date: isDelivered ? formatDate(order.deliveredDate || order.createdAt) : 'لم يتم التوصيل',
+                  completed: isDelivered,
+                  status: isDelivered ? 'مكتمل' : (isShipped ? 'قيد التوصيل' : 'في الانتظار')
+                },
+                { 
+                  step: 'تم التقييم', 
+                  icon: '⭐', 
+                  date: isRated ? 'تم التقييم' : 'لم يتم التقييم',
+                  completed: isRated,
+                  status: isRated ? 'مكتمل' : (isDelivered ? 'متاح للتقييم' : 'في الانتظار')
+                }
             ].map((item, index) => (
               <div key={index} className="flex items-center space-x-2 rtl:space-x-reverse">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  item.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                    item.completed ? 'bg-green-500 text-white' : 
+                    item.status === 'قيد التحضير' || item.status === 'قيد التوصيل' ? 'bg-blue-500 text-white' :
+                    'bg-gray-200 text-gray-500'
                 }`}>
                   {item.icon}
                 </div>
                 <div className="text-xs">
                   <div className="font-medium text-gray-700">{item.step}</div>
                   <div className="text-gray-500">{item.date}</div>
+                    <div className={`text-xs ${
+                      item.completed ? 'text-green-600' : 
+                      item.status === 'قيد التحضير' || item.status === 'قيد التوصيل' ? 'text-blue-600' :
+                      'text-gray-400'
+                    }`}>
+                      {item.status}
                 </div>
               </div>
-            ))}
+                </div>
+              ));
+            })()}
           </div>
         </div>
 
@@ -2275,7 +2888,14 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <span className="text-sm text-gray-600">تقدير تاريخ الشحن:</span>
-            <span className="text-sm font-medium text-gray-700">31 May 2025</span>
+            <span className="text-sm font-medium text-gray-700">
+              {order.estimatedShippingDate 
+                ? new Date(order.estimatedShippingDate).toLocaleDateString('ar-SA')
+                : order.shippingMethod?.estimatedDays 
+                  ? `خلال ${order.shippingMethod.estimatedDays} أيام`
+                  : 'غير محدد'
+              }
+            </span>
           </div>
         </div>
       </div>
@@ -2301,40 +2921,94 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.items.map((item, index) => (
+                  {order.items && Array.isArray(order.items) && order.items.length > 0 ? order.items.map((item, index) => {
+                    // البحث عن تفاصيل المنتج من قائمة الكتب
+                    const productDetails = books.find(book => book.id === item.productId);
+                    console.log('Product details found:', productDetails);
+                    
+                    // استخدام تفاصيل المنتج إذا كانت متاحة
+                    const displayTitle = item.title || item.productName || productDetails?.title || productDetails?.name || 'منتج غير محدد';
+                    const displayAuthor = item.author || productDetails?.author || productDetails?.authorName || 'مؤلف غير محدد';
+                    const displayImage = item.coverImage || item.image || productDetails?.coverImage || productDetails?.image || 'https://via.placeholder.com/40x60/6366f1/fff?text=Book';
+                    
+                    return (
                     <tr key={index} className="border-b border-gray-100">
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3 rtl:space-x-reverse">
                           <img 
-                            src={item.image} 
-                            alt={item.title}
+                            src={displayImage} 
+                            alt={displayTitle}
                             className="w-10 h-12 object-cover rounded"
                           />
                           <div>
-                            <div className="font-medium text-gray-900">{item.title}</div>
-                            <div className="text-sm text-gray-500">{item.author}</div>
+                            <div className="font-medium text-gray-900">
+                              {displayTitle}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {displayAuthor}
+                            </div>
+                            {(item.isbn || productDetails?.isbn) && (
+                              <div className="text-xs text-gray-400">ISBN: {item.isbn || productDetails?.isbn}</div>
+                            )}
+                            {(item.productType || productDetails?.type) && (
+                              <div className="text-xs text-blue-600">
+                                {(item.productType || productDetails?.type) === 'ebook' ? '📖 كتاب إلكتروني' : 
+                                 (item.productType || productDetails?.type) === 'audio' ? '🎧 كتاب صوتي' : 
+                                 (item.productType || productDetails?.type) === 'physical' ? '📚 كتاب ورقي' : 
+                                 (item.productType || productDetails?.type)}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="text-sm">
-                          <div className="font-medium text-gray-900">${item.price}</div>
-                          {item.originalPrice > item.price && (
-                            <div className="text-xs text-gray-500 line-through">${item.originalPrice}</div>
+                          <div className="font-medium text-gray-900">
+                            {item.unitPrice || item.price || 0} {order.currency || 'SAR'}
+                          </div>
+                          {item.originalPrice && item.originalPrice > (item.unitPrice || item.price) && (
+                            <div className="text-xs text-gray-500 line-through">
+                              {item.originalPrice} {order.currency || 'SAR'}
+                            </div>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right text-sm text-gray-700">{item.quantity}</td>
-                      <td className="py-3 px-4 text-right font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</td>
+                      <td className="py-3 px-4 text-right text-sm text-gray-700">{item.quantity || 1}</td>
+                      <td className="py-3 px-4 text-right font-medium text-gray-900">
+                        {((item.unitPrice || item.price || 0) * (item.quantity || 1)).toFixed(2)} {order.currency || 'SAR'}
+                      </td>
                       <td className="py-3 px-4 text-right">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          item.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          item.status === 'ready' || item.status === 'Ready' || item.status === 'available' 
+                            ? 'bg-green-100 text-green-800' 
+                            : item.status === 'out_of_stock' || item.status === 'unavailable'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {item.status === 'Ready' ? 'جاهز' : 'قيد التحضير'}
+                          {item.status === 'ready' || item.status === 'Ready' || item.status === 'available' 
+                            ? 'جاهز' 
+                            : item.status === 'out_of_stock' || item.status === 'unavailable'
+                            ? 'غير متوفر'
+                            : 'قيد التحضير'}
                         </span>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan="5" className="py-8 text-center text-gray-500">
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                          </div>
+                          <div className="text-sm">لا توجد منتجات في هذا الطلب</div>
+                          <div className="text-xs text-gray-400">لم يتم العثور على أي عناصر مرتبطة بهذا الطلب</div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2346,25 +3020,50 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
-                <p className="text-gray-900">{order.customerName}</p>
+                <p className="text-gray-900">{order.customerName || order.customer?.name || 'غير محدد'}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
-                <p className="text-gray-900">{order.customerEmail}</p>
+                <p className="text-gray-900">{order.customerEmail || order.customer?.email || 'غير محدد'}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
-                <p className="text-gray-900">{order.customerPhone}</p>
+                <p className="text-gray-900">{order.customerPhone || order.customer?.phone || 'غير محدد'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">طريقة الدفع</label>
-                <p className="text-gray-900">{order.paymentMethod}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1">رقم الطلب</label>
+                <p className="text-gray-900 font-mono">{order.orderNumber || `#${order.id?.slice(-8)?.toUpperCase() || 'N/A'}`}</p>
               </div>
             </div>
             
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">عنوان الشحن</label>
-              <p className="text-gray-900 text-sm">{order.shippingAddress}</p>
+              <div className="text-gray-900 text-sm">
+                {(() => {
+                  const address = order.shippingAddress || order.customerAddress || order.address;
+                  if (address && typeof address === 'object') {
+                    return (
+                      <div className="space-y-1">
+                        <div className="font-medium">
+                          {address.name || address.firstName || ''} {address.lastName || ''}
+                        </div>
+                        <div>{address.street || address.address1 || ''} {address.street2 || address.address2 || ''}</div>
+                        <div>
+                          {address.city || ''} 
+                          {address.state ? `, ${address.state}` : ''} 
+                          {address.postalCode ? ` ${address.postalCode}` : ''}
+                        </div>
+                        <div>{address.country || ''}</div>
+                        {address.phone && <div>الهاتف: {address.phone}</div>}
+                      </div>
+                    );
+                  } else if (typeof address === 'string' && address.trim()) {
+                    return <p>{address}</p>;
+                  } else {
+                    return <p className="text-gray-500">غير محدد</p>;
+                  }
+                })()}
+              </div>
             </div>
           </div>
 
@@ -2410,50 +3109,108 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">المجموع الفرعي:</span>
-                <span className="font-medium">${(order.total * 0.9).toFixed(2)}</span>
+                <span className="font-medium">
+                  {order.subtotal || order.itemsTotal || 0} {order.currency || 'SAR'}
+                </span>
               </div>
+              {order.discountAmount && order.discountAmount > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">الخصم:</span>
-                <span className="font-medium text-green-600">-${(order.total * 0.1).toFixed(2)}</span>
+                  <span className="font-medium text-green-600">
+                    -{order.discountAmount} {order.currency || 'SAR'}
+                  </span>
               </div>
+              )}
+              {order.couponCode && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">كود الخصم:</span>
+                  <span className="font-medium text-blue-600">{order.couponCode}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">الشحن:</span>
-                <span className="font-medium">$0.00</span>
+                <span className="font-medium">
+                  {(() => {
+                    // إذا كان الاستلام من المتجر، الشحن = 0
+                    if (order.shippingMethod === 'pickup' || order.shippingMethod?.name === 'استلام من المتجر' || order.shippingType === 'pickup') {
+                      return `0 ${order.currency || 'SAR'}`;
+                    }
+                    // وإلا استخدم تكلفة الشحن الفعلية
+                    return `${order.shippingCost || order.shippingAmount || 0} ${order.currency || 'SAR'}`;
+                  })()}
+                </span>
               </div>
+              {order.taxAmount && order.taxAmount > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">الضريبة:</span>
-                <span className="font-medium">$0.00</span>
+                  <span className="font-medium">
+                    {order.taxAmount} {order.currency || 'SAR'}
+                  </span>
               </div>
+              )}
               <hr className="border-gray-200" />
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>المجموع الكلي:</span>
-                <span className="text-blue-600">${order.total}</span>
+                <span className="text-blue-600">
+                  {(() => {
+                    const subtotal = order.subtotal || order.itemsTotal || 0;
+                    const discount = order.discountAmount || 0;
+                    
+                    // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
+                    const shippingMethod = order.shippingMethod;
+                    const isPickup = shippingMethod === 'pickup' || 
+                                    shippingMethod?.name === 'استلام من المتجر' ||
+                                    shippingMethod?.id === 'pickup' ||
+                                    shippingMethod?.type === 'pickup' ||
+                                    order.shippingType === 'pickup';
+                    
+                    const shipping = isPickup ? 0 : (order.shippingCost || order.shippingAmount || 0);
+                    const tax = order.taxAmount || 0;
+                    const total = subtotal - discount + shipping + tax;
+                    return `${total.toFixed(2)} ${order.currency || 'SAR'}`;
+                  })()}
+                </span>
               </div>
+              {order.paymentStatus && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">حالة الدفع:</span>
+                  <span className={`font-medium ${
+                    order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed' ? 'text-green-600' : 'text-orange-600'
+                  }`}>
+                    {order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed' ? 'مدفوع' : 'في الانتظار'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Payment Information */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">معلومات الدفع</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">طريقة الدفع:</span>
-                <span className="font-medium">{order.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">حالة الدفع:</span>
-                <span className={`font-medium ${
-                  order.paymentStatus === 'Paid' ? 'text-green-600' : 'text-orange-600'
-                }`}>
-                  {order.paymentStatus === 'Paid' ? 'مدفوع' : 'في الانتظار'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">تاريخ الطلب:</span>
-                <span className="font-medium">{order.date}</span>
-              </div>
-            </div>
-          </div>
+           {/* Payment Information */}
+           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+             <h3 className="text-lg font-medium text-gray-800 mb-4">معلومات الدفع</h3>
+             <div className="space-y-3">
+               <div className="flex justify-between">
+                 <span className="text-sm text-gray-600">طريقة الدفع:</span>
+                 <span className="text-sm font-medium">
+                   {typeof order.paymentMethod === 'string' 
+                     ? order.paymentMethod 
+                     : order.paymentMethod?.name || order.paymentMethod?.gateway || 'غير محدد'
+                   }
+                 </span>
+               </div>
+               <div className="flex justify-between">
+                 <span className="text-sm text-gray-600">حالة الدفع:</span>
+                 <span className={`text-sm font-medium ${
+                   order.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'
+                 }`}>
+                   {order.paymentStatus === 'paid' ? 'مدفوع' : 'معلق'}
+                 </span>
+               </div>
+               <div className="flex justify-between">
+                 <span className="text-sm text-gray-600">معرف الدفع:</span>
+                 <span className="text-sm font-medium font-mono">{order.paymentIntentId || 'غير محدد'}</span>
+               </div>
+             </div>
+           </div>
 
           {/* Shipping Information */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -2461,16 +3218,45 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">طريقة الشحن:</span>
-                <span className="font-medium">الشحن القياسي</span>
+                <span className="font-medium">
+                  {order.shippingMethod?.name || order.shippingMethod || 'غير محدد'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">تكلفة الشحن:</span>
+                <span className="font-medium">
+                  {order.shippingCost || order.shippingAmount || 0} {order.currency || 'SAR'}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">تاريخ الشحن المتوقع:</span>
-                <span className="font-medium">31 May 2025</span>
+                <span className="font-medium">
+                  {order.estimatedShippingDate 
+                    ? new Date(order.estimatedShippingDate).toLocaleDateString('ar-SA')
+                    : order.shippingMethod?.estimatedDays 
+                      ? `خلال ${order.shippingMethod.estimatedDays} أيام`
+                      : 'غير محدد'
+                  }
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">وقت التوصيل:</span>
-                <span className="font-medium">3-5 أيام عمل</span>
+                <span className="font-medium">
+                  {order.shippingMethod?.estimatedDays ? `${order.shippingMethod.estimatedDays} أيام` : 'غير محدد'}
+                </span>
               </div>
+              {order.trackingNumber && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">رقم التتبع:</span>
+                  <span className="font-medium font-mono text-sm">{order.trackingNumber}</span>
+            </div>
+              )}
+              {order.shippingCompany && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">شركة الشحن:</span>
+                  <span className="font-medium">{order.shippingCompany}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -2480,45 +3266,38 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Order Summary - Items List */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">ملخص الطلب</h3>
-            <div className="space-y-4">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex items-center space-x-4 rtl:space-x-reverse p-4 border border-gray-200 rounded-lg">
-                  <img src={item.image} alt={item.title} className="w-16 h-20 object-cover rounded shadow" />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-800">{item.title}</h4>
-                    <p className="text-sm text-gray-500">بقلم {item.author}</p>
-                    <div className="flex items-center space-x-4 rtl:space-x-reverse mt-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        item.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {item.status === 'Ready' ? 'جاهز' : 'في الانتظار'}
-                      </span>
-                      <span className="text-sm text-gray-600">الكمية: {item.quantity}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500 line-through">{item.originalPrice} Đ</div>
-                    <div className="text-lg font-semibold text-blue-600">{item.price} Đ</div>
-                    <div className="text-sm font-medium text-gray-700">المجموع: {item.price * item.quantity} Đ</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Order Timeline */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-medium text-gray-800 mb-4">جدول الطلب</h3>
             <div className="space-y-4">
               {[
-                { event: 'تم بدء التعبئة', details: 'تأكيد من Mc Cartney', time: '15 May 2025 - 11:18 am' },
-                { event: 'تم إرسال الفاتورة للعميل', details: 'تم إرسال الفاتورة إلى mc.cartney@gmail.com', time: '15 May 2025 - 11:18 am', action: 'إعادة إرسال الفاتورة' },
-                { event: 'تم إنشاء الفاتورة', details: 'تم إنشاء الفاتورة بواسطة Mc Cartney', time: '15 May 2025 - 11:18 am', action: 'تحميل الفاتورة' },
-                { event: 'دفع الطلب', details: 'باستخدام Master Card', time: '15 May 2025 - 11:18 am', status: 'مدفوع' },
-                { event: 'تأكيد الطلب 4 بواسطة Mc Cartney', details: '', time: '15 May 2025 - 11:18 am', buttons: ['Order 1', 'Order 2'] }
+                { 
+                  event: 'تم إنشاء الطلب', 
+                  details: `تم إنشاء الطلب بواسطة ${order.customerName || 'العميل'}`, 
+                  time: formatDate(order.createdAt),
+                  status: 'مكتمل'
+                },
+                ...(order.paymentStatus === 'paid' || order.paymentStatus === 'Paid' || order.paymentStatus === 'completed' ? [{
+                  event: 'تم الدفع', 
+                  details: `تم الدفع باستخدام ${order.paymentMethod && typeof order.paymentMethod === 'object' 
+                    ? order.paymentMethod.name || order.paymentMethod.displayName || order.paymentMethod.gateway || 'طريقة الدفع المحددة'
+                    : order.paymentMethod || 'طريقة الدفع المحددة'}`, 
+                  time: formatDate(order.paymentDate || order.createdAt),
+                  status: 'مدفوع'
+                }] : []),
+                ...(order.status === 'shipped' || order.status === 'delivered' ? [{
+                  event: 'تم الشحن', 
+                  details: `تم شحن الطلب ${order.trackingNumber ? `برقم تتبع: ${order.trackingNumber}` : ''}`, 
+                  time: formatDate(order.shippedDate),
+                  status: order.status === 'delivered' ? 'تم التوصيل' : 'تم الشحن'
+                }] : []),
+                ...(order.status === 'delivered' ? [{
+                  event: 'تم التوصيل', 
+                  details: 'تم توصيل الطلب بنجاح', 
+                  time: formatDate(order.deliveredDate),
+                  status: 'تم التوصيل'
+                }] : [])
               ].map((timeline, index) => (
                 <div key={index} className="flex items-start space-x-3 rtl:space-x-reverse">
                   <div className="w-3 h-3 bg-green-500 rounded-full mt-2"></div>
@@ -2554,53 +3333,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
 
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
-          {/* Order Summary - Financial */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">ملخص الطلب</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">إجمالي البضائع:</span>
-                <span className="font-medium">{(order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)).toFixed(2)} Đ</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">الخصم:</span>
-                <span className="font-medium">0.00 Đ</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">الشحن:</span>
-                <span className="font-medium">10.00 Đ</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">الضريبة:</span>
-                <span className="font-medium">0.00 Đ</span>
-              </div>
-              <hr className="my-3" />
-              <div className="flex justify-between text-lg font-bold">
-                <span>الإجمالي:</span>
-                <span className="text-blue-600">{order.total} Đ</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Payment Information */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">معلومات الدفع</h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">MC</span>
-                </div>
-                <div>
-                  <div className="font-medium text-gray-800">Master Card</div>
-                  <div className="text-sm text-gray-600">xxxx xxxx xxxx 5060</div>
-                </div>
-              </div>
-              <div className="text-sm">
-                <div className="text-gray-600">معرف المعاملة: <span className="font-medium">#ID{order.id}</span></div>
-                <div className="text-gray-600">اسم حامل البطاقة: <span className="font-medium">{order.customerName}</span></div>
-              </div>
-            </div>
-          </div>
 
           {/* Customer Details */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -2636,7 +3369,16 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
                   </button>
                 </div>
                 <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                  {order.shippingAddress || 'عنوان الشحن'}
+                  {(() => {
+                    const address = order.shippingAddress;
+                    if (address && typeof address === 'object') {
+                      return `${address.street || ''} ${address.city || ''} ${address.country || ''}`.trim() || 'عنوان الشحن';
+                    } else if (typeof address === 'string') {
+                      return address;
+                    } else {
+                      return 'عنوان الشحن';
+                    }
+                  })()}
                 </div>
               </div>
             </div>
@@ -2680,6 +3422,40 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete }) => {
 };
 
 const DashboardPayments = ({ payments, setPayments }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  // تحميل المدفوعات من Firebase
+  useEffect(() => {
+    const loadPayments = async () => {
+      if (!payments || payments.length === 0) {
+        setIsLoading(true);
+        try {
+          // انتظار تهيئة نظام المصادقة
+          await authManager.waitForInitialization();
+          
+          // التحقق من الأذونات
+          if (!authManager.isManager()) {
+            authManager.showPermissionError('المدفوعات');
+            setIsLoading(false);
+            return;
+          }
+          
+          const firebasePayments = await firebaseApi.getPayments();
+          setPayments(firebasePayments);
+        } catch (error) {
+          console.error('Error loading payments:', error);
+          if (error.code === 'permission-denied') {
+            authManager.showPermissionError('المدفوعات');
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadPayments();
+  }, [payments, setPayments]);
+
   const handleDelete = async (id) => {
     if (!confirmDelete()) return;
     try {
@@ -2690,6 +3466,37 @@ const DashboardPayments = ({ payments, setPayments }) => {
       toast({ title: 'حدث خطأ أثناء الحذف. حاول مجدداً.', variant: 'destructive' });
     }
   };
+
+  // عرض loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">جاري تحميل المدفوعات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // عرض رسالة عندما لا توجد مدفوعات
+  if (!isLoading && (!payments || payments.length === 0)) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد مدفوعات</h3>
+            <p className="text-gray-600">لم يتم العثور على أي مدفوعات في النظام</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div className="space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -2833,6 +3640,39 @@ const PaymentMethodForm = ({ method, onSubmit, onCancel }) => {
 const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingMethod, setEditingMethod] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // تحميل طرق الدفع من Firebase
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      if (!paymentMethods || paymentMethods.length === 0) {
+        setIsLoading(true);
+        try {
+          // انتظار تهيئة نظام المصادقة
+          await authManager.waitForInitialization();
+          
+          // التحقق من الأذونات
+          if (!authManager.isManager()) {
+            authManager.showPermissionError('طرق الدفع');
+            setIsLoading(false);
+            return;
+          }
+          
+          const firebasePaymentMethods = await firebaseApi.getPaymentMethods();
+          setPaymentMethods(firebasePaymentMethods);
+        } catch (error) {
+          console.error('Error loading payment methods:', error);
+          if (error.code === 'permission-denied') {
+            authManager.showPermissionError('طرق الدفع');
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadPaymentMethods();
+  }, [paymentMethods, setPaymentMethods]);
 
   const handleAdd = async (data) => {
     let parsed;
@@ -2886,8 +3726,46 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
     }
   };
 
+  // عرض loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">جاري تحميل طرق الدفع...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (showForm) {
     return <PaymentMethodForm method={editingMethod} onSubmit={editingMethod ? handleEdit : handleAdd} onCancel={() => { setShowForm(false); setEditingMethod(null); }} />;
+  }
+
+  // عرض رسالة عندما لا توجد طرق دفع
+  if (!isLoading && (!paymentMethods || paymentMethods.length === 0)) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد طرق دفع</h3>
+            <p className="text-gray-600 mb-4">لم يتم إعداد أي طرق دفع في النظام</p>
+            <Button 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+              onClick={() => { setEditingMethod(null); setShowForm(true); }}
+            >
+              <Plus className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+              إضافة طريقة دفع
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -3135,9 +4013,47 @@ const LanguageForm = ({ language, onSubmit, onCancel }) => {
 // DashboardLanguages component is now imported from separate file
 
 const DashboardInventory = ({ books, setBooks }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stockFilter, setStockFilter] = useState('all');
+  const [filteredBooks, setFilteredBooks] = useState(books);
+
+  // تصفية الكتب بناءً على البحث وحالة المخزون
+  useEffect(() => {
+    let filtered = books;
+
+    // تصفية حسب البحث
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(book => 
+        book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.isbn?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // تصفية حسب حالة المخزون
+    if (stockFilter !== 'all') {
+      filtered = filtered.filter(book => {
+        const stock = book.stock || 0;
+        switch (stockFilter) {
+          case 'in-stock':
+            return stock > 0;
+          case 'low-stock':
+            return stock > 0 && stock <= 5;
+          case 'out-of-stock':
+            return stock === 0;
+          default:
+            return true;
+        }
+      });
+    }
+
+    setFilteredBooks(filtered);
+  }, [searchTerm, stockFilter, books]);
+
   const handleChange = (id, value) => {
     setBooks(prev => prev.map(b => b.id === id ? { ...b, stock: value } : b));
   };
+  
   const handleSave = async (id, stock) => {
     try {
       const updated = await api.updateBook(id, { stock: Number(stock) });
@@ -3147,34 +4063,169 @@ const DashboardInventory = ({ books, setBooks }) => {
       toast({ title: 'حدث خطأ أثناء الحفظ', variant: 'destructive' });
     }
   };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   return (
     <motion.div className="space-y-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <h2 className="text-2xl font-semibold text-gray-700 mb-3">إدارة المخزون</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-2xl font-semibold text-gray-700">إدارة المخزون</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          {/* تصفية المخزون */}
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <Label htmlFor="stock-filter" className="text-sm font-medium text-gray-700">تصفية:</Label>
+            <select
+              id="stock-filter"
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              <option value="all">جميع الكتب</option>
+              <option value="in-stock">متوفر</option>
+              <option value="low-stock">مخزون منخفض (≤5)</option>
+              <option value="out-of-stock">نفد المخزون</option>
+            </select>
+          </div>
+          
+          {/* البحث */}
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="relative">
+              <Search className="absolute right-3 rtl:left-3 rtl:right-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="البحث في الكتب..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 rtl:pr-10 rtl:pl-3 w-64 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+              />
+            </div>
+            {(searchTerm || stockFilter !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStockFilter('all');
+                }}
+                className="flex items-center space-x-1 rtl:space-x-reverse"
+              >
+                <X className="w-4 h-4" />
+                <span>مسح</span>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-card rounded-xl shadow-lg overflow-hidden bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[400px]">
             <thead className="bg-slate-50">
               <tr>
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">الكتاب</th>
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المؤلف</th>
                 <th className="px-5 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">المخزون</th>
                 <th className="px-5 py-3.5 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">الإجراءات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {books.map(b => (
+              {filteredBooks.length > 0 ? (
+                filteredBooks.map(b => (
                 <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.title}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                        {b.coverImage && (
+                          <img 
+                            src={b.coverImage} 
+                            alt={b.title}
+                            className="w-10 h-14 object-cover rounded border"
+                          />
+                        )}
+                        <div>
+                          <div className="font-medium text-gray-900">{b.title}</div>
+                          {b.isbn && (
+                            <div className="text-xs text-gray-500">ISBN: {b.isbn}</div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 whitespace-nowrap text-sm text-gray-700">{b.author || '-'}</td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm">
-                    <Input type="number" value={b.stock || 0} onChange={e => handleChange(b.id, e.target.value)} className="w-24" />
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <Input 
+                          type="number" 
+                          value={b.stock || 0} 
+                          onChange={e => handleChange(b.id, e.target.value)} 
+                          className="w-24" 
+                          min="0"
+                        />
+                        <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                          {(() => {
+                            const stock = b.stock || 0;
+                            if (stock === 0) {
+                              return (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  نفد
+                                </span>
+                              );
+                            } else if (stock <= 5) {
+                              return (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  منخفض
+                                </span>
+                              );
+                            } else {
+                              return (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  متوفر
+                                </span>
+                              );
+                            }
+                          })()}
+                        </div>
+                      </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap text-sm">
                     <Button size="sm" onClick={() => handleSave(b.id, b.stock)}>حفظ</Button>
                   </td>
                 </tr>
-              ))}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="px-5 py-8 text-center text-gray-500">
+                    {searchTerm ? 'لم يتم العثور على كتب تطابق البحث' : 'لا توجد كتب في المخزون'}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        
+        {(searchTerm || stockFilter !== 'all') && (
+          <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                عرض {filteredBooks.length} من أصل {books.length} كتاب
+              </p>
+              <div className="flex items-center space-x-4 rtl:space-x-reverse text-xs text-gray-500">
+                <span className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span>متوفر: {books.filter(b => (b.stock || 0) > 5).length}</span>
+                </span>
+                <span className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  <span>منخفض: {books.filter(b => (b.stock || 0) > 0 && (b.stock || 0) <= 5).length}</span>
+                </span>
+                <span className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span>نفد: {books.filter(b => (b.stock || 0) === 0).length}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -3426,6 +4477,21 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, d
     durationSeconds: '',
     tags: '',
     coverImage: '',
+    // الحقول الجديدة
+    translators: '',
+    pages: '',
+    publicationYear: new Date().getFullYear(),
+    fileFormat: '',
+    fileSize: '',
+    publisher: '',
+    isbn: '',
+    // حقول الشحن للكتب الورقية
+    weight: '',
+    dimensions: {
+      length: '',
+      width: '',
+      height: ''
+    },
     ...(book ? (({ rating, reviews, ...rest }) => rest)(book) : {}),
     ...initialPrices,
   });
@@ -3535,29 +4601,105 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, d
             </select>
           </div>
           {formData.type === 'physical' && (
-            <div>
-              <Label htmlFor="deliveryMethod">طريقة التوصيل</Label>
-              <Input id="deliveryMethod" name="deliveryMethod" value={formData.deliveryMethod} onChange={handleChange} />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="deliveryMethod">طريقة التوصيل</Label>
+                <Input id="deliveryMethod" name="deliveryMethod" value={formData.deliveryMethod} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="translators">المترجمون (اختياري)</Label>
+                <Input id="translators" name="translators" value={formData.translators} onChange={handleChange} placeholder="أسماء المترجمين" />
+              </div>
+              <div>
+                <Label htmlFor="pages">عدد الصفحات</Label>
+                <Input id="pages" name="pages" type="number" value={formData.pages} onChange={handleChange} placeholder="مثال: 250" />
+              </div>
+              <div>
+                <Label htmlFor="publicationYear">سنة النشر</Label>
+                <Input id="publicationYear" name="publicationYear" type="number" value={formData.publicationYear} onChange={handleChange} min="1900" max={new Date().getFullYear() + 1} />
+              </div>
+              <div>
+                <Label htmlFor="publisher">دار النشر</Label>
+                <Input id="publisher" name="publisher" value={formData.publisher} onChange={handleChange} placeholder="اسم دار النشر" />
+              </div>
+              <div>
+                <Label htmlFor="isbn">رقم ISBN</Label>
+                <Input id="isbn" name="isbn" value={formData.isbn} onChange={handleChange} placeholder="مثال: 978-0-123456-47-2" />
+              </div>
+              <div>
+                <Label htmlFor="weight">الوزن (كجم)</Label>
+                <Input id="weight" name="weight" type="number" step="0.01" value={formData.weight} onChange={handleChange} placeholder="مثال: 0.5" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="length">الطول (سم)</Label>
+                  <Input id="length" name="length" type="number" step="0.1" value={formData.dimensions?.length || ''} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, length: e.target.value } }))} placeholder="مثال: 20" />
+                </div>
+                <div>
+                  <Label htmlFor="width">العرض (سم)</Label>
+                  <Input id="width" name="width" type="number" step="0.1" value={formData.dimensions?.width || ''} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, width: e.target.value } }))} placeholder="مثال: 15" />
+                </div>
+                <div>
+                  <Label htmlFor="height">الارتفاع (سم)</Label>
+                  <Input id="height" name="height" type="number" step="0.1" value={formData.dimensions?.height || ''} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, height: e.target.value } }))} placeholder="مثال: 2" />
+                </div>
+              </div>
+            </>
           )}
           {formData.type === 'ebook' && (
-            <div>
-              <Label htmlFor="ebookFile">الملف الإلكتروني</Label>
-              <input
-                id="ebookFile"
-                name="ebookFile"
-                type="file"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => setFormData(prev => ({ ...prev, ebookFile: reader.result }));
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="ebookFile">الملف الإلكتروني</Label>
+                <input
+                  id="ebookFile"
+                  name="ebookFile"
+                  type="file"
+                  accept=".pdf,.epub,.mobi,.docx,.doc,.txt"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        const fileInfo = await processBookFile(file, 'ebook');
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          ebookFile: reader.result,
+                          fileFormat: fileInfo.fileFormat,
+                          fileSize: fileInfo.fileSize,
+                          pages: fileInfo.pages || ''
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <Label htmlFor="fileFormat">صيغة الملف</Label>
+                <Input id="fileFormat" name="fileFormat" value={formData.fileFormat} onChange={handleChange} readOnly />
+              </div>
+              <div>
+                <Label htmlFor="fileSize">حجم الملف</Label>
+                <Input id="fileSize" name="fileSize" value={formData.fileSize} onChange={handleChange} readOnly />
+              </div>
+              <div>
+                <Label htmlFor="pages">عدد الصفحات</Label>
+                <Input id="pages" name="pages" type="number" value={formData.pages} onChange={handleChange} placeholder="سيتم استخراجه تلقائياً من الملف" />
+              </div>
+              <div>
+                <Label htmlFor="publicationYear">سنة النشر</Label>
+                <Input id="publicationYear" name="publicationYear" type="number" value={formData.publicationYear} onChange={handleChange} min="1900" max={new Date().getFullYear() + 1} />
+              </div>
+              <div>
+                <Label htmlFor="publisher">دار النشر</Label>
+                <Input id="publisher" name="publisher" value={formData.publisher} onChange={handleChange} placeholder="اسم دار النشر" />
+              </div>
+              <div>
+                <Label htmlFor="isbn">رقم ISBN</Label>
+                <Input id="isbn" name="isbn" value={formData.isbn} onChange={handleChange} placeholder="مثال: 978-0-123456-47-2" />
+              </div>
+            </>
           )}
           {formData.type === 'audio' && (
             <>
@@ -3567,12 +4709,20 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, d
                   id="audioFile"
                   name="audioFile"
                   type="file"
-                  onChange={(e) => {
+                  accept=".mp3,.wav,.m4a,.aac"
+                  onChange={async (e) => {
                     const file = e.target.files[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData(prev => ({ ...prev, audioFile: reader.result }));
+                      reader.onloadend = async () => {
+                        const fileInfo = await processBookFile(file, 'audio');
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          audioFile: reader.result,
+                          fileFormat: fileInfo.fileFormat,
+                          fileSize: fileInfo.fileSize
+                        }));
+                        
                         const audio = new Audio(reader.result);
                         audio.onloadedmetadata = () => {
                           const dur = audio.duration;
@@ -3592,6 +4742,26 @@ const BookForm = ({ book, onSubmit, onCancel, authors, categories, currencies, d
                   }}
                   className="w-full p-2 border border-gray-300 rounded-md"
                 />
+              </div>
+              <div>
+                <Label htmlFor="fileFormat">صيغة الملف</Label>
+                <Input id="fileFormat" name="fileFormat" value={formData.fileFormat} onChange={handleChange} readOnly />
+              </div>
+              <div>
+                <Label htmlFor="fileSize">حجم الملف</Label>
+                <Input id="fileSize" name="fileSize" value={formData.fileSize} onChange={handleChange} readOnly />
+              </div>
+              <div>
+                <Label htmlFor="publicationYear">سنة النشر</Label>
+                <Input id="publicationYear" name="publicationYear" type="number" value={formData.publicationYear} onChange={handleChange} min="1900" max={new Date().getFullYear() + 1} />
+              </div>
+              <div>
+                <Label htmlFor="publisher">دار النشر</Label>
+                <Input id="publisher" name="publisher" value={formData.publisher} onChange={handleChange} placeholder="اسم دار النشر" />
+              </div>
+              <div>
+                <Label htmlFor="isbn">رقم ISBN</Label>
+                <Input id="isbn" name="isbn" value={formData.isbn} onChange={handleChange} placeholder="مثال: 978-0-123456-47-2" />
               </div>
               <div>
                 <Label htmlFor="sampleAudio">رابط عينة صوتية</Label>
@@ -4045,27 +5215,90 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
+  // متغيرات الصفحات الجديدة
+  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [blogForm, setBlogForm] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    category: ''
+  });
+  const [showFaqForm, setShowFaqForm] = useState(false);
+  const [faqForm, setFaqForm] = useState({
+    question: '',
+    answer: '',
+    category: '',
+    orderIndex: 0
+  });
+  const [showDistributorForm, setShowDistributorForm] = useState(false);
+  const [distributorForm, setDistributorForm] = useState({
+    name: '',
+    type: 'physical',
+    region: '',
+    country: '',
+    city: '',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
+    description: ''
+  });
+  const [showTeamMemberForm, setShowTeamMemberForm] = useState(false);
+  const [teamMemberForm, setTeamMemberForm] = useState({
+    name: '',
+    position: '',
+    bio: '',
+    email: '',
+    linkedin: '',
+    twitter: ''
+  });
+
+  // تهيئة نظام المصادقة
+  useEffect(() => {
+    const initializeAuth = async () => {
+      await authManager.initialize();
+      
+      // تسجيل دخول تلقائي كمدير
+      await authManager.autoLoginAsAdmin();
+    };
+
+    initializeAuth();
+  }, []);
+
   // Fetch real data from Firebase
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setStats(prev => ({ ...prev, isLoading: true }));
         
+        // انتظار تهيئة نظام المصادقة
+        await authManager.waitForInitialization();
+        
+        // التحقق من الأذونات
+        if (!authManager.isManager()) {
+          authManager.showPermissionError('لوحة التحكم');
+          setStats(prev => ({ ...prev, isLoading: false }));
+          return;
+        }
+        
         // Fetch basic stats
         const dashboardStats = await firebaseApi.getDashboardStats();
         
-        // Fetch orders
-        const orders = await firebaseApi.getOrders();
+        // Fetch orders from Firebase
+        const firebaseOrders = await firebaseApi.getOrders();
+        
+        // Update orders state with real data from Firebase
+        setOrders(firebaseOrders);
         
         // Fetch recent messages
         const messages = await firebaseApi.getMessages();
         
         // Calculate additional stats
-        const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+        const totalOrders = firebaseOrders.length;
+        const totalRevenue = firebaseOrders.reduce((sum, order) => sum + (order.total || 0), 0);
         
         // Get recent orders (last 5)
-        const recentOrders = orders
+        const recentOrders = firebaseOrders
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5);
         
@@ -4103,7 +5336,315 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
     };
 
     fetchDashboardData();
-  }, []);
+  }, [setOrders]);
+
+  // دوال الصفحات الجديدة
+  const handleSaveBlog = async () => {
+    try {
+      if (!blogForm.title || !blogForm.content) {
+        toast({
+          title: "خطأ",
+          description: "يرجى ملء جميع الحقول المطلوبة",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // حفظ المقال في Firebase
+      await firebaseApi.addBlogPost({
+        title: blogForm.title,
+        content: blogForm.content,
+        excerpt: blogForm.excerpt || '',
+        category: blogForm.category || 'عام',
+        author: 'Admin', // يمكن تغييرها لاحقاً
+        status: 'published'
+      });
+      
+      toast({
+        title: "نجح",
+        description: "تم حفظ المقال بنجاح",
+      });
+      
+      setBlogForm({ title: '', content: '', excerpt: '', category: '' });
+      setShowBlogForm(false);
+      
+      // تحديث قائمة المقالات
+      fetchBlogPosts();
+    } catch (error) {
+      console.error('Error saving blog post:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ المقال",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveFaq = async () => {
+    try {
+      if (!faqForm.question || !faqForm.answer) {
+        toast({
+          title: "خطأ",
+          description: "يرجى ملء جميع الحقول المطلوبة",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // حفظ السؤال الشائع في Firebase
+      await firebaseApi.addFaq({
+        question: faqForm.question,
+        answer: faqForm.answer,
+        category: faqForm.category || 'عام',
+        orderIndex: faqForm.orderIndex || 0
+      });
+      
+      toast({
+        title: "نجح",
+        description: "تم حفظ السؤال الشائع بنجاح",
+      });
+      
+      setFaqForm({ question: '', answer: '', category: '', orderIndex: 0 });
+      setShowFaqForm(false);
+      
+      // تحديث قائمة الأسئلة الشائعة
+      fetchFaqs();
+    } catch (error) {
+      console.error('Error saving FAQ:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ السؤال الشائع",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveDistributor = async () => {
+    try {
+      if (!distributorForm.name || !distributorForm.type) {
+        toast({
+          title: "خطأ",
+          description: "يرجى ملء جميع الحقول المطلوبة",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // حفظ الموزع في Firebase
+      await firebaseApi.addDistributor({
+        name: distributorForm.name,
+        type: distributorForm.type,
+        region: distributorForm.region || '',
+        country: distributorForm.country || '',
+        city: distributorForm.city || '',
+        address: distributorForm.address || '',
+        phone: distributorForm.phone || '',
+        email: distributorForm.email || '',
+        website: distributorForm.website || '',
+        description: distributorForm.description || ''
+      });
+      
+      toast({
+        title: "نجح",
+        description: "تم حفظ الموزع بنجاح",
+      });
+      
+      setDistributorForm({
+        name: '', type: 'physical', region: '', country: '', city: '',
+        address: '', phone: '', email: '', website: '', description: ''
+      });
+      setShowDistributorForm(false);
+      
+      // تحديث قائمة الموزعين
+      fetchDistributors();
+    } catch (error) {
+      console.error('Error saving distributor:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ الموزع",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveTeamMember = async () => {
+    try {
+      if (!teamMemberForm.name || !teamMemberForm.position) {
+        toast({
+          title: "خطأ",
+          description: "يرجى ملء جميع الحقول المطلوبة",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // حفظ عضو الفريق في Firebase
+      await firebaseApi.addTeamMember({
+        name: teamMemberForm.name,
+        position: teamMemberForm.position,
+        bio: teamMemberForm.bio || '',
+        email: teamMemberForm.email || '',
+        linkedin: teamMemberForm.linkedin || '',
+        twitter: teamMemberForm.twitter || ''
+      });
+      
+      toast({
+        title: "نجح",
+        description: "تم حفظ عضو الفريق بنجاح",
+      });
+      
+      setTeamMemberForm({ name: '', position: '', bio: '', email: '', linkedin: '', twitter: '' });
+      setShowTeamMemberForm(false);
+      
+      // تحديث قائمة أعضاء الفريق
+      fetchTeamMembers();
+    } catch (error) {
+      console.error('Error saving team member:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ عضو الفريق",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // دوال جلب البيانات من Firebase
+  const fetchBlogPosts = async () => {
+    try {
+      const posts = await firebaseApi.getBlogPosts();
+      setBlogPosts(posts);
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء جلب المقالات",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchFaqs = async () => {
+    try {
+      const faqs = await firebaseApi.getFaqs();
+      setFaqs(faqs);
+    } catch (error) {
+      console.error('Error fetching FAQs:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء جلب الأسئلة الشائعة",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchDistributors = async () => {
+    try {
+      const distributors = await firebaseApi.getDistributors();
+      setDistributors(distributors);
+    } catch (error) {
+      console.error('Error fetching distributors:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء جلب الموزعين",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTeamMembers = async () => {
+    try {
+      const members = await firebaseApi.getTeamMembers();
+      setTeamMembers(members);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء جلب أعضاء الفريق",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // دوال الحذف
+  const handleDeleteBlog = async (id) => {
+    if (confirmDelete()) {
+      try {
+        await firebaseApi.deleteBlogPost(id);
+        toast({
+          title: "نجح",
+          description: "تم حذف المقال بنجاح",
+        });
+        fetchBlogPosts();
+      } catch (error) {
+        console.error('Error deleting blog post:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء حذف المقال",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDeleteFaq = async (id) => {
+    if (confirmDelete()) {
+      try {
+        await firebaseApi.deleteFaq(id);
+        toast({
+          title: "نجح",
+          description: "تم حذف السؤال الشائع بنجاح",
+        });
+        fetchFaqs();
+      } catch (error) {
+        console.error('Error deleting FAQ:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء حذف السؤال الشائع",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDeleteDistributor = async (id) => {
+    if (confirmDelete()) {
+      try {
+        await firebaseApi.deleteDistributor(id);
+        toast({
+          title: "نجح",
+          description: "تم حذف الموزع بنجاح",
+        });
+        fetchDistributors();
+      } catch (error) {
+        console.error('Error deleting distributor:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء حذف الموزع",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDeleteTeamMember = async (id) => {
+    if (confirmDelete()) {
+      try {
+        await firebaseApi.deleteTeamMember(id);
+        toast({
+          title: "نجح",
+          description: "تم حذف عضو الفريق بنجاح",
+        });
+        fetchTeamMembers();
+      } catch (error) {
+        console.error('Error deleting team member:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء حذف عضو الفريق",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   const sectionTitles = {
     overview: t('overview'),
@@ -4115,6 +5656,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
     branches: t('branches'),
     orders: t('orders'),
     users: t('users'),
+    'user-roles': 'إدارة الأدوار',
     payments: t('payments'),
     'payment-methods': t('payments'), // يمكن تغييرها لاحقاً
     currencies: t('payments'), // يمكن تغييرها لاحقاً
@@ -4128,10 +5670,33 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
     sliders: t('books'), // يمكن تغييرها لاحقاً
     banners: t('books'), // يمكن تغييرها لاحقاً
     analytics: 'Analytics',
+    shipping: 'إدارة الشحن',
     settings: t('settings'),
+    pages: 'إدارة الصفحات',
+    blog: 'إدارة المدونة',
+    help: 'مركز المساعدة',
+    distributors: 'إدارة الموزعين'
   };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ratings, setRatings] = useState([]);
+  
+  // متغيرات الحالة للصفحات الجديدة
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [distributors, setDistributors] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+
+  // Design requests state
+  const [designRequests, setDesignRequests] = useState([]);
+  const [selectedDesignRequest, setSelectedDesignRequest] = useState(null);
+  const [showDesignRequestDialog, setShowDesignRequestDialog] = useState(false);
+  const [designRequestStatus, setDesignRequestStatus] = useState('all');
+
+  // Publishing requests state
+  const [publishingRequests, setPublishingRequests] = useState([]);
+  const [selectedPublishingRequest, setSelectedPublishingRequest] = useState(null);
+  const [showPublishingRequestDialog, setShowPublishingRequestDialog] = useState(false);
+  const [publishingRequestStatus, setPublishingRequestStatus] = useState('all');
 
   useEffect(() => {
     if (dashboardSection === 'ratings') {
@@ -4146,9 +5711,172 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
     }
   }, [dashboardSection]);
 
+  // جلب البيانات عند تغيير القسم
+  useEffect(() => {
+    if (dashboardSection === 'blog') {
+      fetchBlogPosts();
+    } else if (dashboardSection === 'help') {
+      fetchFaqs();
+    } else if (dashboardSection === 'distributors') {
+      fetchDistributors();
+    } else if (dashboardSection === 'team') {
+      fetchTeamMembers();
+    } else if (dashboardSection === 'design-requests') {
+      fetchDesignRequests();
+    } else if (dashboardSection === 'publishing-requests') {
+      fetchPublishingRequests();
+    } else if (dashboardSection === 'publish-with-us') {
+      fetchPublishingRequests();
+    }
+  }, [dashboardSection]);
+
+  // Fetch design requests
+  const fetchDesignRequests = async () => {
+    try {
+      const requests = await firebaseApi.getDesignRequests();
+      setDesignRequests(requests);
+    } catch (error) {
+      console.error('Error fetching design requests:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في جلب طلبات التصميم',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDesignRequestStatusChange = async (requestId, newStatus) => {
+    try {
+      await firebaseApi.updateDesignRequest(requestId, { status: newStatus });
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث حالة الطلب بنجاح'
+      });
+      fetchDesignRequests();
+    } catch (error) {
+      console.error('Error updating design request status:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تحديث حالة الطلب',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDeleteDesignRequest = async (requestId) => {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+    
+    try {
+      await firebaseApi.deleteDesignRequest(requestId);
+      toast({
+        title: 'تم الحذف',
+        description: 'تم حذف الطلب بنجاح'
+      });
+      fetchDesignRequests();
+    } catch (error) {
+      console.error('Error deleting design request:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في حذف الطلب',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'قيد المراجعة' },
+      approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'تمت الموافقة' },
+      rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'مرفوض' },
+      inProgress: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'قيد التنفيذ' },
+      completed: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'مكتمل' }
+    };
+    
+    const config = statusConfig[status] || statusConfig.pending;
+    return (
+      <span className={`px-2 py-1 ${config.bg} ${config.text} rounded-full text-xs`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending': return <Clock className="w-4 h-4" />;
+      case 'approved': return <CheckCircle className="w-4 h-4" />;
+      case 'rejected': return <AlertCircle className="w-4 h-4" />;
+      case 'inProgress': return <PenTool className="w-4 h-4" />;
+      case 'completed': return <CheckCircle className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const filteredDesignRequests = designRequests.filter(request => {
+    if (designRequestStatus === 'all') return true;
+    return request.status === designRequestStatus;
+  });
+
+  // Publishing requests functions
+  const fetchPublishingRequests = async () => {
+    try {
+      const requests = await firebaseApi.getPublishingRequests();
+      setPublishingRequests(requests);
+    } catch (error) {
+      console.error('Error fetching publishing requests:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في جلب طلبات النشر',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handlePublishingRequestStatusChange = async (requestId, newStatus) => {
+    try {
+      await firebaseApi.updatePublishingRequest(requestId, { status: newStatus });
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث حالة الطلب بنجاح'
+      });
+      fetchPublishingRequests();
+    } catch (error) {
+      console.error('Error updating publishing request status:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تحديث حالة الطلب',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDeletePublishingRequest = async (requestId) => {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+    
+    try {
+      await firebaseApi.deletePublishingRequest(requestId);
+      toast({
+        title: 'تم الحذف',
+        description: 'تم حذف الطلب بنجاح'
+      });
+      fetchPublishingRequests();
+    } catch (error) {
+      console.error('Error deleting publishing request:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في حذف الطلب',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const filteredPublishingRequests = publishingRequests.filter(request => {
+    if (publishingRequestStatus === 'all') return true;
+    return request.status === publishingRequestStatus;
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 flex text-gray-800 relative">
-      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <DashboardSidebar dashboardSection={dashboardSection} setDashboardSection={setDashboardSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} handleFeatureClick={handleFeatureClick} />
       <div className="flex-1 flex flex-col">
         <DashboardHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
@@ -4188,9 +5916,10 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         {dashboardSection === 'sellers' && <DashboardSellers sellers={sellers} setSellers={setSellers} />}
         {dashboardSection === 'branches' && <DashboardBranches branches={branches} setBranches={setBranches} />}
         {dashboardSection === 'categories' && <DashboardCategories categories={categories} setCategories={setCategories} />}
-        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} />}
+        {dashboardSection === 'orders' && <DashboardOrders orders={orders} setOrders={setOrders} books={books} />}
         {dashboardSection === 'payments' && <DashboardPayments payments={payments} setPayments={setPayments} />}
-        {dashboardSection === 'payment-methods' && <DashboardPaymentMethods paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
+        {dashboardSection === 'payment-methods' && <PaymentMethodsManagement />}
+        {dashboardSection === 'shipping' && <ShippingMethodsManagement />}
         {dashboardSection === 'currencies' && <DashboardCurrencies currencies={currencies} setCurrencies={setCurrencies} />}
         {dashboardSection === 'languages' && <DashboardLanguages />}
         {dashboardSection === 'google-merchant' && (
@@ -4200,6 +5929,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
           />
         )}
         {dashboardSection === 'users' && <DashboardUsers users={users} setUsers={setUsers} />}
+        {dashboardSection === 'user-roles' && <UserRoleManager />}
         {dashboardSection === 'plans' && <DashboardPlans plans={plans} setPlans={setPlans} />}
         {dashboardSection === 'subscriptions' && (
           <DashboardSubscriptions
@@ -4228,19 +5958,1160 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         )}
         {dashboardSection === 'settings' && (
           <DashboardSettings
-            siteSettings={siteSettings}
-            setSiteSettings={setSiteSettings}
+            settings={siteSettings}
+            setSettings={setSiteSettings}
             currencies={currencies}
           />
         )}
+        {dashboardSection === 'pages' && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">إدارة الصفحات</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-800 mb-2">تعرف على كتابنا</h3>
+                <p className="text-sm text-gray-600 mb-4">صفحة عرض المؤلفين والكتاب</p>
+                <Button className="w-full">إدارة الصفحة</Button>
+              </div>
+                             <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                 <h3 className="font-semibold text-gray-800 mb-2">خدمات التصميم</h3>
+                 <p className="text-sm text-gray-600 mb-4">صفحة خدمات التصميم والإنتاج</p>
+                 <Button className="w-full" onClick={() => setDashboardSection('design-requests')}>إدارة الطلبات</Button>
+               </div>
+               <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                 <h3 className="font-semibold text-gray-800 mb-2">خدمات النشر</h3>
+                 <p className="text-sm text-gray-600 mb-4">صفحة خدمات النشر والتوزيع</p>
+                 <Button className="w-full" onClick={() => setDashboardSection('publishing-requests')}>إدارة الطلبات</Button>
+               </div>
+               <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                 <h3 className="font-semibold text-gray-800 mb-2">انشر معنا</h3>
+                 <p className="text-sm text-gray-600 mb-4">صفحة النشر مع دار ملهمون</p>
+                 <Button className="w-full" onClick={() => setDashboardSection('publish-with-us')}>إدارة الطلبات</Button>
+               </div>
+              <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-800 mb-2">حول دار ملهمون</h3>
+                <p className="text-sm text-gray-600 mb-4">صفحة من نحن</p>
+                <Button className="w-full">إدارة الصفحة</Button>
+              </div>
+                             <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                 <h3 className="font-semibold text-gray-800 mb-2">فريق العمل</h3>
+                 <p className="text-sm text-gray-600 mb-4">صفحة فريق العمل</p>
+                 <Button className="w-full" onClick={() => setDashboardSection('team')}>إدارة الصفحة</Button>
+               </div>
+            </div>
+          </div>
+        )}
+                 {dashboardSection === 'blog' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <h2 className="text-2xl font-bold text-gray-800 mb-6">إدارة المدونة</h2>
+             <div className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <h3 className="text-lg font-semibold text-gray-800">المقالات</h3>
+                 <Button onClick={() => setShowBlogForm(true)}>إضافة مقال جديد</Button>
+               </div>
+               
+               {/* نموذج إضافة مقال جديد */}
+               {showBlogForm && (
+                 <div className="border rounded-lg p-6 bg-gray-50">
+                   <h4 className="text-lg font-semibold text-gray-800 mb-4">مقال جديد</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <Label htmlFor="blogTitle">عنوان المقال</Label>
+                       <Input
+                         id="blogTitle"
+                         placeholder="أدخل عنوان المقال"
+                         value={blogForm.title}
+                         onChange={(e) => setBlogForm({...blogForm, title: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="blogCategory">الفئة</Label>
+                       <select
+                         id="blogCategory"
+                         className="w-full p-2 border rounded-md"
+                         value={blogForm.category}
+                         onChange={(e) => setBlogForm({...blogForm, category: e.target.value})}
+                       >
+                         <option value="">اختر الفئة</option>
+                         <option value="literature">أدب</option>
+                         <option value="technology">تقنية</option>
+                         <option value="education">تعليم</option>
+                         <option value="news">أخبار</option>
+                       </select>
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="blogContent">محتوى المقال</Label>
+                       <Textarea
+                         id="blogContent"
+                         placeholder="أدخل محتوى المقال"
+                         rows={6}
+                         value={blogForm.content}
+                         onChange={(e) => setBlogForm({...blogForm, content: e.target.value})}
+                       />
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="blogExcerpt">ملخص المقال</Label>
+                       <Textarea
+                         id="blogExcerpt"
+                         placeholder="أدخل ملخص المقال"
+                         rows={3}
+                         value={blogForm.excerpt}
+                         onChange={(e) => setBlogForm({...blogForm, excerpt: e.target.value})}
+                       />
+                     </div>
+                   </div>
+                   <div className="flex gap-2 mt-4">
+                     <Button onClick={() => handleSaveBlog()}>حفظ المقال</Button>
+                     <Button variant="outline" onClick={() => setShowBlogForm(false)}>إلغاء</Button>
+                   </div>
+                 </div>
+               )}
+               
+               <div className="border rounded-lg p-4">
+                 <div className="overflow-x-auto">
+                   <table className="w-full">
+                     <thead>
+                       <tr className="border-b">
+                         <th className="text-right p-2">العنوان</th>
+                         <th className="text-right p-2">الفئة</th>
+                         <th className="text-right p-2">الحالة</th>
+                         <th className="text-right p-2">التاريخ</th>
+                         <th className="text-right p-2">الإجراءات</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {blogPosts.length === 0 ? (
+                         <tr>
+                           <td colSpan="5" className="p-4 text-center text-gray-500">لا توجد مقالات بعد</td>
+                         </tr>
+                       ) : (
+                         blogPosts.map((post) => (
+                           <tr key={post.id} className="border-b">
+                             <td className="p-2">{post.title}</td>
+                             <td className="p-2">{post.category || 'عام'}</td>
+                             <td className="p-2">
+                               <span className={`px-2 py-1 rounded-full text-xs ${
+                                 post.status === 'published' ? 'bg-green-100 text-green-800' : 
+                                 post.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 
+                                 'bg-gray-100 text-gray-800'
+                               }`}>
+                                 {post.status === 'published' ? 'منشور' : 
+                                  post.status === 'draft' ? 'مسودة' : 'مؤرشف'}
+                               </span>
+                             </td>
+                             <td className="p-2">
+                               {post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString('ar-SA') : 'غير محدد'}
+                             </td>
+                             <td className="p-2">
+                               <Button size="sm" variant="outline" className="mr-2">تعديل</Button>
+                               <Button 
+                                 size="sm" 
+                                 variant="destructive"
+                                 onClick={() => handleDeleteBlog(post.id)}
+                               >
+                                 حذف
+                               </Button>
+                             </td>
+                           </tr>
+                         ))
+                       )}
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+             </div>
+           </div>
+         )}
+                 {dashboardSection === 'help' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <h2 className="text-2xl font-bold text-gray-800 mb-6">مركز المساعدة</h2>
+             <div className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <h3 className="text-lg font-semibold text-gray-800">الأسئلة الشائعة</h3>
+                 <Button onClick={() => setShowFaqForm(true)}>إضافة سؤال جديد</Button>
+               </div>
+               
+               {/* نموذج إضافة سؤال جديد */}
+               {showFaqForm && (
+                 <div className="border rounded-lg p-6 bg-gray-50">
+                   <h4 className="text-lg font-semibold text-gray-800 mb-4">سؤال جديد</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <Label htmlFor="faqQuestion">السؤال</Label>
+                       <Input
+                         id="faqQuestion"
+                         placeholder="أدخل السؤال"
+                         value={faqForm.question}
+                         onChange={(e) => setFaqForm({...faqForm, question: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="faqCategory">الفئة</Label>
+                       <select
+                         id="faqCategory"
+                         className="w-full p-2 border rounded-md"
+                         value={faqForm.category}
+                         onChange={(e) => setFaqForm({...faqForm, category: e.target.value})}
+                       >
+                         <option value="">اختر الفئة</option>
+                         <option value="general">عام</option>
+                         <option value="orders">الطلبات</option>
+                         <option value="delivery">التوصيل</option>
+                         <option value="contact">التواصل</option>
+                         <option value="technical">تقني</option>
+                       </select>
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="faqAnswer">الإجابة</Label>
+                       <Textarea
+                         id="faqAnswer"
+                         placeholder="أدخل الإجابة"
+                         rows={4}
+                         value={faqForm.answer}
+                         onChange={(e) => setFaqForm({...faqForm, answer: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="faqOrder">ترتيب العرض</Label>
+                       <Input
+                         id="faqOrder"
+                         type="number"
+                         placeholder="0"
+                         value={faqForm.orderIndex}
+                         onChange={(e) => setFaqForm({...faqForm, orderIndex: parseInt(e.target.value) || 0})}
+                       />
+                     </div>
+                   </div>
+                   <div className="flex gap-2 mt-4">
+                     <Button onClick={() => handleSaveFaq()}>حفظ السؤال</Button>
+                     <Button variant="outline" onClick={() => setShowFaqForm(false)}>إلغاء</Button>
+                   </div>
+                 </div>
+               )}
+               
+               <div className="border rounded-lg p-4">
+                 <div className="overflow-x-auto">
+                   <table className="w-full">
+                     <thead>
+                       <tr className="border-b">
+                         <th className="text-right p-2">السؤال</th>
+                         <th className="text-right p-2">الفئة</th>
+                         <th className="text-right p-2">الترتيب</th>
+                         <th className="text-right p-2">الحالة</th>
+                         <th className="text-right p-2">الإجراءات</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {faqs.length === 0 ? (
+                         <tr>
+                           <td colSpan="5" className="p-4 text-center text-gray-500">لا توجد أسئلة شائعة بعد</td>
+                         </tr>
+                       ) : (
+                         faqs.map((faq) => (
+                           <tr key={faq.id} className="border-b">
+                             <td className="p-2">{faq.question}</td>
+                             <td className="p-2">{faq.category || 'عام'}</td>
+                             <td className="p-2">{faq.orderIndex || 0}</td>
+                             <td className="p-2">
+                               <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">نشط</span>
+                             </td>
+                             <td className="p-2">
+                               <Button size="sm" variant="outline" className="mr-2">تعديل</Button>
+                               <Button 
+                                 size="sm" 
+                                 variant="destructive"
+                                 onClick={() => handleDeleteFaq(faq.id)}
+                               >
+                                 حذف
+                               </Button>
+                             </td>
+                           </tr>
+                         ))
+                       )}
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+             </div>
+           </div>
+         )}
+                 {dashboardSection === 'distributors' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <h2 className="text-2xl font-bold text-gray-800 mb-6">إدارة الموزعين</h2>
+             <div className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <h3 className="text-lg font-semibold text-gray-800">قائمة الموزعين</h3>
+                 <Button onClick={() => setShowDistributorForm(true)}>إضافة موزع جديد</Button>
+               </div>
+               
+               {/* نموذج إضافة موزع جديد */}
+               {showDistributorForm && (
+                 <div className="border rounded-lg p-6 bg-gray-50">
+                   <h4 className="text-lg font-semibold text-gray-800 mb-4">موزع جديد</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <Label htmlFor="distributorName">اسم الموزع</Label>
+                       <Input
+                         id="distributorName"
+                         placeholder="أدخل اسم الموزع"
+                         value={distributorForm.name}
+                         onChange={(e) => setDistributorForm({...distributorForm, name: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorType">نوع الموزع</Label>
+                       <select
+                         id="distributorType"
+                         className="w-full p-2 border rounded-md"
+                         value={distributorForm.type}
+                         onChange={(e) => setDistributorForm({...distributorForm, type: e.target.value})}
+                       >
+                         <option value="physical">فيزيائي</option>
+                         <option value="digital">رقمي</option>
+                       </select>
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorRegion">المنطقة</Label>
+                       <Input
+                         id="distributorRegion"
+                         placeholder="أدخل المنطقة"
+                         value={distributorForm.region}
+                         onChange={(e) => setDistributorForm({...distributorForm, region: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorCountry">الدولة</Label>
+                       <Input
+                         id="distributorCountry"
+                         placeholder="أدخل الدولة"
+                         value={distributorForm.country}
+                         onChange={(e) => setDistributorForm({...distributorForm, country: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorCity">المدينة</Label>
+                       <Input
+                         id="distributorCity"
+                         placeholder="أدخل المدينة"
+                         value={distributorForm.city}
+                         onChange={(e) => setDistributorForm({...distributorForm, city: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorPhone">رقم الهاتف</Label>
+                       <Input
+                         id="distributorPhone"
+                         placeholder="أدخل رقم الهاتف"
+                         value={distributorForm.phone}
+                         onChange={(e) => setDistributorForm({...distributorForm, phone: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorEmail">البريد الإلكتروني</Label>
+                       <Input
+                         id="distributorEmail"
+                         type="email"
+                         placeholder="أدخل البريد الإلكتروني"
+                         value={distributorForm.email}
+                         onChange={(e) => setDistributorForm({...distributorForm, email: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="distributorWebsite">الموقع الإلكتروني</Label>
+                       <Input
+                         id="distributorWebsite"
+                         placeholder="أدخل الموقع الإلكتروني"
+                         value={distributorForm.website}
+                         onChange={(e) => setDistributorForm({...distributorForm, website: e.target.value})}
+                       />
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="distributorAddress">العنوان</Label>
+                       <Textarea
+                         id="distributorAddress"
+                         placeholder="أدخل العنوان التفصيلي"
+                         rows={3}
+                         value={distributorForm.address}
+                         onChange={(e) => setDistributorForm({...distributorForm, address: e.target.value})}
+                       />
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="distributorDescription">الوصف</Label>
+                       <Textarea
+                         id="distributorDescription"
+                         placeholder="أدخل وصف الموزع"
+                         rows={3}
+                         value={distributorForm.description}
+                         onChange={(e) => setDistributorForm({...distributorForm, description: e.target.value})}
+                       />
+                     </div>
+                   </div>
+                   <div className="flex gap-2 mt-4">
+                     <Button onClick={() => handleSaveDistributor()}>حفظ الموزع</Button>
+                     <Button variant="outline" onClick={() => setShowDistributorForm(false)}>إلغاء</Button>
+                   </div>
+                 </div>
+               )}
+               
+               <div className="border rounded-lg p-4">
+                 <div className="overflow-x-auto">
+                   <table className="w-full">
+                     <thead>
+                       <tr className="border-b">
+                         <th className="text-right p-2">الاسم</th>
+                         <th className="text-right p-2">النوع</th>
+                         <th className="text-right p-2">المنطقة</th>
+                         <th className="text-right p-2">المدينة</th>
+                         <th className="text-right p-2">الهاتف</th>
+                         <th className="text-right p-2">الحالة</th>
+                         <th className="text-right p-2">الإجراءات</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {distributors.length === 0 ? (
+                         <tr>
+                           <td colSpan="7" className="p-4 text-center text-gray-500">لا يوجد موزعون بعد</td>
+                         </tr>
+                       ) : (
+                         distributors.map((distributor) => (
+                           <tr key={distributor.id} className="border-b">
+                             <td className="p-2">{distributor.name}</td>
+                             <td className="p-2">{distributor.type === 'physical' ? 'فيزيائي' : 'رقمي'}</td>
+                             <td className="p-2">{distributor.region || '-'}</td>
+                             <td className="p-2">{distributor.city || '-'}</td>
+                             <td className="p-2">{distributor.phone || '-'}</td>
+                             <td className="p-2">
+                               <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">نشط</span>
+                             </td>
+                             <td className="p-2">
+                               <Button size="sm" variant="outline" className="mr-2">تعديل</Button>
+                               <Button 
+                                 size="sm" 
+                                 variant="destructive"
+                                 onClick={() => handleDeleteDistributor(distributor.id)}
+                               >
+                                 حذف
+                               </Button>
+                             </td>
+                           </tr>
+                         ))
+                       )}
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+             </div>
+           </div>
+                  )}
+
+         {/* إدارة أعضاء الفريق */}
+         {dashboardSection === 'team' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <h2 className="text-2xl font-bold text-gray-800 mb-6">إدارة أعضاء الفريق</h2>
+             <div className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <h3 className="text-lg font-semibold text-gray-800">أعضاء الفريق</h3>
+                 <Button onClick={() => setShowTeamMemberForm(true)}>إضافة عضو جديد</Button>
+               </div>
+               
+               {/* نموذج إضافة عضو فريق جديد */}
+               {showTeamMemberForm && (
+                 <div className="border rounded-lg p-6 bg-gray-50">
+                   <h4 className="text-lg font-semibold text-gray-800 mb-4">عضو فريق جديد</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <Label htmlFor="teamMemberName">الاسم</Label>
+                       <Input
+                         id="teamMemberName"
+                         placeholder="أدخل الاسم"
+                         value={teamMemberForm.name}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, name: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="teamMemberPosition">المنصب</Label>
+                       <Input
+                         id="teamMemberPosition"
+                         placeholder="أدخل المنصب"
+                         value={teamMemberForm.position}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, position: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="teamMemberEmail">البريد الإلكتروني</Label>
+                       <Input
+                         id="teamMemberEmail"
+                         type="email"
+                         placeholder="أدخل البريد الإلكتروني"
+                         value={teamMemberForm.email}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, email: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="teamMemberLinkedin">LinkedIn</Label>
+                       <Input
+                         id="teamMemberLinkedin"
+                         placeholder="أدخل رابط LinkedIn"
+                         value={teamMemberForm.linkedin}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, linkedin: e.target.value})}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="teamMemberTwitter">Twitter</Label>
+                       <Input
+                         id="teamMemberTwitter"
+                         placeholder="أدخل رابط Twitter"
+                         value={teamMemberForm.twitter}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, twitter: e.target.value})}
+                       />
+                     </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="teamMemberBio">السيرة الذاتية</Label>
+                       <Textarea
+                         id="teamMemberBio"
+                         placeholder="أدخل السيرة الذاتية"
+                         rows={4}
+                         value={teamMemberForm.bio}
+                         onChange={(e) => setTeamMemberForm({...teamMemberForm, bio: e.target.value})}
+                       />
+                     </div>
+                   </div>
+                   <div className="flex gap-2 mt-4">
+                     <Button onClick={() => handleSaveTeamMember()}>حفظ العضو</Button>
+                     <Button variant="outline" onClick={() => setShowTeamMemberForm(false)}>إلغاء</Button>
+                   </div>
+                 </div>
+               )}
+               
+               <div className="border rounded-lg p-4">
+                 <div className="overflow-x-auto">
+                   <table className="w-full">
+                     <thead>
+                       <tr className="border-b">
+                         <th className="text-right p-2">الاسم</th>
+                         <th className="text-right p-2">المنصب</th>
+                         <th className="text-right p-2">البريد الإلكتروني</th>
+                         <th className="text-right p-2">الحالة</th>
+                         <th className="text-right p-2">الإجراءات</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {teamMembers.length === 0 ? (
+                         <tr>
+                           <td colSpan="5" className="p-4 text-center text-gray-500">لا يوجد أعضاء فريق بعد</td>
+                         </tr>
+                       ) : (
+                         teamMembers.map((member) => (
+                           <tr key={member.id} className="border-b">
+                             <td className="p-2">{member.name}</td>
+                             <td className="p-2">{member.position}</td>
+                             <td className="p-2">{member.email || '-'}</td>
+                             <td className="p-2">
+                               <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">نشط</span>
+                             </td>
+                             <td className="p-2">
+                               <Button size="sm" variant="outline" className="mr-2">تعديل</Button>
+                               <Button 
+                                 size="sm" 
+                                 variant="destructive"
+                                 onClick={() => handleDeleteTeamMember(member.id)}
+                               >
+                                 حذف
+                               </Button>
+                             </td>
+                           </tr>
+                         ))
+                       )}
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+             </div>
+           </div>
+         )}
+
         {/* Shipping Management Tab */}
         {activeTab === 'shipping' && (
-          <ShippingManagement />
+          <ShippingMethodsManagement />
         )}
+
+         {/* إدارة طلبات التصميم */}
+         {dashboardSection === 'design-requests' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <div className="flex justify-between items-center mb-6">
+               <h2 className="text-2xl font-bold text-gray-800">إدارة طلبات التصميم</h2>
+               <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                 <select
+                   value={designRequestStatus}
+                   onChange={(e) => setDesignRequestStatus(e.target.value)}
+                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                 >
+                   <option value="all">جميع الطلبات</option>
+                   <option value="pending">قيد المراجعة</option>
+                   <option value="approved">تمت الموافقة</option>
+                   <option value="inProgress">قيد التنفيذ</option>
+                   <option value="completed">مكتمل</option>
+                   <option value="rejected">مرفوض</option>
+                 </select>
+                 <Button onClick={fetchDesignRequests} variant="outline">
+                   تحديث
+                 </Button>
+               </div>
+             </div>
+
+             {filteredDesignRequests.length === 0 ? (
+               <div className="text-center py-12">
+                 <PenTool className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-500 mb-2">لا توجد طلبات تصميم</h3>
+                 <p className="text-gray-400">لم يتم إرسال أي طلبات تصميم بعد</p>
+               </div>
+             ) : (
+               <div className="space-y-4">
+                 {filteredDesignRequests.map((request) => (
+                   <div key={request.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                     <div className="flex items-center justify-between mb-3">
+                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                         {getStatusIcon(request.status)}
+                         {getStatusBadge(request.status)}
+                       </div>
+                       <span className="text-sm text-gray-500">
+                         {new Date(request.createdAt).toLocaleDateString('ar-SA')}
+                       </span>
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                       <div>
+                         <Label className="text-xs text-gray-500">اسم العميل</Label>
+                         <p className="font-medium">{request.name}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">البريد الإلكتروني</Label>
+                         <p className="font-medium">{request.email}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">رقم الجوال</Label>
+                         <p className="font-medium">{request.mobile || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">عنوان الكتاب</Label>
+                         <p className="font-medium">{request.bookTitle || 'غير محدد'}</p>
+                       </div>
+                     </div>
+
+                     {request.services && request.services.length > 0 && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">الخدمات المطلوبة</Label>
+                         <div className="flex flex-wrap gap-2 mt-1">
+                           {request.services.map((service, index) => (
+                             <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                               {service}
+                             </span>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+
+                     {request.notes && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">ملاحظات</Label>
+                         <p className="text-sm text-gray-700 mt-1">{request.notes}</p>
+                       </div>
+                     )}
+
+                     {request.fileInfo && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">الملف المرفق</Label>
+                         <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                           <FileText className="w-4 h-4 text-gray-500" />
+                           <span className="text-sm text-gray-700">{request.fileInfo.name}</span>
+                           <span className="text-xs text-gray-500">({request.fileInfo.size} KB)</span>
+                       </div>
+                     </div>
+                     )}
+
+                     <div className="flex items-center justify-between pt-3 border-t">
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <select
+                           value={request.status}
+                           onChange={(e) => handleDesignRequestStatusChange(request.id, e.target.value)}
+                           className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                         >
+                           <option value="pending">قيد المراجعة</option>
+                           <option value="approved">تمت الموافقة</option>
+                           <option value="inProgress">قيد التنفيذ</option>
+                           <option value="completed">مكتمل</option>
+                           <option value="rejected">مرفوض</option>
+                         </select>
+                       </div>
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => {
+                             setSelectedDesignRequest(request);
+                             setShowDesignRequestDialog(true);
+                           }}
+                         >
+                           عرض التفاصيل
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="destructive"
+                           onClick={() => handleDeleteDesignRequest(request.id)}
+                         >
+                           حذف
+                         </Button>
+                       </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         )}
+
+         {/* Design Request Details Dialog */}
+         {showDesignRequestDialog && selectedDesignRequest && (
+           <Dialog open={showDesignRequestDialog} onOpenChange={setShowDesignRequestDialog}>
+             <DialogContent className="max-w-2xl">
+               <DialogHeader>
+                 <DialogTitle>تفاصيل طلب التصميم</DialogTitle>
+               </DialogHeader>
+               <div className="space-y-4">
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <Label className="text-sm font-medium">اسم العميل</Label>
+                     <p className="text-gray-700">{selectedDesignRequest.name}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">البريد الإلكتروني</Label>
+                     <p className="text-gray-700">{selectedDesignRequest.email}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">رقم الجوال</Label>
+                     <p className="text-gray-700">{selectedDesignRequest.mobile || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">عنوان الكتاب</Label>
+                     <p className="text-gray-700">{selectedDesignRequest.bookTitle || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">نوع الكتاب</Label>
+                     <p className="text-gray-700">{selectedDesignRequest.type || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">الحالة</Label>
+                     <div className="mt-1">{getStatusBadge(selectedDesignRequest.status)}</div>
+                   </div>
+                 </div>
+
+                 {selectedDesignRequest.services && selectedDesignRequest.services.length > 0 && (
+                   <div>
+                     <Label className="text-sm font-medium">الخدمات المطلوبة</Label>
+                     <div className="flex flex-wrap gap-2 mt-1">
+                       {selectedDesignRequest.services.map((service, index) => (
+                         <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                           {service}
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+
+                 {selectedDesignRequest.notes && (
+                   <div>
+                     <Label className="text-sm font-medium">ملاحظات</Label>
+                     <p className="text-gray-700 mt-1">{selectedDesignRequest.notes}</p>
+                   </div>
+                 )}
+
+                 {selectedDesignRequest.fileInfo && (
+                   <div>
+                     <Label className="text-sm font-medium">الملف المرفق</Label>
+                     <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                       <FileText className="w-4 h-4 text-gray-500" />
+                       <span className="text-gray-700">{selectedDesignRequest.fileInfo.name}</span>
+                       <span className="text-gray-500">({selectedDesignRequest.fileInfo.size} KB)</span>
+                     </div>
+                   </div>
+                 )}
+
+                 <div>
+                   <Label className="text-sm font-medium">تاريخ الطلب</Label>
+                   <p className="text-gray-700 mt-1">
+                     {new Date(selectedDesignRequest.createdAt).toLocaleString('ar-SA')}
+                   </p>
+                 </div>
+               </div>
+               <DialogFooter>
+                 <Button variant="outline" onClick={() => setShowDesignRequestDialog(false)}>
+                   إغلاق
+                 </Button>
+               </DialogFooter>
+             </DialogContent>
+           </Dialog>
+         )}
+
+         {/* Publishing Request Details Dialog */}
+         {showPublishingRequestDialog && selectedPublishingRequest && (
+           <Dialog open={showPublishingRequestDialog} onOpenChange={setShowPublishingRequestDialog}>
+             <DialogContent className="max-w-2xl">
+               <DialogHeader>
+                 <DialogTitle>تفاصيل طلب النشر</DialogTitle>
+               </DialogHeader>
+               <div className="space-y-4">
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <Label className="text-sm font-medium">اسم المؤلف</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.name}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">البريد الإلكتروني</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.email}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">رقم الجوال</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.mobile || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">عنوان الكتاب</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.bookTitle || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">نوع الكتاب</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.type || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">اللغة</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.language || 'العربية'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">التنسيق</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.format || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">المناطق المستهدفة</Label>
+                     <p className="text-gray-700">{selectedPublishingRequest.targetRegions || 'غير محدد'}</p>
+                   </div>
+                   <div>
+                     <Label className="text-sm font-medium">الحالة</Label>
+                     <div className="mt-1">{getStatusBadge(selectedPublishingRequest.status)}</div>
+                   </div>
+                 </div>
+
+                 {selectedPublishingRequest.notes && (
+                   <div>
+                     <Label className="text-sm font-medium">ملاحظات</Label>
+                     <p className="text-gray-700 mt-1">{selectedPublishingRequest.notes}</p>
+                   </div>
+                 )}
+
+                 {selectedPublishingRequest.fileInfo && (
+                   <div>
+                     <Label className="text-sm font-medium">الملف المرفق</Label>
+                     <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                       <FileText className="w-4 h-4 text-gray-500" />
+                       <span className="text-gray-700">{selectedPublishingRequest.fileInfo.name}</span>
+                       <span className="text-gray-500">({selectedPublishingRequest.fileInfo.size} KB)</span>
+                     </div>
+                   </div>
+                 )}
+
+                 <div>
+                   <Label className="text-sm font-medium">تاريخ الطلب</Label>
+                   <p className="text-gray-700 mt-1">
+                     {new Date(selectedPublishingRequest.createdAt).toLocaleString('ar-SA')}
+                   </p>
+                 </div>
+               </div>
+               <DialogFooter>
+                 <Button variant="outline" onClick={() => setShowPublishingRequestDialog(false)}>
+                   إغلاق
+                 </Button>
+               </DialogFooter>
+             </DialogContent>
+           </Dialog>
+         )}
+
+         {/* إدارة طلبات النشر */}
+         {dashboardSection === 'publishing-requests' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <div className="flex justify-between items-center mb-6">
+               <h2 className="text-2xl font-bold text-gray-800">إدارة طلبات النشر</h2>
+               <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                 <select
+                   value={publishingRequestStatus}
+                   onChange={(e) => setPublishingRequestStatus(e.target.value)}
+                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                 >
+                   <option value="all">جميع الطلبات</option>
+                   <option value="pending">قيد المراجعة</option>
+                   <option value="approved">تمت الموافقة</option>
+                   <option value="inProgress">قيد التنفيذ</option>
+                   <option value="completed">مكتمل</option>
+                   <option value="rejected">مرفوض</option>
+                 </select>
+                 <Button onClick={fetchPublishingRequests} variant="outline">
+                   تحديث
+                 </Button>
+               </div>
+             </div>
+
+             {filteredPublishingRequests.length === 0 ? (
+               <div className="text-center py-12">
+                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-500 mb-2">لا توجد طلبات نشر</h3>
+                 <p className="text-gray-400">لم يتم إرسال أي طلبات نشر بعد</p>
+               </div>
+             ) : (
+               <div className="space-y-4">
+                 {filteredPublishingRequests.map((request) => (
+                   <div key={request.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                     <div className="flex items-center justify-between mb-3">
+                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                         {getStatusIcon(request.status)}
+                         {getStatusBadge(request.status)}
+                       </div>
+                       <span className="text-sm text-gray-500">
+                         {new Date(request.createdAt).toLocaleDateString('ar-SA')}
+                       </span>
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                       <div>
+                         <Label className="text-xs text-gray-500">اسم المؤلف</Label>
+                         <p className="font-medium">{request.name}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">عنوان الكتاب</Label>
+                         <p className="font-medium">{request.bookTitle || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">نوع الكتاب</Label>
+                         <p className="font-medium">{request.type || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">اللغة</Label>
+                         <p className="font-medium">{request.language || 'العربية'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">البريد الإلكتروني</Label>
+                         <p className="font-medium">{request.email}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">رقم الجوال</Label>
+                         <p className="font-medium">{request.mobile || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">التنسيق</Label>
+                         <p className="font-medium">{request.format || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">المناطق المستهدفة</Label>
+                         <p className="font-medium">{request.targetRegions || 'غير محدد'}</p>
+                       </div>
+                     </div>
+
+                     {request.notes && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">ملاحظات</Label>
+                         <p className="text-sm text-gray-700 mt-1">{request.notes}</p>
+                       </div>
+                     )}
+
+                     {request.fileInfo && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">الملف المرفق</Label>
+                         <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                           <FileText className="w-4 h-4 text-gray-500" />
+                           <span className="text-sm text-gray-700">{request.fileInfo.name}</span>
+                           <span className="text-xs text-gray-500">({request.fileInfo.size} KB)</span>
+                         </div>
+                       </div>
+                     )}
+
+                     <div className="flex items-center justify-between pt-3 border-t">
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <select
+                           value={request.status}
+                           onChange={(e) => handlePublishingRequestStatusChange(request.id, e.target.value)}
+                           className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                         >
+                           <option value="pending">قيد المراجعة</option>
+                           <option value="approved">تمت الموافقة</option>
+                           <option value="inProgress">قيد التنفيذ</option>
+                           <option value="completed">مكتمل</option>
+                           <option value="rejected">مرفوض</option>
+                         </select>
+                       </div>
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => {
+                             setSelectedPublishingRequest(request);
+                             setShowPublishingRequestDialog(true);
+                           }}
+                         >
+                           عرض التفاصيل
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="destructive"
+                           onClick={() => handleDeletePublishingRequest(request.id)}
+                         >
+                           حذف
+                         </Button>
+                       </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         )}
+
+         {/* إدارة طلبات النشر مع دار ملهمون */}
+         {dashboardSection === 'publish-with-us' && (
+           <div className="bg-white rounded-lg shadow-lg p-6">
+             <div className="flex justify-between items-center mb-6">
+               <h2 className="text-2xl font-bold text-gray-800">إدارة طلبات النشر مع دار ملهمون</h2>
+               <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                 <select
+                   value={publishingRequestStatus}
+                   onChange={(e) => setPublishingRequestStatus(e.target.value)}
+                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                 >
+                   <option value="all">جميع الطلبات</option>
+                   <option value="pending">قيد المراجعة</option>
+                   <option value="approved">تمت الموافقة</option>
+                   <option value="inProgress">قيد التنفيذ</option>
+                   <option value="completed">مكتمل</option>
+                   <option value="rejected">مرفوض</option>
+                 </select>
+                 <Button onClick={fetchPublishingRequests} variant="outline">
+                   تحديث
+                 </Button>
+               </div>
+             </div>
+
+             {filteredPublishingRequests.length === 0 ? (
+               <div className="text-center py-12">
+                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-500 mb-2">لا توجد طلبات نشر</h3>
+                 <p className="text-gray-400">لم يتم إرسال أي طلبات نشر بعد</p>
+               </div>
+             ) : (
+               <div className="space-y-4">
+                 {filteredPublishingRequests.map((request) => (
+                   <div key={request.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                     <div className="flex items-center justify-between mb-3">
+                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                         {getStatusIcon(request.status)}
+                         {getStatusBadge(request.status)}
+                       </div>
+                       <span className="text-sm text-gray-500">
+                         {new Date(request.createdAt).toLocaleDateString('ar-SA')}
+                       </span>
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                       <div>
+                         <Label className="text-xs text-gray-500">اسم المؤلف</Label>
+                         <p className="font-medium">{request.name}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">عنوان الكتاب</Label>
+                         <p className="font-medium">{request.bookTitle || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">نوع الكتاب</Label>
+                         <p className="font-medium">{request.type || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">اللغة</Label>
+                         <p className="font-medium">{request.language || 'العربية'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">البريد الإلكتروني</Label>
+                         <p className="font-medium">{request.email}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">رقم الجوال</Label>
+                         <p className="font-medium">{request.mobile || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">التنسيق</Label>
+                         <p className="font-medium">{request.format || 'غير محدد'}</p>
+                       </div>
+                       <div>
+                         <Label className="text-xs text-gray-500">المناطق المستهدفة</Label>
+                         <p className="font-medium">{request.targetRegions || 'غير محدد'}</p>
+                       </div>
+                     </div>
+
+                     {request.notes && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">ملاحظات</Label>
+                         <p className="text-sm text-gray-700 mt-1">{request.notes}</p>
+                       </div>
+                     )}
+
+                     {request.fileInfo && (
+                       <div className="mb-4">
+                         <Label className="text-xs text-gray-500">الملف المرفق</Label>
+                         <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                           <FileText className="w-4 h-4 text-gray-500" />
+                           <span className="text-sm text-gray-700">{request.fileInfo.name}</span>
+                           <span className="text-xs text-gray-500">({request.fileInfo.size} KB)</span>
+                         </div>
+                       </div>
+                     )}
+
+                     <div className="flex items-center justify-between pt-3 border-t">
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <select
+                           value={request.status}
+                           onChange={(e) => handlePublishingRequestStatusChange(request.id, e.target.value)}
+                           className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                         >
+                           <option value="pending">قيد المراجعة</option>
+                           <option value="approved">تمت الموافقة</option>
+                           <option value="inProgress">قيد التنفيذ</option>
+                           <option value="completed">مكتمل</option>
+                           <option value="rejected">مرفوض</option>
+                         </select>
+                       </div>
+                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => {
+                             setSelectedPublishingRequest(request);
+                             setShowPublishingRequestDialog(true);
+                           }}
+                         >
+                           عرض التفاصيل
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="destructive"
+                           onClick={() => handleDeletePublishingRequest(request.id)}
+                         >
+                           حذف
+                         </Button>
+                       </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+                 )}
       </main>
-      </div>
+      
     </div>
-  );
+  </div>
+);
 };
 
 export default Dashboard;

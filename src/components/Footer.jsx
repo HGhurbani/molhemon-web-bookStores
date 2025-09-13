@@ -84,6 +84,8 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
               </ul>
             </div>
           ))}
+
+
         </div>
 
         <div className="border-t border-slate-700/50 pt-5 sm:pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] sm:text-xs text-white">
@@ -92,6 +94,7 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
             <Link to="/privacy-policy" className="hover:text-blue-200">سياسة الخصوصية</Link>
             <Link to="/terms-of-service" className="hover:text-blue-200">شروط الاستخدام</Link>
             <Link to="/return-policy" className="hover:text-blue-200">سياسة الإرجاع</Link>
+            <Link to="/shipping-policy" className="hover:text-blue-200">سياسة الشحن</Link>
           </div>
         </div>
       </div>

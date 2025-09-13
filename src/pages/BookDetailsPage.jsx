@@ -11,6 +11,7 @@ import YouMayAlsoLikeSection from '@/components/YouMayAlsoLikeSection.jsx';
 import { toast } from "@/components/ui/use-toast.js";
 import api from '@/lib/api.js';
 import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
+import jwtAuthManager from '@/lib/jwtAuth.js';
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist, onOpenChat }) => {
   const { id } = useParams();
@@ -24,6 +25,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const [ratings, setRatings] = useState([]);
   const [ratingValue, setRatingValue] = useState(0);
   const [comment, setComment] = useState('');
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const stateBook = location.state?.book;
@@ -62,6 +65,34 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
     })();
   }, [book]);
 
+  // تحقق من أن المستخدم قام بشراء هذا الكتاب بالفعل
+  useEffect(() => {
+    (async () => {
+      try {
+        const user = jwtAuthManager.getCurrentUser();
+        const loggedIn = !!user;
+        setIsLoggedIn(loggedIn);
+        if (!loggedIn || !book) {
+          setHasPurchased(false);
+          return;
+        }
+
+        const orders = await api.orders.getOrders(user.uid);
+        const purchased = Array.isArray(orders) && orders.some((order) => {
+          const items = order.items || [];
+          const orderStatus = (order.status || '').toLowerCase();
+          const paymentStatus = (order.paymentStatus || '').toLowerCase();
+          const isPaid = ['paid', 'completed', 'succeeded', 'delivered'].some(s => orderStatus.includes(s) || paymentStatus.includes(s));
+          return items.some((it) => String(it.productId || it.id) === String(book.id)) && (isPaid || !order.requiresPayment);
+        });
+        setHasPurchased(!!purchased);
+      } catch (e) {
+        console.warn('Failed to verify purchase for rating', e);
+        setHasPurchased(false);
+      }
+    })();
+  }, [book]);
+
   const authorDetails = authors.find(a => a.name === book?.author);
 
   const hasReadSample = Boolean(book?.ebookFile);
@@ -69,6 +100,11 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
 
   const hasBook = book?.type !== 'audio';
   const hasAudiobook = Boolean(book?.audioFile || book?.sampleAudio);
+  
+  // تحديد نوع الكتاب
+  const isPhysicalBook = book?.type === 'physical';
+  const isEbook = book?.type === 'ebook';
+  const isAudiobook = book?.type === 'audio';
 
   const [selectedFormat, setSelectedFormat] = useState(
     hasBook ? 'book' : hasAudiobook ? 'audio' : ''
@@ -91,7 +127,12 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
   const handleRatingSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.addBookRating(book.id, { rating: ratingValue, comment });
+      if (!isLoggedIn || !hasPurchased) {
+        toast({ title: 'غير مسموح', description: 'يمكن التقييم فقط بعد شراء المنتج.', variant: 'destructive' });
+        return;
+      }
+      const user = jwtAuthManager.getCurrentUser();
+      await api.addBookRating(book.id, { rating: ratingValue, comment, userId: user?.uid });
       const r = await api.getBookRatings(book.id);
       setRatings(r);
       setRatingValue(0);
@@ -193,6 +234,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             <span className="px-3 py-1 rounded-full border text-sm bg-white text-gray-800">{book.category}</span>
           </div>
 
+
           <hr className="mb-4" />
 
           <div className="mb-6">
@@ -202,13 +244,136 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             </div>
             {activeTab === 'details' ? (
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-4">
-                <div className="text-gray-500">رقم ISBN-13:</div><div className="text-gray-700">{book.isbn || '9781401971373'}</div>
-                <div className="text-gray-500">الناشر:</div><div className="text-gray-700">{book.publisher || 'دار نشر هاوس'}</div>
-                <div className="text-gray-500">البائع:</div><div className="text-gray-700">{book.seller || 'خدمات دار نشر بينجوين راندوم هاوس'}</div>
-                <div className="text-gray-500">التنسيق:</div><div className="text-gray-700">{book.format || 'كتاب إلكتروني'}</div>
-                <div className="text-gray-500">عدد الصفحات:</div><div className="text-gray-700">{book.pages || '257'}</div>
-                <div className="text-gray-500">ترتيب المبيعات:</div><div className="text-gray-700">{book.salesRank || '77'}</div>
-                <div className="text-gray-500">حجم الملف:</div><div className="text-gray-700">{book.fileSize || '—'}</div>
+                {book.isbn && (
+                  <>
+                    <div className="text-gray-500">رقم ISBN:</div>
+                    <div className="text-gray-700">{book.isbn}</div>
+                  </>
+                )}
+                {book.publisher && (
+                  <>
+                    <div className="text-gray-500">دار النشر:</div>
+                    <div className="text-gray-700">{book.publisher}</div>
+                  </>
+                )}
+                {book.publicationYear && (
+                  <>
+                    <div className="text-gray-500">سنة النشر:</div>
+                    <div className="text-gray-700">{book.publicationYear}</div>
+                  </>
+                )}
+                {book.pages && (
+                  <>
+                    <div className="text-gray-500">عدد الصفحات:</div>
+                    <div className="text-gray-700">{book.pages}</div>
+                  </>
+                )}
+                {book.fileFormat && (
+                  <>
+                    <div className="text-gray-500">الصيغة:</div>
+                    <div className="text-gray-700">{book.fileFormat}</div>
+                  </>
+                )}
+                {book.fileSize && (
+                  <>
+                    <div className="text-gray-500">حجم الملف:</div>
+                    <div className="text-gray-700">{book.fileSize}</div>
+                  </>
+                )}
+                {book.salesRank && (
+                  <>
+                    <div className="text-gray-500">ترتيب المبيعات:</div>
+                    <div className="text-gray-700">{book.salesRank}</div>
+                  </>
+                )}
+                
+                {/* حقول إضافية للكتب الورقية */}
+                {isPhysicalBook && book.translators && (
+                  <>
+                    <div className="text-gray-500">المترجمون:</div>
+                    <div className="text-gray-700">{book.translators}</div>
+                  </>
+                )}
+                {isPhysicalBook && book.coverType && (
+                  <>
+                    <div className="text-gray-500">نوع الغلاف:</div>
+                    <div className="text-gray-700">{book.coverType}</div>
+                  </>
+                )}
+                {isPhysicalBook && book.weight && (
+                  <>
+                    <div className="text-gray-500">الوزن:</div>
+                    <div className="text-gray-700">{book.weight} كجم</div>
+                  </>
+                )}
+                {isPhysicalBook && book.dimensions && (
+                  <>
+                    <div className="text-gray-500">الأبعاد:</div>
+                    <div className="text-gray-700">
+                      {book.dimensions.length} × {book.dimensions.width} × {book.dimensions.height} سم
+                    </div>
+                  </>
+                )}
+                {isPhysicalBook && book.originalLanguage && (
+                  <>
+                    <div className="text-gray-500">اللغة الأصلية:</div>
+                    <div className="text-gray-700">{book.originalLanguage}</div>
+                  </>
+                )}
+                {isPhysicalBook && book.translatedLanguage && (
+                  <>
+                    <div className="text-gray-500">اللغة المترجم إليها:</div>
+                    <div className="text-gray-700">{book.translatedLanguage}</div>
+                  </>
+                )}
+                {isPhysicalBook && book.readCount && (
+                  <>
+                    <div className="text-gray-500">مرات القراءة:</div>
+                    <div className="text-gray-700">{book.readCount} مرة</div>
+                  </>
+                )}
+                {isPhysicalBook && book.weight && (
+                  <>
+                    <div className="text-gray-500">الوزن:</div>
+                    <div className="text-gray-700">{book.weight} كجم</div>
+                  </>
+                )}
+                {isPhysicalBook && book.dimensions && (
+                  <>
+                    <div className="text-gray-500">الأبعاد:</div>
+                    <div className="text-gray-700">
+                      {book.dimensions.length} × {book.dimensions.width} × {book.dimensions.height} سم
+                    </div>
+                  </>
+                )}
+                
+                {/* حقول إضافية للكتب الإلكترونية */}
+                {isEbook && book.wordCount && (
+                  <>
+                    <div className="text-gray-500">عدد الكلمات:</div>
+                    <div className="text-gray-700">{book.wordCount}</div>
+                  </>
+                )}
+                
+                {/* حقول إضافية للكتب الصوتية */}
+                {isAudiobook && book.duration && (
+                  <>
+                    <div className="text-gray-500">مدة التشغيل:</div>
+                    <div className="text-gray-700">{book.duration}</div>
+                  </>
+                )}
+                {isAudiobook && book.narrator && (
+                  <>
+                    <div className="text-gray-500">القارئ:</div>
+                    <div className="text-gray-700">{book.narrator}</div>
+                  </>
+                )}
+                {isAudiobook && book.audioQuality && (
+                  <>
+                    <div className="text-gray-500">جودة الصوت:</div>
+                    <div className="text-gray-700">{book.audioQuality}</div>
+                  </>
+                )}
               </div>
             ) : (
               <p className="text-sm text-gray-700 mt-4 whitespace-pre-line">{authorDetails?.bio || 'لا توجد نبذة متوفرة.'}</p>
@@ -318,7 +483,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
       </div>
 
       <div className="rounded-lg shadow-sm p-4 mt-4">
-        {localStorage.getItem('customerLoggedIn') === 'true' && (
+        {isLoggedIn && hasPurchased ? (
           <form onSubmit={handleRatingSubmit} className="space-y-2 mb-6">
             <div className="flex items-center gap-2">
               <Label htmlFor="ratingValue" className="text-sm">قيم الكتاب</Label>
@@ -343,6 +508,10 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
             />
             <Button type="submit" className="bg-blue-600 text-white">إرسال التقييم</Button>
           </form>
+        ) : (
+          <div className="mb-6 text-sm text-gray-600">
+            {isLoggedIn ? 'يمكنك تقييم المنتج بعد شرائه.' : 'سجل الدخول وقم بشراء المنتج لتتمكن من التقييم.'}
+          </div>
         )}
         <div className="space-y-6">
           {ratings.map((r) => (
@@ -350,8 +519,8 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
               <div className="flex items-center gap-3 mb-2">
                 <img src="https://i.pravatar.cc/40" alt="user" className="w-10 h-10 rounded-full border" />
                 <div>
-                  <p className="font-semibold text-gray-800 text-sm">{r.user_id || 'مستخدم'}</p>
-                  <p className="text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</p>
+                  <p className="font-semibold text-gray-800 text-sm">{r.userId || r.user_id || 'مستخدم'}</p>
+                  <p className="text-xs text-gray-500">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1 text-yellow-500 text-sm mb-2">

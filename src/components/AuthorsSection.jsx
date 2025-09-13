@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
+import SocialMediaIcons from '@/components/SocialMediaIcons.jsx';
 
 const AuthorsSection = ({ authors }) => {
   return (
@@ -17,7 +18,36 @@ const AuthorsSection = ({ authors }) => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-2.5 sm:gap-x-3 gap-y-3 sm:gap-y-4">
+        {/* Mobile: Horizontal scroll, Desktop: Grid */}
+        <div className="block sm:hidden">
+          <div className="flex gap-x-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {authors.slice(0,10).map((author, index) => (
+              <motion.div
+                key={`${author.id}-${index}`}
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="text-center group flex-shrink-0"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+              >
+                <Link to={`/author/${author.id}`} className="block">
+                  <div className="relative w-16 h-16 mx-auto mb-2">
+                     <img
+                        alt={`صورة المؤلف ${author.name}`}
+                        className="w-full h-full rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-sm group-hover:shadow-md"
+                        src={author.image || `https://source.unsplash.com/80x80/?${encodeURIComponent(author.imgPlaceholder || author.name)}`}
+                      />
+                     <div className="absolute inset-0 rounded-full ring-1 ring-blue-500 ring-offset-1 ring-offset-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <h3 className="font-medium text-xs text-gray-700 group-hover:text-blue-600 transition-colors whitespace-nowrap">{author.name}</h3>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Grid layout */}
+        <div className="hidden sm:grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-3 gap-y-4">
           {authors.slice(0,10).map((author, index) => (
             <motion.div
               key={`${author.id}-${index}`}
@@ -28,7 +58,7 @@ const AuthorsSection = ({ authors }) => {
               transition={{ delay: index * 0.06 }}
             >
               <Link to={`/author/${author.id}`} className="block">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-1.5 sm:mb-2">
+                <div className="relative w-16 h-16 mx-auto mb-2">
                    <img
                       alt={`صورة المؤلف ${author.name}`}
                       className="w-full h-full rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-sm group-hover:shadow-md"
@@ -36,7 +66,7 @@ const AuthorsSection = ({ authors }) => {
                     />
                    <div className="absolute inset-0 rounded-full ring-1 ring-blue-500 ring-offset-1 ring-offset-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <h3 className="font-medium text-[10px] sm:text-xs text-gray-700 group-hover:text-blue-600 transition-colors">{author.name}</h3>
+                <h3 className="font-medium text-xs text-gray-700 group-hover:text-blue-600 transition-colors">{author.name}</h3>
               </Link>
             </motion.div>
           ))}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Dialog, DialogContent } from '@/components/ui/dialog.jsx'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import * as DialogPrimitive from '@radix-ui/react-dialog' // Ensure this is imported for DialogPrimitive.Close
 import { CheckCircle2 } from 'lucide-react'; // Importing a check icon for success
@@ -12,20 +12,14 @@ const AddToCartDialog = ({ open, onOpenChange, book, handleAddToCart, handleTogg
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="space-y-6 sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-4xl">
-        {/* Close Button at Top Right of the DialogContent */}
-        <DialogPrimitive.Close className='absolute top-3 left-3 text-gray-500 hover:text-gray-700'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="lucide lucide-x h-5 w-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </DialogPrimitive.Close>
+        <DialogTitle className="sr-only">تمت الإضافة بنجاح</DialogTitle>
 
-        {/* Dialog Header matching the image */}
-        <div className="flex items-center justify-between border-b pb-4">
+        {/* Dialog Header */}
+        <div className="flex items-center justify-center border-b pb-4">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <CheckCircle2 className="w-6 h-6 text-green-500" />
             <h2 className="text-lg font-semibold">تمت الإضافة بنجاح!</h2>
           </div>
-          <Button asChild className="h-9 bg-blue-600 hover:bg-blue-700 text-white">
-            <Link to="/cart">انظر إلى السلة</Link>
-          </Button>
         </div>
 
         {/* Book that was added */}
@@ -35,6 +29,22 @@ const AddToCartDialog = ({ open, onOpenChange, book, handleAddToCart, handleTogg
             <h3 className="font-semibold text-gray-800 text-sm">{book.title}</h3>
             <p className="text-gray-500 text-xs">{book.author}</p>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          <Button 
+            onClick={() => onOpenChange(false)}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
+          >
+            متابعة التسوق
+          </Button>
+          <Button 
+            onClick={() => onOpenChange(false)}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Link to="/cart" onClick={() => onOpenChange(false)}>انظر إلى السلة</Link>
+          </Button>
         </div>
 
       </DialogContent>

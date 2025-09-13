@@ -1,0 +1,77 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isManager() {
+      return isAuthenticated() && 
+        (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+    }
+
+    // Book covers and images
+    match /book-covers/{allPaths=**} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // Author images
+    match /author-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // User profile images
+    match /user-profiles/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isOwner(userId) || isManager();
+    }
+
+    // Blog images
+    match /blog-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // Ebook files
+    match /ebooks/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // Audio book files
+    match /audiobooks/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // Team member images
+    match /team-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // Distributor images
+    match /distributor-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // General uploads
+    match /uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

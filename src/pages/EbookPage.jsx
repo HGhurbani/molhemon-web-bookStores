@@ -49,33 +49,43 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         style={{ backgroundImage: "url('https://i.ibb.co/3Y7PkFH7/image-1318.png')" }}
-        className="relative p-6 sm:p-8 rounded-xl shadow-2xl flex items-center text-white overflow-hidden"
+        className="relative h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] rounded-xl shadow-2xl flex items-center text-white overflow-hidden bg-cover bg-center bg-no-repeat"
       >
-        <div className="absolute inset-0 z-0" />
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/20 z-5" />
         
-        {/* SVG لتطبيق المنحنى المطلوب باللون الجديد #9774FF */}
+        {/* SVG لتطبيق المنحنى المطلوب باللون الجديد #9774FF - 60% عرض في الهاتف */}
         <svg
-          className="absolute inset-y-0 right-0 w-full md:w-1/2 z-10"
+          className="absolute top-0 bottom-0 right-0 w-[60%] sm:w-[48%] h-full z-10"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
           <path 
-            d="M 0 0 C 40 0, 40 100, 0 100 L 100 100 L 100 0 Z" 
-            fill="#9774FF" // تم تغيير اللون هنا
+            d="M 0 0 C 30 0, 30 100, 0 100 L 100 100 L 100 0 Z" 
+            fill="#9774FF"
           />
         </svg>
 
-        <div className="relative z-20 p-6 sm:p-8 text-center md:text-right max-w-lg md:max-w-md">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
-          <p className="text-lg sm:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
-          <p className="text-white-100 text-sm sm:text-base mb-6">اكتشف آلاف الكتب من الأطفال، إلى %٥٠ خصم وأكثر في أي وقت</p>
-          <Button
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg"
-            onClick={() => handleFeatureClick ? handleFeatureClick('free-ebook-trial') : toast({ title: 'تم اختيار التجربة المجانية!' })}
-          >
-            تجربة مجانية لمدة ٧ أيام
-          </Button>
+        {/* محتوى البانر - محسن للهواتف */}
+        <div className="relative z-20 p-4 sm:p-6 md:p-8 w-full">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            {/* النص */}
+            <div className="flex-1 text-center sm:text-right max-w-full sm:max-w-lg">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold mb-2 sm:mb-3 leading-tight">اكتشف أكثر من ٧٠٠٠٠ كتاب إلكتروني</h1>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-1">نحن باقة القراءة المناسبة لك</p>
+              <p className="text-white/90 text-xs sm:text-sm md:text-base mb-3 sm:mb-4 lg:mb-6 leading-relaxed">اكتشف آلاف الكتب من الأطفال، إلى %٥٠ خصم وأكثر في أي وقت</p>
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg text-xs sm:text-sm md:text-base px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto"
+                onClick={() => handleFeatureClick ? handleFeatureClick('free-ebook-trial') : toast({ title: 'تم اختيار التجربة المجانية!' })}
+              >
+                تجربة مجانية لمدة ٧ أيام
+              </Button>
+            </div>
+            
+            {/* مساحة فارغة للـ SVG */}
+            <div className="hidden sm:block flex-1"></div>
+          </div>
         </div>
 
       </motion.section>

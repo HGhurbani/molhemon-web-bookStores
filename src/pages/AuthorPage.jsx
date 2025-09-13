@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { BookOpen, Star, Users, Edit3, PlusCircle, BookOpenText, TrendingUp } from 'lucide-react';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import AuthorsSection from '@/components/AuthorsSection.jsx'; // Import AuthorsSection
+import SocialMediaIcons from '@/components/SocialMediaIcons.jsx';
 import { toast } from "@/components/ui/use-toast.js";
 
 const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) => {
@@ -90,6 +91,20 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
         </span>
       </div>
 
+      {/* وسائل التواصل الاجتماعي */}
+      {author.socialMedia && (
+        <div className="flex justify-center md:justify-start mb-4">
+          <div className="text-center md:text-right">
+            <p className="text-sm text-gray-500 mb-2">تابع المؤلف على:</p>
+            <SocialMediaIcons 
+              socialMedia={author.socialMedia} 
+              className="text-lg"
+              size="w-6 h-6"
+            />
+          </div>
+        </div>
+      )}
+
       {/* نبذة مدمجة داخل نفس الكارد */}
       <div className="mt-4 p-0 text-sm text-gray-700 leading-relaxed whitespace-pre-line">
   <h3 className="text-base font-semibold text-purple-600 mb-2 flex items-center">
@@ -149,7 +164,7 @@ const AuthorPage = ({ authors, books, handleAddToCart, handleToggleWishlist }) =
         </h2>
         <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-gray-600">
           <span>الترتيب حسب:</span>
-          <select className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1 text-xs" onChange={(e) => console.log(e.target.value)}>
+          <select className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1 text-xs" onChange={(e) => {}}>
             <option value="default">الأكثر شعبية</option>
             <option value="newest">الأحدث</option>
             <option value="rating">الأعلى تقييماً</option>

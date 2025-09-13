@@ -13,17 +13,12 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
   const totalPrice = cart.reduce((sum, item) => sum + getPriceForCurrency(item, currency.code) * item.quantity, 0);
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Example logic for shipping and discounts based on total price
-  const freeShippingThreshold = 150.00; // Example: Free shipping over 150 AED
+  // Example logic for discounts based on total price
   const discountThreshold = 105.00; // Example: Discount if total is over 105 AED
   const discountAmount = 5.00; // Example: 5 AED discount
 
-  const hasPhysical = cart.some(item => item.type === 'physical' || !item.type);
-  const shippingCost = hasPhysical
-    ? (totalPrice >= freeShippingThreshold ? 0 : 25.00)
-    : 0;
   const appliedDiscount = totalPrice >= discountThreshold ? discountAmount : 0;
-  const finalTotal = totalPrice + shippingCost - appliedDiscount;
+  const finalTotal = totalPrice - appliedDiscount;
 
   if (cart.length === 0) {
     return (
@@ -165,15 +160,11 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
             transition={{ delay: cart.length * 0.05 + 0.2 }}
             className="bg-white p-6 rounded-lg shadow-lg sticky top-24"
           >
-            <h2 className="text-xl font-semibold text-gray-800 mb-5">الإجمالي (السعر)</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-5">ملخص الطلب</h2>
             <div className="space-y-3 mb-5 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">المجموع الفرعي ({totalQuantity} منتجات):</span>
                 <span className="font-medium text-gray-800"><FormattedPrice value={totalPrice} /></span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">الشحن:</span>
-                <span className="font-medium text-green-600">{shippingCost === 0 ? 'مجاني' : <FormattedPrice value={shippingCost} />}</span>
               </div>
               {appliedDiscount > 0 && (
                 <div className="flex justify-between">
@@ -184,6 +175,10 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
               <div className="flex justify-between border-t pt-3 mt-3">
                 <span className="text-lg font-bold text-gray-800">الإجمالي:</span>
                 <span className="text-xl font-bold text-blue-600"><FormattedPrice value={finalTotal} /></span>
+              </div>
+              <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 rounded">
+                <span className="block">💡 سيتم حساب سعر الشحن في صفحة إتمام الطلب</span>
+                <span className="block">بعد اختيار طريقة الشحن المناسبة</span>
               </div>
             </div>
 

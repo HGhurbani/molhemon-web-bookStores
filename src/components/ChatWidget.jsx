@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
-import { collection, onSnapshot, addDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
 import api from '@/lib/api.js';
 
@@ -16,6 +16,7 @@ const ChatWidget = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [userId, setUserId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messagesRef = useRef(null);
   const isLoggedIn =
     !!targetUser || localStorage.getItem('customerLoggedIn') === 'true';
@@ -42,37 +43,126 @@ const ChatWidget = ({
 
   useEffect(() => {
     if (!userId && !email) return;
+    
     const q = query(
       collection(db, 'messages'),
       where(userId ? 'userId' : 'email', '==', userId || email),
       orderBy('createdAt', 'asc')
     );
-    const unsub = onSnapshot(q, snap => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    
+    const unsub = onSnapshot(q, (snapshot) => {
+      const newMessages = snapshot.docs.map(d => ({ 
+        id: d.id, 
+        ...d.data(),
+        createdAt: d.data().createdAt?.toDate?.() || new Date(),
+        isNew: true // مؤشر للرسائل الجديدة
+      }));
+      
+      // تحديث الرسائل مع الحفاظ على الرسائل المؤقتة
+      setMessages(prev => {
+        const tempMessages = prev.filter(msg => msg.isPending);
+        const firebaseMessages = newMessages.filter(msg => !msg.isPending);
+        const allMessages = [...tempMessages, ...firebaseMessages];
+        
+        // ترتيب الرسائل حسب التاريخ
+        return allMessages.sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateA - dateB;
+        });
+      });
+      
+      // التمرير إلى أسفل عند استلام رسائل جديدة
+      const changes = snapshot.docChanges();
+      const hasNewMessages = changes.some(change => change.type === 'added');
+      
+      if (hasNewMessages) {
+        // التمرير الفوري
+        if (messagesRef.current) {
+          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }
+        
+        // إزالة مؤشر "جديد" بعد ثانيتين
+        setTimeout(() => {
+          setMessages(prev => prev.map(msg => ({ ...msg, isNew: false })));
+        }, 2000);
+      }
+    }, (error) => {
+      console.error('Error listening to messages:', error);
     });
+    
     return () => unsub();
   }, [userId, email]);
 
   useEffect(() => {
     if (open && messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      setTimeout(() => {
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      }, 100);
     }
   }, [messages, open]);
 
   const send = async () => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || isLoading) return;
     const trimmed = text.trim();
     if (!trimmed) return;
     if (!name || !email) return;
-    await addDoc(collection(db, 'messages'), {
-      userId: userId || null,
-      name,
-      email,
-      text: trimmed,
-      sender: targetUser ? 'admin' : 'user',
-      createdAt: new Date(),
-    });
-    setText('');
+    
+    setIsLoading(true);
+    
+    try {
+      // إضافة الرسالة فوراً للحالة المحلية
+      const newMessage = {
+        id: `temp-${Date.now()}`,
+        userId: userId || null,
+        name,
+        email,
+        text: trimmed,
+        sender: targetUser ? 'admin' : 'user',
+        createdAt: new Date(),
+        isPending: true
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      setText('');
+      
+      // إرسال الرسالة إلى Firebase
+      const docRef = await addDoc(collection(db, 'messages'), {
+        userId: userId || null,
+        name,
+        email,
+        text: trimmed,
+        sender: targetUser ? 'admin' : 'user',
+        createdAt: serverTimestamp(),
+      });
+      
+      // تحديث الرسالة المحلية بإزالة حالة الانتظار
+      setMessages(prev => prev.map(msg => 
+        msg.id === newMessage.id 
+          ? { ...msg, id: docRef.id, isPending: false }
+          : msg
+      ));
+      
+      // التمرير إلى أسفل
+      if (messagesRef.current) {
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      }
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // إزالة الرسالة المحلية في حالة الخطأ
+      setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
+      setText(trimmed); // إعادة النص
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
   };
 
   return (
@@ -102,9 +192,22 @@ const ChatWidget = ({
           <div ref={messagesRef} className="p-3 space-y-2 h-64 overflow-y-auto bg-gray-50 text-sm">
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.sender === 'admin' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`${m.sender === 'admin' ? 'bg-white text-gray-800' : 'bg-blue-600 text-white'} rounded-lg px-3 py-1 max-w-[70%]`}>{m.text}</div>
+                <div className={`${m.sender === 'admin' ? 'bg-white text-gray-800' : 'bg-blue-600 text-white'} rounded-lg px-3 py-1 max-w-[70%] relative`}>
+                  {m.text}
+                  {m.isPending && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                  )}
+                  {m.isNew && !m.isPending && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  )}
+                </div>
               </div>
             ))}
+            {messages.length === 0 && (
+              <div className="text-center text-gray-500 text-sm py-4">
+                لا توجد رسائل بعد. ابدأ المحادثة الآن!
+              </div>
+            )}
           </div>
           <div className="p-3 border-t bg-white flex flex-col gap-2">
             {!userId && (
@@ -112,7 +215,7 @@ const ChatWidget = ({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="border rounded px-2 py-1 text-sm mb-2 focus:outline-none"
+                className="border rounded px-2 py-1 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="اسمك"
               />
             )}
@@ -121,7 +224,7 @@ const ChatWidget = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border rounded px-2 py-1 text-sm mb-2 focus:outline-none"
+                className="border rounded px-2 py-1 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="بريدك الإلكتروني"
               />
             )}
@@ -130,12 +233,19 @@ const ChatWidget = ({
                 type="text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="flex-grow border rounded px-2 py-1 text-sm focus:outline-none"
-                placeholder="اكتب رسالتك"
+                onKeyPress={handleKeyPress}
+                className="flex-grow border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="اكتب رسالتك (اضغط Enter للإرسال)"
+                disabled={isLoading}
               />
-              <Button size="sm" className="h-8 bg-blue-600 text-white" onClick={send}>
+              <Button 
+                size="sm" 
+                className="h-8 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50" 
+                onClick={send}
+                disabled={isLoading || !text.trim()}
+              >
                 <Send className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0" />
-                إرسال
+                {isLoading ? 'جاري...' : 'إرسال'}
               </Button>
             </div>
           </div>
@@ -144,7 +254,7 @@ const ChatWidget = ({
       {!open && (
         <button
           onClick={() => onOpenChange(true)}
-          className="fixed bottom-6 left-6 rtl:left-auto rtl:right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700"
+          className="fixed bottom-6 left-6 rtl:left-auto rtl:right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
         >
           <MessageCircle className="w-5 h-5" />
         </button>

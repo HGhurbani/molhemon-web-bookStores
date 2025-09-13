@@ -11,6 +11,7 @@ import Dashboard from '@/components/Dashboard.jsx';
 import SEO from '@/components/SEO.jsx';
 import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
 import AuthPage from '@/pages/AuthPage.jsx';
+import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 
 import HomePage from '@/pages/HomePage.jsx';
 import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
@@ -34,19 +35,39 @@ import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
 import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage.jsx';
 import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
 import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
+import AuthorsSectionPage from '@/pages/AuthorsSectionPage.jsx';
+import DesignServicesPage from '@/pages/DesignServicesPage.jsx';
+import PublishingServicesPage from '@/pages/PublishingServicesPage.jsx';
+import PublishPage from '@/pages/PublishPage.jsx';
+import AboutPage from '@/pages/AboutPage.jsx';
+import TeamPage from '@/pages/TeamPage.jsx';
+import BlogPage from '@/pages/BlogPage.jsx';
+import BlogDetailsPage from '@/pages/BlogDetailsPage.jsx';
+import BlogTestPage from '@/pages/BlogTestPage.jsx';
+import HelpCenterPage from '@/pages/HelpCenterPage.jsx';
+import DistributorsPage from '@/pages/DistributorsPage.jsx';
+import FirebaseTestPage from '@/pages/FirebaseTestPage.jsx';
+import ImageTestPage from '@/pages/ImageTestPage.jsx';
+import StoreSettingsPage from '@/pages/StoreSettingsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
 import ChatWidget from '@/components/ChatWidget.jsx';
+import SplashScreen from '@/components/SplashScreen.jsx';
+import MobileBottomNav from '@/components/MobileBottomNav.jsx';
 
 import { sellers as initialSellers, branches as initialBranches, users as initialUsers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
+import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
+import { errorHandler } from '@/lib/errorHandler.js';
 
 const App = () => {
+  const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(localStorage.getItem('adminLoggedIn') === 'true');
-  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(localStorage.getItem('customerLoggedIn') === 'true');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const { setLanguage, setLanguages, languages } = useLanguage();
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -106,43 +127,271 @@ const App = () => {
     return books.slice(3, 6).concat(books.slice(0, 3));
   }, [books]);
 
+  // التحقق من حالة المصادقة عند تحميل التطبيق
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) setCart(JSON.parse(storedCart));
-    const storedWishlist = localStorage.getItem('wishlist');
-    if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
-    const storedAuthors = localStorage.getItem('authors');
-    if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
-    const storedOrders = localStorage.getItem('orders');
-    if (storedOrders) setOrders(JSON.parse(storedOrders));
-    const storedSettings = localStorage.getItem('siteSettings');
-    if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
-    const storedFeatures = localStorage.getItem('features');
-    if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) setMessages(JSON.parse(storedMessages));
-    (async () => {
+    const checkAuthStatus = () => {
       try {
+        const user = jwtAuthManager.getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
+          setIsCustomerLoggedIn(true);
+          
+          // التحقق من صلاحيات المدير
+          if (user.isAdmin || user.role === 'admin') {
+            setIsAdminLoggedIn(true);
+          }
+        }
+        
+        // فحص إضافي من localStorage للتحقق من حالة المدير
+        const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+        const userRole = localStorage.getItem('userRole');
+        if (adminLoggedIn === 'true' && (userRole === 'admin' || userRole === 'manager')) {
+          setIsAdminLoggedIn(true);
+        }
+      } catch (error) {
+        const errorObject = errorHandler.handleError(error, 'auth:status-check');
+        console.error('Auth status check failed:', errorObject);
+        
+        // مسح حالة المصادقة في حالة الخطأ
+        jwtAuthManager.clearTokens();
+        setIsCustomerLoggedIn(false);
+        setIsAdminLoggedIn(false);
+        setCurrentUser(null);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  // مراقبة تغييرات حالة المصادقة
+  useEffect(() => {
+    const unsubscribe = firebaseAuth.onAuthStateChange(async ({ user, isAuthenticated }) => {
+      if (isAuthenticated && user) {
+        setCurrentUser(user);
+        setIsCustomerLoggedIn(true);
+        
+        // التحقق من دور المستخدم في Firestore
+        try {
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase.js');
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const userData = userDoc.data();
+          
+          if (userData && (userData.role === 'admin' || userData.role === 'manager')) {
+            setIsAdminLoggedIn(true);
+            // تحديث localStorage
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('currentUserId', user.uid);
+            localStorage.setItem('userRole', userData.role);
+          } else {
+            setIsAdminLoggedIn(false);
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('userRole');
+          }
+        } catch (error) {
+          console.error('Error checking user role:', error);
+          setIsAdminLoggedIn(false);
+        }
+      } else {
+        setCurrentUser(null);
+        setIsCustomerLoggedIn(false);
+        setIsAdminLoggedIn(false);
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('userRole');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // تحميل البيانات من Firebase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsAppLoading(true);
+        // تحميل البيانات المحفوظة محلياً أولاً
+        const storedCart = localStorage.getItem('cart');
+        if (storedCart) setCart(JSON.parse(storedCart));
+        const storedWishlist = localStorage.getItem('wishlist');
+        if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+        const storedAuthors = localStorage.getItem('authors');
+        if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
+        const storedOrders = localStorage.getItem('orders');
+        if (storedOrders) setOrders(JSON.parse(storedOrders));
+        const storedSettings = localStorage.getItem('siteSettings');
+        if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
+        const storedFeatures = localStorage.getItem('features');
+        if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
+        const storedMessages = localStorage.getItem('messages');
+        if (storedMessages) setMessages(JSON.parse(storedMessages));
+
+        // تحميل البيانات من Firebase
         const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
-          api.getBooks(),
-          api.getAuthors(),
-          api.getCategories(),
-          api.getSettings(),
-          api.getOrders(),
-          api.getPayments(),
-          api.getPaymentMethods(),
-          api.getCurrencies(),
-          api.getLanguages(),
-          api.getPlans(),
-          api.getUsers(),
-          api.getSliders(),
-          api.getBanners(),
-          api.getFeatures(),
-          api.getSellers(),
-          api.getBranches(),
-          api.getSubscriptions(),
-          api.getMessages(),
+          api.getBooks().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:books');
+            toast({
+              title: "خطأ في تحميل الكتب",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getAuthors().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:authors');
+            toast({
+              title: "خطأ في تحميل المؤلفين",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getCategories().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:categories');
+            toast({
+              title: "خطأ في تحميل الفئات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getSettings().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:settings');
+            toast({
+              title: "خطأ في تحميل الإعدادات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return {};
+          }),
+          api.getOrders().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:orders');
+            toast({
+              title: "خطأ في تحميل الطلبات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getPayments().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:payments');
+            toast({
+              title: "خطأ في تحميل المدفوعات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getPaymentMethods().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:payment-methods');
+            toast({
+              title: "خطأ في تحميل طرق الدفع",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getCurrencies().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:currencies');
+            toast({
+              title: "خطأ في تحميل العملات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getLanguages().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:languages');
+            toast({
+              title: "خطأ في تحميل اللغات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getPlans().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:plans');
+            toast({
+              title: "خطأ في تحميل الخطط",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getUsers().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:users');
+            toast({
+              title: "خطأ في تحميل المستخدمين",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getSliders().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:sliders');
+            toast({
+              title: "خطأ في تحميل الشرائح",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getBanners().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:banners');
+            toast({
+              title: "خطأ في تحميل البانرات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getFeatures().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:features');
+            toast({
+              title: "خطأ في تحميل الميزات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getSellers().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:sellers');
+            toast({
+              title: "خطأ في تحميل البائعين",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getBranches().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:branches');
+            toast({
+              title: "خطأ في تحميل الفروع",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getSubscriptions().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:subscriptions');
+            toast({
+              title: "خطأ في تحميل الاشتراكات",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
+          api.getMessages().catch(error => {
+            const errorObject = errorHandler.handleError(error, 'data:messages');
+            toast({
+              title: "خطأ في تحميل الرسائل",
+              description: errorObject.message,
+              variant: "destructive"
+            });
+            return [];
+          }),
         ]);
+
+        // تحديث الحالة
         setBooks(b);
         setAuthors(a);
         setCategoriesState(c);
@@ -162,6 +411,8 @@ const App = () => {
         setBranches(branchData);
         setSubscriptions(subs);
         setMessages(msgs);
+
+        // حساب إحصائيات لوحة التحكم
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
         setDashboardStatsState([
           { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
@@ -169,12 +420,24 @@ const App = () => {
           { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
           { title: 'المستخدمون', value: u.length, icon: Eye, color: 'bg-orange-500' },
         ]);
-      } catch (err) {
-        console.error('API fetch failed', err);
+
+      } catch (error) {
+        const errorObject = errorHandler.handleError(error, 'data:initial-load');
+        toast({
+          title: "خطأ في تحميل البيانات",
+          description: errorObject.message,
+          variant: "destructive"
+        });
+      } finally {
+        // تأخير بسيط لتحسين تجربة التحميل وتجنب الوميض
+        setTimeout(() => setIsAppLoading(false), 300);
       }
-    })();
+    };
+
+    loadData();
   }, []);
 
+  // حفظ البيانات في localStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
@@ -190,6 +453,7 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('sellers', JSON.stringify(sellers));
   }, [sellers]);
+
   useEffect(() => {
     localStorage.setItem('branches', JSON.stringify(branches));
   }, [branches]);
@@ -197,7 +461,6 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('users', JSON.stringify(users));
   }, [users]);
-
 
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
@@ -244,6 +507,7 @@ const App = () => {
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
 
+  // تحديث إحصائيات لوحة التحكم
   useEffect(() => {
     const sales = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     setDashboardStatsState([
@@ -254,12 +518,14 @@ const App = () => {
     ]);
   }, [books, authors, payments, users]);
 
+  // تحديث عنوان الصفحة
   useEffect(() => {
     if (siteSettingsState.siteName) {
       document.title = siteSettingsState.siteName;
     }
   }, [siteSettingsState.siteName]);
 
+  // تحديث اللغة الافتراضية
   useEffect(() => {
     if (siteSettingsState.defaultLanguage) {
       const lang = languages.find(l => l.code === siteSettingsState.defaultLanguage);
@@ -267,6 +533,7 @@ const App = () => {
     }
   }, [siteSettingsState.defaultLanguage, setLanguage, languages]);
 
+  // تحديث العملة الافتراضية
   useEffect(() => {
     if (!currenciesState.length) return;
     const defCode = siteSettingsState.defaultCurrency;
@@ -279,6 +546,7 @@ const App = () => {
     }
   }, [currenciesState, siteSettingsState.defaultCurrency, siteSettingsState.detectCurrencyByCountry, setCurrency]);
 
+  // دوال معالجة الأحداث
   const handleAddToCart = (book) => {
     setCart((prevCart) => {
       const existingBook = prevCart.find(item => item.id === book.id);
@@ -337,9 +605,16 @@ const App = () => {
   
   const handleFeatureClick = (feature) => {
     if (feature === 'logout') {
-      localStorage.removeItem('customerLoggedIn');
-      setIsCustomerLoggedIn(false);
-      toast({ title: 'تم تسجيل الخروج' });
+      firebaseAuth.signOut().then(() => {
+        toast({ title: 'تم تسجيل الخروج' });
+      }).catch(error => {
+        const errorObject = errorHandler.handleError(error, 'auth:signout');
+        toast({
+          title: 'خطأ في تسجيل الخروج',
+          description: errorObject.message,
+          variant: 'destructive'
+        });
+      });
       return;
     }
     if (feature.startsWith('change-language-')) {
@@ -357,7 +632,7 @@ const App = () => {
     });
   };
 
-  const PageLayout = ({ children }) => {
+  const PageLayout = ({ children, siteSettings }) => {
     const location = useLocation();
     return (
       <motion.div
@@ -367,7 +642,12 @@ const App = () => {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {children}
+        {React.Children.map(children, child => {
+          if (React.isValidElement(child)) {
+            return React.cloneElement(child, { siteSettings });
+          }
+          return child;
+        })}
       </motion.div>
     );
   };
@@ -384,113 +664,141 @@ const App = () => {
           handleFeatureClick={handleFeatureClick}
           cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
           isCustomerLoggedIn={isCustomerLoggedIn}
+          currentUser={currentUser}
           books={books}
           categories={categoriesState}
           siteSettings={siteSettings}
         />
-        {children}
+        <div className="pb-16 md:pb-0">
+          {children}
+        </div>
         <Footer
           footerLinks={footerLinks}
           handleFeatureClick={handleFeatureClick}
           siteSettings={siteSettings}
         />
+        <MobileBottomNav 
+          cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+        />
       </div>
     </>
   );
 
+  if (isAppLoading) {
+    return <SplashScreen siteSettings={siteSettingsState} />;
+  }
+
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="font-sans" dir="rtl">
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route
-              path="/admin"
-              element={
-                isAdminLoggedIn ? (
-                  <Dashboard
-                    dashboardStats={dashboardStatsState}
-                    books={books}
-                    authors={authors}
-                    sellers={sellers}
-                    branches={branches}
-                    categories={categoriesState}
-                    orders={orders}
-                    payments={payments}
-                    paymentMethods={paymentMethods}
-                    plans={plans}
-                    subscriptions={subscriptions}
-                    dashboardSection={dashboardSection}
-                    setDashboardSection={setDashboardSection}
-                    handleFeatureClick={handleFeatureClick}
-                    setBooks={setBooks}
-                    setAuthors={setAuthors}
-                    setSellers={setSellers}
-                    setBranches={setBranches}
-                    setCategories={setCategoriesState}
-                    setOrders={setOrders}
-                    setPayments={setPayments}
-                    setPaymentMethods={setPaymentMethods}
-                    currencies={currenciesState}
-                    setCurrencies={setCurrenciesState}
-                    languages={languages}
-                    setLanguages={setLanguages}
-                    setPlans={setPlans}
-                    setSubscriptions={setSubscriptions}
-                    users={users}
-                    setUsers={setUsers}
-                    messages={messages}
-                    setMessages={setMessages}
-                    siteSettings={siteSettingsState}
-                    setSiteSettings={setSiteSettingsState}
-                    sliders={heroSlidesState}
-                    setSliders={setHeroSlidesState}
-                    banners={bannersState}
-                    setBanners={setBannersState}
-                    features={features}
-                    setFeatures={setFeatures}
-                  />
-                ) : (
-                  <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
-                )
-              }
-            />
-            <Route
-              path="/admin/orders/:id"
-              element={
-                isAdminLoggedIn ? (
-                  <DashboardOrderDetailsPage />
-                ) : (
-                  <AdminLoginPage onLogin={() => setIsAdminLoggedIn(true)} />
-                )
-                                }
-                />
-                <Route
-              path="/login"
-              element={
-                isCustomerLoggedIn ? (
-                  <Navigate to="/profile" />
-                ) : (
-                  <MainLayout siteSettings={siteSettingsState}><PageLayout><AuthPage onLogin={() => setIsCustomerLoggedIn(true)} /></PageLayout></MainLayout>
-                )
-              }
-            />
-            <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={features} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} onOpenChat={handleOpenChat} /></PageLayout></MainLayout>} />
-              <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
+    <ErrorBoundary>
+      <Router>
+        <ScrollToTop />
+        <div className="font-sans" dir="rtl">
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route
+                path="/admin"
+                element={
+                  isAdminLoggedIn ? (
+                    <Dashboard
+                      dashboardStats={dashboardStatsState}
+                      books={books}
+                      authors={authors}
+                      sellers={sellers}
+                      branches={branches}
+                      categories={categoriesState}
+                      orders={orders}
+                      payments={payments}
+                      paymentMethods={paymentMethods}
+                      plans={plans}
+                      subscriptions={subscriptions}
+                      dashboardSection={dashboardSection}
+                      setDashboardSection={setDashboardSection}
+                      handleFeatureClick={handleFeatureClick}
+                      setBooks={setBooks}
+                      setAuthors={setAuthors}
+                      setSellers={setSellers}
+                      setBranches={setBranches}
+                      setCategories={setCategoriesState}
+                      setOrders={setOrders}
+                      setPayments={setPayments}
+                      setPaymentMethods={setPaymentMethods}
+                      currencies={currenciesState}
+                      setCurrencies={setCurrenciesState}
+                      languages={languages}
+                      setLanguages={setLanguages}
+                      setPlans={setPlans}
+                      setSubscriptions={setSubscriptions}
+                      users={users}
+                      setUsers={setUsers}
+                      messages={messages}
+                      setMessages={setMessages}
+                      siteSettings={siteSettingsState}
+                      setSiteSettings={setSiteSettingsState}
+                      sliders={heroSlidesState}
+                      setSliders={setHeroSlidesState}
+                      banners={bannersState}
+                      setBanners={setBannersState}
+                      features={features}
+                      setFeatures={setFeatures}
+                    />
+                  ) : (
+                    <AdminLoginPage 
+                      onLogin={() => {
+                        setIsAdminLoggedIn(true);
+                        setIsCustomerLoggedIn(true);
+                      }} 
+                      setCurrentUser={setCurrentUser}
+                    />
+                  )
+                }
+              />
+              <Route
+                path="/admin/orders/:id"
+                element={
+                  isAdminLoggedIn ? (
+                    <DashboardOrderDetailsPage />
+                  ) : (
+                    <AdminLoginPage 
+                      onLogin={() => {
+                        setIsAdminLoggedIn(true);
+                        setIsCustomerLoggedIn(true);
+                      }} 
+                      setCurrentUser={setCurrentUser}
+                    />
+                  )
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  isCustomerLoggedIn ? (
+                    <Navigate to="/profile" />
+                  ) : (
+                    <MainLayout siteSettings={siteSettingsState}>
+                      <PageLayout siteSettings={siteSettingsState}>
+                        <AuthPage onLogin={() => setIsCustomerLoggedIn(true)} />
+                      </PageLayout>
+                    </MainLayout>
+                  )
+                }
+              />
+              <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={features} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} onOpenChat={handleOpenChat} /></PageLayout></MainLayout>} />
+              <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
+              <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
               <Route
                 path="/checkout"
                 element={
                   isCustomerLoggedIn ? (
                     <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout>
+                      <PageLayout siteSettings={siteSettingsState}>
                         <CheckoutPage
                           cart={cart}
                           setCart={setCart}
                           setOrders={setOrders}
+                          currentUser={currentUser}
                         />
                       </PageLayout>
                     </MainLayout>
@@ -504,7 +812,7 @@ const App = () => {
                 element={
                   isCustomerLoggedIn ? (
                     <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout>
+                      <PageLayout siteSettings={siteSettingsState}>
                         <SubscriptionCheckoutPage />
                       </PageLayout>
                     </MainLayout>
@@ -518,8 +826,11 @@ const App = () => {
                 element={
                   isCustomerLoggedIn ? (
                     <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout>
-                        <UserProfilePage handleFeatureClick={handleFeatureClick} />
+                      <PageLayout siteSettings={siteSettingsState}>
+                        <UserProfilePage 
+                          handleFeatureClick={handleFeatureClick}
+                          currentUser={currentUser}
+                        />
                       </PageLayout>
                     </MainLayout>
                   ) : (
@@ -527,37 +838,52 @@ const App = () => {
                   )
                 }
               />
-              <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><OrderDetailsPage /></PageLayout></MainLayout>} />
-              <Route path="/track-order" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><TrackOrderPage /></PageLayout></MainLayout>} />
-              <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/player/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><AudiobookPlayerPage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/privacy-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><PrivacyPolicyPage /></PageLayout></MainLayout>} />
-              <Route path="/terms-of-service" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><TermsOfServicePage /></PageLayout></MainLayout>} />
-              <Route path="/return-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><ReturnPolicyPage /></PageLayout></MainLayout>} />
-              <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout><NotFoundPage /></PageLayout></MainLayout>} />
+              <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><OrderDetailsPage /></PageLayout></MainLayout>} />
+              <Route path="/track-order" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TrackOrderPage /></PageLayout></MainLayout>} />
+              <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
+              <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/player/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AudiobookPlayerPage books={books} /></PageLayout></MainLayout>} />
+              <Route path="/privacy-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PrivacyPolicyPage /></PageLayout></MainLayout>} />
+              <Route path="/terms-of-service" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TermsOfServicePage /></PageLayout></MainLayout>} />
+              <Route path="/return-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ReturnPolicyPage /></PageLayout></MainLayout>} />
+              <Route path="/authors" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AuthorsSectionPage /></PageLayout></MainLayout>} />
+              <Route path="/design-services" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><DesignServicesPage /></PageLayout></MainLayout>} />
+              <Route path="/publishing-services" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PublishingServicesPage /></PageLayout></MainLayout>} />
+              <Route path="/publish" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PublishPage /></PageLayout></MainLayout>} />
+              <Route path="/about" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AboutPage /></PageLayout></MainLayout>} />
+              <Route path="/team" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TeamPage /></PageLayout></MainLayout>} />
+              <Route path="/blog" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogPage /></PageLayout></MainLayout>} />
+              <Route path="/blog/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogDetailsPage /></PageLayout></MainLayout>} />
+              <Route path="/blog-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogTestPage /></PageLayout></MainLayout>} />
+              <Route path="/help" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><HelpCenterPage /></PageLayout></MainLayout>} />
+              <Route path="/distributors" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><DistributorsPage /></PageLayout></MainLayout>} />
+              <Route path="/firebase-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><FirebaseTestPage /></PageLayout></MainLayout>} />
+              <Route path="/image-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ImageTestPage /></PageLayout></MainLayout>} />
+<Route path="/store-settings" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><StoreSettingsPage /></PageLayout></MainLayout>} />
+<Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
-        </AnimatePresence>
-        <Toaster />
-        <AddToCartDialog
-          open={cartDialogOpen}
-          onOpenChange={setCartDialogOpen}
-          book={cartDialogBook}
-          handleAddToCart={handleAddToCart}
-          handleToggleWishlist={handleToggleWishlist}
-          wishlist={wishlist}
-          authors={authors}
-        />
-        <ChatWidget
-          open={chatOpen}
-          onOpenChange={setChatOpen}
-          contact={chatContact}
-        />
-      </div>
-    </Router>
+          </AnimatePresence>
+          <Toaster />
+          <AddToCartDialog
+            open={cartDialogOpen}
+            onOpenChange={setCartDialogOpen}
+            book={cartDialogBook}
+            handleAddToCart={handleAddToCart}
+            handleToggleWishlist={handleToggleWishlist}
+            wishlist={wishlist}
+            authors={authors}
+          />
+          <ChatWidget
+            open={chatOpen}
+            onOpenChange={setChatOpen}
+            contact={chatContact}
+          />
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 };
 

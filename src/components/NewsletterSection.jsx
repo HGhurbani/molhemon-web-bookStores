@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const NewsletterSection = ({ handleFeatureClick }) => {
   return (
-    <section className="py-10 sm:py-12 bg-blue-600 text-white rounded-t-2xl">
+    <section className="py-10 sm:py-12 text-white rounded-t-2xl" style={{backgroundColor: '#585cc3'}}>
       <motion.div
         className="max-w-screen-lg mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y:25 }}

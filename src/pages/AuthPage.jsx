@@ -5,16 +5,9 @@ import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  OAuthProvider,
-} from 'firebase/auth';
+import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase.js';
+import { db } from '@/lib/firebase.js';
 
 const formVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -32,12 +25,16 @@ const AuthPage = ({ onLogin }) => {
     e.preventDefault();
     try {
       if (isSignUp) {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, 'users', cred.user.uid), {
+        // إنشاء حساب جديد باستخدام jwtAuthManager
+        const result = await firebaseAuth.createAccount(email, password, fullName);
+        
+        // حفظ بيانات إضافية في Firestore
+        await setDoc(doc(db, 'users', result.user.uid), {
           name: fullName,
           email,
           role: 'customer',
         });
+        
         toast({
           title: 'تم إنشاء الحساب بنجاح',
           description: 'يمكنك تسجيل الدخول الآن'
@@ -49,14 +46,19 @@ const AuthPage = ({ onLogin }) => {
         return;
       }
 
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      // تسجيل الدخول باستخدام jwtAuthManager
+      const result = await firebaseAuth.signInWithEmail(email, password);
+      
+      // تحديث localStorage للتوافق مع النظام القديم
       localStorage.setItem('customerLoggedIn', 'true');
-      localStorage.setItem('currentUserId', user.uid);
+      localStorage.setItem('currentUserId', result.user.uid);
+      
       onLogin();
       navigate('/profile');
     } catch (err) {
+      console.error('Auth error:', err);
       toast({
-        title: 'بيانات غير صحيحة',
+        title: err.message || 'بيانات غير صحيحة',
         variant: 'destructive'
       });
     }
@@ -64,22 +66,39 @@ const AuthPage = ({ onLogin }) => {
 
   const handleSocialClick = async (providerId) => {
     try {
-      let provider;
-      if (providerId === 'google') provider = new GoogleAuthProvider();
-      else if (providerId === 'facebook') provider = new FacebookAuthProvider();
-      else if (providerId === 'apple') provider = new OAuthProvider('apple.com');
-      const { user } = await signInWithPopup(auth, provider);
-      await setDoc(
-        doc(db, 'users', user.uid),
-        { name: user.displayName, email: user.email, role: 'customer' },
-        { merge: true }
-      );
-      localStorage.setItem('customerLoggedIn', 'true');
-      localStorage.setItem('currentUserId', user.uid);
-      onLogin();
-      navigate('/profile');
+      let result;
+      
+      if (providerId === 'google') {
+        result = await firebaseAuth.signInWithGoogle();
+      } else if (providerId === 'facebook') {
+        result = await firebaseAuth.signInWithFacebook();
+      } else if (providerId === 'apple') {
+        // Apple sign in not implemented in jwtAuth yet
+        toast({ title: 'تسجيل الدخول بـ Apple غير متاح حالياً', variant: 'destructive' });
+        return;
+      }
+      
+      if (result && result.success) {
+        // حفظ بيانات إضافية في Firestore
+        await setDoc(
+          doc(db, 'users', result.user.uid),
+          { name: result.user.displayName, email: result.user.email, role: 'customer' },
+          { merge: true }
+        );
+        
+        // تحديث localStorage للتوافق مع النظام القديم
+        localStorage.setItem('customerLoggedIn', 'true');
+        localStorage.setItem('currentUserId', result.user.uid);
+        
+        onLogin();
+        navigate('/profile');
+      }
     } catch (err) {
-      toast({ title: 'تعذر تسجيل الدخول بالحساب', variant: 'destructive' });
+      console.error('Social auth error:', err);
+      toast({ 
+        title: err.message || 'تعذر تسجيل الدخول بالحساب', 
+        variant: 'destructive' 
+      });
     }
   };
 

@@ -192,16 +192,118 @@ export const bestsellerBooks = books.slice(0,6);
 
 
 export const authors = [
-  { id: 1, name: 'ليلي ويليامز', books: 15, imgPlaceholder: 'صورة ليلي ويليامز كرتونية', bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.' },
-  { id: 2, name: 'ماك كارتني', books: 8, imgPlaceholder: 'صورة ماك كارتني كرتونية', bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.' },
-  { id: 3, name: 'واشنطن', books: 12, imgPlaceholder: 'صورة واشنطن كرتونية', bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.' },
-  { id: 4, name: 'دينا خوجة', books: 6, imgPlaceholder: 'صورة ديانا روز كرتونية', bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.' },
-  { id: 5, name: 'ناتالي', books: 10, imgPlaceholder: 'صورة ناتالي كرتونية', bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.' },
-  { id: 6, name: 'ليلي ويليامز مكرر', books: 15, imgPlaceholder: 'صورة ليلي ويليامز كرتونية مكررة', bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.' },
-  { id: 7, name: 'ماك كارتني مكرر', books: 8, imgPlaceholder: 'صورة ماك كارتني كرتونية مكررة', bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.' },
-  { id: 8, name: 'واشنطن مكرر', books: 12, imgPlaceholder: 'صورة واشنطن كرتونية مكررة', bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.' },
-  { id: 9, name: 'ديانا روز مكرر', books: 6, imgPlaceholder: 'صورة ديانا روز كرتونية مكررة', bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.' },
-  { id: 10, name: 'ناتالي مكرر', books: 10, imgPlaceholder: 'صورة ناتالي كرتونية مكررة', bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.' },
+  { 
+    id: 1, 
+    name: 'ليلي ويليامز', 
+    books: 15, 
+    imgPlaceholder: 'صورة ليلي ويليامز كرتونية', 
+    bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.',
+    socialMedia: {
+      facebook: 'https://facebook.com/lilywilliams',
+      twitter: 'https://twitter.com/lilywilliams',
+      instagram: 'https://instagram.com/lilywilliams',
+      website: 'https://lilywilliams.com'
+    }
+  },
+  { 
+    id: 2, 
+    name: 'ماك كارتني', 
+    books: 8, 
+    imgPlaceholder: 'صورة ماك كارتني كرتونية', 
+    bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.',
+    socialMedia: {
+      twitter: 'https://twitter.com/maccartney',
+      linkedin: 'https://linkedin.com/in/maccartney',
+      website: 'https://maccartney.com'
+    }
+  },
+  { 
+    id: 3, 
+    name: 'واشنطن', 
+    books: 12, 
+    imgPlaceholder: 'صورة واشنطن كرتونية', 
+    bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.',
+    socialMedia: {
+      facebook: 'https://facebook.com/washington',
+      youtube: 'https://youtube.com/washington',
+      website: 'https://washington.com'
+    }
+  },
+  { 
+    id: 4, 
+    name: 'دينا خوجة', 
+    books: 6, 
+    imgPlaceholder: 'صورة ديانا روز كرتونية', 
+    bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.',
+    socialMedia: {
+      instagram: 'https://instagram.com/dinakhouja',
+      twitter: 'https://twitter.com/dinakhouja',
+      linkedin: 'https://linkedin.com/in/dinakhouja'
+    }
+  },
+  { 
+    id: 5, 
+    name: 'ناتالي', 
+    books: 10, 
+    imgPlaceholder: 'صورة ناتالي كرتونية', 
+    bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.',
+    socialMedia: {
+      facebook: 'https://facebook.com/natalie',
+      instagram: 'https://instagram.com/natalie',
+      website: 'https://natalie.com'
+    }
+  },
+  { 
+    id: 6, 
+    name: 'ليلي ويليامز مكرر', 
+    books: 15, 
+    imgPlaceholder: 'صورة ليلي ويليامز كرتونية مكررة', 
+    bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.',
+    socialMedia: {
+      facebook: 'https://facebook.com/lilywilliams2',
+      twitter: 'https://twitter.com/lilywilliams2'
+    }
+  },
+  { 
+    id: 7, 
+    name: 'ماك كارتني مكرر', 
+    books: 8, 
+    imgPlaceholder: 'صورة ماك كارتني كرتونية مكررة', 
+    bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.',
+    socialMedia: {
+      linkedin: 'https://linkedin.com/in/maccartney2'
+    }
+  },
+  { 
+    id: 8, 
+    name: 'واشنطن مكرر', 
+    books: 12, 
+    imgPlaceholder: 'صورة واشنطن كرتونية مكررة', 
+    bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.',
+    socialMedia: {
+      youtube: 'https://youtube.com/washington2'
+    }
+  },
+  { 
+    id: 9, 
+    name: 'ديانا روز مكرر', 
+    books: 6, 
+    imgPlaceholder: 'صورة ديانا روز كرتونية مكررة', 
+    bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.',
+    socialMedia: {
+      instagram: 'https://instagram.com/dianarose2'
+    }
+  },
+  { 
+    id: 10, 
+    name: 'ناتالي مكرر', 
+    books: 10, 
+    imgPlaceholder: 'صورة ناتالي كرتونية مكررة', 
+    bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.',
+    socialMedia: {
+      website: 'https://natalie2.com'
+    }
+  },
 ];
 
 export const sellers = [
@@ -285,7 +387,7 @@ export const footerLinks = [
   {
     title: 'حول ملهمون',
     links: [
-      { text: 'من نحن', href: '/about-us' },
+      { text: 'حول دار ملهمون', href: '/about' },
       { text: 'فريق الدار', href: '/team' },
       { text: 'المؤلفون', href: '/authors' },
       { text: 'قراء ملهمون', href: '#', action: 'molhemoon-readers-club' },
@@ -304,8 +406,8 @@ export const footerLinks = [
   {
     title: 'خدمات ملهمون',
     links: [
-      { text: 'طلبات النشر', href: '/publishing-requests' },
-      { text: 'خدمات التصميم والإنتاج', href: '/design-production-services' },
+      { text: 'خدمات النشر', href: '/publishing-services' },
+      { text: 'خدمات التصميم والإنتاج', href: '/design-services' },
       { text: 'خدمة توزيع المطبوعات', href: '/distribution-services' },
       { text: 'طلب قائمة منشورات الدار', href: '#', action: 'request-publications-list' },
     ],
@@ -564,12 +666,69 @@ export const siteSettings = {
   },
   shipping: {
     methods: {
-      standard: { enabled: true, name: 'الشحن العادي', price: 15, days: '3-5 أيام' },
-      express: { enabled: true, name: 'الشحن السريع', price: 25, days: '1-2 أيام' },
-      overnight: { enabled: false, name: 'الشحن الفوري', price: 50, days: '24 ساعة' }
+      free: { 
+        enabled: true, 
+        name: 'شحن مجاني', 
+        price: 0, 
+        days: '3-5 أيام',
+        conditions: {
+          minOrderAmount: 200,
+          maxWeight: 10,
+          countries: ['SA', 'AE', 'KW', 'BH', 'OM', 'QA']
+        }
+      },
+      standard: { 
+        enabled: true, 
+        name: 'الشحن العادي', 
+        price: 15, 
+        days: '3-5 أيام',
+        conditions: {
+          maxWeight: 20,
+          countries: ['SA', 'AE', 'KW', 'BH', 'OM', 'QA']
+        }
+      },
+      express: { 
+        enabled: true, 
+        name: 'الشحن السريع', 
+        price: 25, 
+        days: '1-2 أيام',
+        conditions: {
+          maxWeight: 15,
+          countries: ['SA', 'AE', 'KW', 'BH', 'OM', 'QA']
+        }
+      },
+      overnight: { 
+        enabled: false, 
+        name: 'الشحن الفوري', 
+        price: 50, 
+        days: '24 ساعة',
+        conditions: {
+          maxWeight: 5,
+          countries: ['SA']
+        }
+      },
+      pickup: { 
+        enabled: true, 
+        name: 'استلام من المتجر', 
+        price: 0, 
+        days: 'فوري',
+        conditions: {
+          countries: ['SA']
+        }
+      }
     },
     freeShippingThreshold: 200,
-    maxShippingDistance: 100
+    maxShippingDistance: 100,
+    weightUnit: 'kg',
+    dimensionUnit: 'cm',
+    baseShippingCost: 15,
+    costPerKg: 5,
+    maxWeight: 30,
+    maxDimensions: {
+      length: 100,
+      width: 100,
+      height: 100
+    }
   },
   locations: {
     branches: [
@@ -603,10 +762,86 @@ export const siteSettings = {
     }
   },
   terms: {
-    termsOfService: 'شروط وأحكام استخدام الموقع...',
-    privacyPolicy: 'سياسة الخصوصية...',
-    returnPolicy: 'سياسة الإرجاع والاستبدال...',
-    shippingPolicy: 'سياسة الشحن والتوصيل...'
+    termsOfService: `شروط وأحكام استخدام الموقع
+
+1. القبول بالشروط
+باستخدامك لهذا الموقع، فإنك توافق على الالتزام بهذه الشروط والأحكام.
+
+2. استخدام الموقع
+يجب استخدام الموقع لأغراض قانونية ومشروعة فقط.
+
+3. الملكية الفكرية
+جميع المحتويات محمية بموجب حقوق الملكية الفكرية.
+
+4. المسؤولية
+لا نتحمل المسؤولية عن أي أضرار مباشرة أو غير مباشرة.
+
+5. التعديلات
+نحتفظ بحق تعديل هذه الشروط في أي وقت.
+
+6. القانون المطبق
+تخضع هذه الشروط لقوانين دولة الإمارات العربية المتحدة.`,
+    privacyPolicy: `سياسة الخصوصية
+
+1. جمع المعلومات
+نقوم بجمع المعلومات التي تقدمها لنا مباشرة عند التسجيل أو الشراء.
+
+2. استخدام المعلومات
+نستخدم معلوماتك لتقديم الخدمات وتحسين تجربتك.
+
+3. حماية المعلومات
+نطبق إجراءات أمنية صارمة لحماية معلوماتك الشخصية.
+
+4. مشاركة المعلومات
+لا نشارك معلوماتك مع أطراف ثالثة دون موافقتك.
+
+5. ملفات تعريف الارتباط
+نستخدم ملفات تعريف الارتباط لتحسين تجربتك على الموقع.
+
+6. حقوقك
+يمكنك طلب حذف أو تعديل معلوماتك في أي وقت.`,
+    returnPolicy: `سياسة الإرجاع والاستبدال
+
+1. شروط الإرجاع
+يمكن إرجاع الكتب خلال 14 يوماً من تاريخ الاستلام.
+
+2. الحالة المطلوبة
+يجب أن تكون الكتب في حالة ممتازة وغير مستخدمة.
+
+3. عملية الإرجاع
+اتصل بنا أولاً للحصول على رقم إرجاع.
+
+4. التكلفة
+تكلفة الشحن للإرجاع على العميل.
+
+5. الاستبدال
+يمكن استبدال الكتاب بآخر من نفس القيمة.
+
+6. المبالغ المستردة
+يتم استرداد المبلغ خلال 5-7 أيام عمل.`,
+    shippingPolicy: `سياسة الشحن والتوصيل
+
+1. طرق الشحن
+- الشحن العادي: 3-5 أيام عمل
+- الشحن السريع: 1-2 أيام عمل
+- الشحن الفوري: 24 ساعة
+
+2. تكلفة الشحن
+- الشحن العادي: 15 درهم
+- الشحن السريع: 25 درهم
+- الشحن الفوري: 50 درهم
+
+3. الشحن المجاني
+الشحن مجاني للطلبات التي تزيد عن 200 درهم.
+
+4. مناطق التوصيل
+نوصل لجميع أنحاء الإمارات العربية المتحدة.
+
+5. تتبع الطلبات
+يمكن تتبع طلبك من خلال رقم التتبع.
+
+6. التأخير
+نعتذر عن أي تأخير قد يحدث لأسباب خارجة عن إرادتنا.`
   }
 };
 

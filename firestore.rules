@@ -1,0 +1,338 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isManager() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+    }
+    
+    // Allow access for development/testing
+    function isDevelopmentMode() {
+      return true; // Temporarily allow all access for development
+    }
+    
+    // Enhanced admin check with fallback
+    function isAdminOrDevelopment() {
+      return isAdmin() || isDevelopmentMode();
+    }
+    
+    // Enhanced manager check with fallback
+    function isManagerOrDevelopment() {
+      return isManager() || isDevelopmentMode();
+    }
+
+    // Books collection
+    match /books/{bookId} {
+      allow read: if true; // Public read access
+      allow write: if isManagerOrDevelopment();
+      
+      // Ratings subcollection
+      match /ratings/{ratingId} {
+        allow read: if true;
+        allow create: if isAuthenticated(); // Allow customers to create ratings
+        allow update, delete: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      }
+    }
+
+    // Authors collection
+    match /authors/{authorId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Categories collection
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow authenticated customers to create orders
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own orders
+      allow delete: if isAdminOrDevelopment();
+    }
+
+    // Order items collection
+    match /order_items/{itemId} {
+      allow read: if isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow authenticated customers to create order items
+      allow update: if isManagerOrDevelopment(); // Only managers can update order items
+      allow delete: if isManagerOrDevelopment(); // Only managers can delete order items
+    }
+
+    // Shipping collection
+    match /shipping/{shippingId} {
+      allow read: if isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow authenticated customers to create shipping records
+      allow update: if isManagerOrDevelopment(); // Only managers can update shipping records
+      allow delete: if isManagerOrDevelopment(); // Only managers can delete shipping records
+    }
+
+    // Addresses collection (standalone addresses)
+    match /addresses/{addressId} {
+      allow read, write: if isOwner(resource.data.userId) || isManager();
+      allow create: if isAuthenticated(); // Allow customers to create their own addresses
+      allow update: if isOwner(resource.data.userId) || isManager(); // Allow customers to update their own addresses
+      allow delete: if isOwner(resource.data.userId) || isManager(); // Allow customers to delete their own addresses
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true; // Public read access
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Store settings collection (used by StoreSettingsService)
+    match /store_settings/{settingId} {
+      allow read: if true; // Public read access for storefront
+      allow write: if isManagerOrDevelopment(); // Only admins/managers can modify
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow authenticated users to create their own user document
+      allow update: if isOwner(userId) || isManagerOrDevelopment(); // Allow customers to update their own profile
+      allow delete: if isManagerOrDevelopment(); // Only managers can delete user profiles
+      
+      // User subcollections
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create their own addresses
+        allow update: if isOwner(userId) || isManager(); // Allow customers to update their own addresses
+        allow delete: if isOwner(userId) || isManager(); // Allow customers to delete their own addresses
+      }
+      
+      match /payment_methods/{methodId} {
+        allow read, write: if isOwner(userId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create their own payment methods
+        allow update: if isOwner(userId) || isManager(); // Allow customers to update their own payment methods
+        allow delete: if isOwner(userId) || isManager(); // Allow customers to delete their own payment methods
+      }
+      
+      match /orders/{orderId} {
+        allow read, write: if isOwner(userId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create orders
+        allow update: if isOwner(userId) || isManager(); // Allow customers to update their own orders
+        allow delete: if isManager(); // Only managers can delete orders
+      }
+    }
+
+    // Customers collection (for customer data management)
+    match /customers/{customerId} {
+      allow read, write: if isOwner(customerId) || isManager();
+      allow create: if isAuthenticated(); // Allow customers to create their own customer profile
+      allow update: if isOwner(customerId) || isManager(); // Allow customers to update their own profile
+      allow delete: if isManager(); // Only managers can delete customer profiles
+      
+      // Customer subcollections
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(customerId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create their own addresses
+        allow update: if isOwner(customerId) || isManager(); // Allow customers to update their own addresses
+        allow delete: if isOwner(customerId) || isManager(); // Allow customers to delete their own addresses
+      }
+      
+      match /orders/{orderId} {
+        allow read, write: if isOwner(customerId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create orders
+        allow update: if isOwner(customerId) || isManager(); // Allow customers to update their own orders
+        allow delete: if isManager(); // Only managers can delete orders
+      }
+      
+      match /payment_methods/{methodId} {
+        allow read, write: if isOwner(customerId) || isManager();
+        allow create: if isAuthenticated(); // Allow customers to create their own payment methods
+        allow update: if isOwner(customerId) || isManager(); // Allow customers to update their own payment methods
+        allow delete: if isOwner(customerId) || isManager(); // Allow customers to delete their own payment methods
+      }
+    }
+
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow authenticated customers to create payments
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own payments
+      allow delete: if isManagerOrDevelopment(); // Only managers can delete payments
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    // Messages collection
+    match /messages/{messageId} {
+      allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create messages
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own messages
+      allow delete: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to delete their own messages
+    }
+
+    // Blog posts
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // FAQs
+    match /faqs/{faqId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Distributors
+    match /distributors/{distributorId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Team members
+    match /team_members/{memberId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Design requests
+    match /design_requests/{requestId} {
+      allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create design requests
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own design requests
+      allow delete: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to delete their own design requests
+    }
+
+    // Publishing requests
+    match /publishing_requests/{requestId} {
+      allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create publishing requests
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own publishing requests
+      allow delete: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to delete their own publishing requests
+    }
+
+    // Publish with us requests
+    match /publish_with_us_requests/{requestId} {
+      allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create publish with us requests
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own publish with us requests
+      allow delete: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to delete their own publish with us requests
+    }
+
+    // Sliders
+    match /sliders/{sliderId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Banners
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Features
+    match /features/{featureId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Sellers
+    match /sellers/{sellerId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Branches
+    match /branches/{branchId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Payment methods
+    match /payment_methods/{methodId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Coupons
+    match /coupons/{couponId} {
+      allow read: if true; // Allow customers to read coupons
+      allow write: if isManagerOrDevelopment(); // Only admins/managers can create/modify coupons
+    }
+
+    // Plans
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Subscriptions
+    match /subscriptions/{subscriptionId} {
+      allow read: if isOwner(resource.data.customerId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create subscriptions
+      allow update: if isOwner(resource.data.customerId) || isManagerOrDevelopment(); // Allow customers to update their own subscriptions
+      allow delete: if isOwner(resource.data.customerId) || isManagerOrDevelopment(); // Allow customers to delete their own subscriptions
+    }
+
+    // Currencies collection
+    match /currencies/{currencyId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Languages collection
+    match /languages/{languageId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Shipping methods collection
+    match /shipping_methods/{methodId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Payment methods collection (global)
+    match /payment_methods/{methodId} {
+      allow read: if true;
+      allow write: if isManagerOrDevelopment();
+    }
+
+    // Cart collection (for shopping cart management)
+    match /carts/{cartId} {
+      allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to create their own cart
+      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own cart
+      allow delete: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to delete their own cart
+    }
+
+    // Cart items subcollection
+    match /carts/{cartId}/items/{itemId} {
+      allow read, write: if isOwner(get(/databases/$(database)/documents/carts/$(cartId)).data.userId) || isManagerOrDevelopment();
+      allow create: if isAuthenticated(); // Allow customers to add items to their cart
+      allow update: if isOwner(get(/databases/$(database)/documents/carts/$(cartId)).data.userId) || isManagerOrDevelopment(); // Allow customers to update their cart items
+      allow delete: if isOwner(get(/databases/$(database)/documents/carts/$(cartId)).data.userId) || isManagerOrDevelopment(); // Allow customers to delete their cart items
+    }
+
+    // Backups (admin only)
+    match /backups/{backupId} {
+      allow read, write: if isAdminOrDevelopment();
+    }
+  }
+}

@@ -1,0 +1,614 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Registration with Valid Data",
+    "description": "Verify that a new user can register successfully with valid email and password.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the registration page"
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid email address and strong password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that registration completes with a success message and user receives verification email"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User Login with Correct Credentials",
+    "description": "Check that user can login successfully with correct email and password.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter registered email and correct password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that user is logged in and redirected to dashboard or homepage"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "User Login with Incorrect Password",
+    "description": "Check that login fails with invalid password and appropriate error message is shown.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Input registered email with incorrect password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is denied and error message 'Invalid credentials' is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Multi-language Toggle English to Arabic",
+    "description": "Verify UI texts switch correctly between English and Arabic languages and layout adjusts for RTL.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load homepage with English language set"
+      },
+      {
+        "type": "action",
+        "description": "Switch language to Arabic using language selector"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all UI texts appear in Arabic and layout changes to RTL orientation"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Currency Conversion Accuracy",
+    "description": "Verify that product prices are correctly converted when switching between supported currencies.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set currency to default and note displayed product prices"
+      },
+      {
+        "type": "action",
+        "description": "Change currency to another supported currency (e.g., USD to SAR)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify displayed prices update accurately according to latest exchange rates"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Add Physical Book to Shopping Cart",
+    "description": "Verify user can add a physical book from product page to persistent shopping cart.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Browse catalog and select a physical book"
+      },
+      {
+        "type": "action",
+        "description": "Click on 'Add to Cart' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that book is added to cart and cart count updates"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Add eBook Sample Preview Availability",
+    "description": "Verify that sample preview of an eBook can be accessed and displayed correctly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to an eBook product page"
+      },
+      {
+        "type": "action",
+        "description": "Click on sample preview button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that sample pages load and display correctly with navigation controls"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Checkout with Multiple Payment Methods",
+    "description": "Verify the checkout process for each supported payment method: Stripe, PayPal, Tabby installment, and Cash on Delivery.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add items to cart and proceed to checkout"
+      },
+      {
+        "type": "action",
+        "description": "Select Stripe payment option, enter valid payment details, and complete purchase"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order confirmation and payment success"
+      },
+      {
+        "type": "action",
+        "description": "Repeat with PayPal payment integration and confirm success"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order confirmation and payment success"
+      },
+      {
+        "type": "action",
+        "description": "Repeat with Tabby installment plan, verify installments terms, complete purchase"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order confirmation with installment schedule"
+      },
+      {
+        "type": "action",
+        "description": "Repeat with Cash on Delivery and submit order"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order placed and COD payment selected"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Order Status Lifecycle and Tracking",
+    "description": "Verify real-time order status updates and tracking notifications for an order from placement to delivery.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place an order using any payment method"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order status is initially 'Processing'"
+      },
+      {
+        "type": "action",
+        "description": "Simulate status change to 'Shipped' and update through shipping provider integration"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tracking number is available and status updates in user interface"
+      },
+      {
+        "type": "action",
+        "description": "Simulate status change to 'Delivered'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify final delivery confirmation and notification sent to user"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Role-Based Access Control for Admin and User",
+    "description": "Verify that system enforces proper access levels between administrators, publishers, authors, and regular customers.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as an administrator"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to admin dashboard, analytics, and management pages"
+      },
+      {
+        "type": "action",
+        "description": "Login as a publisher or author user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to manuscript submission, publishing workflow, and book catalog management is granted"
+      },
+      {
+        "type": "action",
+        "description": "Login as a regular customer"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to shopping, profile management, and order history but not to admin or publishing services"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Publishing Manuscript Submission Workflow",
+    "description": "Test uploading and submitting a manuscript, following editorial review stages to final approval.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as author and navigate to publishing services portal"
+      },
+      {
+        "type": "action",
+        "description": "Upload manuscript file via Firebase Storage uploader"
+      },
+      {
+        "type": "action",
+        "description": "Submit manuscript and verify status changes to 'Under Review'"
+      },
+      {
+        "type": "action",
+        "description": "Simulate editorial approval, verify status update to 'Approved'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify author can see final approved status and marketing options"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Content Management Blog Creation and Editing",
+    "description": "Verify ability to create, edit, and publish blog posts using the rich text editor.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as admin or editor"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to blog management and create a new post"
+      },
+      {
+        "type": "action",
+        "description": "Use rich text editor to add content including images and links"
+      },
+      {
+        "type": "action",
+        "description": "Save draft, edit content, and then publish the post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the post appears on public blog page with correct formatting"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Search Books with Multi-Category Filter",
+    "description": "Verify that advanced search filters allow narrowing product search by categories, authors, and formats.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to search page and enter a keyword"
+      },
+      {
+        "type": "action",
+        "description": "Apply filters for physical books, specific author, and language"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify search results reflect applied filters correctly"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "File Upload Validation and Error Handling",
+    "description": "Verify that file uploads for manuscripts and images validate file size, type and handle errors gracefully.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to upload unsupported file type (e.g., .exe file) for manuscript"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error message is displayed indicating invalid file type"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to upload file exceeding maximum allowed size"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error informs user about file size limit"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Persistent Shopping Cart on User Logout and Login",
+    "description": "Verify cart contents persist across user sessions including guest and authenticated users.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "As guest user, add books to cart"
+      },
+      {
+        "type": "action",
+        "description": "Logout or close browser"
+      },
+      {
+        "type": "action",
+        "description": "Reopen site and verify cart still contains previously added items"
+      },
+      {
+        "type": "action",
+        "description": "Login with existing user account"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cart merges with any user saved cart items"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Security Test for Data Encryption and PCI Compliance",
+    "description": "Verify payment data and sensitive user data is encrypted in storage and during transmission, meeting PCI DSS standards.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Initiate a payment process and monitor network traffic"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that payment information is transmitted using secure HTTPS and encrypted API calls"
+      },
+      {
+        "type": "action",
+        "description": "Verify database encryption for sensitive user fields and tokens"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure compliance banners or audit reports confirm PCI DSS adherence"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Accessibility Compliance for WCAG 2.1 AA",
+    "description": "Validate the platform’s UI supports keyboard navigation, screen readers, and appropriate contrast including RTL support.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate through main pages using only keyboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all interactive elements are reachable and usable"
+      },
+      {
+        "type": "action",
+        "description": "Use screen reader to browse key pages"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify content is read properly and form labels are descriptive"
+      },
+      {
+        "type": "action",
+        "description": "Switch UI to Arabic language and verify RTL layout and similar accessibility standards"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm proper tab order and focus states in RTL layout"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Shipping Cost Calculation with Multiple Carrier Options",
+    "description": "Verify that shipping costs are accurately calculated based on weight, destination, and selected carrier.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add physical books of known weight to cart"
+      },
+      {
+        "type": "action",
+        "description": "Proceed to shipping selection and enter destination region"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify multiple carrier options appear with correct price calculations"
+      },
+      {
+        "type": "action",
+        "description": "Select different carriers and verify total order price updates accordingly"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Subscription Plan Purchase and Recurring Payment",
+    "description": "Verify user can subscribe to premium content plans and recurring payments are processed successfully.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to subscription checkout page"
+      },
+      {
+        "type": "action",
+        "description": "Select subscription plan and enter payment details"
+      },
+      {
+        "type": "action",
+        "description": "Complete initial payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify subscription activation and scheduled recurring payments"
+      },
+      {
+        "type": "action",
+        "description": "Simulate next payment cycle"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify recurring payment succeeds and subscription remains active"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Analytics Dashboard Data Accuracy",
+    "description": "Verify real-time analytics and reporting dashboard displays correct data from orders, sales, and user behaviour.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Generate multiple transactions covering different product types and users"
+      },
+      {
+        "type": "action",
+        "description": "Access analytics dashboard as admin"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard charts, counts, and reports match the generated data accurately"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Error Handling on Payment Gateway Failures",
+    "description": "Simulate payment service unavailability and verify system handles errors gracefully with user notifications.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt payment with Stripe while disabling Stripe API"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify payment failure is detected and a clear error message is displayed to the user"
+      },
+      {
+        "type": "action",
+        "description": "Repeat with PayPal, Tabby, and COD to verify consistent error handling"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "UI Component Consistency Across Pages",
+    "description": "Verify Radix UI components and custom React UI components render consistently with expected styles across different pages.",
+    "category": "ui",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open multiple modules such as book pages, checkout, dashboard, and blog editor"
+      },
+      {
+        "type": "assertion",
+        "description": "Check buttons, dialogs, dropdown menus, toasts, and form inputs render with consistent styling and responsiveness"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Legal Pages Content and Accessibility",
+    "description": "Verify availability and correctness of legal pages including privacy policy, terms of service, and return policy.",
+    "category": "functional",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to legal pages from footer or settings links"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the content matches the legal markdown files and pages are properly accessible and formatted"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Performance Testing Under Load",
+    "description": "Verify system performance with multiple concurrent users browsing, ordering, and managing content.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate 1000 concurrent users performing browsing, search, and checkout"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page load times remain under SLA thresholds and errors rates stay minimal"
+      }
+    ]
+  }
+]

@@ -54,6 +54,14 @@ const PaymentProcessor = ({
     setShowCardForm(false);
     setUseSavedMethod(false);
     setSelectedSavedMethod(null);
+    
+    // إظهار نموذج الأقساط إذا كانت الطريقة تدعمها
+    if (method.installmentOptions && method.installmentOptions.length > 0) {
+      setPaymentData(prev => ({
+        ...prev,
+        installmentPlan: method.installmentOptions[0] // القيمة الافتراضية
+      }));
+    }
   };
 
   const handlePaymentDataChange = (field, value) => {
@@ -79,6 +87,14 @@ const PaymentProcessor = ({
       if (['visa', 'mastercard', 'amex'].includes(selectedMethod)) {
         if (!paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvv) {
           toast({ title: 'يرجى إدخال جميع بيانات البطاقة', variant: 'destructive' });
+          return false;
+        }
+      }
+      
+      // التحقق من اختيار خطة الأقساط إذا كانت مطلوبة
+      if (selectedMethod.installmentOptions && selectedMethod.installmentOptions.length > 0) {
+        if (!paymentData.installmentPlan) {
+          toast({ title: 'يرجى اختيار خطة الأقساط', variant: 'destructive' });
           return false;
         }
       }
@@ -160,20 +176,20 @@ const PaymentProcessor = ({
 
   const getMethodIcon = (method) => {
     const icons = {
-      visa: '💳',
-      mastercard: '💳',
-      amex: '💳',
-      paypal: '🅿️',
-      applePay: '🍎',
-      googlePay: '📱',
-      mada: '💳',
-      stcPay: '📱',
-      bankTransfer: '🏦',
-      cashOnDelivery: '💵',
-      bitcoin: '₿',
-      ethereum: 'Ξ'
+      visa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png',
+      mastercard: 'https://www.mastercard.com/content/dam/public/brandresources/assets/img/logos/mastercard/logo-80.svg',
+      amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/2560px-American_Express_logo_%282018%29.svg.png',
+      paypal: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/PayPal_logo.svg/2560px-PayPal_logo.svg.png',
+      applePay: 'https://developer.apple.com/design/human-interface-guidelines/technologies/apple-pay/images/apple-pay-mark_2x.png',
+      googlePay: 'https://developers.google.com/static/wallet/images/gpay-logo.png',
+      mada: 'https://www.mastercard.com/content/dam/public/brandresources/assets/img/logos/mastercard/logo-80.svg',
+      stcPay: 'https://www.stcpay.com.sa/assets/images/logo.svg',
+      bankTransfer: 'https://cdn-icons-png.flaticon.com/512/2830/2830282.png',
+      cashOnDelivery: 'https://cdn-icons-png.flaticon.com/512/2830/2830282.png',
+      bitcoin: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png',
+      ethereum: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-icon-purple.svg/1200px-Ethereum-icon-purple.svg.png'
     };
-    return icons[method] || '💳';
+    return icons[method] || 'https://cdn-icons-png.flaticon.com/512/2830/2830282.png';
   };
 
   const getMethodName = (method) => {
@@ -227,7 +243,16 @@ const PaymentProcessor = ({
                     onClick={() => setSelectedSavedMethod(method)}
                   >
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                      <span className="text-xl">{getMethodIcon(method.type)}</span>
+                      <img 
+                        src={getMethodIcon(method.type)} 
+                        alt={method.type}
+                        className="h-6 w-auto object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                      <span className="text-xl hidden">{getMethodIcon(method.type)}</span>
                       <div className="flex-1">
                         <p className="font-medium">{getMethodName(method.type)}</p>
                         <p className="text-sm text-gray-500">
@@ -259,7 +284,16 @@ const PaymentProcessor = ({
                 onClick={() => handleMethodSelect(method)}
               >
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <span className="text-2xl">{getMethodIcon(method)}</span>
+                  <img 
+                    src={getMethodIcon(method)} 
+                    alt={method}
+                    className="h-8 w-auto object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <span className="text-2xl hidden">{getMethodIcon(method)}</span>
                   <div>
                     <p className="font-medium">{getMethodName(method)}</p>
                     <p className="text-sm text-gray-500">
@@ -280,6 +314,35 @@ const PaymentProcessor = ({
       {selectedMethod && !useSavedMethod && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-800 mb-4">تفاصيل الدفع</h3>
+          
+          {/* Installment Plan Selection */}
+          {selectedMethod.installmentOptions && selectedMethod.installmentOptions.length > 0 && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h4 className="text-md font-medium text-blue-800 mb-3">اختر خطة الأقساط</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {selectedMethod.installmentOptions.map((installments) => (
+                  <div
+                    key={installments}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all text-center ${
+                      paymentData.installmentPlan === installments
+                        ? 'border-blue-500 bg-blue-100'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setPaymentData(prev => ({ ...prev, installmentPlan: installments }))}
+                  >
+                    <div className="text-lg font-bold text-blue-600">{installments}</div>
+                    <div className="text-sm text-gray-600">أقساط</div>
+                    <div className="text-xs text-gray-500">
+                      {orderData?.total ? `$${(orderData.total / installments).toFixed(2)}/شهر` : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-blue-600 mt-2">
+                💡 بدون فوائد أو رسوم إضافية
+              </p>
+            </div>
+          )}
           
           {/* Credit Card Form */}
           {['visa', 'mastercard', 'amex'].includes(selectedMethod) && (

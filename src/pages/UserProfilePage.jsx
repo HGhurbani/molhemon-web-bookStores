@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
@@ -11,8 +11,12 @@ import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import api from '@/lib/api.js';
 import FormattedPrice from '@/components/FormattedPrice.jsx';
+import { jwtAuthManager } from '@/lib/jwtAuth.js';
+import { auth } from '@/lib/firebase.js';
+import { updateProfile } from 'firebase/auth';
 
 const UserProfilePage = ({ handleFeatureClick }) => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const [wishlist, setWishlist] = useState([]);
@@ -24,6 +28,11 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   const [newAddress, setNewAddress] = useState({ name: '', street: '', city: '', country: '' });
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [newPayment, setNewPayment] = useState({ type: '', last4: '', expiry: '' });
+  
+  // حالة المستخدم والمصادقة
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -31,33 +40,142 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   }, [searchParams]);
 
   useEffect(() => {
-    const storedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    setWishlist(storedWishlist);
-    (async () => {
+    const initializeProfile = async () => {
       try {
-        const uid = localStorage.getItem('currentUserId');
-        if (!uid) return;
-        const [user, addr, pay, ordersData] = await Promise.all([
-          api.getUser(uid),
-          api.getUserAddresses(uid),
-          api.getUserPaymentMethods(uid),
-          api.getOrders(),
-        ]);
-        if (user) setUserData({
-          name: user.name || '',
+        setLoading(true);
+        
+        // التحقق من حالة المصادقة
+        const user = jwtAuthManager.getCurrentUser();
+        if (!user) {
+          // المستخدم غير مسجل دخول، الانتقال لصفحة تسجيل الدخول
+          navigate('/login');
+          return;
+        }
+        
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+        
+        // تعبئة البيانات الأساسية من المستخدم
+        console.log('User data from JWT:', user);
+        
+        // محاولة جلب البيانات من Firebase مباشرة إذا كانت البيانات المحفوظة فارغة
+        let displayName = user.displayName;
+        let phoneNumber = user.phoneNumber;
+        
+        if (!displayName && auth.currentUser) {
+          displayName = auth.currentUser.displayName || '';
+          console.log('Got displayName from Firebase auth:', displayName);
+        }
+        if (!phoneNumber && auth.currentUser) {
+          phoneNumber = auth.currentUser.phoneNumber || '';
+          console.log('Got phoneNumber from Firebase auth:', phoneNumber);
+        }
+        
+        setUserData({
+          name: displayName || '',
           email: user.email || '',
-          phone: user.phone || '',
-          profilePicture: user.profilePicture || '',
+          phone: phoneNumber || '',
+          profilePicture: user.photoURL || ''
         });
+        
+        // تحميل قائمة الرغبات
+        const storedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        setWishlist(storedWishlist);
+        
+        // محاولة جلب بيانات العميل من قاعدة البيانات
+        try {
+          const userData = {
+            email: user.email,
+            displayName: user.displayName,
+            phone: user.phoneNumber
+          };
+          
+          const [customer, addr, pay, ordersData] = await Promise.all([
+            api.getCustomerData(user.uid, userData),
+            api.getCustomerAddresses(user.uid),
+            api.getCustomerPaymentMethods(user.uid),
+            api.orders.getOrders(user.uid)
+          ]);
+          
+          // تحديث البيانات من ملف العميل إذا كان متوفراً
+          if (customer) {
+            setUserData(prev => ({
+              ...prev,
+              name: customer.displayName || (customer.firstName + ' ' + customer.lastName).trim() || prev.name,
+              email: customer.email || prev.email,
+              phone: customer.phone || prev.phone,
+              profilePicture: customer.profilePicture || prev.profilePicture
+            }));
+          }
+          
         setAddresses(addr || []);
         setPaymentMethods(pay || []);
-        const filteredOrders = (ordersData || []).filter(o => o.customer_id === uid);
-        setOrders(filteredOrders);
-      } catch (e) {
-        console.error('Failed to fetch profile data', e);
+          
+          // تعيين الطلبات (تم تصفيتها بالفعل من API)
+          setOrders(ordersData || []);
+          
+        } catch (error) {
+          console.log('Customer profile not found, using basic user data');
+          // إذا لم يتم العثور على ملف العميل، نستخدم البيانات الأساسية
+        }
+        
+      } catch (error) {
+        console.error('Failed to fetch profile data:', error);
+        toast({
+          title: 'خطأ في تحميل البيانات',
+          description: 'تعذر تحميل بيانات الملف الشخصي',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
       }
-    })();
-  }, []);
+    };
+    
+    initializeProfile();
+  }, [navigate]);
+
+  // مراقبة حالة المصادقة وتحديث البيانات من Firebase
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      if (firebaseUser && isLoggedIn) {
+        console.log('Firebase auth state changed:', firebaseUser);
+        
+        // تحديث البيانات من Firebase إذا كانت متوفرة
+        const updatedUserData = {
+          name: firebaseUser.displayName || '',
+          email: firebaseUser.email || '',
+          phone: firebaseUser.phoneNumber || '',
+          profilePicture: firebaseUser.photoURL || ''
+        };
+        
+        console.log('Updating user data from Firebase:', updatedUserData);
+        setUserData(prev => ({
+          ...prev,
+          ...updatedUserData
+        }));
+        
+        // تحديث البيانات في JWT أيضاً
+        if (currentUser) {
+          const updatedJWTData = {
+            ...currentUser,
+            displayName: firebaseUser.displayName || currentUser.displayName,
+            email: firebaseUser.email || currentUser.email,
+            phoneNumber: firebaseUser.phoneNumber || currentUser.phoneNumber,
+            photoURL: firebaseUser.photoURL || currentUser.photoURL
+          };
+          
+          try {
+            jwtAuthManager.updateUserData(updatedJWTData);
+            console.log('JWT data updated successfully');
+          } catch (error) {
+            console.error('Failed to update JWT data:', error);
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isLoggedIn, currentUser]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -66,12 +184,44 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    const uid = localStorage.getItem('currentUserId');
-    if (!uid) return;
+    if (!currentUser) return;
     try {
-      await api.updateUser(uid, userData);
+      // تحديث البيانات في ملف العميل
+      if (userData.name) {
+        const [firstName, ...lastNameParts] = userData.name.split(' ');
+        const lastName = lastNameParts.join(' ') || '';
+        
+        await api.customers.updateCustomer(currentUser.uid, {
+          firstName: firstName || '',
+          lastName: lastName,
+          email: userData.email,
+          phone: userData.phone
+        });
+      }
+      
+      // محاولة تحديث البيانات في Firebase أيضاً
+      if (auth.currentUser && userData.name) {
+        try {
+          await updateProfile(auth.currentUser, { 
+            displayName: userData.name 
+          });
+          console.log('Firebase profile updated successfully');
+          
+          // تحديث البيانات في JWT أيضاً
+          const updatedUserData = {
+            ...currentUser,
+            displayName: userData.name
+          };
+          jwtAuthManager.updateUserData(updatedUserData);
+          
+        } catch (firebaseError) {
+          console.warn('Failed to update Firebase profile:', firebaseError);
+        }
+      }
+      
       toast({ title: "تم تحديث الملف الشخصي بنجاح!" });
-    } catch {
+    } catch (error) {
+      console.error('Error updating profile:', error);
       toast({ title: "تعذر تحديث الملف الشخصي", variant: "destructive" });
     }
   };
@@ -84,34 +234,36 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   };
 
   const handleSaveAddress = async () => {
-    const uid = localStorage.getItem('currentUserId');
-    if (!uid) return;
+    if (!currentUser) return;
     let updated;
     try {
       if (newAddress.id) {
-        await api.updateUserAddress(uid, newAddress.id, newAddress);
+        await api.customers.updateCustomerAddress(currentUser.uid, newAddress.id, newAddress);
         updated = addresses.map(a => (a.id === newAddress.id ? newAddress : a));
       } else {
-        const added = await api.addUserAddress(uid, newAddress);
+        const added = await api.customers.addCustomerAddress(currentUser.uid, newAddress);
         updated = [...addresses, added];
       }
       setAddresses(updated);
       setNewAddress({ name: '', street: '', city: '', country: '' });
       setAddressDialogOpen(false);
-    } catch {
+      toast({ title: 'تم حفظ العنوان بنجاح!' });
+    } catch (error) {
+      console.error('Error saving address:', error);
       toast({ title: 'تعذر حفظ العنوان', variant: 'destructive' });
     }
   };
 
   const handleSavePayment = async () => {
-    const uid = localStorage.getItem('currentUserId');
-    if (!uid) return;
+    if (!currentUser) return;
     try {
-      const added = await api.addUserPaymentMethod(uid, newPayment);
+      const added = await api.customers.addCustomerPaymentMethod(currentUser.uid, newPayment);
       setPaymentMethods([...paymentMethods, added]);
       setNewPayment({ type: '', last4: '', expiry: '' });
       setPaymentDialogOpen(false);
-    } catch {
+      toast({ title: 'تم حفظ طريقة الدفع بنجاح!' });
+    } catch (error) {
+      console.error('Error saving payment method:', error);
       toast({ title: 'تعذر حفظ طريقة الدفع', variant: 'destructive' });
     }
   };
@@ -125,17 +277,32 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     }
   };
   const handleDeleteAddress = async (id) => {
-    const uid = localStorage.getItem('currentUserId');
-    if (!uid) return;
+    if (!currentUser) return;
     try {
-      await api.deleteUserAddress(uid, id);
+      await api.customers.deleteCustomerAddress(currentUser.uid, id);
       const updated = addresses.filter(a => a.id !== id);
       setAddresses(updated);
-    } catch {
+      toast({ title: 'تم حذف العنوان بنجاح!' });
+    } catch (error) {
+      console.error('Error deleting address:', error);
       toast({ title: 'تعذر حذف العنوان', variant: 'destructive' });
     }
   };
   const handleAddPaymentMethod = () => setPaymentDialogOpen(true);
+
+  // دالة تسجيل الخروج
+  const handleLogout = async () => {
+    try {
+      await jwtAuthManager.clearTokens();
+      setCurrentUser(null);
+      setIsLoggedIn(false);
+      navigate('/');
+      toast({ title: 'تم تسجيل الخروج بنجاح' });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({ title: 'خطأ في تسجيل الخروج', variant: 'destructive' });
+    }
+  };
 
 
   const navSections = [
@@ -178,46 +345,153 @@ const UserProfilePage = ({ handleFeatureClick }) => {
             <h2 className="text-xl font-semibold mb-4">تعديل الملف الشخصي</h2>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div className="flex flex-col items-center mb-6">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden mb-2">
-                  <img-replace src={userData.profilePicture} alt="صورة الملف الشخصي" className="w-full h-full object-cover" />
-                  صورة بروس وين الشخصية
+                <div className="relative w-24 h-24 rounded-full overflow-hidden mb-2 bg-blue-100 flex items-center justify-center">
+                  {userData.profilePicture ? (
+                    <img src={userData.profilePicture} alt="صورة الملف الشخصي" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-12 h-12 text-blue-600" />
+                  )}
                 </div>
                 <Button variant="link" size="sm" onClick={() => handleFeatureClick('change-profile-picture')}>تغيير الصورة</Button>
               </div>
               <div>
-                <Label htmlFor="name">الاسم</Label>
-                <Input id="name" value={userData.name} onChange={(e) => setUserData({...userData, name: e.target.value})} />
+                <Label htmlFor="name">الاسم الكامل *</Label>
+                <Input 
+                  id="name" 
+                  value={userData.name} 
+                  onChange={(e) => setUserData({...userData, name: e.target.value})} 
+                  placeholder="أدخل الاسم الكامل"
+                />
               </div>
               <div>
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input id="email" type="email" value={userData.email} onChange={(e) => setUserData({...userData, email: e.target.value})} />
+                <Label htmlFor="email">البريد الإلكتروني *</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={userData.email} 
+                  onChange={(e) => setUserData({...userData, email: e.target.value})} 
+                  placeholder="أدخل البريد الإلكتروني"
+                />
               </div>
               <div>
                 <Label htmlFor="phone">رقم الهاتف</Label>
-                <Input id="phone" type="tel" value={userData.phone} onChange={(e) => setUserData({...userData, phone: e.target.value})} />
+                <Input 
+                  id="phone" 
+                  type="tel" 
+                  value={userData.phone} 
+                  onChange={(e) => setUserData({...userData, phone: e.target.value})} 
+                  placeholder="أدخل رقم الهاتف"
+                />
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">حفظ التغييرات</Button>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+                حفظ التغييرات
+              </Button>
+              
+              {/* رسالة توضيحية */}
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-white">
+                  <strong>ملاحظة:</strong> سيتم حفظ البيانات في ملفك الشخصي ويمكنك استخدامها في الطلبات المستقبلية.
+                </p>
+              </div>
             </form>
           </motion.div>
         );
       case 'orders':
         return (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">طلباتي</h2>
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <ShoppingBag className="w-5 h-5 mr-2" />
+              طلباتي
+            </h2>
             {orders.length > 0 ? (
               <div className="space-y-4">
                 {orders.map(order => (
-                  <div key={order.id} className="border p-4 rounded-md hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-blue-600">طلب رقم: {order.id}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'تم التوصيل' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span>
+                  <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className="font-semibold text-blue-600">طلب رقم: {order.orderNumber || order.id}</span>
+                        <p className="text-sm text-gray-500 mt-1">
+                          التاريخ: {order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : 'غير محدد'}
+                        </p>
+                      </div>
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        order.status === 'delivered' || order.status === 'تم التوصيل' 
+                          ? 'bg-green-100 text-green-700' 
+                          : order.status === 'cancelled' || order.status === 'ملغي'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {order.status === 'pending' ? 'قيد المراجعة' : 
+                         order.status === 'confirmed' ? 'مؤكد' :
+                         order.status === 'shipped' ? 'تم الشحن' :
+                         order.status === 'delivered' ? 'تم التوصيل' :
+                         order.status === 'cancelled' ? 'ملغي' : order.status}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-500">التاريخ: {order.date}</p>
-                    <p className="text-sm text-gray-500">الإجمالي: <FormattedPrice value={order.total} /></p>
-                    <p className="text-sm text-gray-500">المنتجات: {order.items.map(i => i.title).join(', ')}</p>
-                    <Button asChild variant="link" size="sm" className="px-0 mt-1">
-                      <Link to={`/orders/${order.id}`}>عرض التفاصيل</Link>
-                    </Button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-sm text-gray-600">الإجمالي:</p>
+                        <p className="font-medium text-lg">
+                          <FormattedPrice value={(() => {
+                            // حساب المبلغ الإجمالي بشكل صحيح مع التحقق من طريقة الشحن
+                            const subtotal = order.subtotal || 0;
+                            const taxAmount = order.taxAmount || 0;
+                            const discountAmount = order.discountAmount || 0;
+                            
+                            // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
+                            const shippingMethod = order.shippingMethod;
+                            const isPickup = shippingMethod === 'pickup' || 
+                                            shippingMethod?.name === 'استلام من المتجر' ||
+                                            shippingMethod?.id === 'pickup' ||
+                                            shippingMethod?.type === 'pickup';
+                            
+                            const shippingCost = isPickup ? 0 : (order.shippingCost || 0);
+                            
+                            // حساب الإجمالي: المجموع الفرعي - الخصم + الشحن + الضريبة
+                            const calculatedTotal = subtotal - discountAmount + shippingCost + taxAmount;
+                            
+                            // استخدام الحساب الصحيح بدلاً من القيم المحفوظة
+                            return calculatedTotal;
+                          })()} />
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">عدد المنتجات:</p>
+                        <p className="font-medium">{order.itemCount || (order.items?.length || 0)} منتج</p>
+                      </div>
+                    </div>
+                    
+                    {order.items && order.items.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-600 mb-2">المنتجات:</p>
+                        <div className="space-y-1">
+                          {order.items.slice(0, 3).map((item, index) => (
+                            <div key={index} className="text-sm text-gray-700">
+                              • {item.title || item.name || item.productName} × {item.quantity}
+                            </div>
+                          ))}
+                          {order.items.length > 3 && (
+                            <div className="text-sm text-gray-500">
+                              + {order.items.length - 3} منتج آخر
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/orders/${order.id}`}>
+                          عرض التفاصيل
+                        </Link>
+                      </Button>
+                      {order.status === 'delivered' && (
+                        <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50">
+                          تقييم الطلب
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -359,6 +633,34 @@ const UserProfilePage = ({ handleFeatureClick }) => {
     }
   };
 
+  // عرض مؤشر التحميل
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري تحميل الملف الشخصي...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // التحقق من تسجيل الدخول
+  if (!isLoggedIn || !currentUser) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">يجب تسجيل الدخول</h2>
+          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لعرض ملفك الشخصي</p>
+          <Button onClick={() => navigate('/login')} className="bg-blue-600 hover:bg-blue-700">
+            تسجيل الدخول
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
       <motion.h1 
@@ -372,11 +674,19 @@ const UserProfilePage = ({ handleFeatureClick }) => {
         <aside className="lg:w-1/4">
           <div className="bg-white p-4 rounded-lg shadow sticky top-24">
             <div className="flex items-center mb-4 pb-4 border-b">
-              <img-replace src={userData.profilePicture} alt="صورة الملف الشخصي المصغرة" className="w-12 h-12 rounded-full object-cover mr-3 rtl:ml-3 rtl:mr-0" />
-              صورة بروس وين الشخصية المصغرة
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3 rtl:ml-3 rtl:mr-0">
+                {userData.profilePicture ? (
+                  <img src={userData.profilePicture} alt="صورة الملف الشخصي" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <User className="w-6 h-6 text-blue-600" />
+                )}
+              </div>
               <div>
-                <h3 className="font-semibold">{userData.name}</h3>
-                <p className="text-xs text-gray-500">{userData.email}</p>
+                <h3 className="font-semibold">{userData.name || 'المستخدم'}</h3>
+                <p className="text-xs text-gray-500">{userData.email || 'لا يوجد بريد إلكتروني'}</p>
+                {userData.phone && (
+                  <p className="text-xs text-gray-500">{userData.phone}</p>
+                )}
               </div>
             </div>
             <nav className="space-y-4">
@@ -399,7 +709,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                   })}
                 </div>
               ))}
-              <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleFeatureClick('logout')}>
+              <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:bg-red-50 hover:text-red-700" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
                 تسجيل الخروج
               </Button>

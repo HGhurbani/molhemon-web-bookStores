@@ -107,7 +107,37 @@ const BookBestsellerSection = ({ books, handleAddToCart, handleToggleWishlist, w
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        {/* Mobile: Horizontal scroll, Desktop: Grid */}
+        <div className="block sm:hidden">
+          <div className="flex gap-x-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {books.slice(0, 6).map((book, index) => (
+              <div key={`${book.id}-${index}-bestseller-mobile`} className="flex-shrink-0 w-40">
+                {likeCardStyle ? (
+                  <BestsellerCard
+                    book={book}
+                    handleAddToCart={handleAddToCart}
+                    handleToggleWishlist={handleToggleWishlist}
+                    index={index}
+                    isInWishlist={wishlist?.some((item) => item.id === book.id)}
+                    square={squareImages}
+                  />
+                ) : (
+                  <BookCard
+                    book={book}
+                    handleAddToCart={handleAddToCart}
+                    handleToggleWishlist={handleToggleWishlist}
+                    index={index}
+                    isInWishlist={wishlist?.some((item) => item.id === book.id)}
+                    square={squareImages}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Grid layout */}
+        <div className="hidden sm:grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {books.slice(0, 6).map((book, index) => (
             likeCardStyle ? (
               <BestsellerCard

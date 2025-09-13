@@ -86,7 +86,26 @@ const DashboardOrderDetailsPage = () => {
           </ul>
         </div>
         <p className="text-right font-medium">
-          الإجمالي: <FormattedPrice value={order.total} />
+          الإجمالي: <FormattedPrice value={(() => {
+            // حساب المبلغ الإجمالي بشكل صحيح مع التحقق من طريقة الشحن
+            const subtotal = order.subtotal || 0;
+            const taxAmount = order.taxAmount || 0;
+            const discountAmount = order.discountAmount || 0;
+            
+            // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
+            const shippingMethod = order.shippingMethod;
+            const isPickup = shippingMethod === 'pickup' || 
+                            shippingMethod?.name === 'استلام من المتجر' ||
+                            shippingMethod?.id === 'pickup' ||
+                            shippingMethod?.type === 'pickup';
+            
+            const shippingCost = isPickup ? 0 : (order.shippingCost || 0);
+            
+            // حساب الإجمالي: المجموع الفرعي - الخصم + الشحن + الضريبة
+            const calculatedTotal = subtotal - discountAmount + shippingCost + taxAmount;
+            
+            return calculatedTotal;
+          })()} />
         </p>
         <div className="flex items-center justify-between print:hidden">
           <select
