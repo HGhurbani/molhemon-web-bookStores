@@ -83,6 +83,59 @@ import UnifiedOrderDetails from './UnifiedOrderDetails.jsx';
 
 const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
 
+/**
+ * Adds a sample order when no orders exist during development.
+ * This helper is intended for development use only and will not run
+ * in production builds.
+ *
+ * @param {Array} ordersArray - Current list of orders.
+ * @returns {Array} - Original orders or a sample order array.
+ */
+function addSampleOrderForDev(ordersArray) {
+  if (!import.meta.env.DEV || ordersArray.length !== 0) {
+    return ordersArray;
+  }
+
+  logger.debug('No orders found, creating sample order for testing...');
+  const sampleOrder = {
+    id: 'sample-order-1',
+    orderNumber: 'ORD-001',
+    customerId: 'sample-customer',
+    customerName: 'عميل تجريبي',
+    customerEmail: 'customer@example.com',
+    customerPhone: '+966501234567',
+    customerAddress: {
+      name: 'عميل تجريبي',
+      street: 'شارع الملك فهد',
+      city: 'الرياض',
+      postalCode: '12345',
+      country: 'SA'
+    },
+    items: [
+      {
+        id: 'item-1',
+        name: 'كتاب تجريبي',
+        type: 'physical',
+        price: 50,
+        quantity: 1,
+        weight: 0.5
+      }
+    ],
+    subtotal: 50,
+    shippingCost: 15,
+    taxAmount: 7.5,
+    totalAmount: 72.5,
+    currency: 'SAR',
+    status: 'pending',
+    paymentStatus: 'pending',
+    paymentMethod: 'manual',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  logger.debug('Added sample order:', sampleOrder);
+  return [sampleOrder];
+}
+
 const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -2065,49 +2118,10 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
         });
         
         logger.debug('Final orders array:', ordersArray);
-        
-        // إذا لم توجد طلبات، أضف طلب تجريبي للاختبار
-        if (ordersArray.length === 0) {
-          logger.debug('No orders found, creating sample order for testing...');
-          const sampleOrder = {
-            id: 'sample-order-1',
-            orderNumber: 'ORD-001',
-            customerId: 'sample-customer',
-            customerName: 'عميل تجريبي',
-            customerEmail: 'customer@example.com',
-            customerPhone: '+966501234567',
-            customerAddress: {
-              name: 'عميل تجريبي',
-              street: 'شارع الملك فهد',
-              city: 'الرياض',
-              postalCode: '12345',
-              country: 'SA'
-            },
-            items: [
-              {
-                id: 'item-1',
-                name: 'كتاب تجريبي',
-                type: 'physical',
-                price: 50,
-                quantity: 1,
-                weight: 0.5
-              }
-            ],
-            subtotal: 50,
-            shippingCost: 15,
-            taxAmount: 7.5,
-            totalAmount: 72.5,
-            currency: 'SAR',
-            status: 'pending',
-            paymentStatus: 'pending',
-            paymentMethod: 'manual',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
-          ordersArray = [sampleOrder];
-          logger.debug('Added sample order:', sampleOrder);
-        }
-        
+
+        // Add a sample order in development if none exist
+        ordersArray = addSampleOrderForDev(ordersArray);
+
         setOrders(ordersArray);
       } catch (error) {
         logger.error('Error loading orders:', error);
