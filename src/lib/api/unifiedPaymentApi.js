@@ -4,6 +4,7 @@
  */
 
 import logger from '../logger.js';
+import * as encryptedCache from '../encryptedCache.js';
 
 class UnifiedPaymentAPI {
   constructor() {
@@ -181,47 +182,48 @@ class UnifiedPaymentAPI {
 
       // قراءة إعدادات المتجر وتحديث حالة المزودين
       try {
-        // محاولة قراءة إعدادات المتجر من localStorage أولاً
-        const savedSettings = localStorage.getItem('siteSettings');
-        if (savedSettings) {
-          const storeSettings = JSON.parse(savedSettings);
-          if (storeSettings.paymentGateways) {
-            // تحديث حالة المزودين بناءً على إعدادات المتجر
-            this.providers.forEach(provider => {
-              const gatewaySettings = storeSettings.paymentGateways[provider.name];
-              if (gatewaySettings) {
-                provider.enabled = gatewaySettings.enabled;
-                provider.testMode = gatewaySettings.testMode;
-                // تحديث الإعدادات الأخرى حسب الحاجة
-                if (gatewaySettings.config) {
-                  provider.settings = {
-                    ...provider.settings,
-                    ...gatewaySettings.config
-                  };
-                }
-              } else if (provider.name === 'cashOnDelivery') {
-                // طريقة الدفع عند الاستلام مفعلة افتراضياً
-                provider.enabled = true;
+        let storeSettings = await encryptedCache.getItem('siteSettings');
+        if (!storeSettings) {
+          const firebaseApi = await import('../firebaseApi.js');
+          storeSettings = await firebaseApi.default.getSettings();
+          await encryptedCache.setItem('siteSettings', storeSettings);
+        }
+        if (storeSettings.paymentGateways) {
+          // تحديث حالة المزودين بناءً على إعدادات المتجر
+          this.providers.forEach(provider => {
+            const gatewaySettings = storeSettings.paymentGateways[provider.name];
+            if (gatewaySettings) {
+              provider.enabled = gatewaySettings.enabled;
+              provider.testMode = gatewaySettings.testMode;
+              // تحديث الإعدادات الأخرى حسب الحاجة
+              if (gatewaySettings.config) {
+                provider.settings = {
+                  ...provider.settings,
+                  ...gatewaySettings.config
+                };
               }
-            });
-          }
-          
-          // قراءة إعدادات المدفوعات من النظام الموحد إذا كانت موجودة
-          if (storeSettings.payments && storeSettings.payments.providers) {
-            Object.entries(storeSettings.payments.providers).forEach(([providerName, providerData]) => {
-              const provider = this.providers.find(p => p.name === providerName);
-              if (provider) {
-                provider.enabled = providerData.enabled;
-                provider.testMode = providerData.testMode;
-                if (providerData.settings) {
-                  provider.settings = {
-                    ...provider.settings,
-                    ...providerData.settings
-                  };
-                }
+            } else if (provider.name === 'cashOnDelivery') {
+              // طريقة الدفع عند الاستلام مفعلة افتراضياً
+              provider.enabled = true;
+            }
+          });
+        }
+
+        // قراءة إعدادات المدفوعات من النظام الموحد إذا كانت موجودة
+        if (storeSettings.payments && storeSettings.payments.providers) {
+          Object.entries(storeSettings.payments.providers).forEach(([providerName, providerData]) => {
+            const provider = this.providers.find(p => p.name === providerName);
+            if (provider) {
+              provider.enabled = providerData.enabled;
+              provider.testMode = providerData.testMode;
+              if (providerData.settings) {
+                provider.settings = {
+                  ...provider.settings,
+                  ...providerData.settings
+                };
               }
-            });
-          }
+            }
+          });
         }
       } catch (error) {
         logger.debug('Could not load store settings, using defaults');
@@ -340,9 +342,10 @@ class UnifiedPaymentAPI {
       // محاكاة نجاح الاختبار إذا كان المزود مفعل
       const success = provider.enabled;
       
-      // حفظ حالة الاتصال في localStorage
+      // حفظ حالة الاتصال في Firestore والكاش المشفر
       if (success) {
-        const currentSettings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+        const firebaseApi = await import('../firebaseApi.js');
+        const currentSettings = await firebaseApi.default.getSettings();
         if (!currentSettings.payments) {
           currentSettings.payments = {};
         }
@@ -356,9 +359,10 @@ class UnifiedPaymentAPI {
         currentSettings.payments.providers[providerName].enabled = provider.enabled;
         currentSettings.payments.providers[providerName].testMode = provider.testMode;
         currentSettings.payments.providers[providerName].settings = provider.settings;
-        
-        localStorage.setItem('siteSettings', JSON.stringify(currentSettings));
-        logger.debug(`Provider ${providerName} connection status saved to localStorage`);
+
+        await firebaseApi.default.updateSettings(currentSettings);
+        await encryptedCache.setItem('siteSettings', currentSettings);
+        logger.debug(`Provider ${providerName} connection status saved to Firebase`);
       }
       
       return {
@@ -392,30 +396,19 @@ class UnifiedPaymentAPI {
         }
       });
 
-      // حفظ الإعدادات في localStorage
-      const currentSettings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-      currentSettings.payments = {
-        ...currentSettings.payments,
-        providers: settings
+      // حفظ الإعدادات في Firebase والكاش المشفر
+      const firebaseApi = await import('../firebaseApi.js');
+      const currentFirebaseSettings = await firebaseApi.default.getSettings();
+      const updatedFirebaseSettings = {
+        ...currentFirebaseSettings,
+        payments: {
+          ...currentFirebaseSettings.payments,
+          providers: settings
+        }
       };
-      localStorage.setItem('siteSettings', JSON.stringify(currentSettings));
-
-      // حفظ الإعدادات في Firebase أيضاً
-      try {
-        const firebaseApi = await import('../firebaseApi.js');
-        const currentFirebaseSettings = await firebaseApi.default.getSettings();
-        const updatedFirebaseSettings = {
-          ...currentFirebaseSettings,
-          payments: {
-            ...currentFirebaseSettings.payments,
-            providers: settings
-          }
-        };
-        await firebaseApi.default.updateSettings(updatedFirebaseSettings);
-        logger.info('Payment settings saved to Firebase successfully');
-      } catch (firebaseError) {
-        logger.info('Could not save to Firebase, but settings are saved locally:', firebaseError);
-      }
+      await firebaseApi.default.updateSettings(updatedFirebaseSettings);
+      await encryptedCache.setItem('siteSettings', updatedFirebaseSettings);
+      logger.info('Payment settings saved to Firebase successfully');
 
       return { success: true };
 

@@ -11,12 +11,30 @@ import CustomerService from './services/CustomerService.js';
 import CartService from './services/CartService.js';
 import unifiedPaymentApi from './api/unifiedPaymentApi.js';
 import logger from './logger.js';
+import * as encryptedCache from './encryptedCache.js';
 
 // Firebase API هو الآن الخيار الوحيد مع Functions
 const api = {
   ...firebaseApi,
   ...firebaseFunctionsApi,
-  
+
+  // الحصول على الإعدادات مع كاش مشفر اختياري
+  getSettings: async (forceRefresh = false) => {
+    try {
+      if (!forceRefresh) {
+        const cached = await encryptedCache.getItem('siteSettings');
+        if (cached) {
+          return cached;
+        }
+      }
+      const settings = await firebaseApi.getSettings();
+      await encryptedCache.setItem('siteSettings', settings);
+      return settings;
+    } catch (error) {
+      throw errorHandler.handleError(error, 'settings:get');
+    }
+  },
+
   // Google Merchant import - سيتم تنفيذها عبر Firebase Functions
   importGoogleMerchant: async (cfg = {}) => {
     try {
@@ -75,10 +93,10 @@ const api = {
       
       // تحديث الإعدادات عبر Firebase
       const result = await firebaseApi.updateSettings(settings);
-      
-      // حفظ في localStorage للوصول الفوري
-      localStorage.setItem('siteSettings', JSON.stringify(settings));
-      
+
+      // تخزين في كاش مشفر للوصول السريع
+      await encryptedCache.setItem('siteSettings', settings);
+
       return result;
     } catch (error) {
       throw errorHandler.handleError(error, 'settings:update');

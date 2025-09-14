@@ -31,7 +31,7 @@ const App = () => {
   const { setLanguage, setLanguages, languages } = useLanguage();
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
   const { favorites: wishlist, toggleFavorite } = useFavorites();
-  const { settings: siteSettingsState, setSettings: setSiteSettingsState } = useSettings();
+  const { settings: siteSettingsState, setSettings: setSiteSettingsState, refreshSettings } = useSettings();
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
@@ -88,7 +88,7 @@ const App = () => {
       try {
         setIsAppLoading(true);
         // تحميل البيانات من Firebase
-        const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
+        const [b, a, c, _settings, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
           api.getBooks().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:books');
             toast({
@@ -116,7 +116,7 @@ const App = () => {
             });
             return [];
           }),
-          api.getSettings().catch(error => {
+          refreshSettings(true).catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:settings');
             toast({
               title: "خطأ في تحميل الإعدادات",
@@ -257,7 +257,6 @@ const App = () => {
         setBooks(b);
         setAuthors(a);
         setCategoriesState(c);
-        setSiteSettingsState(prev => ({ ...prev, ...s }));
         setOrders(o);
         setPayments(pay);
         setPaymentMethods(methods);
@@ -342,10 +341,6 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
   }, [subscriptions]);
-
-  useEffect(() => {
-    localStorage.setItem('siteSettings', JSON.stringify(siteSettingsState));
-  }, [siteSettingsState]);
 
   useEffect(() => {
     localStorage.setItem('heroSlides', JSON.stringify(heroSlidesState));
