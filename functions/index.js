@@ -7,6 +7,11 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
+// Status synchronization
+const statusSync = require('./statusSync');
+exports.syncPaymentStatus = statusSync.syncPaymentStatus;
+exports.syncShippingStatus = statusSync.syncShippingStatus;
+
 // ===== PAYMENT FUNCTIONS =====
 
 // Stripe Payment Intent
