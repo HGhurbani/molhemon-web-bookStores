@@ -34,30 +34,35 @@ const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
         const result = await firebaseAuth.createAccount(email, password, fullName);
 
         // إنشاء سجل المستخدم بدور مشرف
-        await setDoc(doc(db, 'users', result.user.uid), {
-          name: fullName,
-          email,
-          role: 'admin',
-          createdAt: new Date()
-        }, { merge: true });
+        await setDoc(
+          doc(db, 'users', result.user.uid),
+          {
+            name: fullName,
+            email,
+            role: 'admin',
+            createdAt: new Date(),
+          },
+          { merge: true }
+        );
+
+        // قراءة بيانات المستخدم للتحقق من الدور
+        const createdDoc = await getDoc(doc(db, 'users', result.user.uid));
+        const createdData = createdDoc.data();
 
         toast({
           title: 'تم إنشاء حساب المشرف',
-          description: 'تم تحويلك للوحة التحكم'
+          description: 'تم تحويلك للوحة التحكم',
         });
 
-        // تحديث حالة المشرف والدخول مباشرة
-        localStorage.setItem('adminLoggedIn', 'true');
-        localStorage.setItem('currentUserId', result.user.uid);
-        localStorage.setItem('userRole', 'admin');
-        
         // تحديث حالة المستخدم الحالي
         setCurrentUser({
           ...result.user,
-          role: 'admin',
-          isAdmin: true
+          role: createdData?.role || 'admin',
+          isAdmin:
+            createdData?.role === 'admin' ||
+            createdData?.role === 'manager',
         });
-        
+
         onLogin();
         navigate('/admin');
         return;
@@ -73,11 +78,6 @@ const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
       if (!userData || (userData.role !== 'admin' && userData.role !== 'manager')) {
         throw new Error('ليس لديك صلاحية للوصول إلى لوحة التحكم');
       }
-      
-      // تحديث localStorage
-      localStorage.setItem('adminLoggedIn', 'true');
-      localStorage.setItem('currentUserId', result.user.uid);
-      localStorage.setItem('userRole', userData.role);
       
       // تحديث حالة المستخدم الحالي
       setCurrentUser({

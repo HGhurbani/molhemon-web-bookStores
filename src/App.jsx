@@ -54,6 +54,7 @@ import ScrollToTop from '@/components/ScrollToTop.jsx';
 import ChatWidget from '@/components/ChatWidget.jsx';
 import SplashScreen from '@/components/SplashScreen.jsx';
 import MobileBottomNav from '@/components/MobileBottomNav.jsx';
+import RequireAdmin from '@/components/RequireAdmin.jsx';
 
 import { sellers as initialSellers, branches as initialBranches, users as initialUsers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
@@ -143,12 +144,6 @@ const App = () => {
           }
         }
         
-        // فحص إضافي من localStorage للتحقق من حالة المدير
-        const adminLoggedIn = localStorage.getItem('adminLoggedIn');
-        const userRole = localStorage.getItem('userRole');
-        if (adminLoggedIn === 'true' && (userRole === 'admin' || userRole === 'manager')) {
-          setIsAdminLoggedIn(true);
-        }
       } catch (error) {
         const errorObject = errorHandler.handleError(error, 'auth:status-check');
         console.error('Auth status check failed:', errorObject);
@@ -180,14 +175,8 @@ const App = () => {
           
           if (userData && (userData.role === 'admin' || userData.role === 'manager')) {
             setIsAdminLoggedIn(true);
-            // تحديث localStorage
-            localStorage.setItem('adminLoggedIn', 'true');
-            localStorage.setItem('currentUserId', user.uid);
-            localStorage.setItem('userRole', userData.role);
           } else {
             setIsAdminLoggedIn(false);
-            localStorage.removeItem('adminLoggedIn');
-            localStorage.removeItem('userRole');
           }
         } catch (error) {
           console.error('Error checking user role:', error);
@@ -197,8 +186,6 @@ const App = () => {
         setCurrentUser(null);
         setIsCustomerLoggedIn(false);
         setIsAdminLoggedIn(false);
-        localStorage.removeItem('adminLoggedIn');
-        localStorage.removeItem('userRole');
       }
     });
 
@@ -703,7 +690,7 @@ const App = () => {
               <Route
                 path="/admin"
                 element={
-                  isAdminLoggedIn ? (
+                  <RequireAdmin>
                     <Dashboard
                       dashboardStats={dashboardStatsState}
                       books={books}
@@ -748,31 +735,27 @@ const App = () => {
                       features={features}
                       setFeatures={setFeatures}
                     />
-                  ) : (
-                    <AdminLoginPage 
-                      onLogin={() => {
-                        setIsAdminLoggedIn(true);
-                        setIsCustomerLoggedIn(true);
-                      }} 
-                      setCurrentUser={setCurrentUser}
-                    />
-                  )
+                  </RequireAdmin>
                 }
               />
               <Route
                 path="/admin/orders/:id"
                 element={
-                  isAdminLoggedIn ? (
+                  <RequireAdmin>
                     <DashboardOrderDetailsPage />
-                  ) : (
-                    <AdminLoginPage 
-                      onLogin={() => {
-                        setIsAdminLoggedIn(true);
-                        setIsCustomerLoggedIn(true);
-                      }} 
-                      setCurrentUser={setCurrentUser}
-                    />
-                  )
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/login"
+                element={
+                  <AdminLoginPage
+                    onLogin={() => {
+                      setIsAdminLoggedIn(true);
+                      setIsCustomerLoggedIn(true);
+                    }}
+                    setCurrentUser={setCurrentUser}
+                  />
                 }
               />
               <Route
