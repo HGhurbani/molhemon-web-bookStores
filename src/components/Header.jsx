@@ -30,6 +30,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
 import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
+import { useCart } from '@/lib/cartContext.jsx';
+import { useAuth } from '@/lib/authContext.jsx';
 
 const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
