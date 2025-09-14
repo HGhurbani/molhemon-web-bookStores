@@ -169,12 +169,6 @@ service cloud.firestore {
       allow update, delete: if isManager();
     }
 
-    // Settings collection
-    match /settings/{settingId} {
-      allow read: if true;
-      allow write: if isManager();
-    }
-
     // Messages collection
     match /messages/{messageId} {
       allow read, write: if isOwner(resource.data.userId) || isManagerOrDevelopment();
@@ -301,12 +295,6 @@ service cloud.firestore {
 
     // Shipping methods collection
     match /shipping_methods/{methodId} {
-      allow read: if true;
-      allow write: if isManagerOrDevelopment();
-    }
-
-    // Payment methods collection (global)
-    match /payment_methods/{methodId} {
       allow read: if true;
       allow write: if isManagerOrDevelopment();
     }
