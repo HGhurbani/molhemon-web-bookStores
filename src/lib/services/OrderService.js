@@ -6,13 +6,15 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
-import { Schemas, validateData } from '../models/schemas.js';
+import schemas from '../../../functions/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
 
 import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase.js';
+
+const { Schemas, validateData } = schemas;
 
 export class OrderService {
   constructor() {

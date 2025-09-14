@@ -3,10 +3,12 @@
  */
 
 import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js';
-import { Schemas, validateData } from '../models/schemas.js';
+import schemas from '../../../functions/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
+
+const { Schemas, validateData } = schemas;
 
 export class PaymentService {
   constructor() {

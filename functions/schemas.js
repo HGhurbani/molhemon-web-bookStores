@@ -1,4 +1,4 @@
-export const OrderItemSchema = {
+const OrderItemSchema = {
   type: 'object',
   required: ['productId', 'quantity', 'unitPrice'],
   properties: {
@@ -11,7 +11,7 @@ export const OrderItemSchema = {
   }
 };
 
-export const ShippingSchema = {
+const ShippingSchema = {
   type: 'object',
   required: ['orderId', 'shippingAddress'],
   properties: {
@@ -23,7 +23,7 @@ export const ShippingSchema = {
   }
 };
 
-export const PaymentSchema = {
+const PaymentSchema = {
   type: 'object',
   required: ['orderId', 'amount', 'paymentMethod'],
   properties: {
@@ -35,7 +35,7 @@ export const PaymentSchema = {
   }
 };
 
-export const OrderSchema = {
+const OrderSchema = {
   type: 'object',
   required: ['customerId', 'items', 'totalAmount', 'currency'],
   properties: {
@@ -53,7 +53,7 @@ export const OrderSchema = {
   }
 };
 
-export function validateData(data, schema, path = '') {
+function validateData(data, schema, path = '') {
   const errors = [];
   if (schema.type === 'object') {
     const obj = data || {};
@@ -84,13 +84,18 @@ export function validateData(data, schema, path = '') {
   return errors;
 }
 
-export const Schemas = {
+const Schemas = {
   Order: OrderSchema,
   OrderItem: OrderItemSchema,
   Payment: PaymentSchema,
   Shipping: ShippingSchema
 };
 
-if (typeof module !== 'undefined') {
-  module.exports = { Schemas, validateData };
-}
+module.exports = {
+  OrderItemSchema,
+  ShippingSchema,
+  PaymentSchema,
+  OrderSchema,
+  validateData,
+  Schemas
+};
