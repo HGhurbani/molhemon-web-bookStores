@@ -15,6 +15,7 @@ import { errorHandler } from '@/lib/errorHandler.js';
 import api from '@/lib/api.js';
 import unifiedPaymentApi from '@/lib/api/unifiedPaymentApi.js';
 import firebaseApi from '@/lib/firebaseApi.js';
+import logger from '@/lib/logger.js';
 import '@/lib/test/checkoutTest.js'; // استيراد ملف الاختبار
 import {
   Lock,
@@ -96,22 +97,22 @@ const CheckoutPage = ({ cart, setCart }) => {
   const shippingCost = (() => {
     // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
     if (!orderData.shippingMethod) {
-      console.log('No shipping method selected');
+      logger.debug('No shipping method selected');
       return 0;
     }
     
-    console.log('CheckoutPage - Shipping method:', orderData.shippingMethod);
-    console.log('CheckoutPage - Shipping method keys:', Object.keys(orderData.shippingMethod));
+    logger.debug('CheckoutPage - Shipping method:', orderData.shippingMethod);
+    logger.debug('CheckoutPage - Shipping method keys:', Object.keys(orderData.shippingMethod));
     
     const isPickup = orderData.shippingMethod.id === 'pickup' || 
                     orderData.shippingMethod.name === 'استلام من المتجر' ||
                     orderData.shippingMethod.type === 'pickup';
     
-    console.log('CheckoutPage - Is pickup:', isPickup);
-    console.log('CheckoutPage - Original cost:', orderData.shippingMethod.cost);
+    logger.debug('CheckoutPage - Is pickup:', isPickup);
+    logger.debug('CheckoutPage - Original cost:', orderData.shippingMethod.cost);
     
     const finalCost = isPickup ? 0 : (orderData.shippingMethod.cost || 0);
-    console.log('CheckoutPage - Final shipping cost:', finalCost);
+    logger.debug('CheckoutPage - Final shipping cost:', finalCost);
     
     return finalCost;
   })();
@@ -119,7 +120,7 @@ const CheckoutPage = ({ cart, setCart }) => {
   const discountAmount = orderData.discountAmount || 0;
   const total = subtotal - discountAmount + shippingCost + taxAmount;
   
-  console.log('CheckoutPage - Total calculation:', {
+  logger.debug('CheckoutPage - Total calculation:', {
     subtotal,
     discountAmount,
     shippingCost,
@@ -355,7 +356,7 @@ const CheckoutPage = ({ cart, setCart }) => {
                     shippingMethod.type === 'pickup';
     
     if (isPickup) {
-      console.log('Pickup method detected in calculateShippingCost, returning 0');
+      logger.debug('Pickup method detected in calculateShippingCost, returning 0');
       return 0;
     }
 
@@ -374,7 +375,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         
         // جلب إعدادات المتجر
         const settings = await api.storeSettings.getStoreSettings();
-        console.log('Store settings loaded:', settings);
+        logger.debug('Store settings loaded:', settings);
         
         setStoreSettings(settings);
         
@@ -433,7 +434,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         }
 
         setAvailablePaymentMethods(paymentMethods);
-        console.log('Payment methods loaded:', paymentMethods);
+        logger.debug('Payment methods loaded:', paymentMethods);
         
         // جلب طرق الشحن المتاحة (فقط للمنتجات الفيزيائية)
         if (hasPhysicalProducts) {
@@ -441,7 +442,7 @@ const CheckoutPage = ({ cart, setCart }) => {
             const shippingMethods = await api.storeSettings.getAvailableShippingMethods();
             setAvailableShippingMethods(shippingMethods);
           } catch (error) {
-            console.error('Error loading shipping methods:', error);
+            logger.error('Error loading shipping methods:', error);
             // استخدام طرق شحن افتراضية في حالة الفشل
             const defaultShippingMethods = [
               {
@@ -493,7 +494,7 @@ const CheckoutPage = ({ cart, setCart }) => {
               }));
             }
           } catch (error) {
-            console.error('Failed to load/create customer data:', error);
+            logger.error('Failed to load/create customer data:', error);
             setOrderData(prev => ({
               ...prev,
               customerId: user.uid,
@@ -529,7 +530,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           }));
         }
       } catch (error) {
-        console.error('Failed to initialize checkout:', error);
+        logger.error('Failed to initialize checkout:', error);
         toast({
           title: 'فشل في تهيئة صفحة الدفع',
           description: error.message,
@@ -546,7 +547,7 @@ const CheckoutPage = ({ cart, setCart }) => {
   // useEffect للتحقق من وجود طرق دفع متاحة
   useEffect(() => {
           if (availablePaymentMethods.length === 0) {
-      console.log('No payment methods available, adding emergency methods');
+      logger.debug('No payment methods available, adding emergency methods');
             const emergencyMethods = [];
             
       // إضافة الدفع عند الاستلام للمنتجات المادية
@@ -576,7 +577,7 @@ const CheckoutPage = ({ cart, setCart }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       if (firebaseUser && isLoggedIn) {
-        console.log('Firebase auth state changed in checkout:', firebaseUser);
+        logger.debug('Firebase auth state changed in checkout:', firebaseUser);
         
         // تحديث البيانات من Firebase إذا كانت متوفرة
         const updatedCustomerInfo = {
@@ -585,7 +586,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           phone: firebaseUser.phoneNumber || ''
         };
         
-        console.log('Updating customer info from Firebase:', updatedCustomerInfo);
+        logger.debug('Updating customer info from Firebase:', updatedCustomerInfo);
         setOrderData(prev => ({
           ...prev,
           customerInfo: {
@@ -605,9 +606,9 @@ const CheckoutPage = ({ cart, setCart }) => {
           
           try {
             jwtAuthManager.updateUserData(updatedJWTData);
-            console.log('JWT data updated in checkout successfully');
+            logger.debug('JWT data updated in checkout successfully');
           } catch (error) {
-            console.error('Failed to update JWT data in checkout:', error);
+            logger.error('Failed to update JWT data in checkout:', error);
           }
         }
       }
@@ -643,11 +644,11 @@ const CheckoutPage = ({ cart, setCart }) => {
         if (auth.currentUser) {
           displayName = auth.currentUser.displayName || displayName || '';
           phoneNumber = auth.currentUser.phoneNumber || phoneNumber || '';
-          console.log('Got data from Firebase auth:', { displayName, phoneNumber });
+          logger.debug('Got data from Firebase auth:', { displayName, phoneNumber });
         }
         
         // تعبئة البيانات الأساسية من المستخدم
-        console.log('User data for checkout:', { displayName, email: user.email, phoneNumber });
+        logger.debug('User data for checkout:', { displayName, email: user.email, phoneNumber });
         setOrderData(prev => ({
           ...prev,
           customerId: user.uid,
@@ -659,13 +660,13 @@ const CheckoutPage = ({ cart, setCart }) => {
         }));
       } else {
         // إذا لم يكن هناك مستخدم، انتظار قليلاً ثم المحاولة مرة أخرى
-        console.log('No user found, waiting for auth...');
+        logger.debug('No user found, waiting for auth...');
         setTimeout(() => {
           const retryUser = jwtAuthManager.getCurrentUser();
           if (retryUser) {
             initializeCheckout();
           } else {
-            console.log('Still no user, redirecting to home');
+            logger.debug('Still no user, redirecting to home');
             navigate('/');
           }
         }, 2000);
@@ -677,7 +678,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         const settings = await api.storeSettings.getStoreSettings();
         setStoreSettings(settings);
       } catch (error) {
-        console.error('Error loading store settings:', error);
+        logger.error('Error loading store settings:', error);
         // لا نوقف العملية إذا فشل تحميل الإعدادات
         // يمكن أن يكون هناك مشكلة في الاتصال أو الخادم
       }
@@ -689,12 +690,12 @@ const CheckoutPage = ({ cart, setCart }) => {
         setSavedPaymentMethods(customerData.paymentMethods || []);
 
         // تعبئة البيانات من الملف الشخصي إذا كانت متوفرة
-        console.log('Customer data already loaded:', customerData);
+        logger.debug('Customer data already loaded:', customerData);
         if (customerData && (customerData.firstName || customerData.lastName || customerData.displayName)) {
           const customerName = (customerData.firstName || customerData.displayName || '') + ' ' + (customerData.lastName || '');
           const customerPhone = customerData.phone || (auth.currentUser?.phoneNumber) || '';
           
-          console.log('Using customer profile data:', { customerName, customerPhone });
+          logger.debug('Using customer profile data:', { customerName, customerPhone });
           setOrderData(prev => ({
             ...prev,
             customerInfo: {
@@ -708,7 +709,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           }));
         } else {
           // إذا لم تكن بيانات العميل متوفرة، استخدم البيانات الأساسية من المستخدم
-          console.log('Customer profile incomplete, using basic user data');
+          logger.debug('Customer profile incomplete, using basic user data');
         }
       }
 
@@ -766,10 +767,10 @@ const CheckoutPage = ({ cart, setCart }) => {
           });
           
           setAvailablePaymentMethods(allMethods);
-          console.log('Available payment methods after conversion:', allMethods);
-          console.log('Cash on Delivery found:', allMethods.find(m => m.id === 'cashOnDelivery' || m.id === 'cash_on_delivery'));
+          logger.debug('Available payment methods after conversion:', allMethods);
+          logger.debug('Cash on Delivery found:', allMethods.find(m => m.id === 'cashOnDelivery' || m.id === 'cash_on_delivery'));
         } else {
-          console.error('Failed to load payment methods:', response.error);
+          logger.error('Failed to load payment methods:', response.error);
           // في حالة فشل تحميل طرق الدفع، أضف طريقة الدفع عند الاستلام كخيار احتياطي (فقط للمنتجات المادية)
           const fallbackMethods = [];
           if (storeSettings?.paymentMethods?.cash_on_delivery?.enabled && hasPhysicalProducts) {
@@ -787,10 +788,10 @@ const CheckoutPage = ({ cart, setCart }) => {
             });
           }
           setAvailablePaymentMethods(fallbackMethods);
-          console.log('Using fallback payment methods in second location:', fallbackMethods);
+          logger.debug('Using fallback payment methods in second location:', fallbackMethods);
         }
               } catch (error) {
-          console.error('Error loading payment methods:', error);
+          logger.error('Error loading payment methods:', error);
           // في حالة فشل تحميل طرق الدفع، أضف طريقة الدفع عند الاستلام كخيار احتياطي (فقط للمنتجات المادية)
           const fallbackMethods = hasPhysicalProducts ? [{
             id: 'cash_on_delivery',
@@ -805,7 +806,7 @@ const CheckoutPage = ({ cart, setCart }) => {
             fees: { percentage: 0, fixed: 5 }
           }] : [];
           setAvailablePaymentMethods(fallbackMethods);
-          console.log('Using emergency fallback payment methods:', fallbackMethods);
+          logger.debug('Using emergency fallback payment methods:', fallbackMethods);
         }
 
       // تحميل طرق الشحن المتاحة (فقط للمنتجات الفيزيائية)
@@ -825,17 +826,17 @@ const CheckoutPage = ({ cart, setCart }) => {
             totalWeight
           );
           
-          console.log('Loaded shipping methods:', shippingMethods);
+          logger.debug('Loaded shipping methods:', shippingMethods);
           setAvailableShippingMethods(shippingMethods);
         } catch (error) {
-          console.error('Error loading shipping methods:', error);
+          logger.error('Error loading shipping methods:', error);
           // لا نوقف العملية إذا فشل تحميل طرق الشحن
           // يمكن أن يكون هناك مشكلة في الاتصال أو الخادم
         }
       }
 
     } catch (error) {
-      console.error('Error in initializeCheckout:', error);
+      logger.error('Error in initializeCheckout:', error);
       
       // عرض رسالة الخطأ فقط إذا كان هناك خطأ حقيقي
       if (error.message && !error.message.includes('auth/user-not-found') && !error.message.includes('auth/invalid-email')) {
@@ -878,10 +879,10 @@ const CheckoutPage = ({ cart, setCart }) => {
           totalWeight
         );
         
-        console.log('Updated shipping methods:', shippingMethods);
+        logger.debug('Updated shipping methods:', shippingMethods);
         setAvailableShippingMethods(shippingMethods);
       } catch (error) {
-        console.error('Error updating shipping methods:', error);
+        logger.error('Error updating shipping methods:', error);
       }
     }
   };
@@ -1002,7 +1003,7 @@ const CheckoutPage = ({ cart, setCart }) => {
        const newTimeout = setTimeout(async () => {
          try {
            setIsSaving(true);
-           console.log('Saving customer data:', info);
+           logger.debug('Saving customer data:', info);
            // تحديث أو إنشاء ملف العميل
            await api.updateCustomer(currentUser.uid, {
              firstName: info.name.split(' ')[0] || '',
@@ -1011,9 +1012,9 @@ const CheckoutPage = ({ cart, setCart }) => {
              phone: info.phone
            });
            
-           console.log('Customer data saved successfully');
+           logger.debug('Customer data saved successfully');
          } catch (error) {
-           console.error('Error saving customer data:', error);
+           logger.error('Error saving customer data:', error);
            // لا نعرض خطأ للمستخدم لأن الطلب يمكن أن يستمر
          } finally {
            setIsSaving(false);
@@ -1027,12 +1028,12 @@ const CheckoutPage = ({ cart, setCart }) => {
     const getValidationStatus = () => {
     try {
       // لقطات تشخيصية كاملة للحالة الحالية
-      console.log('[Checkout][DEBUG] orderData snapshot:', JSON.parse(JSON.stringify(orderData)));
-      console.log('[Checkout][DEBUG] hasPhysicalProducts:', hasPhysicalProducts);
-      console.log('[Checkout][DEBUG] storeSettings.paymentGateways keys:', Object.keys(storeSettings?.paymentGateways || {}));
+      logger.debug('[Checkout][DEBUG] orderData snapshot:', JSON.parse(JSON.stringify(orderData)));
+      logger.debug('[Checkout][DEBUG] hasPhysicalProducts:', hasPhysicalProducts);
+      logger.debug('[Checkout][DEBUG] storeSettings.paymentGateways keys:', Object.keys(storeSettings?.paymentGateways || {}));
       if (orderData?.paymentMethod) {
-        console.log('[Checkout][DEBUG] selected paymentMethod:', orderData.paymentMethod);
-        console.log('[Checkout][DEBUG] selected gateway enabled?:', storeSettings?.paymentGateways?.[orderData.paymentMethod.gatewayId || orderData.paymentMethod.gateway]?.enabled);
+        logger.debug('[Checkout][DEBUG] selected paymentMethod:', orderData.paymentMethod);
+        logger.debug('[Checkout][DEBUG] selected gateway enabled?:', storeSettings?.paymentGateways?.[orderData.paymentMethod.gatewayId || orderData.paymentMethod.gateway]?.enabled);
       }
 
       if (!orderData?.customerInfo?.name || !orderData?.customerInfo?.email) {
@@ -1071,7 +1072,7 @@ const CheckoutPage = ({ cart, setCart }) => {
 
       return { ok: true };
     } catch (e) {
-      console.error('[Checkout][DEBUG] validation error:', e);
+      logger.error('[Checkout][DEBUG] validation error:', e);
       return { ok: false, reason: 'unknown' };
     }
   };
@@ -1171,7 +1172,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           .filter(item => item.type === 'physical')
           .reduce((sum, item) => {
             const itemWeight = (item.weight || 0) * item.quantity;
-            console.log('Item weight calculation:', {
+            logger.debug('Item weight calculation:', {
               productName: item.name || item.title,
               weight: item.weight || 0,
               quantity: item.quantity,
@@ -1180,7 +1181,7 @@ const CheckoutPage = ({ cart, setCart }) => {
             return sum + itemWeight;
           }, 0);
         
-        console.log('Shipping calculation:', {
+        logger.debug('Shipping calculation:', {
           totalWeight,
           shippingMethod: orderData.shippingMethod.id,
           baseCost: orderData.shippingMethod.cost,
@@ -1241,7 +1242,7 @@ const CheckoutPage = ({ cart, setCart }) => {
       }
 
       // معالجة إتمام الطلب
-      console.log('Checkout data before processing:', {
+      logger.debug('Checkout data before processing:', {
         customerId: orderData.customerId,
         customerInfo: orderData.customerInfo,
         shippingAddress: orderData.shippingAddress,
@@ -1252,12 +1253,12 @@ const CheckoutPage = ({ cart, setCart }) => {
 
       // Validate required data before processing
       if (!orderData.customerId) {
-        console.error('Missing customerId in checkout data:', orderData);
+        logger.error('Missing customerId in checkout data:', orderData);
         throw new Error('معرف العميل مطلوب');
       }
       
       if (!orderData.customerInfo || !orderData.customerInfo.name || !orderData.customerInfo.email) {
-        console.error('Missing customer info in checkout data:', orderData);
+        logger.error('Missing customer info in checkout data:', orderData);
         throw new Error('معلومات العميل مطلوبة');
       }
       
@@ -1282,15 +1283,15 @@ const CheckoutPage = ({ cart, setCart }) => {
 
       const orderResult = await api.orders.processCheckout(cartResult.id, checkoutData);
 
-      console.log('CheckoutPage - Raw order result:', orderResult);
+      logger.debug('CheckoutPage - Raw order result:', orderResult);
 
       // التحقق من وجود معرف الطلب
       if (!orderResult || !orderResult.id) {
-        console.error('CheckoutPage - Order ID is missing after checkout:', orderResult);
+        logger.error('CheckoutPage - Order ID is missing after checkout:', orderResult);
         
         // محاولة استخدام معرفات بديلة
         const fallbackId = orderResult?.order?.id || orderResult?.orderNumber || `temp_${Date.now()}`;
-        console.warn('CheckoutPage - Using fallback ID:', fallbackId);
+        logger.info('CheckoutPage - Using fallback ID:', fallbackId);
         
         if (fallbackId && fallbackId !== `temp_${Date.now()}`) {
           orderResult.id = fallbackId;
@@ -1299,7 +1300,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         }
       }
 
-      console.log('CheckoutPage - Order created successfully:', {
+      logger.debug('CheckoutPage - Order created successfully:', {
         id: orderResult.id,
         orderNumber: orderResult.orderNumber,
         success: orderResult.success
@@ -1322,17 +1323,17 @@ const CheckoutPage = ({ cart, setCart }) => {
 
       // التحقق النهائي من معرف الطلب قبل الانتقال
       if (!orderResult.id || orderResult.id === 'null' || orderResult.id === 'undefined') {
-        console.error('CheckoutPage - Final check failed, order ID is still invalid:', orderResult.id);
+        logger.error('CheckoutPage - Final check failed, order ID is still invalid:', orderResult.id);
         throw new Error('فشل في الحصول على معرف صحيح للطلب');
       }
 
       // الانتقال لصفحة تأكيد الطلب مع رسالة النجاح
-      console.log('CheckoutPage - Navigating to order page with ID:', orderResult.id);
+      logger.debug('CheckoutPage - Navigating to order page with ID:', orderResult.id);
       navigate(`/orders/${orderResult.id}?success=true`);
 
     } catch (error) {
       const errorObject = errorHandler.handleError(error, 'checkout:place-order');
-      console.error('CheckoutPage - Order creation failed:', errorObject);
+      logger.error('CheckoutPage - Order creation failed:', errorObject);
       
       setTimeout(() => {
         toast({
@@ -1818,7 +1819,7 @@ const ShippingMethodSection = ({
   cartTotal,
   formatPrice
 }) => {
-  console.log('ShippingMethodSection rendered with:', {
+  logger.debug('ShippingMethodSection rendered with:', {
     availableMethods,
     selectedMethod,
     shippingAddress,

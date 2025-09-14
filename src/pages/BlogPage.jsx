@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import firebaseApi from '@/lib/firebaseApi';
+import logger from '@/lib/logger.js';
 
 const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,7 +45,7 @@ const BlogPage = () => {
           setFeaturedArticle(sortedPosts[0]);
         }
       } catch (error) {
-        console.error('Error fetching blog posts:', error);
+        logger.error('Error fetching blog posts:', error);
         setError('حدث خطأ أثناء جلب المقالات');
       } finally {
         setIsLoading(false);

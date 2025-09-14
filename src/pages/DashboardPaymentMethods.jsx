@@ -23,6 +23,7 @@ import {
   Zap
 } from 'lucide-react';
 import api from '@/lib/api.js';
+import logger from '@/lib/logger.js';
 
 const DashboardPaymentMethods = () => {
   const [storeSettings, setStoreSettings] = useState(null);
@@ -41,7 +42,7 @@ const DashboardPaymentMethods = () => {
       const settings = await api.storeSettings.getStoreSettings();
       setStoreSettings(settings);
     } catch (error) {
-      console.error('Error loading store settings:', error);
+      logger.error('Error loading store settings:', error);
       toast({
         title: 'خطأ في تحميل الإعدادات',
         description: error.message,
@@ -150,7 +151,7 @@ const DashboardPaymentMethods = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error saving gateway settings:', error);
+      logger.error('Error saving gateway settings:', error);
       toast({
         title: 'خطأ في حفظ الإعدادات',
         description: error.message,
@@ -173,7 +174,7 @@ const DashboardPaymentMethods = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error toggling gateway:', error);
+      logger.error('Error toggling gateway:', error);
       toast({
         title: 'خطأ في تحديث حالة البوابة',
         description: error.message,
@@ -196,7 +197,7 @@ const DashboardPaymentMethods = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error toggling payment method:', error);
+      logger.error('Error toggling payment method:', error);
       toast({
         title: 'خطأ في تحديث حالة طريقة الدفع',
         description: error.message,

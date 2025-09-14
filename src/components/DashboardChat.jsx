@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input.jsx';
 import { collection, onSnapshot, addDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
 import api from '@/lib/api.js';
+import logger from '@/lib/logger.js';
 
 const DashboardChat = ({ messages = [] }) => {
   const [activeChat, setActiveChat] = useState(null);
@@ -129,7 +130,7 @@ const DashboardChat = ({ messages = [] }) => {
         createdAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
     }
   };
 

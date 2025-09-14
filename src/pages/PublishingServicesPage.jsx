@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast.js';
 import firebaseApi from '@/lib/firebaseApi.js';
+import logger from '@/lib/logger.js';
 
 const PublishingServicesPage = () => {
   const [formData, setFormData] = useState({
@@ -103,7 +104,7 @@ const PublishingServicesPage = () => {
       });
       setUploadedFile(null);
     } catch (error) {
-      console.error('Error submitting publishing request:', error);
+      logger.error('Error submitting publishing request:', error);
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى',

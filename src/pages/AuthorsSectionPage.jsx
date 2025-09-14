@@ -5,6 +5,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import firebaseApi from '@/lib/firebaseApi';
 import SocialMediaIcons from '@/components/SocialMediaIcons.jsx';
+import logger from '@/lib/logger.js';
 
 const AuthorsSectionPage = () => {
   const [authors, setAuthors] = useState([]);
@@ -16,7 +17,7 @@ const AuthorsSectionPage = () => {
         const response = await firebaseApi.getAuthors();
         setAuthors(response);
       } catch (error) {
-        console.error('Error fetching authors:', error);
+        logger.error('Error fetching authors:', error);
         setAuthors([]);
       } finally {
         setLoading(false);

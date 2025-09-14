@@ -78,7 +78,7 @@ export const deleteBlogImage = async (imagePath) => {
     logger.error('خطأ في حذف الصورة:', error);
     
     if (error.code === 'storage/object-not-found') {
-      console.warn('الصورة غير موجودة في التخزين');
+      logger.info('الصورة غير موجودة في التخزين');
       return true; // نعتبر الحذف ناجح إذا لم تكن الصورة موجودة
     }
     

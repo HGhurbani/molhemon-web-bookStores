@@ -7,6 +7,7 @@ import api from '@/lib/api.js';
 import { purchasePlan } from '@/lib/subscriptionUtils.js';
 import { BookCard } from '@/components/FlashSaleSection.jsx';
 import { Check, Award, Star } from 'lucide-react';
+import logger from '@/lib/logger.js';
 
 const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wishlist, handleFeatureClick }) => {
   const [localWishlist, setLocalWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
@@ -38,7 +39,7 @@ const EbookPage = ({ books, authors, handleAddToCart, handleToggleWishlist, wish
       try {
         setPlans(await api.getPlans({ type: 'package', packageType: 'ebook' }));
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     })();
   }, []);

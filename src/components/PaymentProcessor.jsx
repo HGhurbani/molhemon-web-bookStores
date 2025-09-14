@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import paymentApi, { paymentUtils } from '@/lib/paymentApi.js';
+import logger from '@/lib/logger.js';
 
 const PaymentProcessor = ({ 
   orderData, 
@@ -44,7 +45,7 @@ const PaymentProcessor = ({
       const methods = await paymentApi.getBuyerPaymentMethods(buyerAccount.id);
       setSavedMethods(methods);
     } catch (error) {
-      console.error('Error loading saved payment methods:', error);
+      logger.error('Error loading saved payment methods:', error);
     }
   };
 
@@ -147,7 +148,7 @@ const PaymentProcessor = ({
         throw new Error('فشل في معالجة الدفع');
       }
     } catch (error) {
-      console.error('Payment processing error:', error);
+      logger.error('Payment processing error:', error);
       toast({ 
         title: 'فشل في معالجة الدفع', 
         description: error.message,

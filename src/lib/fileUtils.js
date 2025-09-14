@@ -1,4 +1,5 @@
 // وظائف معالجة الملفات واستخراج المعلومات
+import logger from './logger.js';
 import { toast } from '@/components/ui/use-toast';
 
 // استخراج عدد الصفحات من ملف PDF
@@ -31,7 +32,7 @@ export async function extractPagesFromPDF(file) {
           }
         }
       } catch (error) {
-        console.warn('تعذر استخراج عدد الصفحات من PDF:', error);
+        logger.info('تعذر استخراج عدد الصفحات من PDF:', error);
         resolve(null);
       }
     };
@@ -82,7 +83,7 @@ export async function extractPagesFromDOCX(file) {
           resolve(null);
         }
       } catch (error) {
-        console.warn('تعذر استخراج عدد الصفحات من DOCX:', error);
+        logger.info('تعذر استخراج عدد الصفحات من DOCX:', error);
         resolve(null);
       }
     };
@@ -113,7 +114,7 @@ export async function extractPagesFromFile(file) {
       return null;
     }
   } catch (error) {
-    console.warn('خطأ في استخراج عدد الصفحات:', error);
+    logger.info('خطأ في استخراج عدد الصفحات:', error);
     return null;
   }
 }
@@ -230,7 +231,7 @@ export async function processBookFile(file, bookType) {
 
     return fileInfo;
   } catch (error) {
-    console.warn('خطأ في معالجة ملف الكتاب:', error);
+    logger.info('خطأ في معالجة ملف الكتاب:', error);
     return fileInfo;
   }
 }

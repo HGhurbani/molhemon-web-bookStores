@@ -15,6 +15,7 @@ import {
 import authManager from '@/lib/authManager.js';
 import { db } from '@/lib/firebase.js';
 import { collection, doc, setDoc } from 'firebase/firestore';
+import logger from '@/lib/logger.js';
 
 const QuickLogin = ({ onLoginSuccess }) => {
   const [showLogin, setShowLogin] = useState(false);
@@ -62,7 +63,7 @@ const QuickLogin = ({ onLoginSuccess }) => {
         onLoginSuccess();
       }
     } catch (error) {
-      console.error('Error in quick login:', error);
+      logger.error('Error in quick login:', error);
       toast({
         title: 'خطأ في تسجيل الدخول',
         description: error.message,

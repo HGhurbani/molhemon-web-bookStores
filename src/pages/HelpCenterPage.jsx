@@ -15,6 +15,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import firebaseApi from '@/lib/firebaseApi';
+import logger from '@/lib/logger.js';
 
 const HelpCenterPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +41,7 @@ const HelpCenterPage = () => {
         
         setFaqs(sortedFaqs);
       } catch (error) {
-        console.error('Error fetching FAQs:', error);
+        logger.error('Error fetching FAQs:', error);
         setError('حدث خطأ أثناء جلب الأسئلة الشائعة');
       } finally {
         setIsLoading(false);

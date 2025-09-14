@@ -309,7 +309,7 @@ async function fetchAllMessages() {
       return dateB - dateA; // ترتيب تنازلي
     });
   } catch (error) {
-    console.warn('Failed to fetch all messages, using fallback:', error);
+    logger.info('Failed to fetch all messages, using fallback:', error);
     // في حالة فشل الاستعلام، استخدم استعلام بسيط
     try {
       const messages = await getCollection('messages');
@@ -341,7 +341,7 @@ async function fetchUserMessages({ userId, email }) {
       return dateA - dateB;
     });
   } catch (error) {
-    console.warn('Failed to fetch user messages with index, falling back to simple query:', error);
+    logger.info('Failed to fetch user messages with index, falling back to simple query:', error);
     // في حالة فشل الاستعلام المعقد، استخدم استعلام بسيط
     try {
       const allMessages = await getCollection('messages');

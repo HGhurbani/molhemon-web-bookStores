@@ -17,6 +17,7 @@ import {
 import authManager from '@/lib/authManager.js';
 import { db } from '@/lib/firebase.js';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import logger from '@/lib/logger.js';
 
 const UserRoleManager = () => {
   const [users, setUsers] = useState([]);
@@ -56,7 +57,7 @@ const UserRoleManager = () => {
       
       setUsers(usersData);
     } catch (error) {
-      console.error('Error loading users:', error);
+      logger.error('Error loading users:', error);
       toast({
         title: 'خطأ في تحميل المستخدمين',
         description: error.message,
@@ -84,7 +85,7 @@ const UserRoleManager = () => {
         variant: 'default'
       });
     } catch (error) {
-      console.error('Error updating user role:', error);
+      logger.error('Error updating user role:', error);
       toast({
         title: 'خطأ في تحديث الدور',
         description: error.message,
@@ -108,7 +109,7 @@ const UserRoleManager = () => {
         variant: 'default'
       });
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logger.error('Error deleting user:', error);
       toast({
         title: 'خطأ في حذف المستخدم',
         description: error.message,
@@ -148,7 +149,7 @@ const UserRoleManager = () => {
         variant: 'default'
       });
     } catch (error) {
-      console.error('Error adding user:', error);
+      logger.error('Error adding user:', error);
       toast({
         title: 'خطأ في إضافة المستخدم',
         description: error.message,

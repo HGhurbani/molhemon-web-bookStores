@@ -28,6 +28,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import api from '@/lib/api.js';
+import logger from '@/lib/logger.js';
 
 const SettingsNavigation = ({ activeTab, setActiveTab }) => {
   const { t } = useTranslation();
@@ -1067,7 +1068,7 @@ const DashboardSettings = ({ settings, setSettings }) => {
       
       toast({ title: 'تم حفظ الإعدادات بنجاح!' });
     } catch (error) {
-      console.error('Error saving settings:', error);
+      logger.error('Error saving settings:', error);
       toast({ 
         title: 'خطأ في حفظ الإعدادات', 
         description: error.message,
