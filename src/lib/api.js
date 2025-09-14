@@ -10,6 +10,7 @@ import StoreSettingsService from './services/StoreSettingsService.js';
 import CustomerService from './services/CustomerService.js';
 import CartService from './services/CartService.js';
 import unifiedPaymentApi from './api/unifiedPaymentApi.js';
+import logger from './logger.js';
 
 // Firebase API هو الآن الخيار الوحيد مع Functions
 const api = {
@@ -257,11 +258,11 @@ const api = {
 
         // التحقق من وجود معرف الطلب
         if (!orderResult.order.id) {
-          console.error('API - Order ID is missing in result:', orderResult);
+          logger.error('API - Order ID is missing in result:', orderResult);
           throw new Error('فشل في الحصول على معرف الطلب من الخادم');
         }
 
-        console.log('API - Order result:', {
+        logger.debug('API - Order result:', {
           hasOrder: !!orderResult.order,
           orderId: orderResult.order.id,
           orderNumber: orderResult.order.orderNumber

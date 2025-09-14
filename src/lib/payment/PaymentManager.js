@@ -8,6 +8,7 @@ import { PayPalProvider } from './providers/PayPalProvider.js';
 import { TabbyProvider } from './providers/TabbyProvider.js';
 import { CashOnDeliveryProvider } from './providers/CashOnDeliveryProvider.js';
 import { UNIFIED_PAYMENT_STATUSES } from './providers/PaymentProvider.js';
+import logger from '../logger.js';
 
 export class PaymentManager {
   constructor() {
@@ -32,10 +33,10 @@ export class PaymentManager {
       
       this.isInitialized = true;
       
-      console.log('Payment Manager initialized successfully');
+      logger.info('Payment Manager initialized successfully');
       return { success: true };
     } catch (error) {
-      console.error('Payment Manager initialization failed:', error);
+      logger.error('Payment Manager initialization failed:', error);
       throw error;
     }
   }
@@ -90,9 +91,9 @@ export class PaymentManager {
     for (const [name, provider] of this.providers) {
       try {
         await provider.initialize();
-        console.log(`Provider ${name} initialized successfully`);
+        logger.info(`Provider ${name} initialized successfully`);
       } catch (error) {
-        console.error(`Provider ${name} initialization failed:`, error);
+        logger.error(`Provider ${name} initialization failed:`, error);
       }
     }
   }
@@ -151,7 +152,7 @@ export class PaymentManager {
 
       return await provider.testConnection();
     } catch (error) {
-      console.error(`Provider ${providerName} connection test failed:`, error);
+      logger.error(`Provider ${providerName} connection test failed:`, error);
       throw error;
     }
   }
@@ -191,7 +192,7 @@ export class PaymentManager {
 
       return result;
     } catch (error) {
-      console.error('Payment Intent creation failed:', error);
+      logger.error('Payment Intent creation failed:', error);
       throw error;
     }
   }
@@ -273,7 +274,7 @@ export class PaymentManager {
 
       return result;
     } catch (error) {
-      console.error('Payment confirmation failed:', error);
+      logger.error('Payment confirmation failed:', error);
       throw error;
     }
   }
@@ -294,7 +295,7 @@ export class PaymentManager {
 
       return await provider.cancelPayment(paymentIntentId);
     } catch (error) {
-      console.error('Payment cancellation failed:', error);
+      logger.error('Payment cancellation failed:', error);
       throw error;
     }
   }
@@ -315,7 +316,7 @@ export class PaymentManager {
 
       return await provider.refundPayment(paymentIntentId, amount, reason);
     } catch (error) {
-      console.error('Payment refund failed:', error);
+      logger.error('Payment refund failed:', error);
       throw error;
     }
   }
@@ -341,7 +342,7 @@ export class PaymentManager {
 
       return result;
     } catch (error) {
-      console.error('Webhook handling failed:', error);
+      logger.error('Webhook handling failed:', error);
       throw error;
     }
   }
@@ -362,7 +363,7 @@ export class PaymentManager {
 
       return await provider.getPaymentStatus(paymentIntentId);
     } catch (error) {
-      console.error('Payment status retrieval failed:', error);
+      logger.error('Payment status retrieval failed:', error);
       throw error;
     }
   }
@@ -412,7 +413,7 @@ export class PaymentManager {
 
       return await provider.createCustomer(customerData);
     } catch (error) {
-      console.error('Customer creation failed:', error);
+      logger.error('Customer creation failed:', error);
       throw error;
     }
   }
@@ -433,7 +434,7 @@ export class PaymentManager {
 
       return await provider.savePaymentMethod(customerId, paymentMethodData);
     } catch (error) {
-      console.error('Payment method saving failed:', error);
+      logger.error('Payment method saving failed:', error);
       throw error;
     }
   }
@@ -454,7 +455,7 @@ export class PaymentManager {
 
       return await provider.getCustomerPaymentMethods(customerId);
     } catch (error) {
-      console.error('Customer payment methods retrieval failed:', error);
+      logger.error('Customer payment methods retrieval failed:', error);
       throw error;
     }
   }
@@ -475,7 +476,7 @@ export class PaymentManager {
 
       return await provider.deletePaymentMethod(customerId, paymentMethodId);
     } catch (error) {
-      console.error('Payment method deletion failed:', error);
+      logger.error('Payment method deletion failed:', error);
       throw error;
     }
   }
@@ -578,7 +579,7 @@ export class PaymentManager {
       
       return { success: true };
     } catch (error) {
-      console.error('Settings update failed:', error);
+      logger.error('Settings update failed:', error);
       throw error;
     }
   }
@@ -600,7 +601,7 @@ export class PaymentManager {
 
       return stats;
     } catch (error) {
-      console.error('Payment stats retrieval failed:', error);
+      logger.error('Payment stats retrieval failed:', error);
       throw error;
     }
   }

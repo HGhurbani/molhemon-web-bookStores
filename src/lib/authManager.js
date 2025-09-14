@@ -1,10 +1,11 @@
 import { auth, db } from './firebase.js';
 import { toast } from '@/components/ui/use-toast.js';
 import { collection, doc, getDoc, setDoc, updateDoc, query, where, limit, getDocs } from 'firebase/firestore';
+import logger from './logger.js';
 
 // التحقق من صحة استيراد db
-console.log('DB imported:', db);
-console.log('DB type:', typeof db);
+logger.debug('DB imported:', db);
+logger.debug('DB type:', typeof db);
 
 class AuthManager {
   constructor() {
@@ -35,41 +36,41 @@ class AuthManager {
         this.isInitialized = true;
       }
     } catch (error) {
-      console.error('Error initializing auth manager:', error);
+      logger.error('Error initializing auth manager:', error);
     }
   }
 
   // تحميل دور المستخدم
   async loadUserRole(uid) {
     try {
-      console.log('loadUserRole called with uid:', uid);
-      console.log('db object:', db);
-      console.log('db type:', typeof db);
+      logger.debug('loadUserRole called with uid:', uid);
+      logger.debug('db object:', db);
+      logger.debug('db type:', typeof db);
       
       if (!db) {
-        console.error('Firebase db is not available');
+        logger.error('Firebase db is not available');
         this.userRole = 'user';
         return;
       }
       
-      console.log('Attempting to access users collection using v9 API...');
+      logger.debug('Attempting to access users collection using v9 API...');
       const userDocRef = doc(db, 'users', uid);
       const userDoc = await getDoc(userDocRef);
-      console.log('User document retrieved:', userDoc.exists());
+      logger.debug('User document retrieved:', userDoc.exists());
       
       if (userDoc.exists()) {
         this.userRole = userDoc.data().role || 'user';
-        console.log('User role set to:', this.userRole);
+        logger.debug('User role set to:', this.userRole);
       } else {
         // إنشاء مستخدم جديد بدور user
-        console.log('User document does not exist, creating new user...');
+        logger.debug('User document does not exist, creating new user...');
         await this.createUserDocument(uid);
         this.userRole = 'user';
       }
     } catch (error) {
-      console.error('Error loading user role:', error);
-      console.error('Error details:', error.message);
-      console.error('Error stack:', error.stack);
+      logger.error('Error loading user role:', error);
+      logger.error('Error details:', error.message);
+      logger.error('Error stack:', error.stack);
       this.userRole = 'user';
     }
   }
@@ -78,7 +79,7 @@ class AuthManager {
   async createUserDocument(uid) {
     try {
       if (!db) {
-        console.error('Firebase db is not available for creating user document');
+        logger.error('Firebase db is not available for creating user document');
         return;
       }
       
@@ -93,9 +94,9 @@ class AuthManager {
 
       const userDocRef = doc(db, 'users', uid);
       await setDoc(userDocRef, userData);
-      console.log('User document created successfully');
+      logger.info('User document created successfully');
     } catch (error) {
-      console.error('Error creating user document:', error);
+      logger.error('Error creating user document:', error);
     }
   }
 
@@ -141,7 +142,7 @@ class AuthManager {
   async createDefaultAdmin() {
     try {
       if (!db) {
-        console.error('Firebase db is not available for creating default admin');
+        logger.error('Firebase db is not available for creating default admin');
         return;
       }
       
@@ -151,7 +152,7 @@ class AuthManager {
       const adminQuerySnapshot = await getDocs(adminQuery);
 
       if (!adminQuerySnapshot.empty) {
-        console.log('Admin user already exists');
+        logger.info('Admin user already exists');
         return;
       }
 
@@ -168,7 +169,7 @@ class AuthManager {
 
       const adminDocRef = doc(db, 'users', 'default-admin');
       await setDoc(adminDocRef, adminData);
-      console.log('Default admin user created');
+      logger.info('Default admin user created');
       
       toast({
         title: 'تم إنشاء مدير افتراضي',
@@ -176,7 +177,7 @@ class AuthManager {
         variant: 'default'
       });
     } catch (error) {
-      console.error('Error creating default admin:', error);
+      logger.error('Error creating default admin:', error);
     }
   }
 
@@ -184,7 +185,7 @@ class AuthManager {
   async autoLoginAsAdmin() {
     try {
       if (!db) {
-        console.error('Firebase db is not available for auto login as admin');
+        logger.error('Firebase db is not available for auto login as admin');
         return;
       }
       
@@ -194,7 +195,7 @@ class AuthManager {
       const adminQuerySnapshot = await getDocs(adminQuery);
 
       if (adminQuerySnapshot.empty) {
-        console.log('No admin user found, creating default admin');
+        logger.debug('No admin user found, creating default admin');
         await this.createDefaultAdmin();
         return;
       }
@@ -204,7 +205,7 @@ class AuthManager {
       
       // إذا كان المستخدم الحالي ليس مديراً، قم بتسجيل دخول كمدير
       if (!this.isManager()) {
-        console.log('Current user is not admin, switching to admin mode');
+        logger.debug('Current user is not admin, switching to admin mode');
         
         // إنشاء مستخدم وهمي للمدير
         const mockUser = {
@@ -224,7 +225,7 @@ class AuthManager {
         });
       }
     } catch (error) {
-      console.error('Error in auto login as admin:', error);
+      logger.error('Error in auto login as admin:', error);
     }
   }
 
@@ -236,7 +237,7 @@ class AuthManager {
       }
 
       if (!db) {
-        console.error('Firebase db is not available for promoting user');
+        logger.error('Firebase db is not available for promoting user');
         return;
       }
 
@@ -252,7 +253,7 @@ class AuthManager {
         variant: 'default'
       });
     } catch (error) {
-      console.error('Error promoting user:', error);
+      logger.error('Error promoting user:', error);
       toast({
         title: 'خطأ في ترقية المستخدم',
         description: error.message,

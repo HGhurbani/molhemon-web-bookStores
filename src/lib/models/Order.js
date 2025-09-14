@@ -3,6 +3,7 @@
  */
 
 import { OrderItem } from './OrderItem.js';
+import logger from '../logger.js';
 
 export class Order {
   constructor(data = {}) {
@@ -40,14 +41,14 @@ export class Order {
     this.totalAmount = data.totalAmount || data.total || 0;
     this.currency = data.currency || 'SAR';
     
-    console.log('Order constructor - Received data:', {
+    logger.debug('Order constructor - Received data:', {
       subtotal: data.subtotal,
       shippingCost: data.shippingCost,
       taxAmount: data.taxAmount,
       total: data.total,
       totalAmount: data.totalAmount
     });
-    console.log('Order constructor - Set values:', {
+    logger.debug('Order constructor - Set values:', {
       subtotal: this.subtotal,
       shippingCost: this.shippingCost,
       taxAmount: this.taxAmount,
@@ -169,7 +170,7 @@ export class Order {
     // إضافة total للتوافق
     this.total = this.totalAmount;
     
-    console.log('Order calculateTotal - Final values:', {
+    logger.debug('Order calculateTotal - Final values:', {
       subtotal: this.subtotal,
       shippingCost: this.shippingCost,
       taxAmount: this.taxAmount,

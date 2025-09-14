@@ -3,6 +3,8 @@
  * Payment Provider Interface
  */
 
+import logger from '../../logger.js';
+
 export class PaymentProvider {
   constructor(config = {}) {
     this.config = config;
@@ -158,7 +160,7 @@ export class PaymentProvider {
    * تسجيل العمليات
    */
   logOperation(operation, data) {
-    console.log(`[${this.providerName}] ${operation}:`, data);
+    logger.debug(`[${this.providerName}] ${operation}:`, data);
   }
 }
 

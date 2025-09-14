@@ -1,25 +1,26 @@
 import { db } from './firebase';
 import { collection, getDocs, addDoc, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import logger from './logger.js';
 
 // دالة اختبار اتصال Firebase
 export async function testFirebaseConnection() {
   try {
-    console.log('🔍 اختبار اتصال Firebase...');
+    logger.info('🔍 اختبار اتصال Firebase...');
     
     // اختبار الاتصال الأساسي
     if (!db) {
       throw new Error('Firebase DB غير متصل');
     }
     
-    console.log('✅ Firebase DB متصل بنجاح');
+    logger.info('✅ Firebase DB متصل بنجاح');
     
     // اختبار قراءة مجموعة الكتب
-    console.log('📚 اختبار قراءة مجموعة الكتب...');
+    logger.info('📚 اختبار قراءة مجموعة الكتب...');
     const booksSnapshot = await getDocs(collection(db, 'books'));
-    console.log(`✅ تم قراءة ${booksSnapshot.size} كتاب بنجاح`);
+    logger.info(`✅ تم قراءة ${booksSnapshot.size} كتاب بنجاح`);
     
     // اختبار إضافة كتاب تجريبي
-    console.log('➕ اختبار إضافة كتاب تجريبي...');
+    logger.info('➕ اختبار إضافة كتاب تجريبي...');
     const testBook = {
       title: 'كتاب اختبار',
       author: 'مؤلف اختبار',
@@ -31,28 +32,28 @@ export async function testFirebaseConnection() {
     };
     
     const docRef = await addDoc(collection(db, 'books'), testBook);
-    console.log(`✅ تم إضافة كتاب تجريبي بنجاح، المعرف: ${docRef.id}`);
+    logger.info(`✅ تم إضافة كتاب تجريبي بنجاح، المعرف: ${docRef.id}`);
     
     // اختبار قراءة الكتاب المضاف
-    console.log('📖 اختبار قراءة الكتاب المضاف...');
+    logger.info('📖 اختبار قراءة الكتاب المضاف...');
     const bookDoc = await getDoc(doc(db, 'books', docRef.id));
     if (bookDoc.exists()) {
-      console.log('✅ تم قراءة الكتاب المضاف بنجاح');
-      console.log('📋 بيانات الكتاب:', bookDoc.data());
+      logger.info('✅ تم قراءة الكتاب المضاف بنجاح');
+      logger.info('📋 بيانات الكتاب:', bookDoc.data());
     } else {
       throw new Error('فشل في قراءة الكتاب المضاف');
     }
     
     // حذف الكتاب التجريبي
-    console.log('🗑️ حذف الكتاب التجريبي...');
+    logger.info('🗑️ حذف الكتاب التجريبي...');
     await deleteDoc(doc(db, 'books', docRef.id));
-    console.log('✅ تم حذف الكتاب التجريبي بنجاح');
+    logger.info('✅ تم حذف الكتاب التجريبي بنجاح');
     
-    console.log('🎉 جميع اختبارات Firebase نجحت!');
+    logger.info('🎉 جميع اختبارات Firebase نجحت!');
     return { success: true, message: 'Firebase يعمل بشكل صحيح' };
     
   } catch (error) {
-    console.error('❌ خطأ في اختبار Firebase:', error);
+    logger.error('❌ خطأ في اختبار Firebase:', error);
     
     let errorMessage = 'خطأ غير معروف';
     
@@ -80,7 +81,7 @@ export async function testFirebaseConnection() {
 // دالة اختبار إضافة كتاب
 export async function testAddBook(bookData) {
   try {
-    console.log('➕ اختبار إضافة كتاب:', bookData);
+    logger.info('➕ اختبار إضافة كتاب:', bookData);
     
     if (!db) {
       throw new Error('Firebase DB غير متصل');
@@ -98,7 +99,7 @@ export async function testAddBook(bookData) {
       updatedAt: new Date()
     });
     
-    console.log(`✅ تم إضافة الكتاب بنجاح، المعرف: ${docRef.id}`);
+    logger.info(`✅ تم إضافة الكتاب بنجاح، المعرف: ${docRef.id}`);
     
     // قراءة الكتاب المضاف
     const bookDoc = await getDoc(doc(db, 'books', docRef.id));
@@ -111,7 +112,7 @@ export async function testAddBook(bookData) {
     };
     
   } catch (error) {
-    console.error('❌ خطأ في إضافة الكتاب:', error);
+    logger.error('❌ خطأ في إضافة الكتاب:', error);
     
     let errorMessage = 'خطأ غير معروف';
     

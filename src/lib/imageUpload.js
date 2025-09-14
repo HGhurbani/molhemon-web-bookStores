@@ -1,5 +1,6 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebase';
+import logger from './logger.js';
 
 // دالة رفع صورة للمدونة
 export const uploadBlogImage = async (file, blogId) => {
@@ -47,7 +48,7 @@ export const uploadBlogImage = async (file, blogId) => {
       type: file.type
     };
   } catch (error) {
-    console.error('خطأ في رفع الصورة:', error);
+    logger.error('خطأ في رفع الصورة:', error);
     
     // رسائل خطأ أكثر تفصيلاً
     if (error.code === 'storage/unauthorized') {
@@ -74,7 +75,7 @@ export const deleteBlogImage = async (imagePath) => {
     
     return true;
   } catch (error) {
-    console.error('خطأ في حذف الصورة:', error);
+    logger.error('خطأ في حذف الصورة:', error);
     
     if (error.code === 'storage/object-not-found') {
       console.warn('الصورة غير موجودة في التخزين');
@@ -97,7 +98,7 @@ export const uploadMultipleBlogImages = async (files, blogId) => {
     
     return results;
   } catch (error) {
-    console.error('خطأ في رفع الصور المتعددة:', error);
+    logger.error('خطأ في رفع الصور المتعددة:', error);
     throw error;
   }
 };

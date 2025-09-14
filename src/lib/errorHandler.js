@@ -1,4 +1,6 @@
 // Error Handler System
+import logger from './logger.js';
+
 class ErrorHandler {
   constructor() {
     this.errorTypes = {
@@ -209,7 +211,7 @@ class ErrorHandler {
   // تسجيل الأخطاء
   logError(errorObject) {
     if (import.meta.env.VITE_APP_ENV === 'development') {
-      console.error('Error Handler:', errorObject);
+      logger.error('Error Handler:', errorObject);
     }
     
     // يمكن إضافة إرسال الأخطاء إلى خدمة مراقبة الأخطاء هنا
