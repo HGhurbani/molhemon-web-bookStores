@@ -40,6 +40,7 @@ import unifiedPaymentApi from '@/lib/api/unifiedPaymentApi.js';
 import InvoiceGenerator from '@/components/InvoiceGenerator.jsx';
 import { db } from '@/lib/firebase.js';
 import { collection, onSnapshot } from 'firebase/firestore';
+import logger from '@/lib/logger.js';
 
 const OrdersManagementPage = () => {
   const [orders, setOrders] = useState([]);
@@ -81,7 +82,7 @@ const OrdersManagementPage = () => {
       ordersUnsub.current = loadOrders();
       paymentsUnsub.current = loadPayments();
     } catch (err) {
-      console.error('Failed to initialize system:', err);
+      logger.error('Failed to initialize system:', err);
       setError('فشل في تهيئة النظام');
       toast({
         title: 'فشل في تهيئة النظام',
@@ -111,7 +112,7 @@ const OrdersManagementPage = () => {
           setError(null);
         },
         (err) => {
-          console.error('Error loading orders:', err);
+          logger.error('Error loading orders:', err);
           setError('فشل في تحميل الطلبات');
           toast({
             title: 'فشل في تحميل الطلبات',
@@ -121,7 +122,7 @@ const OrdersManagementPage = () => {
         }
       );
     } catch (err) {
-      console.error('Error loading orders:', err);
+      logger.error('Error loading orders:', err);
       setError('فشل في تحميل الطلبات');
     }
   };
@@ -135,7 +136,7 @@ const OrdersManagementPage = () => {
           setPayments(data);
         },
         (err) => {
-          console.error('Failed to load payments:', err);
+          logger.error('Failed to load payments:', err);
           toast({
             title: 'فشل في تحميل المدفوعات',
             description: err.message,
@@ -144,7 +145,7 @@ const OrdersManagementPage = () => {
         }
       );
     } catch (err) {
-      console.error('Failed to load payments:', err);
+      logger.error('Failed to load payments:', err);
     }
   };
   useEffect(() => {
@@ -187,7 +188,7 @@ const OrdersManagementPage = () => {
       
       // سيتم تحديث الإحصائيات تلقائيًا
     } catch (error) {
-      console.error('Failed to update order status:', error);
+      logger.error('Failed to update order status:', error);
       toast({
         title: 'فشل في تحديث حالة الطلب',
         description: error.message,
@@ -243,7 +244,7 @@ const OrdersManagementPage = () => {
         throw new Error(result.message || 'فشل في تحديث مرحلة الطلب');
       }
     } catch (error) {
-      console.error('Failed to update order stage:', error);
+      logger.error('Failed to update order stage:', error);
       toast({
         title: 'فشل في تحديث مرحلة الطلب',
         description: error.message,
@@ -298,7 +299,7 @@ const OrdersManagementPage = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Failed to deliver digital products:', error);
+      logger.error('Failed to deliver digital products:', error);
       toast({
         title: 'فشل في تسليم المنتجات الرقمية',
         description: error.message,
@@ -313,7 +314,7 @@ const OrdersManagementPage = () => {
       const result = await api.products.generateDownloadUrl(productId, orderId);
       return result.downloadUrl || `/download/${productId}?order=${orderId}`;
     } catch (error) {
-      console.error('Failed to generate download URL:', error);
+      logger.error('Failed to generate download URL:', error);
       return `/download/${productId}?order=${orderId}`;
     }
   };
@@ -355,7 +356,7 @@ const OrdersManagementPage = () => {
       }
       
     } catch (error) {
-      console.error('Failed to load order details:', error);
+      logger.error('Failed to load order details:', error);
       toast({
         title: 'فشل في تحميل تفاصيل الطلب',
         description: error.message,
@@ -404,7 +405,7 @@ const OrdersManagementPage = () => {
         throw new Error(result.message || 'فشل في استرداد المبلغ');
       }
     } catch (error) {
-      console.error('Failed to refund payment:', error);
+      logger.error('Failed to refund payment:', error);
       toast({
         title: 'فشل في استرداد المبلغ',
         description: error.message,

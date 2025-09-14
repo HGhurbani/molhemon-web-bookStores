@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { auth, db } from '@/lib/firebase.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import logger from '@/lib/logger.js';
 
 const RequireAdmin = ({ children }) => {
   const [loading, setLoading] = React.useState(true);
@@ -21,7 +22,7 @@ const RequireAdmin = ({ children }) => {
             setIsAdmin(false);
           }
         } catch (err) {
-          console.error('Error checking admin role:', err);
+          logger.error('Error checking admin role:', err);
           setIsAdmin(false);
         }
       } else {

@@ -3,6 +3,7 @@ import { errorHandler } from '@/lib/errorHandler';
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import logger from '@/lib/logger.js';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -77,7 +78,7 @@ const ErrorFallback = ({ error, errorInfo, errorId, onReset }) => {
       timestamp: new Date().toISOString()
     };
     
-    console.error('Error Report:', errorReport);
+    logger.error('Error Report:', errorReport);
     
     // يمكن إرسال التقرير إلى الخادم أو خدمة مراقبة الأخطاء
     alert('تم تسجيل الخطأ. سيتم مراجعته من قبل فريق التطوير.');

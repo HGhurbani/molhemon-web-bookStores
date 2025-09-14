@@ -12,6 +12,7 @@ import {
   User
 } from 'lucide-react';
 import firebaseApi from '@/lib/firebaseApi';
+import logger from '@/lib/logger.js';
 
 const TeamPage = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -26,7 +27,7 @@ const TeamPage = () => {
         const members = await firebaseApi.getTeamMembers();
         setTeamMembers(members);
       } catch (error) {
-        console.error('Error fetching team members:', error);
+        logger.error('Error fetching team members:', error);
         setError('حدث خطأ أثناء جلب أعضاء الفريق');
       } finally {
         setIsLoading(false);

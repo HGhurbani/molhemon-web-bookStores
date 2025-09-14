@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast.js";
 import firebaseApi from '@/lib/firebaseApi';
+import logger from '@/lib/logger.js';
 
 const BlogDetailsPage = () => {
   const { id } = useParams();
@@ -62,11 +63,11 @@ const BlogDetailsPage = () => {
           // زيادة عدد المشاهدات
           incrementViewCount(articleData.id);
         } else {
-          console.error('Article not found');
+          logger.error('Article not found');
           setError('المقال غير موجود');
         }
       } catch (error) {
-        console.error('Error fetching article:', error);
+        logger.error('Error fetching article:', error);
         setError('حدث خطأ أثناء جلب المقال');
       } finally {
         setIsLoading(false);
@@ -86,7 +87,7 @@ const BlogDetailsPage = () => {
       });
       setViewCount((article?.viewCount || 0) + 1);
     } catch (error) {
-      console.error('Error updating view count:', error);
+      logger.error('Error updating view count:', error);
     }
   };
 

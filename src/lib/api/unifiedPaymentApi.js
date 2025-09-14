@@ -414,7 +414,7 @@ class UnifiedPaymentAPI {
         await firebaseApi.default.updateSettings(updatedFirebaseSettings);
         logger.info('Payment settings saved to Firebase successfully');
       } catch (firebaseError) {
-        console.warn('Could not save to Firebase, but settings are saved locally:', firebaseError);
+        logger.info('Could not save to Firebase, but settings are saved locally:', firebaseError);
       }
 
       return { success: true };

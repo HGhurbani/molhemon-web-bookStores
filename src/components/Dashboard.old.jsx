@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
 import { paymentMethods as paymentMethodTemplates } from '@/data/siteData.js';
+import logger from '@/lib/logger.js';
 import {
   BookOpen,
   Users,
@@ -1865,7 +1866,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, customer
           const r = await api.getAllRatings();
           setRatings(r);
         } catch (err) {
-          console.error('Failed to load ratings', err);
+          logger.error('Failed to load ratings', err);
         }
       })();
     }

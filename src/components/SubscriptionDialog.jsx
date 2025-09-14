@@ -7,6 +7,7 @@ import FormattedPrice from './FormattedPrice.jsx';
 import api from '@/lib/api.js';
 import { toast } from '@/components/ui/use-toast.js';
 import { useNavigate } from 'react-router-dom';
+import logger from '@/lib/logger.js';
 
 const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
   const [plans, setPlans] = useState([]);
@@ -17,7 +18,7 @@ const SubscriptionDialog = ({ open, onOpenChange, book, onAddToCart }) => {
       try {
         setPlans(await api.getPlans({ type: 'membership' }));
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     })();
   }, []);

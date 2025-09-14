@@ -12,6 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import firebaseApi from '@/lib/firebaseApi';
+import logger from '@/lib/logger.js';
 
 const DistributorsPage = () => {
   const [selectedRegion, setSelectedRegion] = useState('all');
@@ -28,7 +29,7 @@ const DistributorsPage = () => {
         const distributorsData = await firebaseApi.getDistributors();
         setDistributors(distributorsData);
       } catch (error) {
-        console.error('Error fetching distributors:', error);
+        logger.error('Error fetching distributors:', error);
         setError('حدث خطأ أثناء جلب الموزعين');
       } finally {
         setIsLoading(false);

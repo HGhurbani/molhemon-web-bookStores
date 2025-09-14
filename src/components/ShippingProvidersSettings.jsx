@@ -18,6 +18,7 @@ import {
   DollarSign,
   Clock
 } from 'lucide-react';
+import logger from '@/lib/logger.js';
 
 const ShippingProvidersSettings = () => {
   const { t } = useTranslation();
@@ -159,7 +160,7 @@ const ShippingProvidersSettings = () => {
       
       setProviders(mockProviders);
     } catch (error) {
-      console.error('Failed to load shipping providers:', error);
+      logger.error('Failed to load shipping providers:', error);
       toast({
         title: 'فشل في تحميل مزودي الشحن',
         description: error.message,
@@ -193,7 +194,7 @@ const ShippingProvidersSettings = () => {
       setEditingProvider(null);
       resetForm();
     } catch (error) {
-      console.error('Failed to save provider settings:', error);
+      logger.error('Failed to save provider settings:', error);
       toast({
         title: 'فشل في حفظ الإعدادات',
         description: error.message,
@@ -241,7 +242,7 @@ const ShippingProvidersSettings = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Failed to disconnect provider:', error);
+      logger.error('Failed to disconnect provider:', error);
       toast({
         title: 'فشل في إلغاء الربط',
         description: error.message,

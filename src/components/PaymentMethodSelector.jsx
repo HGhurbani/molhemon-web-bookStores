@@ -16,6 +16,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import api from '@/lib/api.js';
+import logger from '@/lib/logger.js';
 
 const PaymentMethodSelector = ({ 
   selectedMethod, 
@@ -110,7 +111,7 @@ const PaymentMethodSelector = ({
 
       setAvailableMethods(methods);
     } catch (error) {
-      console.error('Error loading payment methods:', error);
+      logger.error('Error loading payment methods:', error);
       toast({
         title: 'خطأ في تحميل طرق الدفع',
         description: error.message,

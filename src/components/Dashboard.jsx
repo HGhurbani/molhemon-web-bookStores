@@ -68,6 +68,7 @@ import DashboardLanguages from './DashboardLanguages.jsx';
 import DashboardAnalytics from './DashboardAnalytics.jsx';
 import DashboardSettings from './DashboardSettings.jsx';
 import DataTable from './DataTable.jsx';
+import logger from '@/lib/logger.js';
 
 import { Link } from 'react-router-dom';
 import firebaseApi from '../lib/firebaseApi';
@@ -2022,7 +2023,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
         try {
           ordersData = await api.orders.getAll();
         } catch (apiError) {
-          console.error('API error, trying direct Firebase call:', apiError);
+          logger.error('API error, trying direct Firebase call:', apiError);
           // جرب جلب البيانات مباشرة من Firebase
           ordersData = await firebaseApi.getOrders();
           
@@ -2030,7 +2031,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
           if (Array.isArray(ordersData)) {
             ordersData = ordersData.map(order => {
               if (!order.id && order.orderNumber) {
-                console.warn('Order ID missing in Firebase data, using orderNumber:', order.orderNumber);
+                logger.info('Order ID missing in Firebase data, using orderNumber:', order.orderNumber);
                 order.id = order.orderNumber;
               }
               return order;
@@ -2057,17 +2058,17 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
         // التأكد من وجود معرفات للطلبات في المصفوفة النهائية
         ordersArray = ordersArray.map(order => {
           if (!order.id && order.orderNumber) {
-            console.warn('Order ID missing in final array, using orderNumber:', order.orderNumber);
+            logger.info('Order ID missing in final array, using orderNumber:', order.orderNumber);
             order.id = order.orderNumber;
           }
           return order;
         });
         
-        console.log('Final orders array:', ordersArray);
+        logger.debug('Final orders array:', ordersArray);
         
         // إذا لم توجد طلبات، أضف طلب تجريبي للاختبار
         if (ordersArray.length === 0) {
-          console.log('No orders found, creating sample order for testing...');
+          logger.debug('No orders found, creating sample order for testing...');
           const sampleOrder = {
             id: 'sample-order-1',
             orderNumber: 'ORD-001',
@@ -2104,12 +2105,12 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
             updatedAt: new Date().toISOString()
           };
           ordersArray = [sampleOrder];
-          console.log('Added sample order:', sampleOrder);
+          logger.debug('Added sample order:', sampleOrder);
         }
         
         setOrders(ordersArray);
       } catch (error) {
-        console.error('Error loading orders:', error);
+        logger.error('Error loading orders:', error);
         if (error.code === 'permission-denied') {
           authManager.showPermissionError('الطلبات');
         }
@@ -2124,7 +2125,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
   const handleUpdateStatus = async (id, status, notes = '') => {
     // التحقق من صحة المعاملات
     if (!id) {
-      console.error('Order ID is required for status update');
+      logger.error('Order ID is required for status update');
       toast({ 
         title: 'خطأ في تحديث حالة الطلب', 
         description: 'معرف الطلب مطلوب',
@@ -2134,7 +2135,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
     }
     
     if (!status) {
-      console.error('Status is required for status update');
+      logger.error('Status is required for status update');
       toast({ 
         title: 'خطأ في تحديث حالة الطلب', 
         description: 'حالة الطلب مطلوبة',
@@ -2144,7 +2145,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
     }
     
     try {
-      console.log('Updating order status:', { id, status, notes });
+      logger.debug('Updating order status:', { id, status, notes });
       const updatedOrder = await api.orders.updateStatus(id, status, notes);
       const currentOrders = Array.isArray(orders) ? orders : [];
       setOrders(currentOrders.map(o => o.id === id ? updatedOrder : o));
@@ -2156,7 +2157,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
         type: 'success'
       });
     } catch (e) {
-      console.error('Error updating order status:', e);
+      logger.error('Error updating order status:', e);
       toast({ 
         title: 'خطأ في تحديث حالة الطلب', 
         description: e.message || 'حدث خطأ غير متوقع',
@@ -2170,7 +2171,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
     try {
       // إذا كان المعرف فارغ، استخدم orderNumber للبحث
       if (!id) {
-        console.warn('Order ID is missing for deletion');
+        logger.info('Order ID is missing for deletion');
         toast({ title: 'لا يمكن حذف الطلب - معرف الطلب غير موجود', variant: 'destructive' });
         return;
       }
@@ -2184,7 +2185,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
       }
       toast({ title: 'تم حذف الطلب بنجاح' });
     } catch (e) {
-      console.error('Error deleting order:', e);
+      logger.error('Error deleting order:', e);
       toast({ title: 'حدث خطأ أثناء الحذف. حاول مجدداً.', variant: 'destructive' });
     }
   };
@@ -2192,7 +2193,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
   const handleViewOrder = (order) => {
     // إذا لم يكن هناك معرف، استخدم orderNumber كمعرف مؤقت
     if (!order.id) {
-      console.warn('Order ID is missing, using orderNumber as fallback:', order.orderNumber);
+      logger.info('Order ID is missing, using orderNumber as fallback:', order.orderNumber);
       order.id = order.orderNumber || `temp-${Date.now()}`;
     }
     
@@ -2326,7 +2327,7 @@ const DashboardOrders = ({ orders, setOrders, books = [] }) => {
           if (isNaN(date.getTime())) return 'غير محدد';
           return date.toLocaleDateString('ar-SA');
         } catch (error) {
-          console.error('Error formatting date in table:', error, 'Value:', dateValue);
+          logger.error('Error formatting date in table:', error, 'Value:', dateValue);
           return 'غير محدد';
         }
       }
@@ -2587,9 +2588,9 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
   const [isUpdating, setIsUpdating] = useState(false);
 
   // تسجيل بيانات الطلب للتأكد من وجود المعرف
-  console.log('OrderDetailsView - Order data:', order);
-  console.log('OrderDetailsView - Order ID:', order.id);
-  console.log('OrderDetailsView - Order keys:', Object.keys(order));
+  logger.debug('OrderDetailsView - Order data:', order);
+  logger.debug('OrderDetailsView - Order ID:', order.id);
+  logger.debug('OrderDetailsView - Order keys:', Object.keys(order));
 
   // دالة مساعدة لتنسيق التواريخ
   const formatDate = (dateValue) => {
@@ -2622,7 +2623,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
         minute: '2-digit'
       });
     } catch (error) {
-      console.error('Error formatting date:', error, 'Value:', dateValue);
+      logger.error('Error formatting date:', error, 'Value:', dateValue);
       return 'غير محدد';
     }
   };
@@ -2641,7 +2642,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
     
     // التحقق من وجود معرف الطلب
     if (!order.id) {
-      console.error('Order ID is missing:', order);
+      logger.error('Order ID is missing:', order);
       toast({ 
         title: 'خطأ في تحديث حالة الطلب', 
         description: 'معرف الطلب غير موجود',
@@ -2652,7 +2653,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
     
     setIsUpdating(true);
     try {
-      console.log('Updating order status:', { orderId: order.id, status: newStatus, notes: statusNotes });
+      logger.debug('Updating order status:', { orderId: order.id, status: newStatus, notes: statusNotes });
       await onUpdateStatus(order.id, newStatus, statusNotes);
       setStatusNotes('');
       toast({ 
@@ -2660,7 +2661,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
         type: 'success'
       });
     } catch (error) {
-      console.error('Error updating status:', error);
+      logger.error('Error updating status:', error);
       toast({ 
         title: 'خطأ في تحديث حالة الطلب', 
         description: error.message || 'حدث خطأ غير متوقع',
@@ -2924,7 +2925,7 @@ const OrderDetailsView = ({ order, onBack, onUpdateStatus, onDelete, books = [] 
                   {order.items && Array.isArray(order.items) && order.items.length > 0 ? order.items.map((item, index) => {
                     // البحث عن تفاصيل المنتج من قائمة الكتب
                     const productDetails = books.find(book => book.id === item.productId);
-                    console.log('Product details found:', productDetails);
+                    logger.debug('Product details found:', productDetails);
                     
                     // استخدام تفاصيل المنتج إذا كانت متاحة
                     const displayTitle = item.title || item.productName || productDetails?.title || productDetails?.name || 'منتج غير محدد';
@@ -3443,7 +3444,7 @@ const DashboardPayments = ({ payments, setPayments }) => {
           const firebasePayments = await firebaseApi.getPayments();
           setPayments(firebasePayments);
         } catch (error) {
-          console.error('Error loading payments:', error);
+          logger.error('Error loading payments:', error);
           if (error.code === 'permission-denied') {
             authManager.showPermissionError('المدفوعات');
           }
@@ -3661,7 +3662,7 @@ const DashboardPaymentMethods = ({ paymentMethods, setPaymentMethods }) => {
           const firebasePaymentMethods = await firebaseApi.getPaymentMethods();
           setPaymentMethods(firebasePaymentMethods);
         } catch (error) {
-          console.error('Error loading payment methods:', error);
+          logger.error('Error loading payment methods:', error);
           if (error.code === 'permission-denied') {
             authManager.showPermissionError('طرق الدفع');
           }
@@ -4900,7 +4901,7 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
         const newBook = await api.addBook(data);
         setBooks((prev) => [newBook, ...prev]);
       } catch (err) {
-        console.error('Import error', err);
+        logger.error('Import error', err);
       }
     }
     toast({ title: 'تم الاستيراد بنجاح!' });
@@ -5330,7 +5331,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
           isLoading: false
         });
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        logger.error('Error fetching dashboard data:', error);
         setStats(prev => ({ ...prev, isLoading: false }));
       }
     };
@@ -5371,7 +5372,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       // تحديث قائمة المقالات
       fetchBlogPosts();
     } catch (error) {
-      console.error('Error saving blog post:', error);
+      logger.error('Error saving blog post:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حفظ المقال",
@@ -5410,7 +5411,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       // تحديث قائمة الأسئلة الشائعة
       fetchFaqs();
     } catch (error) {
-      console.error('Error saving FAQ:', error);
+      logger.error('Error saving FAQ:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حفظ السؤال الشائع",
@@ -5458,7 +5459,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       // تحديث قائمة الموزعين
       fetchDistributors();
     } catch (error) {
-      console.error('Error saving distributor:', error);
+      logger.error('Error saving distributor:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حفظ الموزع",
@@ -5499,7 +5500,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       // تحديث قائمة أعضاء الفريق
       fetchTeamMembers();
     } catch (error) {
-      console.error('Error saving team member:', error);
+      logger.error('Error saving team member:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حفظ عضو الفريق",
@@ -5514,7 +5515,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const posts = await firebaseApi.getBlogPosts();
       setBlogPosts(posts);
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
+      logger.error('Error fetching blog posts:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء جلب المقالات",
@@ -5528,7 +5529,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const faqs = await firebaseApi.getFaqs();
       setFaqs(faqs);
     } catch (error) {
-      console.error('Error fetching FAQs:', error);
+      logger.error('Error fetching FAQs:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء جلب الأسئلة الشائعة",
@@ -5542,7 +5543,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const distributors = await firebaseApi.getDistributors();
       setDistributors(distributors);
     } catch (error) {
-      console.error('Error fetching distributors:', error);
+      logger.error('Error fetching distributors:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء جلب الموزعين",
@@ -5556,7 +5557,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const members = await firebaseApi.getTeamMembers();
       setTeamMembers(members);
     } catch (error) {
-      console.error('Error fetching team members:', error);
+      logger.error('Error fetching team members:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء جلب أعضاء الفريق",
@@ -5570,7 +5571,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const notes = await firebaseApi.getCollection('notifications');
       setNotifications(notes);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', error);
       toast({
         title: "خطأ",
         description: "فشل جلب الإشعارات",
@@ -5590,7 +5591,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         });
         fetchBlogPosts();
       } catch (error) {
-        console.error('Error deleting blog post:', error);
+        logger.error('Error deleting blog post:', error);
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء حذف المقال",
@@ -5610,7 +5611,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         });
         fetchFaqs();
       } catch (error) {
-        console.error('Error deleting FAQ:', error);
+        logger.error('Error deleting FAQ:', error);
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء حذف السؤال الشائع",
@@ -5630,7 +5631,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         });
         fetchDistributors();
       } catch (error) {
-        console.error('Error deleting distributor:', error);
+        logger.error('Error deleting distributor:', error);
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء حذف الموزع",
@@ -5650,7 +5651,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         });
         fetchTeamMembers();
       } catch (error) {
-        console.error('Error deleting team member:', error);
+        logger.error('Error deleting team member:', error);
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء حذف عضو الفريق",
@@ -5719,7 +5720,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
           const r = await api.getAllRatings();
           setRatings(r);
         } catch (err) {
-          console.error('Failed to load ratings', err);
+          logger.error('Failed to load ratings', err);
         }
       })();
     }
@@ -5752,7 +5753,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const requests = await firebaseApi.getDesignRequests();
       setDesignRequests(requests);
     } catch (error) {
-      console.error('Error fetching design requests:', error);
+      logger.error('Error fetching design requests:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في جلب طلبات التصميم',
@@ -5770,7 +5771,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       });
       fetchDesignRequests();
     } catch (error) {
-      console.error('Error updating design request status:', error);
+      logger.error('Error updating design request status:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في تحديث حالة الطلب',
@@ -5790,7 +5791,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       });
       fetchDesignRequests();
     } catch (error) {
-      console.error('Error deleting design request:', error);
+      logger.error('Error deleting design request:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في حذف الطلب',
@@ -5838,7 +5839,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       const requests = await firebaseApi.getPublishingRequests();
       setPublishingRequests(requests);
     } catch (error) {
-      console.error('Error fetching publishing requests:', error);
+      logger.error('Error fetching publishing requests:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في جلب طلبات النشر',
@@ -5856,7 +5857,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       });
       fetchPublishingRequests();
     } catch (error) {
-      console.error('Error updating publishing request status:', error);
+      logger.error('Error updating publishing request status:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في تحديث حالة الطلب',
@@ -5876,7 +5877,7 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       });
       fetchPublishingRequests();
     } catch (error) {
-      console.error('Error deleting publishing request:', error);
+      logger.error('Error deleting publishing request:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في حذف الطلب',

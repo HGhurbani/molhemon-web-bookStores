@@ -6,6 +6,7 @@
 import unifiedPaymentApi from '../../api/unifiedPaymentApi.js';
 import { paymentManager } from '../PaymentManager.js';
 import PAYMENT_CONFIG from '../config/paymentConfig.js';
+import logger from '../../logger.js';
 
 class UnifiedPaymentTest {
   constructor() {
@@ -17,7 +18,7 @@ class UnifiedPaymentTest {
    * تشغيل جميع الاختبارات
    */
   async runAllTests() {
-    console.log('🚀 بدء اختبار نظام المدفوعات الموحد...');
+    logger.debug('🚀 بدء اختبار نظام المدفوعات الموحد...');
     
     try {
       // اختبار التهيئة
@@ -39,7 +40,7 @@ class UnifiedPaymentTest {
       this.displayResults();
       
     } catch (error) {
-      console.error('❌ فشل في تشغيل الاختبارات:', error);
+      logger.error('❌ فشل في تشغيل الاختبارات:', error);
       this.errors.push(error);
     }
   }
@@ -48,7 +49,7 @@ class UnifiedPaymentTest {
    * اختبار التهيئة
    */
   async testInitialization() {
-    console.log('📋 اختبار التهيئة...');
+    logger.debug('📋 اختبار التهيئة...');
     
     try {
       const result = await unifiedPaymentApi.initialize();
@@ -59,7 +60,7 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: 'تم تهيئة النظام بنجاح'
         });
-        console.log('✅ تم تهيئة النظام بنجاح');
+        logger.debug('✅ تم تهيئة النظام بنجاح');
       } else {
         throw new Error('فشل في تهيئة النظام');
       }
@@ -70,7 +71,7 @@ class UnifiedPaymentTest {
         message: error.message
       });
       this.errors.push(error);
-      console.error('❌ فشل في تهيئة النظام:', error.message);
+      logger.error('❌ فشل في تهيئة النظام:', error.message);
     }
   }
 
@@ -78,7 +79,7 @@ class UnifiedPaymentTest {
    * اختبار مزودي الدفع
    */
   async testProviders() {
-    console.log('🏦 اختبار مزودي الدفع...');
+    logger.debug('🏦 اختبار مزودي الدفع...');
     
     try {
       const result = await unifiedPaymentApi.getPaymentProviders();
@@ -97,14 +98,14 @@ class UnifiedPaymentTest {
               status: 'PASS',
               message: `مزود ${expected} متاح`
             });
-            console.log(`✅ مزود ${expected} متاح`);
+            logger.debug(`✅ مزود ${expected} متاح`);
           } else {
             this.testResults.push({
               test: `Provider: ${expected}`,
               status: 'FAIL',
               message: `مزود ${expected} غير متاح`
             });
-            console.error(`❌ مزود ${expected} غير متاح`);
+            logger.error(`❌ مزود ${expected} غير متاح`);
           }
         }
         
@@ -121,7 +122,7 @@ class UnifiedPaymentTest {
         message: error.message
       });
       this.errors.push(error);
-      console.error('❌ فشل في اختبار مزودي الدفع:', error.message);
+      logger.error('❌ فشل في اختبار مزودي الدفع:', error.message);
     }
   }
 
@@ -129,7 +130,7 @@ class UnifiedPaymentTest {
    * اختبار اتصال مزود محدد
    */
   async testProviderConnection(providerName) {
-    console.log(`🔗 اختبار اتصال ${providerName}...`);
+    logger.debug(`🔗 اختبار اتصال ${providerName}...`);
     
     try {
       const result = await unifiedPaymentApi.testProviderConnection(providerName);
@@ -140,14 +141,14 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: `اتصال ${providerName} ناجح`
         });
-        console.log(`✅ اتصال ${providerName} ناجح`);
+        logger.debug(`✅ اتصال ${providerName} ناجح`);
       } else {
         this.testResults.push({
           test: `Connection: ${providerName}`,
           status: 'FAIL',
           message: `فشل في الاتصال بـ ${providerName}`
         });
-        console.error(`❌ فشل في الاتصال بـ ${providerName}`);
+        logger.error(`❌ فشل في الاتصال بـ ${providerName}`);
       }
     } catch (error) {
       this.testResults.push({
@@ -155,7 +156,7 @@ class UnifiedPaymentTest {
         status: 'FAIL',
         message: error.message
       });
-      console.error(`❌ خطأ في اختبار اتصال ${providerName}:`, error.message);
+      logger.error(`❌ خطأ في اختبار اتصال ${providerName}:`, error.message);
     }
   }
 
@@ -163,7 +164,7 @@ class UnifiedPaymentTest {
    * اختبار إنشاء الدفع
    */
   async testPaymentCreation() {
-    console.log('💳 اختبار إنشاء الدفع...');
+    logger.debug('💳 اختبار إنشاء الدفع...');
     
     try {
       const paymentData = {
@@ -185,7 +186,7 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: 'تم إنشاء عملية الدفع بنجاح'
         });
-        console.log('✅ تم إنشاء عملية الدفع بنجاح');
+        logger.debug('✅ تم إنشاء عملية الدفع بنجاح');
         
         // اختبار الحصول على الدفع
         await this.testGetPayment(result.payment.id);
@@ -200,7 +201,7 @@ class UnifiedPaymentTest {
         message: error.message
       });
       this.errors.push(error);
-      console.error('❌ فشل في إنشاء عملية الدفع:', error.message);
+      logger.error('❌ فشل في إنشاء عملية الدفع:', error.message);
     }
   }
 
@@ -208,7 +209,7 @@ class UnifiedPaymentTest {
    * اختبار الحصول على دفع
    */
   async testGetPayment(paymentId) {
-    console.log(`🔍 اختبار الحصول على الدفع ${paymentId}...`);
+    logger.debug(`🔍 اختبار الحصول على الدفع ${paymentId}...`);
     
     try {
       const result = await unifiedPaymentApi.getPaymentById(paymentId);
@@ -219,7 +220,7 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: 'تم الحصول على الدفع بنجاح'
         });
-        console.log('✅ تم الحصول على الدفع بنجاح');
+        logger.debug('✅ تم الحصول على الدفع بنجاح');
       } else {
         throw new Error('فشل في الحصول على الدفع');
       }
@@ -229,7 +230,7 @@ class UnifiedPaymentTest {
         status: 'FAIL',
         message: error.message
       });
-      console.error('❌ فشل في الحصول على الدفع:', error.message);
+      logger.error('❌ فشل في الحصول على الدفع:', error.message);
     }
   }
 
@@ -237,7 +238,7 @@ class UnifiedPaymentTest {
    * اختبار طرق الدفع المتاحة
    */
   async testAvailableMethods() {
-    console.log('📋 اختبار طرق الدفع المتاحة...');
+    logger.debug('📋 اختبار طرق الدفع المتاحة...');
     
     try {
       const orderData = {
@@ -254,11 +255,11 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: `تم العثور على ${result.methods.length} طريقة دفع متاحة`
         });
-        console.log(`✅ تم العثور على ${result.methods.length} طريقة دفع متاحة`);
+        logger.debug(`✅ تم العثور على ${result.methods.length} طريقة دفع متاحة`);
         
         // عرض طرق الدفع المتاحة
         result.methods.forEach(method => {
-          console.log(`  - ${method.displayName} (${method.provider})`);
+          logger.debug(`  - ${method.displayName} (${method.provider})`);
         });
         
       } else {
@@ -271,7 +272,7 @@ class UnifiedPaymentTest {
         message: error.message
       });
       this.errors.push(error);
-      console.error('❌ فشل في اختبار طرق الدفع المتاحة:', error.message);
+      logger.error('❌ فشل في اختبار طرق الدفع المتاحة:', error.message);
     }
   }
 
@@ -279,7 +280,7 @@ class UnifiedPaymentTest {
    * اختبار الإعدادات
    */
   async testSettings() {
-    console.log('⚙️ اختبار الإعدادات...');
+    logger.debug('⚙️ اختبار الإعدادات...');
     
     try {
       // اختبار الحصول على إحصائيات
@@ -291,10 +292,10 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: 'تم الحصول على إحصائيات المدفوعات'
         });
-        console.log('✅ تم الحصول على إحصائيات المدفوعات');
-        console.log(`  - إجمالي المدفوعات: ${statsResult.stats.total}`);
-        console.log(`  - المدفوعات المكتملة: ${statsResult.stats.completed}`);
-        console.log(`  - معدل النجاح: ${statsResult.stats.successRate}%`);
+        logger.debug('✅ تم الحصول على إحصائيات المدفوعات');
+        logger.debug(`  - إجمالي المدفوعات: ${statsResult.stats.total}`);
+        logger.debug(`  - المدفوعات المكتملة: ${statsResult.stats.completed}`);
+        logger.debug(`  - معدل النجاح: ${statsResult.stats.successRate}%`);
       } else {
         throw new Error('فشل في الحصول على إحصائيات المدفوعات');
       }
@@ -308,10 +309,10 @@ class UnifiedPaymentTest {
           status: 'PASS',
           message: 'تم الحصول على معلومات المزود'
         });
-        console.log('✅ تم الحصول على معلومات المزود');
-        console.log(`  - الاسم: ${providerResult.provider.displayName}`);
-        console.log(`  - الوصف: ${providerResult.provider.description}`);
-        console.log(`  - مفعل: ${providerResult.provider.enabled ? 'نعم' : 'لا'}`);
+        logger.debug('✅ تم الحصول على معلومات المزود');
+        logger.debug(`  - الاسم: ${providerResult.provider.displayName}`);
+        logger.debug(`  - الوصف: ${providerResult.provider.description}`);
+        logger.debug(`  - مفعل: ${providerResult.provider.enabled ? 'نعم' : 'لا'}`);
       } else {
         throw new Error('فشل في الحصول على معلومات المزود');
       }
@@ -323,7 +324,7 @@ class UnifiedPaymentTest {
         message: error.message
       });
       this.errors.push(error);
-      console.error('❌ فشل في اختبار الإعدادات:', error.message);
+      logger.error('❌ فشل في اختبار الإعدادات:', error.message);
     }
   }
 
@@ -331,42 +332,42 @@ class UnifiedPaymentTest {
    * عرض نتائج الاختبار
    */
   displayResults() {
-    console.log('\n📊 نتائج الاختبار:');
-    console.log('='.repeat(50));
+    logger.debug('\n📊 نتائج الاختبار:');
+    logger.debug('='.repeat(50));
     
     const passed = this.testResults.filter(r => r.status === 'PASS').length;
     const failed = this.testResults.filter(r => r.status === 'FAIL').length;
     const total = this.testResults.length;
     
-    console.log(`✅ نجح: ${passed}`);
-    console.log(`❌ فشل: ${failed}`);
-    console.log(`📋 إجمالي: ${total}`);
-    console.log(`📈 نسبة النجاح: ${((passed / total) * 100).toFixed(1)}%`);
+    logger.debug(`✅ نجح: ${passed}`);
+    logger.debug(`❌ فشل: ${failed}`);
+    logger.debug(`📋 إجمالي: ${total}`);
+    logger.debug(`📈 نسبة النجاح: ${((passed / total) * 100).toFixed(1)}%`);
     
-    console.log('\n📋 تفاصيل النتائج:');
-    console.log('-'.repeat(50));
+    logger.debug('\n📋 تفاصيل النتائج:');
+    logger.debug('-'.repeat(50));
     
     this.testResults.forEach(result => {
       const icon = result.status === 'PASS' ? '✅' : '❌';
-      console.log(`${icon} ${result.test}: ${result.message}`);
+      logger.debug(`${icon} ${result.test}: ${result.message}`);
     });
     
     if (this.errors.length > 0) {
-      console.log('\n🚨 الأخطاء:');
-      console.log('-'.repeat(50));
+      logger.debug('\n🚨 الأخطاء:');
+      logger.debug('-'.repeat(50));
       this.errors.forEach((error, index) => {
-        console.log(`${index + 1}. ${error.message}`);
+        logger.debug(`${index + 1}. ${error.message}`);
       });
     }
     
-    console.log('\n🎉 انتهى اختبار نظام المدفوعات الموحد!');
+    logger.debug('\n🎉 انتهى اختبار نظام المدفوعات الموحد!');
   }
 
   /**
    * اختبار سريع
    */
   async quickTest() {
-    console.log('⚡ اختبار سريع للنظام...');
+    logger.debug('⚡ اختبار سريع للنظام...');
     
     try {
       // تهيئة سريعة
@@ -385,14 +386,14 @@ class UnifiedPaymentTest {
       
       const payment = await unifiedPaymentApi.createPaymentIntent(paymentData);
       
-      console.log('✅ الاختبار السريع نجح!');
-      console.log(`📊 مزودي الدفع المتاحين: ${providers.providers.length}`);
-      console.log(`💳 تم إنشاء عملية الدفع: ${payment.paymentIntent.id}`);
+      logger.debug('✅ الاختبار السريع نجح!');
+      logger.debug(`📊 مزودي الدفع المتاحين: ${providers.providers.length}`);
+      logger.debug(`💳 تم إنشاء عملية الدفع: ${payment.paymentIntent.id}`);
       
       return true;
       
     } catch (error) {
-      console.error('❌ الاختبار السريع فشل:', error.message);
+      logger.error('❌ الاختبار السريع فشل:', error.message);
       return false;
     }
   }

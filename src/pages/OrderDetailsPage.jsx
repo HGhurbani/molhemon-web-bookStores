@@ -30,6 +30,7 @@ import {
 import api from '@/lib/api.js';
 import InvoiceGenerator from '@/components/InvoiceGenerator.jsx';
 import UnifiedOrderDetails from '@/components/UnifiedOrderDetails.jsx';
+import logger from '@/lib/logger.js';
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
@@ -41,12 +42,12 @@ const OrderDetailsPage = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // تسجيل مفصل لمعرف الطلب
-  console.log('OrderDetailsPage - URL params:', { id, type: typeof id });
+  logger.debug('OrderDetailsPage - URL params:', { id, type: typeof id });
 
   useEffect(() => {
     // التحقق من وجود معرف الطلب قبل التحميل
     if (!id || id === 'null' || id === 'undefined') {
-      console.error('OrderDetailsPage - No valid order ID found in URL');
+      logger.error('OrderDetailsPage - No valid order ID found in URL');
       setLoading(false);
       return;
     }
@@ -59,17 +60,17 @@ const OrderDetailsPage = () => {
       
       // التحقق من صحة معرف الطلب
       if (!id || id === 'null' || id === 'undefined' || id.trim() === '') {
-        console.error('OrderDetailsPage - Invalid order ID:', { id, type: typeof id });
+        logger.error('OrderDetailsPage - Invalid order ID:', { id, type: typeof id });
         throw new Error('معرف الطلب غير صحيح');
       }
       
-      console.log('OrderDetailsPage - Loading order with ID:', id);
+      logger.debug('OrderDetailsPage - Loading order with ID:', id);
       
       // جلب تفاصيل الطلب الحقيقية من Firebase
       const orderResult = await api.orders.getById(id);
       
       if (!orderResult || !orderResult.order) {
-        console.error('OrderDetailsPage - Order not found:', { id, orderResult });
+        logger.error('OrderDetailsPage - Order not found:', { id, orderResult });
         throw new Error('الطلب غير موجود');
       }
 
@@ -78,27 +79,27 @@ const OrderDetailsPage = () => {
       const shipping = orderResult.shipping;
       const payment = orderResult.payment;
 
-      console.log('Order data from Firebase:', orderData);
-      console.log('Items from Firebase:', items);
-      console.log('Shipping from Firebase:', shipping);
-      console.log('Payment from Firebase:', payment);
-      console.log('Shipping Address from orderData:', orderData.shippingAddress);
-      console.log('Customer Address from orderData:', orderData.customerAddress);
+      logger.debug('Order data from Firebase:', orderData);
+      logger.debug('Items from Firebase:', items);
+      logger.debug('Shipping from Firebase:', shipping);
+      logger.debug('Payment from Firebase:', payment);
+      logger.debug('Shipping Address from orderData:', orderData.shippingAddress);
+      logger.debug('Customer Address from orderData:', orderData.customerAddress);
       
       // حساب المجموع الفرعي من العناصر
       const calculatedSubtotal = items.reduce((sum, item) => {
         const price = item.unitPrice || item.price || 0;
         const quantity = item.quantity || 1;
         const itemTotal = price * quantity;
-        console.log(`Item: ${item.title || item.name}, Price: ${price}, Quantity: ${quantity}, Total: ${itemTotal}`);
+        logger.debug(`Item: ${item.title || item.name}, Price: ${price}, Quantity: ${quantity}, Total: ${itemTotal}`);
         return sum + itemTotal;
       }, 0);
       
-      console.log('Calculated subtotal from items:', calculatedSubtotal);
-      console.log('Order subtotal from database:', orderData.subtotal);
-      console.log('Order shipping cost:', orderData.shippingCost);
-      console.log('Order tax amount:', orderData.taxAmount);
-      console.log('Order total from database:', orderData.total);
+      logger.debug('Calculated subtotal from items:', calculatedSubtotal);
+      logger.debug('Order subtotal from database:', orderData.subtotal);
+      logger.debug('Order shipping cost:', orderData.shippingCost);
+      logger.debug('Order tax amount:', orderData.taxAmount);
+      logger.debug('Order total from database:', orderData.total);
 
       // تحويل البيانات إلى التنسيق المطلوب
       const formattedOrder = {
@@ -167,7 +168,7 @@ const OrderDetailsPage = () => {
                           shippingMethod?.type === 'pickup';
           
           if (isPickup) {
-            console.log('Pickup method detected, setting shipping cost to 0');
+            logger.debug('Pickup method detected, setting shipping cost to 0');
             return 0;
           }
           
@@ -180,16 +181,16 @@ const OrderDetailsPage = () => {
           
           // حساب الشحن مع التحقق من طريقة الشحن
           const shippingMethod = orderData.shippingMethod;
-          console.log('Shipping method data:', shippingMethod);
-          console.log('Shipping method type:', typeof shippingMethod);
-          console.log('Shipping method keys:', shippingMethod ? Object.keys(shippingMethod) : 'N/A');
+          logger.debug('Shipping method data:', shippingMethod);
+          logger.debug('Shipping method type:', typeof shippingMethod);
+          logger.debug('Shipping method keys:', shippingMethod ? Object.keys(shippingMethod) : 'N/A');
           
           const isPickup = shippingMethod === 'pickup' || 
                           shippingMethod?.name === 'استلام من المتجر' ||
                           shippingMethod?.id === 'pickup' ||
                           shippingMethod?.type === 'pickup';
           
-          console.log('Is pickup detected:', isPickup);
+          logger.debug('Is pickup detected:', isPickup);
           
           const finalShipping = isPickup ? 0 : (orderData.shippingCost || 0);
           const finalTax = orderData.taxAmount || finalSubtotal * 0.15;
@@ -198,8 +199,8 @@ const OrderDetailsPage = () => {
           // حساب الإجمالي: المجموع الفرعي - الخصم + الشحن + الضريبة
           const finalTotal = finalSubtotal - finalDiscount + finalShipping + finalTax;
           
-          console.log(`Final calculation: Subtotal: ${finalSubtotal}, Discount: ${finalDiscount}, Shipping: ${finalShipping} (pickup: ${isPickup}), Tax: ${finalTax}, Total: ${finalTotal}`);
-          console.log(`Database values: orderData.total: ${orderData.total}, orderData.totalAmount: ${orderData.totalAmount}`);
+          logger.debug(`Final calculation: Subtotal: ${finalSubtotal}, Discount: ${finalDiscount}, Shipping: ${finalShipping} (pickup: ${isPickup}), Tax: ${finalTax}, Total: ${finalTotal}`);
+          logger.debug(`Database values: orderData.total: ${orderData.total}, orderData.totalAmount: ${orderData.totalAmount}`);
           
           // إعطاء الأولوية للحساب الصحيح بدلاً من القيم المحفوظة
           return finalTotal;
@@ -240,7 +241,7 @@ const OrderDetailsPage = () => {
         setTimeout(() => setShowSuccessMessage(false), 5000);
       }
     } catch (error) {
-      console.error('Failed to load order details:', error);
+      logger.error('Failed to load order details:', error);
       
       // معالجة أنواع مختلفة من الأخطاء
       let errorMessage = error.message;
@@ -581,7 +582,7 @@ const OrderDetailsPage = () => {
                         if (isNaN(date.getTime())) return 'غير محدد';
                         return date.toLocaleDateString('ar-SA');
                       } catch (error) {
-                        console.error('Date parsing error:', error, 'Value:', order.createdAt);
+                        logger.error('Date parsing error:', error, 'Value:', order.createdAt);
                         return 'غير محدد';
                       }
                     })()}

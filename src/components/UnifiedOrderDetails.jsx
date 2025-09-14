@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import logger from '@/lib/logger.js';
 
 /**
  * مكون موحد لعرض تفاصيل الطلب
@@ -141,7 +142,7 @@ const UnifiedOrderDetails = ({
         minute: '2-digit'
       });
     } catch (error) {
-      console.error('Error formatting date:', error, 'Value:', dateValue);
+      logger.error('Error formatting date:', error, 'Value:', dateValue);
       return 'غير محدد';
     }
   };

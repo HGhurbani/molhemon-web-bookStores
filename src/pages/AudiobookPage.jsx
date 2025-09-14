@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { toast } from '@/components/ui/use-toast.js';
 import api from '@/lib/api.js';
 import { purchasePlan } from '@/lib/subscriptionUtils.js';
+import logger from '@/lib/logger.js';
 
 const AudiobookPage = () => {
   // Mock data
@@ -38,7 +39,7 @@ const AudiobookPage = () => {
       try {
         setPlans(await api.getPlans({ type: 'package', packageType: 'audio' }));
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     })();
   }, []);

@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/use-toast.js";
 import api from '@/lib/api.js';
 import { getPriceForCurrency, useCurrency } from '@/lib/currencyContext.jsx';
 import jwtAuthManager from '@/lib/jwtAuth.js';
+import logger from '@/lib/logger.js';
 
 const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist, onOpenChat }) => {
   const { id } = useParams();
@@ -60,7 +61,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         const r = await api.getBookRatings(book.id);
         setRatings(r);
       } catch (e) {
-        console.error('Failed to fetch ratings', e);
+        logger.error('Failed to fetch ratings', e);
       }
     })();
   }, [book]);
@@ -87,7 +88,7 @@ const BookDetailsPage = ({ books, authors, handleAddToCart, handleToggleWishlist
         });
         setHasPurchased(!!purchased);
       } catch (e) {
-        console.warn('Failed to verify purchase for rating', e);
+        logger.info('Failed to verify purchase for rating', e);
         setHasPurchased(false);
       }
     })();

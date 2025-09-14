@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { db } from '@/lib/firebase.js';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import logger from '@/lib/logger.js';
 
 const PaymentMethodsManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -190,12 +191,12 @@ const PaymentMethodsManagement = () => {
         if (data.paymentMethods) setPaymentMethods(data.paymentMethods);
         setLoading(false);
       }, (err) => {
-        console.error('Error loading payment settings:', err);
+        logger.error('Error loading payment settings:', err);
         setError('خطأ في تحميل إعدادات الدفع');
         setLoading(false);
       });
     } catch (err) {
-      console.error('Error loading payment settings:', err);
+      logger.error('Error loading payment settings:', err);
       setError('خطأ في تحميل إعدادات الدفع');
       setLoading(false);
     }
@@ -224,7 +225,7 @@ const PaymentMethodsManagement = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error toggling gateway:', error);
+      logger.error('Error toggling gateway:', error);
       toast({
         title: 'خطأ في تحديث البوابة',
         description: error.message,
@@ -287,7 +288,7 @@ const PaymentMethodsManagement = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error saving gateway:', error);
+      logger.error('Error saving gateway:', error);
       toast({
         title: 'خطأ في حفظ البوابة',
         description: error.message,
@@ -337,7 +338,7 @@ const PaymentMethodsManagement = () => {
         });
       }
     } catch (error) {
-      console.error('Error testing connection:', error);
+      logger.error('Error testing connection:', error);
       toast({
         title: 'خطأ في اختبار الاتصال',
         description: error.message,
@@ -365,7 +366,7 @@ const PaymentMethodsManagement = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Error deleting gateway:', error);
+      logger.error('Error deleting gateway:', error);
       toast({
         title: 'خطأ في حذف البوابة',
         description: error.message,
