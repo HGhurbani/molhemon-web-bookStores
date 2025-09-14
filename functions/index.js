@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
+const orderLifecycle = require('./orderLifecycleService');
 const { Schemas, validateData } = require('../src/lib/models/schemas.js');
 
 // Initialize Firebase Admin
@@ -358,3 +359,8 @@ exports.validateUserAccess = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
+
+// ===== ORDER LIFECYCLE SERVICE =====
+exports.handlePaymentWebhook = orderLifecycle.handlePaymentWebhook;
+exports.handleShipmentWebhook = orderLifecycle.handleShipmentWebhook;
+exports.checkPendingOrders = orderLifecycle.checkPendingOrders;
