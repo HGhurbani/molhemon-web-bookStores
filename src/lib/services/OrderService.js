@@ -9,6 +9,8 @@ import { Shipping } from '../models/Shipping.js';
 import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
+import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase.js';
 
 export class OrderService {
   constructor() {
@@ -77,77 +79,82 @@ export class OrderService {
       // إضافة total للطلب
       order.total = order.totalAmount;
 
-      // حفظ الطلب في Firebase أولاً للحصول على معرف الطلب
+      // إعداد بيانات الحفظ
       const orderDataToSave = order.toObject();
       orderDataToSave.total = order.totalAmount; // إضافة total للتوافق
-      
-      // إضافة timestamps صحيحة
-      orderDataToSave.createdAt = firebaseApi.serverTimestamp();
-      orderDataToSave.updatedAt = firebaseApi.serverTimestamp();
-      orderDataToSave.orderedAt = firebaseApi.serverTimestamp();
-      
-      // إضافة timestamp لمرحلة الطلب
+      orderDataToSave.createdAt = serverTimestamp();
+      orderDataToSave.updatedAt = serverTimestamp();
+      orderDataToSave.orderedAt = serverTimestamp();
+
       if (orderDataToSave.stageHistory && orderDataToSave.stageHistory.length > 0) {
-        orderDataToSave.stageHistory[0].timestamp = firebaseApi.serverTimestamp();
-      }
-      
-      console.log('OrderService - Order before saving to Firebase:', {
-        subtotal: orderDataToSave.subtotal,
-        shippingCost: orderDataToSave.shippingCost,
-        taxAmount: orderDataToSave.taxAmount,
-        total: orderDataToSave.total,
-        totalAmount: orderDataToSave.totalAmount,
-        createdAt: orderDataToSave.createdAt
-      });
-      const orderDoc = await firebaseApi.addToCollection(this.collectionName, orderDataToSave);
-      console.log('Order document returned from Firebase:', orderDoc);
-      
-      // إضافة total إلى orderDoc إذا لم يكن موجوداً
-      if (orderDoc && !orderDoc.total) {
-        orderDoc.total = order.totalAmount;
-      }
-      
-      // التحقق من وجود معرف الطلب
-      if (!orderDoc || !orderDoc.id) {
-        console.error('OrderService - Failed to get order ID from Firebase:', {
-          orderDoc,
-          hasId: orderDoc?.id,
-          orderDocKeys: orderDoc ? Object.keys(orderDoc) : 'N/A'
-        });
-        
-        // إنشاء معرف احتياطي
-        const fallbackId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        console.warn('OrderService - Using fallback order ID:', fallbackId);
-        
-        order.id = fallbackId;
-        order.total = order.totalAmount;
-        
-        // محاولة إعادة حفظ الطلب مع المعرف الاحتياطي
-        try {
-          const orderDataWithId = { ...order.toObject(), id: fallbackId };
-          await firebaseApi.updateCollection(this.collectionName, fallbackId, orderDataWithId);
-          console.log('OrderService - Order saved with fallback ID successfully');
-        } catch (retryError) {
-          console.error('OrderService - Failed to save order with fallback ID:', retryError);
-          throw errorHandler.createError(
-            'DATABASE',
-            'database/order-creation-failed',
-            'فشل في إنشاء الطلب - لم يتم الحصول على معرف الطلب من Firebase',
-            'order-creation'
-          );
-        }
-      } else {
-        order.id = orderDoc.id;
-        order.total = orderDoc.total || order.totalAmount;
-        console.log('Order ID after assignment:', order.id);
-        console.log('Order total after assignment:', order.total);
+        orderDataToSave.stageHistory[0].timestamp = serverTimestamp();
       }
 
-      // حفظ عناصر الطلب
-      for (const item of orderItems) {
-        item.orderId = order.id; // استخدام orderId بدلاً من id
-        await firebaseApi.addToCollection('order_items', item.toObject());
+      const orderItemsData = orderItems.map(item => item.toObject());
+
+      // تنفيذ المعاملة لحفظ الطلب وتحديث المخزون
+      const maxRetries = 5;
+      let orderDoc;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          orderDoc = await runTransaction(db, async (transaction) => {
+            // التحقق من المخزون وتحديثه
+            for (const item of orderItemsData) {
+              const productRef = doc(db, 'books', item.productId);
+              const productSnap = await transaction.get(productRef);
+              if (!productSnap.exists()) {
+                throw errorHandler.createError(
+                  'NOT_FOUND',
+                  'product/not-found',
+                  'المنتج غير موجود',
+                  `stock-update:${item.productId}`
+                );
+              }
+
+              const currentStock = productSnap.data().stock || 0;
+              if (currentStock < item.quantity) {
+                throw errorHandler.createError(
+                  'VALIDATION',
+                  'validation/stock-unavailable',
+                  `المخزون غير كافي للمنتج ${item.productId}`,
+                  `stock-update:${item.productId}`
+                );
+              }
+
+              transaction.update(productRef, { stock: currentStock - item.quantity });
+            }
+
+            // إنشاء مستند الطلب
+            const orderRef = doc(collection(db, this.collectionName));
+            transaction.set(orderRef, orderDataToSave);
+
+            // حفظ عناصر الطلب
+            for (const item of orderItemsData) {
+              const itemRef = doc(collection(db, 'order_items'));
+              transaction.set(itemRef, { ...item, orderId: orderRef.id });
+            }
+
+            return { id: orderRef.id };
+          });
+          break;
+        } catch (txnError) {
+          if (txnError.code === 'aborted' && attempt < maxRetries) {
+            console.warn(`Transaction conflict detected, retrying... (${attempt})`);
+            continue;
+          }
+          throw txnError;
+        }
       }
+
+      order.id = orderDoc.id;
+      order.total = order.totalAmount;
+
+      // تحديث orderId في عناصر الطلب بعد حفظ المعاملة
+      for (const item of orderItems) {
+        item.orderId = order.id;
+      }
+
+      console.log('Order ID after transaction:', order.id);
 
       // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية) بعد الحصول على معرف الطلب
       let shipping = null;
