@@ -10,6 +10,8 @@ import logger from '../logger.js';
 export class StoreSettingsService {
   constructor() {
     this.collectionName = 'store_settings';
+    this.paymentCollection = 'payment_gateways';
+    this.shippingCollection = 'shipping_methods';
     this.settings = null;
   }
 
@@ -495,6 +497,77 @@ export class StoreSettingsService {
     } catch (error) {
       throw errorHandler.handleError(error, `store-settings:gateway-toggle:${gatewayId}`);
     }
+  }
+
+  // === Versioned storage helpers ===
+  async _getLatestVersion(collection) {
+    const docs = await firebaseApi.getCollection(collection);
+    return docs.reduce((max, doc) => Math.max(max, doc.version || 0), 0);
+  }
+
+  async _saveVersioned(collection, data) {
+    const version = (await this._getLatestVersion(collection)) + 1;
+    await firebaseApi.setDoc(collection, version.toString(), {
+      version,
+      data,
+      createdAt: new Date().toISOString()
+    });
+    return version;
+  }
+
+  async _getVersioned(collection, version) {
+    if (version) {
+      return await firebaseApi.getDocById(collection, version.toString());
+    }
+    const latest = await this._getLatestVersion(collection);
+    if (!latest) return null;
+    return await firebaseApi.getDocById(collection, latest.toString());
+  }
+
+  /**
+   * حفظ بوابات الدفع مع إنشاء نسخة بإصدار
+   */
+  async savePaymentGateways(gateways) {
+    await this.updateStoreSettings({ paymentGateways: gateways });
+    return await this._saveVersioned(this.paymentCollection, gateways);
+  }
+
+  /**
+   * استعادة بوابات الدفع من نسخة محددة
+   */
+  async restorePaymentGateways(version) {
+    const doc = await this._getVersioned(this.paymentCollection, version);
+    if (doc && doc.data) {
+      await this.updateStoreSettings({ paymentGateways: doc.data });
+      return doc.data;
+    }
+    return null;
+  }
+
+  /**
+   * حفظ طرق الشحن مع إنشاء نسخة بإصدار
+   */
+  async saveShippingMethods(data) {
+    await this.updateStoreSettings({
+      shippingMethods: data.methods,
+      shippingZones: data.zones
+    });
+    return await this._saveVersioned(this.shippingCollection, data);
+  }
+
+  /**
+   * استعادة طرق الشحن من نسخة محددة
+   */
+  async restoreShippingMethods(version) {
+    const doc = await this._getVersioned(this.shippingCollection, version);
+    if (doc && doc.data) {
+      await this.updateStoreSettings({
+        shippingMethods: doc.data.methods || {},
+        shippingZones: doc.data.zones || {}
+      });
+      return doc.data;
+    }
+    return null;
   }
 }
 

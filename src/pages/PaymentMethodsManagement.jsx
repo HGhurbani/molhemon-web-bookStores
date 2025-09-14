@@ -16,6 +16,8 @@ import {
   AlertCircle,
   Save,
   RefreshCw,
+  Download,
+  Upload,
   ExternalLink,
   Link,
   TestTube,
@@ -208,8 +210,10 @@ const PaymentMethodsManagement = () => {
           enabled
         }
       };
-      
+
       setPaymentGateways(updatedGateways);
+      await api.storeSettings.savePaymentGateways(updatedGateways);
+
       
       await updateDoc(doc(db, 'store_settings', 'main'), {
         paymentGateways: updatedGateways
@@ -268,6 +272,7 @@ const PaymentMethodsManagement = () => {
       };
       
       setPaymentGateways(updatedGateways);
+      await api.storeSettings.savePaymentGateways(updatedGateways);
       
       await updateDoc(doc(db, 'store_settings', 'main'), {
         paymentGateways: updatedGateways
@@ -349,6 +354,7 @@ const PaymentMethodsManagement = () => {
       delete updatedGateways[gatewayId];
       
       setPaymentGateways(updatedGateways);
+      await api.storeSettings.savePaymentGateways(updatedGateways);
       
       await updateDoc(doc(db, 'store_settings', 'main'), {
         paymentGateways: updatedGateways
@@ -373,6 +379,31 @@ const PaymentMethodsManagement = () => {
       ...prev,
       [gatewayId]: !prev[gatewayId]
     }));
+  };
+
+  const handleBackup = async () => {
+    try {
+      await api.storeSettings.savePaymentGateways(paymentGateways);
+      toast({ title: 'تم إنشاء نسخة احتياطية', variant: 'success' });
+    } catch (error) {
+      toast({ title: 'خطأ في النسخ الاحتياطي', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      const version = prompt('أدخل رقم النسخة المراد استعادتها:');
+      if (!version) return;
+      const data = await api.storeSettings.restorePaymentGateways(Number(version));
+      if (data) {
+        setPaymentGateways(data);
+        toast({ title: 'تمت الاستعادة بنجاح', variant: 'success' });
+      } else {
+        toast({ title: 'لم يتم العثور على النسخة', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'خطأ في الاستعادة', description: error.message, variant: 'destructive' });
+    }
   };
 
   if (loading) {
@@ -402,9 +433,19 @@ const PaymentMethodsManagement = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">إدارة طرق الدفع</h1>
-          <p className="text-gray-600">قم بإدارة وربط بوابات الدفع المختلفة مع متجرك</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">إدارة طرق الدفع</h1>
+            <p className="text-gray-600">قم بإدارة وربط بوابات الدفع المختلفة مع متجرك</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleBackup} disabled={saving}>
+              <Download className="w-4 h-4 ml-2" />نسخ احتياطي
+            </Button>
+            <Button variant="outline" onClick={handleRestore} disabled={saving}>
+              <Upload className="w-4 h-4 ml-2" />استعادة
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
