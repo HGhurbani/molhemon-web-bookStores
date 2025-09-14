@@ -5187,7 +5187,7 @@ const PlaceholderSection = ({ sectionName, handleFeatureClick }) => (
 );
 
 
-const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
+const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categories, orders, payments, paymentMethods, currencies, languages, plans, subscriptions, users, messages, notifications, dashboardSection, setDashboardSection, handleFeatureClick, setBooks, setAuthors, setSellers, setBranches, setCategories, setOrders, setPayments, setPaymentMethods, setCurrencies, setLanguages, setPlans, setSubscriptions, setUsers, setMessages, setNotifications, siteSettings, setSiteSettings, sliders, setSliders, banners, setBanners, features, setFeatures }) => {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
@@ -5565,6 +5565,20 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const notes = await firebaseApi.getCollection('notifications');
+      setNotifications(notes);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل جلب الإشعارات",
+        variant: "destructive",
+      });
+    }
+  };
+
   // دوال الحذف
   const handleDeleteBlog = async (id) => {
     if (confirmDelete()) {
@@ -5721,6 +5735,8 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
       fetchDistributors();
     } else if (dashboardSection === 'team') {
       fetchTeamMembers();
+    } else if (dashboardSection === 'notifications') {
+      fetchNotifications();
     } else if (dashboardSection === 'design-requests') {
       fetchDesignRequests();
     } else if (dashboardSection === 'publishing-requests') {
@@ -5944,6 +5960,27 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         )}
         {dashboardSection === 'messages' && (
           <DashboardMessages messages={messages} />
+        )}
+        {dashboardSection === 'notifications' && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">الإشعارات</h2>
+            {notifications.length === 0 ? (
+              <p className="text-gray-500">لا توجد إشعارات</p>
+            ) : (
+              <div className="space-y-4">
+                {notifications.map((note, idx) => (
+                  <div key={idx} className="border-b pb-2">
+                    <p className="text-sm text-gray-700">{note.message || note.title}</p>
+                    {note.createdAt && (
+                      <span className="text-xs text-gray-500">
+                        {new Date(note.createdAt).toLocaleString('ar-SA')}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
         {dashboardSection === 'features' && <DashboardFeatures features={features} setFeatures={setFeatures} />}
         {dashboardSection === 'sliders' && <DashboardSliders sliders={sliders} setSliders={setSliders} />}

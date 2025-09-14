@@ -1,10 +1,19 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
+const cors = require('cors')({ origin: true });
+const orderLifecycle = require('./orderLifecycleService');
+const { Schemas, validateData } = require('../src/lib/models/schemas.js');
+
 // Initialize Firebase Admin
 admin.initializeApp();
 
 const db = admin.firestore();
+
+// Status synchronization
+const statusSync = require('./statusSync');
+exports.syncPaymentStatus = statusSync.syncPaymentStatus;
+exports.syncShippingStatus = statusSync.syncShippingStatus;
 
 // ===== PAYMENT FUNCTIONS =====
 
@@ -213,6 +222,37 @@ exports.updateStock = functions.https.onCall(async (data, context) => {
   }
 });
 
+// ===== SCHEMA VALIDATION =====
+exports.validateSchema = functions.firestore.document('{collectionId}/{docId}').onCreate(async (snap, context) => {
+  const { collectionId } = context.params;
+  const data = snap.data();
+  let schema = null;
+
+  switch (collectionId) {
+    case 'orders':
+      schema = Schemas.Order;
+      break;
+    case 'order_items':
+      schema = Schemas.OrderItem;
+      break;
+    case 'payments':
+      schema = Schemas.Payment;
+      break;
+    case 'shipping':
+      schema = Schemas.Shipping;
+      break;
+    default:
+      return null;
+  }
+
+  const errors = validateData(data, schema);
+  if (errors.length > 0) {
+    console.error(`Invalid ${collectionId} document:`, errors);
+    await snap.ref.delete();
+  }
+  return null;
+});
+
 // ===== ANALYTICS =====
 
 // Get Dashboard Stats
@@ -338,3 +378,8 @@ exports.validateUserAccess = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
+
+// ===== ORDER LIFECYCLE SERVICE =====
+exports.handlePaymentWebhook = orderLifecycle.handlePaymentWebhook;
+exports.handleShipmentWebhook = orderLifecycle.handleShipmentWebhook;
+exports.checkPendingOrders = orderLifecycle.checkPendingOrders;
