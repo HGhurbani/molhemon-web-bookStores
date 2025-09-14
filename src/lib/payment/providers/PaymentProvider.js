@@ -3,6 +3,7 @@
  * Payment Provider Interface
  */
 
+import crypto from 'crypto';
 import logger from '../../logger.js';
 
 export class PaymentProvider {
@@ -144,16 +145,44 @@ export class PaymentProvider {
    * تشفير البيانات الحساسة
    */
   encryptSensitiveData(data) {
-    // يمكن تنفيذ التشفير هنا
-    return data;
+    const keyHex = this.config.encryptionKey || process.env.PAYMENT_ENCRYPTION_KEY;
+    if (!keyHex) {
+      throw new Error('Encryption key not provided');
+    }
+
+    const key = Buffer.from(keyHex, 'hex');
+    if (key.length !== 32) {
+      throw new Error('Encryption key must be 32 bytes in hex');
+    }
+
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    const text = typeof data === 'string' ? data : JSON.stringify(data);
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return iv.toString('base64') + ':' + encrypted;
   }
 
   /**
    * فك تشفير البيانات الحساسة
    */
   decryptSensitiveData(encryptedData) {
-    // يمكن تنفيذ فك التشفير هنا
-    return encryptedData;
+    const keyHex = this.config.encryptionKey || process.env.PAYMENT_ENCRYPTION_KEY;
+    if (!keyHex) {
+      throw new Error('Encryption key not provided');
+    }
+
+    const key = Buffer.from(keyHex, 'hex');
+    const [ivBase64, encrypted] = encryptedData.split(':');
+    const iv = Buffer.from(ivBase64, 'base64');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    try {
+      return JSON.parse(decrypted);
+    } catch {
+      return decrypted;
+    }
   }
 
   /**
