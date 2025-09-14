@@ -3,6 +3,8 @@
  * Unified Payment API - Simplified Version with Auto Connect
  */
 
+import logger from '../logger.js';
+
 class UnifiedPaymentAPI {
   constructor() {
     this.baseUrl = import.meta.env.VITE_API_BASE_URL || '';
@@ -222,16 +224,16 @@ class UnifiedPaymentAPI {
           }
         }
       } catch (error) {
-        console.log('Could not load store settings, using defaults');
+        logger.debug('Could not load store settings, using defaults');
       }
 
       this.isInitialized = true;
-      console.log('Unified Payment API initialized successfully');
-      console.log('Total providers initialized:', this.providers.length);
-      console.log('Cash on Delivery enabled:', this.providers.find(p => p.name === 'cashOnDelivery')?.enabled);
+      logger.info('Unified Payment API initialized successfully');
+      logger.debug('Total providers initialized:', this.providers.length);
+      logger.debug('Cash on Delivery enabled:', this.providers.find(p => p.name === 'cashOnDelivery')?.enabled);
       return { success: true };
     } catch (error) {
-      console.error('Failed to initialize Unified Payment API:', error);
+      logger.error('Failed to initialize Unified Payment API:', error);
       throw error;
     }
   }
@@ -253,10 +255,10 @@ class UnifiedPaymentAPI {
             }
           }
         });
-        console.log('Synced providers with dashboard settings');
+        logger.debug('Synced providers with dashboard settings');
       }
     } catch (error) {
-      console.error('Failed to sync with dashboard settings:', error);
+      logger.error('Failed to sync with dashboard settings:', error);
     }
   }
 
@@ -275,7 +277,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get payment providers:', error);
+      logger.error('Failed to get payment providers:', error);
       return {
         success: false,
         providers: [],
@@ -308,7 +310,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get payment stats:', error);
+      logger.error('Failed to get payment stats:', error);
       return {
         success: false,
         stats: this.stats,
@@ -356,7 +358,7 @@ class UnifiedPaymentAPI {
         currentSettings.payments.providers[providerName].settings = provider.settings;
         
         localStorage.setItem('siteSettings', JSON.stringify(currentSettings));
-        console.log(`Provider ${providerName} connection status saved to localStorage`);
+        logger.debug(`Provider ${providerName} connection status saved to localStorage`);
       }
       
       return {
@@ -365,7 +367,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error(`Failed to test provider connection: ${providerName}`, error);
+      logger.error(`Failed to test provider connection: ${providerName}`, error);
       return {
         success: false,
         error: error.message
@@ -410,7 +412,7 @@ class UnifiedPaymentAPI {
           }
         };
         await firebaseApi.default.updateSettings(updatedFirebaseSettings);
-        console.log('Payment settings saved to Firebase successfully');
+        logger.info('Payment settings saved to Firebase successfully');
       } catch (firebaseError) {
         console.warn('Could not save to Firebase, but settings are saved locally:', firebaseError);
       }
@@ -418,7 +420,7 @@ class UnifiedPaymentAPI {
       return { success: true };
 
     } catch (error) {
-      console.error('Failed to update payment settings:', error);
+      logger.error('Failed to update payment settings:', error);
       return {
         success: false,
         error: error.message
@@ -487,7 +489,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get auto connect links:', error);
+      logger.error('Failed to get auto connect links:', error);
       return {
         success: false,
         error: error.message
@@ -522,7 +524,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to open auto connect link:', error);
+      logger.error('Failed to open auto connect link:', error);
       return {
         success: false,
         error: error.message
@@ -618,7 +620,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get connection instructions:', error);
+      logger.error('Failed to get connection instructions:', error);
       return {
         success: false,
         error: error.message
@@ -718,7 +720,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to validate provider keys:', error);
+      logger.error('Failed to validate provider keys:', error);
       return {
         success: false,
         error: error.message
@@ -777,7 +779,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to create payment intent:', error);
+      logger.error('Failed to create payment intent:', error);
       return {
         success: false,
         error: error.message
@@ -809,7 +811,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to confirm payment:', error);
+      logger.error('Failed to confirm payment:', error);
       return {
         success: false,
         error: error.message
@@ -841,7 +843,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to refund payment:', error);
+      logger.error('Failed to refund payment:', error);
       return {
         success: false,
         error: error.message
@@ -873,7 +875,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get payment:', error);
+      logger.error('Failed to get payment:', error);
       return {
         success: false,
         error: error.message
@@ -891,19 +893,19 @@ class UnifiedPaymentAPI {
       }
 
       // تصفية المزودين حسب البيانات المطلوبة
-      console.log('Available providers before filtering:', this.providers.map(p => ({ name: p.name, enabled: p.enabled })));
-      console.log('Order data:', orderData);
+      logger.debug('Available providers before filtering:', this.providers.map(p => ({ name: p.name, enabled: p.enabled })));
+      logger.debug('Order data:', orderData);
       
       const availableMethods = this.providers
         .filter(provider => {
-          console.log(`Provider ${provider.name}: enabled=${provider.enabled}, testMode=${provider.testMode}, connected=${provider.connected}`);
+          logger.debug(`Provider ${provider.name}: enabled=${provider.enabled}, testMode=${provider.testMode}, connected=${provider.connected}`);
           // السماح بالعرض إذا كان مفعل و (مربوط أو في وضع الاختبار)
           return provider.enabled && (provider.connected || provider.testMode);
         })
         .filter(provider => {
           const currencySupported = provider.supportedCurrencies.includes(orderData.currency);
           const countrySupported = provider.supportedCountries.includes(orderData.country);
-          console.log(`Provider ${provider.name}: currency=${currencySupported}, country=${countrySupported}`);
+          logger.debug(`Provider ${provider.name}: currency=${currencySupported}, country=${countrySupported}`);
           return currencySupported && countrySupported;
         })
         .map(provider => ({
@@ -917,7 +919,7 @@ class UnifiedPaymentAPI {
           connected: provider.connected
         }));
       
-      console.log('Final available methods:', availableMethods);
+      logger.debug('Final available methods:', availableMethods);
 
       // إذا لم توجد طرق دفع متاحة، أضف الدفع عند الاستلام كخيار افتراضي
       let finalMethods = availableMethods;
@@ -934,7 +936,7 @@ class UnifiedPaymentAPI {
             testMode: codProvider.testMode,
             connected: codProvider.connected
           }];
-          console.log('Added Cash on Delivery as fallback option');
+          logger.debug('Added Cash on Delivery as fallback option');
         }
       }
       
@@ -944,7 +946,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get available payment methods:', error);
+      logger.error('Failed to get available payment methods:', error);
       return {
         success: false,
         methods: [],
@@ -973,7 +975,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get provider info:', error);
+      logger.error('Failed to get provider info:', error);
       return {
         success: false,
         error: error.message
@@ -1003,7 +1005,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to cancel payment:', error);
+      logger.error('Failed to cancel payment:', error);
       return {
         success: false,
         error: error.message
@@ -1044,7 +1046,7 @@ class UnifiedPaymentAPI {
       };
 
     } catch (error) {
-      console.error('Failed to get payment logs:', error);
+      logger.error('Failed to get payment logs:', error);
       return {
         success: false,
         logs: [],

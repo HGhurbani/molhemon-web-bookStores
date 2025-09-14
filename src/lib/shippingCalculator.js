@@ -1,6 +1,7 @@
 // خدمة حساب الشحن المحسنة
 import { siteSettings } from '@/data/siteData.js';
 import firebaseApi from './firebaseApi.js';
+import logger from './logger.js';
 
 export class ShippingCalculator {
   constructor() {
@@ -15,7 +16,7 @@ export class ShippingCalculator {
       this.firebaseMethods = await firebaseApi.getShippingMethods();
       return this.firebaseMethods;
     } catch (error) {
-      console.error('Error loading shipping methods from Firebase:', error);
+      logger.error('Error loading shipping methods from Firebase:', error);
       return null;
     }
   }

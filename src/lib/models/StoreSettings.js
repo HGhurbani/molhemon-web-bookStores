@@ -2,6 +2,8 @@
  * نموذج إعدادات المتجر
  */
 
+import logger from '../logger.js';
+
 export class StoreSettings {
   constructor(data = {}) {
     // إعدادات عامة
@@ -487,7 +489,7 @@ export class StoreSettings {
 
   // الحصول على طرق الشحن المتاحة لمنطقة معينة
   getAvailableShippingMethods(country, orderAmount = 0, productWeight = 0) {
-    console.log('Getting available shipping methods:', {
+    logger.debug('Getting available shipping methods:', {
       country,
       orderAmount,
       productWeight,
@@ -505,7 +507,7 @@ export class StoreSettings {
       !['SA', 'AE', 'KW', 'BH', 'OM', 'QA', 'EG', 'JO', 'LB', 'SY', 'IQ', 'IR', 'TR'].includes(cleanCountry);
     
     Object.values(this.shippingMethods).forEach(method => {
-      console.log('Checking method:', method.name, 'enabled:', method.enabled);
+      logger.debug('Checking method:', method.name, 'enabled:', method.enabled);
       
       if (!method.enabled) {
         rejectedMethods.push({
@@ -520,7 +522,7 @@ export class StoreSettings {
       
       // التحقق من الحد الأدنى للطلب
       if (conditions.minOrderAmount && orderAmount < conditions.minOrderAmount) {
-        console.log('Method rejected due to min order amount:', method.name);
+        logger.debug('Method rejected due to min order amount:', method.name);
         rejectedMethods.push({
           method: method.name,
           reason: 'min_order_amount',
@@ -531,7 +533,7 @@ export class StoreSettings {
       
       // التحقق من الوزن الأقصى
       if (conditions.maxWeight && productWeight > conditions.maxWeight) {
-        console.log('Method rejected due to max weight:', method.name);
+        logger.debug('Method rejected due to max weight:', method.name);
         rejectedMethods.push({
           method: method.name,
           reason: 'max_weight',
@@ -544,7 +546,7 @@ export class StoreSettings {
       if (conditions.countries && conditions.countries.length > 0) {
         const supportedCountries = conditions.countries.map(c => c.toUpperCase());
         if (!supportedCountries.includes(cleanCountry)) {
-          console.log('Method rejected due to country:', method.name, 'Country:', cleanCountry, 'Supported:', supportedCountries);
+          logger.debug('Method rejected due to country:', method.name, 'Country:', cleanCountry, 'Supported:', supportedCountries);
           rejectedMethods.push({
             method: method.name,
             reason: 'country_not_supported',
@@ -554,13 +556,13 @@ export class StoreSettings {
         }
       }
       
-      console.log('Method accepted:', method.name);
+      logger.debug('Method accepted:', method.name);
       availableMethods.push(method);
     });
     
     // إذا كانت الدولة غير مدعومة أو لم توجد طرق متاحة، أضف طرق احتياطية
     if (isUnsupportedCountry || availableMethods.length === 0) {
-      console.log('Unsupported country or no shipping methods available, adding fallback methods');
+      logger.debug('Unsupported country or no shipping methods available, adding fallback methods');
       
       // إضافة طريقة شحن احتياطية للدول غير المدعومة
       availableMethods.push({
@@ -595,8 +597,8 @@ export class StoreSettings {
       }
     }
     
-    console.log('Final available methods:', availableMethods);
-    console.log('Rejected methods:', rejectedMethods);
+    logger.debug('Final available methods:', availableMethods);
+    logger.debug('Rejected methods:', rejectedMethods);
     
     return availableMethods;
   }

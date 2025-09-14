@@ -1,6 +1,8 @@
 // Payment API Integration
 // This file handles all payment method connections and processing
 
+import logger from './logger.js';
+
 class PaymentAPI {
   constructor() {
     this.baseUrl = import.meta.env.VITE_API_URL || 'https://api.molhemoon.com';
@@ -10,11 +12,11 @@ class PaymentAPI {
   // Test method to verify API is working
   async testConnection() {
     try {
-      console.log('Payment API initialized successfully');
-      console.log('Base URL:', this.baseUrl);
+      logger.info('Payment API initialized successfully');
+      logger.info('Base URL:', this.baseUrl);
       return { success: true, message: 'Payment API is ready' };
     } catch (error) {
-      console.error('Payment API test failed:', error);
+      logger.error('Payment API test failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -37,7 +39,7 @@ class PaymentAPI {
 
       return await response.json();
     } catch (error) {
-      console.error('Payment API Error:', error);
+      logger.error('Payment API Error:', error);
       throw error;
     }
   }

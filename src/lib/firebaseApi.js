@@ -16,6 +16,7 @@ import {
 import { db } from './firebase';
 import { processImageForStorage, isImageSizeValid } from './imageUtils';
 import { errorHandler } from './errorHandler';
+import logger from './logger.js';
 
 // معالجة البيانات قبل الحفظ في Firebase
 async function processDataForStorage(data) {
@@ -60,7 +61,7 @@ async function processDataForStorage(data) {
 
 async function getCollection(name) {
   try {
-    console.log(`Getting collection: ${name}`);
+    logger.debug(`Getting collection: ${name}`);
     
     // التحقق من اتصال Firebase
     if (!db) {
@@ -75,7 +76,7 @@ async function getCollection(name) {
     
     const snapshot = await getDocs(collection(db, name));
     const result = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    console.log(`Collection ${name} result:`, result);
+    logger.debug(`Collection ${name} result:`, result);
     
     return result;
     
@@ -86,8 +87,8 @@ async function getCollection(name) {
 
 async function addToCollection(name, data) {
   try {
-    console.log(`addToCollection: Starting to add document to collection: ${name}`);
-    console.log(`addToCollection: Data to be added:`, data);
+    logger.debug(`addToCollection: Starting to add document to collection: ${name}`);
+    logger.debug(`addToCollection: Data to be added:`, data);
     
     // التحقق من صحة البيانات
     if (!data || typeof data !== 'object') {
@@ -102,7 +103,7 @@ async function addToCollection(name, data) {
     
     // التحقق من اتصال Firebase
     if (!db) {
-      console.error('Firebase db is not available');
+      logger.error('Firebase db is not available');
       const error = errorHandler.createError(
         'FIREBASE',
         'firebase/connection-failed',
@@ -112,21 +113,21 @@ async function addToCollection(name, data) {
       throw error;
     }
     
-    console.log(`addToCollection: Firebase db is available:`, !!db);
+    logger.debug(`addToCollection: Firebase db is available:`, !!db);
     
     // معالجة الصور قبل الحفظ
     const processedData = await processDataForStorage(data);
-    console.log(`addToCollection: Processed data:`, processedData);
+    logger.debug(`addToCollection: Processed data:`, processedData);
     
-    console.log(`addToCollection: About to call addDoc with collection: ${name}`);
+    logger.debug(`addToCollection: About to call addDoc with collection: ${name}`);
     const ref = await addDoc(collection(db, name), processedData);
-    console.log(`addToCollection: Document added with ref:`, ref);
-    console.log(`addToCollection: ref.id:`, ref.id);
-    console.log(`addToCollection: ref.id type:`, typeof ref.id);
+    logger.debug(`addToCollection: Document added with ref:`, ref);
+    logger.debug(`addToCollection: ref.id:`, ref.id);
+    logger.debug(`addToCollection: ref.id type:`, typeof ref.id);
     
     // التحقق من وجود ref.id
     if (!ref.id) {
-      console.error('ref.id is null or undefined');
+      logger.error('ref.id is null or undefined');
       const error = errorHandler.createError(
         'FIREBASE',
         'firebase/invalid-reference',
@@ -138,12 +139,12 @@ async function addToCollection(name, data) {
     
     // إرجاع البيانات مباشرة مع معرف المستند
     const result = { ...processedData, id: ref.id };
-    console.log(`addToCollection: Returning result with id: ${result.id}`);
-    console.log(`addToCollection: result object:`, result);
+    logger.debug(`addToCollection: Returning result with id: ${result.id}`);
+    logger.debug(`addToCollection: result object:`, result);
     return result;
     
   } catch (error) {
-    console.error(`addToCollection error for collection ${name}:`, error);
+    logger.error(`addToCollection error for collection ${name}:`, error);
     throw errorHandler.handleFirebaseError(error, `add:${name}`);
   }
 }

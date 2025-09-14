@@ -1,5 +1,7 @@
 // دوال معالجة الصور وضغطها
 
+import logger from './logger.js';
+
 /**
  * ضغط الصورة إلى حجم أصغر
  * @param {File} file - ملف الصورة
@@ -80,7 +82,7 @@ export const imageToBase64 = async (file, maxSizeKB = 500) => {
     return await blobToBase64(moreCompressedBlob);
     
   } catch (error) {
-    console.error('خطأ في معالجة الصورة:', error);
+    logger.error('خطأ في معالجة الصورة:', error);
     throw new Error('فشل في معالجة الصورة');
   }
 };
@@ -163,7 +165,7 @@ export const processImageForStorage = async (imageInput) => {
     return base64Image;
     
   } catch (error) {
-    console.error('خطأ في معالجة الصورة:', error);
+    logger.error('خطأ في معالجة الصورة:', error);
     throw new Error(`فشل في معالجة الصورة: ${error.message}`);
   }
 };

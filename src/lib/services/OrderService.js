@@ -196,7 +196,7 @@ export class OrderService {
           break;
         } catch (txnError) {
           if (txnError.code === 'aborted' && attempt < maxRetries) {
-            console.warn(`Transaction conflict detected, retrying... (${attempt})`);
+            logger.info(`Transaction conflict detected, retrying... (${attempt})`);
             continue;
           }
           throw txnError;
@@ -211,7 +211,7 @@ export class OrderService {
         item.orderId = order.id;
       }
 
-      console.log('Order ID after transaction:', order.id);
+      logger.debug('Order ID after transaction:', order.id);
 
       // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية) بعد الحصول على معرف الطلب
       let shipping = null;

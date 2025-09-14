@@ -1,5 +1,6 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from './firebase';
+import logger from './logger.js';
 
 const functions = getFunctions();
 
@@ -31,7 +32,7 @@ export const firebaseFunctionsApi = {
         const result = await createStripePaymentIntent(data);
         return result.data;
       } catch (error) {
-        console.error('Stripe Payment Intent Error:', error);
+        logger.error('Stripe Payment Intent Error:', error);
         throw error;
       }
     },
@@ -41,7 +42,7 @@ export const firebaseFunctionsApi = {
         const result = await createPayPalOrder(data);
         return result.data;
       } catch (error) {
-        console.error('PayPal Order Error:', error);
+        logger.error('PayPal Order Error:', error);
         throw error;
       }
     }
@@ -54,7 +55,7 @@ export const firebaseFunctionsApi = {
         const result = await processOrder({ orderData, paymentData });
         return result.data;
       } catch (error) {
-        console.error('Order Processing Error:', error);
+        logger.error('Order Processing Error:', error);
         throw error;
       }
     }
@@ -67,7 +68,7 @@ export const firebaseFunctionsApi = {
         const result = await calculateShipping({ items, shippingAddress, shippingMethod });
         return result.data;
       } catch (error) {
-        console.error('Shipping Calculation Error:', error);
+        logger.error('Shipping Calculation Error:', error);
         throw error;
       }
     }
@@ -80,7 +81,7 @@ export const firebaseFunctionsApi = {
         const result = await updateStock({ productId, quantity, operation });
         return result.data;
       } catch (error) {
-        console.error('Stock Update Error:', error);
+        logger.error('Stock Update Error:', error);
         throw error;
       }
     }
@@ -93,7 +94,7 @@ export const firebaseFunctionsApi = {
         const result = await getDashboardStats();
         return result.data;
       } catch (error) {
-        console.error('Dashboard Stats Error:', error);
+        logger.error('Dashboard Stats Error:', error);
         throw error;
       }
     }
@@ -106,7 +107,7 @@ export const firebaseFunctionsApi = {
         const result = await validateUserAccess({ resource, action });
         return result.data;
       } catch (error) {
-        console.error('Access Validation Error:', error);
+        logger.error('Access Validation Error:', error);
         throw error;
       }
     }

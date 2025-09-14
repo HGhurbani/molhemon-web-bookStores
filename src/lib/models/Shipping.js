@@ -2,9 +2,11 @@
  * نموذج الشحن
  */
 
+import logger from '../logger.js';
+
 export class Shipping {
   constructor(data = {}) {
-    console.log('Shipping constructor called with data:', data);
+    logger.debug('Shipping constructor called with data:', data);
     
     this.id = data.id || null;
     this.orderId = data.orderId || null;
@@ -26,7 +28,7 @@ export class Shipping {
       additionalInfo: ''
     };
     
-    console.log('Shipping constructor result:', {
+    logger.debug('Shipping constructor result:', {
       orderId: this.orderId,
       customerId: this.customerId,
       shippingAddress: this.shippingAddress,
