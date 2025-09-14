@@ -20,9 +20,9 @@ service cloud.firestore {
         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
     }
     
-    // Allow access for development/testing
+    // Toggle for enabling relaxed access during development
     function isDevelopmentMode() {
-      return true; // Temporarily allow all access for development
+      return false;
     }
     
     // Enhanced admin check with fallback
@@ -62,10 +62,9 @@ service cloud.firestore {
 
     // Orders collection
     match /orders/{orderId} {
-      allow read: if isOwner(resource.data.userId) || isManagerOrDevelopment();
-      allow create: if isAuthenticated(); // Allow authenticated customers to create orders
-      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own orders
-      allow delete: if isAdminOrDevelopment();
+      allow create: if isAuthenticated();
+      allow read, update: if isOwner(resource.data.userId) || isManager();
+      allow delete: if isAdmin();
     }
 
     // Order items collection
@@ -106,10 +105,9 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isManagerOrDevelopment();
-      allow create: if isAuthenticated(); // Allow authenticated users to create their own user document
-      allow update: if isOwner(userId) || isManagerOrDevelopment(); // Allow customers to update their own profile
-      allow delete: if isManagerOrDevelopment(); // Only managers can delete user profiles
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow read, update: if isOwner(userId) || isManager();
+      allow delete: if isManager();
       
       // User subcollections
       match /addresses/{addressId} {
@@ -166,10 +164,9 @@ service cloud.firestore {
 
     // Payments collection
     match /payments/{paymentId} {
-      allow read: if isOwner(resource.data.userId) || isManagerOrDevelopment();
-      allow create: if isAuthenticated(); // Allow authenticated customers to create payments
-      allow update: if isOwner(resource.data.userId) || isManagerOrDevelopment(); // Allow customers to update their own payments
-      allow delete: if isManagerOrDevelopment(); // Only managers can delete payments
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow read: if isOwner(resource.data.userId) || isManager();
+      allow update, delete: if isManager();
     }
 
     // Settings collection

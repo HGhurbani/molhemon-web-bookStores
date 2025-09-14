@@ -1,6 +1,5 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const cors = require('cors')({ origin: true });
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -11,6 +10,9 @@ const db = admin.firestore();
 
 // Stripe Payment Intent
 exports.createStripePaymentIntent = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const stripe = require('stripe')(functions.config().stripe.secret_key);
     
@@ -38,6 +40,9 @@ exports.createStripePaymentIntent = functions.https.onCall(async (data, context)
 
 // PayPal Order Creation
 exports.createPayPalOrder = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const paypal = require('@paypal/checkout-server-sdk');
     
@@ -79,6 +84,9 @@ exports.createPayPalOrder = functions.https.onCall(async (data, context) => {
 
 // Process Order
 exports.processOrder = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const { orderData, paymentData } = data;
     
@@ -126,6 +134,9 @@ exports.processOrder = functions.https.onCall(async (data, context) => {
 
 // Calculate Shipping Cost
 exports.calculateShipping = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const { items, shippingAddress, shippingMethod } = data;
     
@@ -168,6 +179,9 @@ exports.calculateShipping = functions.https.onCall(async (data, context) => {
 
 // Update Stock
 exports.updateStock = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const { productId, quantity, operation = 'decrease' } = data;
     
@@ -203,6 +217,9 @@ exports.updateStock = functions.https.onCall(async (data, context) => {
 
 // Get Dashboard Stats
 exports.getDashboardStats = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
   try {
     const [booksSnap, ordersSnap, usersSnap, paymentsSnap] = await Promise.all([
       db.collection('books').get(),
