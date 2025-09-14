@@ -48,12 +48,18 @@ const ChatWidget = ({
 
   useEffect(() => {
     if (!isLoggedIn || !userId || targetUser) return;
-    api.getUser(userId).then(u => {
-      if (u) {
-        setName(u.name || '');
-        setEmail(u.email || '');
-      }
-    });
+
+    api
+      .getCustomer(userId)
+      .then((u) => {
+        if (u) {
+          setName(u.displayName || '');
+          setEmail(u.email || '');
+        }
+      })
+      .catch((error) => {
+        logger.error('Error fetching customer data:', error);
+      });
   }, [userId, isLoggedIn, targetUser]);
 
   useEffect(() => {
