@@ -12,11 +12,13 @@ import CartService from './services/CartService.js';
 import unifiedPaymentApi from './api/unifiedPaymentApi.js';
 import logger from './logger.js';
 import * as encryptedCache from './encryptedCache.js';
+import homeApi from './firebase/homeApi.js';
 
 // Firebase API هو الآن الخيار الوحيد مع Functions
 const api = {
   ...firebaseApi,
   ...firebaseFunctionsApi,
+  home: homeApi,
 
   // الحصول على الإعدادات مع كاش مشفر اختياري
   getSettings: async (forceRefresh = false) => {
