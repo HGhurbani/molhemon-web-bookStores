@@ -5,6 +5,7 @@
 import StoreSettings from '../models/StoreSettings.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
+import logger from '../logger.js';
 
 export class StoreSettingsService {
   constructor() {
@@ -287,7 +288,7 @@ export class StoreSettingsService {
       
       // التأكد من وجود طرق الشحن الافتراضية إذا لم تكن موجودة
       if (!settings.shippingMethods || Object.keys(settings.shippingMethods).length === 0) {
-        console.log('No shipping methods found, adding default methods');
+        logger.info('No shipping methods found, adding default methods');
         settings.shippingMethods = settings.getDefaultShippingMethods();
         await this.saveStoreSettings();
       }

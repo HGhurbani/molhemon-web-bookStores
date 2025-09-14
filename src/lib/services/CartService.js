@@ -6,6 +6,7 @@ import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import ProductService from './ProductService.js';
 import StoreSettingsService from './StoreSettingsService.js';
+import logger from '../logger.js';
 
 export class CartService {
   constructor() {
@@ -94,7 +95,7 @@ export class CartService {
       } catch (error) {
         if (error.code === 'cart/not-found' || error.code === 'cart/expired') {
           // إنشاء سلة جديدة إذا لم تكن موجودة أو منتهية الصلاحية
-          console.log(`Cart ${cartId} not found or expired, creating new cart for customer ${customerId}`);
+          logger.info(`Cart ${cartId} not found or expired, creating new cart for customer ${customerId}`);
           return await this.createCart(customerId);
         }
         throw error;

@@ -9,6 +9,8 @@ import { Shipping } from '../models/Shipping.js';
 import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
+import logger from '../logger.js';
+
 import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase.js';
 
@@ -43,7 +45,7 @@ export class OrderService {
                       orderData.shippingMethod?.type === 'pickup';
       
       if (isPickup) {
-        console.log('OrderService - Pickup method detected, setting shipping cost to 0');
+        logger.debug('OrderService - Pickup method detected, setting shipping cost to 0');
         order.shippingCost = 0;
       }
 
@@ -87,6 +89,59 @@ export class OrderService {
       orderDataToSave.orderedAt = serverTimestamp();
 
       if (orderDataToSave.stageHistory && orderDataToSave.stageHistory.length > 0) {
+        orderDataToSave.stageHistory[0].timestamp = firebaseApi.serverTimestamp();
+      }
+      
+      logger.debug('OrderService - Order before saving to Firebase:', {
+        subtotal: orderDataToSave.subtotal,
+        shippingCost: orderDataToSave.shippingCost,
+        taxAmount: orderDataToSave.taxAmount,
+        total: orderDataToSave.total,
+        totalAmount: orderDataToSave.totalAmount,
+        createdAt: orderDataToSave.createdAt
+      });
+      const orderDoc = await firebaseApi.addToCollection(this.collectionName, orderDataToSave);
+      logger.debug('Order document returned from Firebase:', orderDoc);
+      
+      // إضافة total إلى orderDoc إذا لم يكن موجوداً
+      if (orderDoc && !orderDoc.total) {
+        orderDoc.total = order.totalAmount;
+      }
+      
+      // التحقق من وجود معرف الطلب
+      if (!orderDoc || !orderDoc.id) {
+        logger.error('OrderService - Failed to get order ID from Firebase:', {
+          orderDoc,
+          hasId: orderDoc?.id,
+          orderDocKeys: orderDoc ? Object.keys(orderDoc) : 'N/A'
+        });
+        
+        // إنشاء معرف احتياطي
+        const fallbackId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        logger.info('OrderService - Using fallback order ID:', fallbackId);
+        
+        order.id = fallbackId;
+        order.total = order.totalAmount;
+        
+        // محاولة إعادة حفظ الطلب مع المعرف الاحتياطي
+        try {
+          const orderDataWithId = { ...order.toObject(), id: fallbackId };
+          await firebaseApi.updateCollection(this.collectionName, fallbackId, orderDataWithId);
+          logger.debug('OrderService - Order saved with fallback ID successfully');
+        } catch (retryError) {
+          logger.error('OrderService - Failed to save order with fallback ID:', retryError);
+          throw errorHandler.createError(
+            'DATABASE',
+            'database/order-creation-failed',
+            'فشل في إنشاء الطلب - لم يتم الحصول على معرف الطلب من Firebase',
+            'order-creation'
+          );
+        }
+      } else {
+        order.id = orderDoc.id;
+        order.total = orderDoc.total || order.totalAmount;
+        logger.debug('Order ID after assignment:', order.id);
+        logger.debug('Order total after assignment:', order.total);
         orderDataToSave.stageHistory[0].timestamp = serverTimestamp();
       }
 
@@ -189,7 +244,7 @@ export class OrderService {
         });
         
         // التحقق من صحة بيانات الشحن
-        console.log('Shipping data before validation:', {
+        logger.debug('Shipping data before validation:', {
           orderId: shipping.orderId,
           customerId: shipping.customerId,
           shippingAddress: shipping.shippingAddress,
@@ -198,7 +253,7 @@ export class OrderService {
         });
         
         const shippingValidationErrors = shipping.validate();
-        console.log('Shipping validation errors:', shippingValidationErrors);
+        logger.debug('Shipping validation errors:', shippingValidationErrors);
         
         if (shippingValidationErrors.length > 0) {
           // حذف الطلب وعناصره إذا فشل التحقق من الشحن
@@ -214,7 +269,7 @@ export class OrderService {
                 }
               }
             } catch (deleteError) {
-              console.error('Error cleaning up order after shipping validation failure:', deleteError);
+              logger.error('Error cleaning up order after shipping validation failure:', deleteError);
             }
           }
           throw errorHandler.createError(
@@ -233,14 +288,14 @@ export class OrderService {
       orderResult.total = order.total || order.totalAmount;
       
       // تسجيل مفصل قبل الإرجاع
-      console.log('OrderService - Final order result:', {
+      logger.debug('OrderService - Final order result:', {
         id: orderResult.id,
         total: orderResult.total,
         totalAmount: orderResult.totalAmount,
         keys: Object.keys(orderResult)
       });
-      console.log('OrderService - Order items count:', orderItems.length);
-      console.log('OrderService - Has shipping:', !!shipping);
+      logger.debug('OrderService - Order items count:', orderItems.length);
+      logger.debug('OrderService - Has shipping:', !!shipping);
       
       const finalResult = {
         order: orderResult,
@@ -248,7 +303,7 @@ export class OrderService {
         shipping: shipping ? shipping.toObject() : null
       };
       
-      console.log('OrderService - Returning final result:', {
+      logger.debug('OrderService - Returning final result:', {
         hasOrder: !!finalResult.order,
         orderId: finalResult.order?.id,
         itemsCount: finalResult.items?.length,
@@ -269,7 +324,7 @@ export class OrderService {
     try {
       // التحقق من صحة معرف الطلب
       if (!orderId || orderId === 'null' || orderId === 'undefined' || orderId.trim() === '') {
-        console.error('OrderService - Invalid order ID:', { orderId, type: typeof orderId });
+        logger.error('OrderService - Invalid order ID:', { orderId, type: typeof orderId });
         throw errorHandler.createError(
           'VALIDATION',
           'validation/invalid-order-id',
@@ -278,11 +333,11 @@ export class OrderService {
         );
       }
       
-      console.log('OrderService - Getting order by ID:', orderId);
+      logger.debug('OrderService - Getting order by ID:', orderId);
       
       const orderDoc = await firebaseApi.getDocById(this.collectionName, orderId);
       if (!orderDoc) {
-        console.error('OrderService - Order not found in Firebase:', { orderId });
+        logger.error('OrderService - Order not found in Firebase:', { orderId });
         throw errorHandler.createError(
           'NOT_FOUND',
           'order/not-found',
@@ -291,7 +346,7 @@ export class OrderService {
         );
       }
       
-      console.log('OrderService - Order found:', { id: orderDoc.id, status: orderDoc.status });
+      logger.debug('OrderService - Order found:', { id: orderDoc.id, status: orderDoc.status });
 
       const order = new Order(orderDoc);
       
@@ -469,7 +524,7 @@ export class OrderService {
           break;
       }
     } catch (error) {
-      console.error('Error handling stage transition:', error);
+      logger.error('Error handling stage transition:', error);
       // لا نوقف العملية إذا فشلت المعالجة الإضافية
     }
   }
@@ -503,7 +558,7 @@ export class OrderService {
       await this.sendDigitalDeliveryNotification(orderId, orderModel, digitalItems);
       
     } catch (error) {
-      console.error('Error delivering digital products:', error);
+      logger.error('Error delivering digital products:', error);
     }
   }
 
@@ -523,7 +578,7 @@ export class OrderService {
    */
   async sendDigitalDeliveryNotification(orderId, orderModel, digitalItems) {
     // محاكاة إرسال إشعار
-    console.log(`Digital products delivered for order ${orderId}:`, digitalItems);
+    logger.debug(`Digital products delivered for order ${orderId}:`, digitalItems);
     
     // في التطبيق الحقيقي، سيتم إرسال إيميل أو إشعار للعميل
     // مع روابط التحميل
@@ -534,7 +589,7 @@ export class OrderService {
    */
   async sendShippingNotification(orderId, orderModel) {
     // محاكاة إرسال إشعار الشحن
-    console.log(`Shipping notification sent for order ${orderId}`);
+    logger.debug(`Shipping notification sent for order ${orderId}`);
   }
 
   /**
@@ -542,7 +597,7 @@ export class OrderService {
    */
   async sendDeliveryNotification(orderId, orderModel) {
     // محاكاة إرسال إشعار التسليم مع رابط التقييم
-    console.log(`Delivery notification sent for order ${orderId}`);
+    logger.debug(`Delivery notification sent for order ${orderId}`);
   }
 
   /**
@@ -550,7 +605,7 @@ export class OrderService {
    */
   async completeOrder(orderId, orderModel) {
     // محاكاة إكمال الطلب
-    console.log(`Order ${orderId} completed successfully`);
+    logger.debug(`Order ${orderId} completed successfully`);
   }
 
   /**
@@ -763,7 +818,7 @@ export class OrderService {
         }
       }
     } catch (error) {
-      console.error('Error returning items to inventory:', error);
+      logger.error('Error returning items to inventory:', error);
     }
   }
 
@@ -846,7 +901,7 @@ export class OrderService {
       const processedOrders = orders.map(order => {
         // إذا لم يكن هناك معرف، استخدم orderNumber كمعرف مؤقت
         if (!order.id && order.orderNumber) {
-          console.warn('Order ID is missing, using orderNumber as fallback:', order.orderNumber);
+          logger.info('Order ID is missing, using orderNumber as fallback:', order.orderNumber);
           order.id = order.orderNumber;
         }
         
@@ -856,7 +911,7 @@ export class OrderService {
         // التأكد من وجود معرف في النتيجة النهائية
         if (!result.id && result.orderNumber) {
           result.id = result.orderNumber;
-          console.warn('Order ID was lost during processing, restored from orderNumber:', result.id);
+          logger.info('Order ID was lost during processing, restored from orderNumber:', result.id);
         }
         
         return result;

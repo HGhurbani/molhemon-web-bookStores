@@ -6,6 +6,7 @@ import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js
 import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
+import logger from '../logger.js';
 
 export class PaymentService {
   constructor() {
@@ -629,7 +630,7 @@ export class PaymentService {
       
       return totalFees;
     } catch (error) {
-      console.error('Error calculating payment fees:', error);
+      logger.error('Error calculating payment fees:', error);
       return 0;
     }
   }
@@ -649,7 +650,7 @@ export class PaymentService {
       const gateway = storeSettings.paymentGateways[method.gateway];
       return gateway && gateway.enabled;
     } catch (error) {
-      console.error('Error checking payment method availability:', error);
+      logger.error('Error checking payment method availability:', error);
       return false;
     }
   }
