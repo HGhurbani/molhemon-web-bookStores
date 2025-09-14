@@ -6,11 +6,13 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
+import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import OrderService from './OrderService.js';
 import PaymentService from './PaymentService.js';
 import ShippingService from './ShippingService.js';
 import ProductService from './ProductService.js';
+import logger from '../logger.js';
 
 export class CheckoutService {
   constructor() {
@@ -37,7 +39,7 @@ export class CheckoutService {
       } = checkoutData;
 
       // التحقق من صحة البيانات
-      console.log('CheckoutService - Validating checkout data:', {
+      logger.debug('CheckoutService - Validating checkout data:', {
         customerId: checkoutData.customerId,
         hasCustomerInfo: !!checkoutData.customerInfo,
         customerName: checkoutData.customerInfo?.name,
@@ -47,7 +49,7 @@ export class CheckoutService {
       
       const validationErrors = this.validateCheckoutData(checkoutData);
       if (validationErrors.length > 0) {
-        console.error('CheckoutService - Validation errors:', validationErrors);
+        logger.error('CheckoutService - Validation errors:', validationErrors);
         throw errorHandler.createError(
           'VALIDATION',
           'validation/checkout-invalid',
@@ -69,7 +71,7 @@ export class CheckoutService {
 
       // استخدام التكاليف المحسوبة مسبقاً أو حسابها
       let costCalculation;
-      console.log('CheckoutService - Received checkoutData:', {
+      logger.debug('CheckoutService - Received checkoutData:', {
         subtotal: checkoutData.subtotal,
         shippingCost: checkoutData.shippingCost,
         taxAmount: checkoutData.taxAmount,
@@ -87,11 +89,11 @@ export class CheckoutService {
           totalWeight: 0,
           packageDimensions: { length: 0, width: 0, height: 0 }
         };
-        console.log('CheckoutService - Using pre-calculated costs:', costCalculation);
+        logger.debug('CheckoutService - Using pre-calculated costs:', costCalculation);
       } else {
         // حساب التكاليف
         costCalculation = await this.calculateOrderCosts(items, shippingAddress, shippingMethod);
-        console.log('CheckoutService - Calculated costs:', costCalculation);
+        logger.debug('CheckoutService - Calculated costs:', costCalculation);
       }
       
       // إنشاء عناصر الطلب
@@ -114,7 +116,7 @@ export class CheckoutService {
       const finalShippingCost = isPickup ? 0 : costCalculation.shippingCost;
       const finalTotal = costCalculation.subtotal - (checkoutData.discountAmount || 0) + finalShippingCost + costCalculation.taxAmount;
 
-      console.log('CheckoutService - Shipping calculation:', {
+      logger.debug('CheckoutService - Shipping calculation:', {
         isPickup,
         originalShippingCost: costCalculation.shippingCost,
         finalShippingCost,
@@ -142,19 +144,30 @@ export class CheckoutService {
         notes
       };
 
-      console.log('CheckoutService - Creating order with data:', orderData);
+      logger.debug('CheckoutService - Creating order with data:', orderData);
+
+      // التحقق من صحة بيانات الطلب قبل الحفظ
+      const orderValidationErrors = validateData(orderData, Schemas.Order);
+      if (orderValidationErrors.length > 0) {
+        throw errorHandler.createError(
+          'VALIDATION',
+          'validation/order-invalid',
+          `خطأ في بيانات الطلب: ${orderValidationErrors.join(', ')}`,
+          'checkout-order-creation'
+        );
+      }
 
       const order = await this.orderService.createOrder(orderData);
       
       // تسجيل مفصل لبيانات الطلب المُنشأ
-      console.log('CheckoutService - Order created:', order);
-      console.log('CheckoutService - Order keys:', Object.keys(order));
-      console.log('CheckoutService - order.order:', order.order);
-      console.log('CheckoutService - order.order.id:', order.order?.id);
+      logger.debug('CheckoutService - Order created:', order);
+      logger.debug('CheckoutService - Order keys:', Object.keys(order));
+      logger.debug('CheckoutService - order.order:', order.order);
+      logger.debug('CheckoutService - order.order.id:', order.order?.id);
       
       // التحقق من وجود معرف الطلب
       if (!order.order || !order.order.id) {
-        console.error('CheckoutService - Order ID is missing after creation:', {
+        logger.error('CheckoutService - Order ID is missing after creation:', {
           hasOrder: !!order.order,
           orderId: order.order?.id,
           orderKeys: order.order ? Object.keys(order.order) : 'N/A'
@@ -170,7 +183,7 @@ export class CheckoutService {
       // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية)
       let shipping = null;
       if (this.hasPhysicalItems(items)) {
-        shipping = await this.shippingService.createShipping({
+        const shippingData = {
           orderId: order.order.id,
           customerId,
           shippingMethod,
@@ -178,11 +191,21 @@ export class CheckoutService {
           packageWeight: costCalculation.totalWeight,
           packageDimensions: costCalculation.packageDimensions,
           packageCount: items.length
-        });
+        };
+        const shippingErrors = validateData(shippingData, Schemas.Shipping);
+        if (shippingErrors.length > 0) {
+          throw errorHandler.createError(
+            'VALIDATION',
+            'validation/shipping-invalid',
+            `خطأ في بيانات الشحن: ${shippingErrors.join(', ')}`,
+            'checkout-shipping-creation'
+          );
+        }
+        shipping = await this.shippingService.createShipping(shippingData);
       }
 
       // إنشاء عملية الدفع
-      const payment = await this.paymentService.createPayment({
+      const paymentData = {
         orderId: order.order.id,
         customerId,
         amount: order.order.total,
@@ -192,7 +215,17 @@ export class CheckoutService {
         customerEmail: customerInfo.email,
         customerPhone: customerInfo.phone,
         billingAddress: shippingAddress
-      });
+      };
+      const paymentErrors = validateData(paymentData, Schemas.Payment);
+      if (paymentErrors.length > 0) {
+        throw errorHandler.createError(
+          'VALIDATION',
+          'validation/payment-invalid',
+          `خطأ في بيانات الدفع: ${paymentErrors.join(', ')}`,
+          'checkout-payment-creation'
+        );
+      }
+      const payment = await this.paymentService.createPayment(paymentData);
 
       // معالجة الدفع
       let paymentResult;
@@ -236,7 +269,7 @@ export class CheckoutService {
 
       // التحقق من وجود الطلب في النتيجة
       if (!order || !order.order) {
-        console.error('CheckoutService - Order is missing in result:', order);
+        logger.error('CheckoutService - Order is missing in result:', order);
         throw errorHandler.createError(
           'VALIDATION',
           'validation/order-missing',
@@ -247,7 +280,7 @@ export class CheckoutService {
 
       // التحقق من وجود معرف الطلب
       if (!order.order.id) {
-        console.error('CheckoutService - Order ID is missing:', order.order);
+        logger.error('CheckoutService - Order ID is missing:', order.order);
         throw errorHandler.createError(
           'VALIDATION',
           'validation/order-id-missing',
@@ -256,7 +289,7 @@ export class CheckoutService {
         );
       }
 
-      console.log('CheckoutService - Final order result:', {
+      logger.debug('CheckoutService - Final order result:', {
         hasOrder: !!order.order,
         orderId: order.order.id,
         orderNumber: order.order.orderNumber
@@ -354,7 +387,7 @@ export class CheckoutService {
         }
       }
     } catch (error) {
-      console.error('Error updating stock for order:', error);
+      logger.error('Error updating stock for order:', error);
     }
   }
 
@@ -669,7 +702,7 @@ export class CheckoutService {
       const fees = this.paymentService.calculatePaymentFees(orderTotal, paymentMethod);
       return fees;
     } catch (error) {
-      console.error('Error calculating payment fees:', error);
+      logger.error('Error calculating payment fees:', error);
       return 0;
     }
   }
@@ -681,7 +714,7 @@ export class CheckoutService {
     try {
       return await this.paymentService.isPaymentMethodAvailable(paymentMethodId);
     } catch (error) {
-      console.error('Error checking payment method availability:', error);
+      logger.error('Error checking payment method availability:', error);
       return false;
     }
   }

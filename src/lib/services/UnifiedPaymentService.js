@@ -7,6 +7,7 @@ import { paymentManager } from '../payment/PaymentManager.js';
 import { Payment } from '../models/Payment.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
+import logger from '../logger.js';
 
 export class UnifiedPaymentService {
   constructor() {
@@ -27,10 +28,10 @@ export class UnifiedPaymentService {
       
       this.isInitialized = true;
       
-      console.log('Unified Payment Service initialized successfully');
+      logger.info('Unified Payment Service initialized successfully');
       return { success: true };
     } catch (error) {
-      console.error('Unified Payment Service initialization failed:', error);
+      logger.error('Unified Payment Service initialization failed:', error);
       throw error;
     }
   }
@@ -43,7 +44,7 @@ export class UnifiedPaymentService {
       const settings = await firebaseApi.getSettings();
       return settings.payments || {};
     } catch (error) {
-      console.error('Failed to get payment settings:', error);
+      logger.error('Failed to get payment settings:', error);
       return {};
     }
   }
@@ -511,7 +512,7 @@ export class UnifiedPaymentService {
       
       return totalFees;
     } catch (error) {
-      console.error('Error calculating payment fees:', error);
+      logger.error('Error calculating payment fees:', error);
       return 0;
     }
   }
@@ -528,7 +529,7 @@ export class UnifiedPaymentService {
       const availableMethods = paymentManager.getAvailablePaymentMethods(orderData);
       return availableMethods.some(method => method.provider === providerName);
     } catch (error) {
-      console.error('Error checking payment method availability:', error);
+      logger.error('Error checking payment method availability:', error);
       return false;
     }
   }

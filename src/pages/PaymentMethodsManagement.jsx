@@ -29,13 +29,15 @@ import {
   Banknote,
   Wallet
 } from 'lucide-react';
-import api from '@/lib/api.js';
+import { db } from '@/lib/firebase.js';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const PaymentMethodsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [paymentGateways, setPaymentGateways] = useState({});
   const [paymentMethods, setPaymentMethods] = useState({});
+  const [error, setError] = useState(null);
   const [showGatewayForm, setShowGatewayForm] = useState(false);
   const [editingGateway, setEditingGateway] = useState(null);
   const [gatewayForm, setGatewayForm] = useState({});
@@ -174,29 +176,27 @@ const PaymentMethodsManagement = () => {
   };
 
   useEffect(() => {
-    loadPaymentSettings();
+    const unsub = loadPaymentSettings();
+    return () => unsub && unsub();
   }, []);
 
-  const loadPaymentSettings = async () => {
+  const loadPaymentSettings = () => {
     try {
       setLoading(true);
-      const settings = await api.storeSettings.getStoreSettings();
-      
-      if (settings.paymentGateways) {
-        setPaymentGateways(settings.paymentGateways);
-      }
-      
-      if (settings.paymentMethods) {
-        setPaymentMethods(settings.paymentMethods);
-      }
-    } catch (error) {
-      console.error('Error loading payment settings:', error);
-      toast({
-        title: 'خطأ في تحميل إعدادات الدفع',
-        description: error.message,
-        variant: 'destructive'
+      const ref = doc(db, 'store_settings', 'main');
+      return onSnapshot(ref, (snap) => {
+        const data = snap.data() || {};
+        if (data.paymentGateways) setPaymentGateways(data.paymentGateways);
+        if (data.paymentMethods) setPaymentMethods(data.paymentMethods);
+        setLoading(false);
+      }, (err) => {
+        console.error('Error loading payment settings:', err);
+        setError('خطأ في تحميل إعدادات الدفع');
+        setLoading(false);
       });
-    } finally {
+    } catch (err) {
+      console.error('Error loading payment settings:', err);
+      setError('خطأ في تحميل إعدادات الدفع');
       setLoading(false);
     }
   };
@@ -213,6 +213,11 @@ const PaymentMethodsManagement = () => {
 
       setPaymentGateways(updatedGateways);
       await api.storeSettings.savePaymentGateways(updatedGateways);
+
+      
+      await updateDoc(doc(db, 'store_settings', 'main'), {
+        paymentGateways: updatedGateways
+      });
       
       toast({
         title: enabled ? 'تم تفعيل البوابة' : 'تم إلغاء تفعيل البوابة',
@@ -268,6 +273,10 @@ const PaymentMethodsManagement = () => {
       
       setPaymentGateways(updatedGateways);
       await api.storeSettings.savePaymentGateways(updatedGateways);
+      
+      await updateDoc(doc(db, 'store_settings', 'main'), {
+        paymentGateways: updatedGateways
+      });
       
       setShowGatewayForm(false);
       setEditingGateway(null);
@@ -347,6 +356,10 @@ const PaymentMethodsManagement = () => {
       setPaymentGateways(updatedGateways);
       await api.storeSettings.savePaymentGateways(updatedGateways);
       
+      await updateDoc(doc(db, 'store_settings', 'main'), {
+        paymentGateways: updatedGateways
+      });
+      
       toast({
         title: 'تم حذف البوابة بنجاح',
         variant: 'success'
@@ -399,6 +412,18 @@ const PaymentMethodsManagement = () => {
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">جاري تحميل إعدادات الدفع...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => { setError(null); loadPaymentSettings(); }} className="bg-blue-600 hover:bg-blue-700">إعادة المحاولة</Button>
         </div>
       </div>
     );
