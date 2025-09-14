@@ -92,6 +92,7 @@ const App = () => {
   const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
   const [messages, setMessages] = useState([]);
+  const [notifications, setNotifications] = useState(() => JSON.parse(localStorage.getItem('notifications') || '[]'));
   const [paymentMethods, setPaymentMethods] = useState(() => {
     const stored = localStorage.getItem('paymentMethods');
     return stored ? JSON.parse(stored) : initialPaymentMethods;
@@ -507,6 +508,10 @@ const App = () => {
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
 
+  useEffect(() => {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
   // تحديث إحصائيات لوحة التحكم
   useEffect(() => {
     const sales = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
@@ -732,6 +737,8 @@ const App = () => {
                       setUsers={setUsers}
                       messages={messages}
                       setMessages={setMessages}
+                      notifications={notifications}
+                      setNotifications={setNotifications}
                       siteSettings={siteSettingsState}
                       setSiteSettings={setSiteSettingsState}
                       sliders={heroSlidesState}
