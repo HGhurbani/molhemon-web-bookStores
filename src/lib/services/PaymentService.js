@@ -7,12 +7,27 @@ import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
+import { paymentManager } from '../payment/PaymentManager.js';
 
 const { Schemas, validateData } = schemas;
 
 export class PaymentService {
   constructor() {
     this.collectionName = 'payments';
+  }
+
+  /**
+   * تحويل طريقة الدفع إلى مزود المدفوعات المناسب
+   */
+  mapPaymentMethodToProvider(paymentMethod) {
+    switch (paymentMethod) {
+      case PAYMENT_METHODS.PAYPAL:
+        return 'paypal';
+      case PAYMENT_METHODS.CASH_ON_DELIVERY:
+        return 'cash_on_delivery';
+      default:
+        return 'stripe';
+    }
   }
 
   /**
@@ -34,11 +49,29 @@ export class PaymentService {
         );
       }
 
+      // إنشاء Payment Intent عبر مدير المدفوعات
+      const paymentIntent = await paymentManager.createPaymentIntent({
+        amount: payment.amount,
+        currency: payment.currency,
+        provider: this.mapPaymentMethodToProvider(payment.paymentMethod),
+        metadata: payment.metadata
+      });
+
+      // حفظ معلومات المزود وPayment Intent
+      payment.paymentDetails = {
+        ...payment.paymentDetails,
+        paymentIntentId: paymentIntent.id,
+        provider: paymentIntent.provider,
+        providerInfo: paymentIntent.providerInfo
+      };
+      payment.paymentStatus = paymentIntent.status;
+      payment.gatewayResponse = paymentIntent;
+
       // حفظ الدفع في Firebase
       const paymentDoc = await firebaseApi.addToCollection(this.collectionName, payment.toObject());
       payment.id = paymentDoc.id;
 
-      return payment.toObject();
+      return { ...payment.toObject(), paymentIntent };
 
     } catch (error) {
       throw errorHandler.handleError(error, 'payment-creation');
@@ -63,55 +96,23 @@ export class PaymentService {
       // تحديث حالة الدفع إلى "قيد المعالجة"
       await this.updatePaymentStatus(paymentId, 'processing');
 
-      let result;
-      
-      // معالجة الدفع حسب الطريقة
-      switch (paymentMethod) {
-        case PAYMENT_METHODS.CREDIT_CARD:
-        case PAYMENT_METHODS.DEBIT_CARD:
-          result = await this.processCardPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.PAYPAL:
-          result = await this.processPayPalPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.APPLE_PAY:
-          result = await this.processApplePayPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.GOOGLE_PAY:
-          result = await this.processGooglePayPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.BANK_TRANSFER:
-          result = await this.processBankTransferPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.CASH_ON_DELIVERY:
-          result = await this.processCashOnDeliveryPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.CRYPTOCURRENCY:
-          result = await this.processCryptoPayment(payment, paymentDetails);
-          break;
-        case PAYMENT_METHODS.MANUAL:
-          result = await this.processManualPayment(payment, paymentDetails);
-          break;
-        default:
-          throw errorHandler.createError(
-            'VALIDATION',
-            'payment/unsupported-method',
-            'طريقة الدفع غير مدعومة',
-            `payment-process:${paymentId}`
-          );
-      }
+      // تأكيد الدفع عبر مدير المدفوعات
+      const result = await paymentManager.confirmPayment(
+        payment.paymentDetails?.paymentIntentId,
+        paymentDetails
+      );
 
-      // تحديث حالة الدفع
-      if (result.success) {
-        await this.updatePaymentStatus(paymentId, 'completed', {
-          transactionId: result.transactionId,
-          gatewayResponse: result.gatewayResponse
-        });
-      } else {
-        await this.updatePaymentStatus(paymentId, 'failed', {
-          error: result.error
-        });
-      }
+      // تحديد حالة الدفع بناءً على نتيجة البوابة
+      const newStatus = ['succeeded', 'captured', 'completed'].includes(result.status)
+        ? 'completed'
+        : result.status === 'processing'
+          ? 'processing'
+          : 'failed';
+
+      await this.updatePaymentStatus(paymentId, newStatus, {
+        transactionId: result.id,
+        gatewayResponse: result
+      });
 
       return result;
 
@@ -125,221 +126,6 @@ export class PaymentService {
     }
   }
 
-  /**
-   * معالجة دفع البطاقة
-   */
-  async processCardPayment(payment, cardDetails) {
-    try {
-      // هنا يتم ربط بوابات الدفع الفعلية
-      // مثل Stripe, PayFort, MyFatoorah
-      
-      // محاكاة معالجة الدفع
-      const isSuccess = Math.random() > 0.1; // 90% نجاح
-      
-      if (isSuccess) {
-        // تحديث معلومات البطاقة
-        payment.setCardInfo({
-          last4: cardDetails.number.slice(-4),
-          brand: cardDetails.brand || 'visa',
-          expMonth: cardDetails.expMonth,
-          expYear: cardDetails.expYear
-        });
-
-        return {
-          success: true,
-          transactionId: `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          gatewayResponse: {
-            status: 'success',
-            message: 'تم الدفع بنجاح'
-          }
-        };
-      } else {
-        return {
-          success: false,
-          error: 'فشل في معالجة الدفع'
-        };
-      }
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'card-payment');
-    }
-  }
-
-  /**
-   * معالجة دفع PayPal
-   */
-  async processPayPalPayment(payment, paypalDetails) {
-    try {
-      // محاكاة معالجة PayPal
-      const isSuccess = Math.random() > 0.05; // 95% نجاح
-      
-      if (isSuccess) {
-        return {
-          success: true,
-          transactionId: `PP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          gatewayResponse: {
-            status: 'success',
-            message: 'تم الدفع عبر PayPal بنجاح'
-          }
-        };
-      } else {
-        return {
-          success: false,
-          error: 'فشل في معالجة دفع PayPal'
-        };
-      }
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'paypal-payment');
-    }
-  }
-
-  /**
-   * معالجة دفع Apple Pay
-   */
-  async processApplePayPayment(payment, applePayDetails) {
-    try {
-      // محاكاة معالجة Apple Pay
-      const isSuccess = Math.random() > 0.05; // 95% نجاح
-      
-      if (isSuccess) {
-        return {
-          success: true,
-          transactionId: `AP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          gatewayResponse: {
-            status: 'success',
-            message: 'تم الدفع عبر Apple Pay بنجاح'
-          }
-        };
-      } else {
-        return {
-          success: false,
-          error: 'فشل في معالجة دفع Apple Pay'
-        };
-      }
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'apple-pay-payment');
-    }
-  }
-
-  /**
-   * معالجة دفع Google Pay
-   */
-  async processGooglePayPayment(payment, googlePayDetails) {
-    try {
-      // محاكاة معالجة Google Pay
-      const isSuccess = Math.random() > 0.05; // 95% نجاح
-      
-      if (isSuccess) {
-        return {
-          success: true,
-          transactionId: `GP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          gatewayResponse: {
-            status: 'success',
-            message: 'تم الدفع عبر Google Pay بنجاح'
-          }
-        };
-      } else {
-        return {
-          success: false,
-          error: 'فشل في معالجة دفع Google Pay'
-        };
-      }
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'google-pay-payment');
-    }
-  }
-
-  /**
-   * معالجة التحويل البنكي
-   */
-  async processBankTransferPayment(payment, bankDetails) {
-    try {
-      // التحويل البنكي يتم تأكيده يدوياً
-      return {
-        success: true,
-        transactionId: `BT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        gatewayResponse: {
-          status: 'pending',
-          message: 'تم إرسال تفاصيل التحويل البنكي، سيتم التأكيد خلال 24-48 ساعة'
-        }
-      };
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'bank-transfer-payment');
-    }
-  }
-
-  /**
-   * معالجة الدفع عند الاستلام
-   */
-  async processCashOnDeliveryPayment(payment, codDetails) {
-    try {
-      // الدفع عند الاستلام
-      return {
-        success: true,
-        transactionId: `COD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        gatewayResponse: {
-          status: 'pending',
-          message: 'سيتم الدفع عند استلام الطلب'
-        }
-      };
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'cash-on-delivery-payment');
-    }
-  }
-
-  /**
-   * معالجة دفع العملات الرقمية
-   */
-  async processCryptoPayment(payment, cryptoDetails) {
-    try {
-      // محاكاة معالجة العملات الرقمية
-      const isSuccess = Math.random() > 0.1; // 90% نجاح
-      
-      if (isSuccess) {
-        return {
-          success: true,
-          transactionId: `CRYPTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          gatewayResponse: {
-            status: 'success',
-            message: 'تم الدفع بالعملة الرقمية بنجاح'
-          }
-        };
-      } else {
-        return {
-          success: false,
-          error: 'فشل في معالجة الدفع بالعملة الرقمية'
-        };
-      }
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'crypto-payment');
-    }
-  }
-
-  /**
-   * معالجة الدفع اليدوي
-   */
-  async processManualPayment(payment, manualDetails) {
-    try {
-      // الدفع اليدوي (مثل الدفع عند الاستلام أو التحويل البنكي)
-      return {
-        success: true,
-        transactionId: `MANUAL_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        gatewayResponse: {
-          status: 'pending',
-          message: 'سيتم معالجة الدفع يدوياً'
-        }
-      };
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'manual-payment');
-    }
-  }
 
   /**
    * الحصول على دفع بواسطة المعرف
@@ -537,82 +323,6 @@ export class PaymentService {
       return availableMethods;
     } catch (error) {
       throw errorHandler.handleError(error, 'payment-methods:get');
-    }
-  }
-
-  /**
-   * معالجة الدفع عبر Tabby
-   */
-  async processTabbyPayment(payment, paymentDetails) {
-    try {
-      // محاكاة معالجة الدفع عبر Tabby
-      const result = {
-        success: true,
-        transactionId: `tabby_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        message: 'تم معالجة الدفع عبر Tabby بنجاح',
-        installmentPlan: paymentDetails.installmentPlan || 4,
-        monthlyPayment: payment.amount / (paymentDetails.installmentPlan || 4)
-      };
-      
-      return result;
-    } catch (error) {
-      throw errorHandler.handleError(error, 'tabby-payment-process');
-    }
-  }
-
-  /**
-   * معالجة الدفع عبر Tamara
-   */
-  async processTamaraPayment(payment, paymentDetails) {
-    try {
-      // محاكاة معالجة الدفع عبر Tamara
-      const result = {
-        success: true,
-        transactionId: `tamara_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        message: 'تم معالجة الدفع عبر Tamara بنجاح',
-        installmentPlan: paymentDetails.installmentPlan || 3,
-        monthlyPayment: payment.amount / (paymentDetails.installmentPlan || 3)
-      };
-      
-      return result;
-    } catch (error) {
-      throw errorHandler.handleError(error, 'tamara-payment-process');
-    }
-  }
-
-  /**
-   * معالجة الدفع عبر STC Pay
-   */
-  async processSTCPayPayment(payment, paymentDetails) {
-    try {
-      // محاكاة معالجة الدفع عبر STC Pay
-      const result = {
-        success: true,
-        transactionId: `stc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        message: 'تم معالجة الدفع عبر STC Pay بنجاح'
-      };
-      
-      return result;
-    } catch (error) {
-      throw errorHandler.handleError(error, 'stc-payment-process');
-    }
-  }
-
-  /**
-   * معالجة الدفع عبر Urway
-   */
-  async processUrwayPayment(payment, paymentDetails) {
-    try {
-      // محاكاة معالجة الدفع عبر Urway
-      const result = {
-        success: true,
-        transactionId: `urway_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        message: 'تم معالجة الدفع عبر Urway بنجاح'
-      };
-      
-      return result;
-    } catch (error) {
-      throw errorHandler.handleError(error, 'urway-payment-process');
     }
   }
 
