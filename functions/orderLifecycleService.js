@@ -1,5 +1,5 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+import functions from 'firebase-functions';
+import admin from 'firebase-admin';
 
 // reuse initialized admin app from index.js or initialize if not already
 try {
@@ -11,7 +11,7 @@ try {
 const db = admin.firestore();
 
 // Handle payment provider webhooks
-const handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
+export const handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
   try {
     const { orderId, status } = req.body;
     if (!orderId || !status) {
@@ -42,7 +42,7 @@ const handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
 });
 
 // Handle shipping provider webhooks
-const handleShipmentWebhook = functions.https.onRequest(async (req, res) => {
+export const handleShipmentWebhook = functions.https.onRequest(async (req, res) => {
   try {
     const { orderId, status } = req.body;
     if (!orderId || !status) {
@@ -84,7 +84,7 @@ const handleShipmentWebhook = functions.https.onRequest(async (req, res) => {
 });
 
 // Scheduled function to clean up pending orders
-const checkPendingOrders = functions.pubsub
+export const checkPendingOrders = functions.pubsub
   .schedule('every 24 hours')
   .timeZone('Asia/Riyadh')
   .onRun(async () => {
@@ -123,8 +123,3 @@ const checkPendingOrders = functions.pubsub
     return null;
   });
 
-module.exports = {
-  handlePaymentWebhook,
-  handleShipmentWebhook,
-  checkPendingOrders,
-};

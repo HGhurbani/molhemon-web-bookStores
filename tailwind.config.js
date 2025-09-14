@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-const plugin = require('tailwindcss/plugin');
+import plugin from 'tailwindcss/plugin';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
-module.exports = {
+export default {
 	darkMode: ['class'],
 	content: [
 		'./pages/**/*.{js,jsx}',
@@ -98,7 +99,7 @@ module.exports = {
 		},
 	},
         plugins: [
-                require('tailwindcss-animate'),
+                tailwindcssAnimate,
                 plugin(function({ addVariant }) {
                         addVariant('rtl', '&[dir="rtl"] &, [dir="rtl"] &');
                         addVariant('ltr', '&[dir="ltr"] &, [dir="ltr"] &');

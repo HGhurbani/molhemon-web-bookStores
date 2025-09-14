@@ -1,28 +1,29 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+import functions from 'firebase-functions';
+import admin from 'firebase-admin';
+import { Schemas, validateData } from '../shared/schemas.js';
+import Stripe from 'stripe';
+import paypal from '@paypal/checkout-server-sdk';
 
-const orderLifecycle = require('./orderLifecycleService');
-const { Schemas, validateData } = require('../shared/schemas.js');
-
-// Initialize Firebase Admin
-admin.initializeApp();
+try {
+  admin.app();
+} catch (e) {
+  admin.initializeApp();
+}
 
 const db = admin.firestore();
 
-// Status synchronization
-const statusSync = require('./statusSync');
-exports.syncPaymentStatus = statusSync.syncPaymentStatus;
-exports.syncShippingStatus = statusSync.syncShippingStatus;
+export { syncPaymentStatus, syncShippingStatus } from './statusSync.js';
+export { handlePaymentWebhook, handleShipmentWebhook, checkPendingOrders } from './orderLifecycleService.js';
 
 // ===== PAYMENT FUNCTIONS =====
 
 // Stripe Payment Intent
-exports.createStripePaymentIntent = functions.https.onCall(async (data, context) => {
+export const createStripePaymentIntent = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
   try {
-    const stripe = require('stripe')(functions.config().stripe.secret_key);
+    const stripe = new Stripe(functions.config().stripe.secret_key);
     
     const { amount, currency = 'SAR', metadata = {} } = data;
     
@@ -47,15 +48,13 @@ exports.createStripePaymentIntent = functions.https.onCall(async (data, context)
 });
 
 // PayPal Order Creation
-exports.createPayPalOrder = functions.https.onCall(async (data, context) => {
+export const createPayPalOrder = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
   try {
-    const paypal = require('@paypal/checkout-server-sdk');
-    
     const { amount, currency = 'SAR' } = data;
-    
+
     const environment = new paypal.core.SandboxEnvironment(
       functions.config().paypal.client_id,
       functions.config().paypal.client_secret
@@ -91,7 +90,7 @@ exports.createPayPalOrder = functions.https.onCall(async (data, context) => {
 // ===== ORDER PROCESSING =====
 
 // Process Order
-exports.processOrder = functions.https.onCall(async (data, context) => {
+export const processOrder = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
@@ -141,7 +140,7 @@ exports.processOrder = functions.https.onCall(async (data, context) => {
 // ===== SHIPPING CALCULATION =====
 
 // Calculate Shipping Cost
-exports.calculateShipping = functions.https.onCall(async (data, context) => {
+export const calculateShipping = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
@@ -186,7 +185,7 @@ exports.calculateShipping = functions.https.onCall(async (data, context) => {
 // ===== INVENTORY MANAGEMENT =====
 
 // Update Stock
-exports.updateStock = functions.https.onCall(async (data, context) => {
+export const updateStock = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
@@ -222,7 +221,7 @@ exports.updateStock = functions.https.onCall(async (data, context) => {
 });
 
 // ===== SCHEMA VALIDATION =====
-exports.validateSchema = functions.firestore.document('{collectionId}/{docId}').onCreate(async (snap, context) => {
+export const validateSchema = functions.firestore.document('{collectionId}/{docId}').onCreate(async (snap, context) => {
   const { collectionId } = context.params;
   const data = snap.data();
   let schema = null;
@@ -255,7 +254,7 @@ exports.validateSchema = functions.firestore.document('{collectionId}/{docId}').
 // ===== ANALYTICS =====
 
 // Get Dashboard Stats
-exports.getDashboardStats = functions.https.onCall(async (data, context) => {
+export const getDashboardStats = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
@@ -293,7 +292,7 @@ exports.getDashboardStats = functions.https.onCall(async (data, context) => {
 // ===== EMAIL NOTIFICATIONS =====
 
 // Send Order Confirmation
-exports.sendOrderConfirmation = functions.firestore
+export const sendOrderConfirmation = functions.firestore
   .document('orders/{orderId}')
   .onCreate(async (snap, context) => {
     try {
@@ -313,7 +312,7 @@ exports.sendOrderConfirmation = functions.firestore
 // ===== BACKUP AND MAINTENANCE =====
 
 // Daily Backup
-exports.dailyBackup = functions.pubsub
+export const dailyBackup = functions.pubsub
   .schedule('0 2 * * *') // Run at 2 AM daily
   .timeZone('Asia/Riyadh')
   .onRun(async (context) => {
@@ -347,7 +346,7 @@ exports.dailyBackup = functions.pubsub
 // ===== SECURITY RULES HELPERS =====
 
 // Validate User Access
-exports.validateUserAccess = functions.https.onCall(async (data, context) => {
+export const validateUserAccess = functions.https.onCall(async (data, context) => {
   try {
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
@@ -379,6 +378,4 @@ exports.validateUserAccess = functions.https.onCall(async (data, context) => {
 });
 
 // ===== ORDER LIFECYCLE SERVICE =====
-exports.handlePaymentWebhook = orderLifecycle.handlePaymentWebhook;
-exports.handleShipmentWebhook = orderLifecycle.handleShipmentWebhook;
-exports.checkPendingOrders = orderLifecycle.checkPendingOrders;
+// Exported from orderLifecycleService.js
