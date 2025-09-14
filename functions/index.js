@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
+const { Schemas, validateData } = require('../src/lib/models/schemas.js');
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -202,6 +203,37 @@ exports.updateStock = functions.https.onCall(async (data, context) => {
     console.error('Stock Update Error:', error);
     throw new functions.https.HttpsError('internal', error.message);
   }
+});
+
+// ===== SCHEMA VALIDATION =====
+exports.validateSchema = functions.firestore.document('{collectionId}/{docId}').onCreate(async (snap, context) => {
+  const { collectionId } = context.params;
+  const data = snap.data();
+  let schema = null;
+
+  switch (collectionId) {
+    case 'orders':
+      schema = Schemas.Order;
+      break;
+    case 'order_items':
+      schema = Schemas.OrderItem;
+      break;
+    case 'payments':
+      schema = Schemas.Payment;
+      break;
+    case 'shipping':
+      schema = Schemas.Shipping;
+      break;
+    default:
+      return null;
+  }
+
+  const errors = validateData(data, schema);
+  if (errors.length > 0) {
+    console.error(`Invalid ${collectionId} document:`, errors);
+    await snap.ref.delete();
+  }
+  return null;
 });
 
 // ===== ANALYTICS =====

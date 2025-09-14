@@ -6,6 +6,7 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
+import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 
@@ -22,8 +23,8 @@ export class OrderService {
       // إنشاء نموذج الطلب
       const order = new Order(orderData);
       
-      // التحقق من صحة البيانات
-      const validationErrors = order.validate();
+      // التحقق من صحة البيانات باستخدام المخطط الموحد
+      const validationErrors = validateData(orderData, Schemas.Order);
       if (validationErrors.length > 0) {
         throw errorHandler.createError(
           'VALIDATION',
