@@ -172,3 +172,6 @@ vite.config.js.timestamp-*
 
 
 
+
+# Test sprite temporary directory
+testsprite_tests/
