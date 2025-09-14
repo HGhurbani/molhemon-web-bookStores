@@ -9,7 +9,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
 import logger from '@/lib/logger.js';
 
-const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
+const AdminLoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -55,16 +55,15 @@ const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
           description: 'تم تحويلك للوحة التحكم',
         });
 
-        // تحديث حالة المستخدم الحالي
-        setCurrentUser({
+        const userWithRole = {
           ...result.user,
           role: createdData?.role || 'admin',
           isAdmin:
             createdData?.role === 'admin' ||
             createdData?.role === 'manager',
-        });
+        };
 
-        onLogin();
+        onLogin(userWithRole);
         navigate('/admin');
         return;
       }
@@ -80,19 +79,18 @@ const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
         throw new Error('ليس لديك صلاحية للوصول إلى لوحة التحكم');
       }
       
-      // تحديث حالة المستخدم الحالي
-      setCurrentUser({
+      const userWithRole = {
         ...result.user,
         role: userData.role,
-        isAdmin: userData.role === 'admin' || userData.role === 'manager'
-      });
-      
+        isAdmin: userData.role === 'admin' || userData.role === 'manager',
+      };
+
       toast({
         title: 'تم تسجيل الدخول بنجاح',
         description: `مرحباً ${userData.name || userData.email}`
       });
-      
-      onLogin();
+
+      onLogin(userWithRole);
       navigate('/admin');
     } catch (error) {
       logger.error('Admin login error:', error);
