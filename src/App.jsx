@@ -46,8 +46,6 @@ import BlogDetailsPage from '@/pages/BlogDetailsPage.jsx';
 import BlogTestPage from '@/pages/BlogTestPage.jsx';
 import HelpCenterPage from '@/pages/HelpCenterPage.jsx';
 import DistributorsPage from '@/pages/DistributorsPage.jsx';
-import FirebaseTestPage from '@/pages/FirebaseTestPage.jsx';
-import ImageTestPage from '@/pages/ImageTestPage.jsx';
 import StoreSettingsPage from '@/pages/StoreSettingsPage.jsx';
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
@@ -850,8 +848,6 @@ const App = () => {
               <Route path="/blog-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogTestPage /></PageLayout></MainLayout>} />
               <Route path="/help" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><HelpCenterPage /></PageLayout></MainLayout>} />
               <Route path="/distributors" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><DistributorsPage /></PageLayout></MainLayout>} />
-              <Route path="/firebase-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><FirebaseTestPage /></PageLayout></MainLayout>} />
-              <Route path="/image-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ImageTestPage /></PageLayout></MainLayout>} />
 <Route path="/store-settings" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><StoreSettingsPage /></PageLayout></MainLayout>} />
 <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>

@@ -208,8 +208,7 @@
         "files": [
           "src/lib/imageUpload.js",
           "src/lib/imageUtils.js",
-          "src/lib/fileUtils.js",
-          "src/pages/ImageTestPage.jsx"
+          "src/lib/fileUtils.js"
         ]
       },
       {
@@ -227,8 +226,7 @@
           "src/lib/firebase.js",
           "src/lib/firebaseApi.js",
           "src/lib/firebaseFunctions.js",
-          "src/lib/firebaseTest.js",
-          "src/pages/FirebaseTestPage.jsx"
+          "src/lib/firebaseTest.js"
         ]
       },
       {

@@ -119,6 +119,10 @@ firebase-emulators/
 # Testing
 coverage/
 .nyc_output/
+# Temporary test files
+test-*.js
+test-firebase-*.html
+src/pages/*TestPage.jsx
 
 # Production builds
 dist/
