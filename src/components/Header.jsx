@@ -31,7 +31,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useCurrency } from '@/lib/currencyContext.jsx';
 import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
 
-const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books = [], categories = [], siteSettings = {} }) => {
+const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -46,6 +46,8 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { currency, setCurrency, currencies } = useCurrency();
   const { language, setLanguage, languages } = useLanguage();
+  const { cart } = useCart();
+  const { isCustomer: isCustomerLoggedIn } = useAuth();
   const t = useTranslation();
   const navigate = useNavigate();
 
@@ -416,13 +418,13 @@ const Header = ({ handleFeatureClick, cartItemCount, isCustomerLoggedIn, books =
               <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-gray-200 w-10 h-10 transition-all duration-200">
               <Link to="/cart">
                 <ShoppingCart className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                    <motion.span 
+                {cart.reduce((sum, item) => sum + item.quantity, 0) > 0 && (
+                    <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-semibold rounded-full w-3.5 h-3.5 flex items-center justify-center"
                     >
-                    {cartItemCount}
+                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
                     </motion.span>
                 )}
               </Link>

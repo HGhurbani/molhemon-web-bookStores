@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,11 +7,14 @@ import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
 import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
-import Dashboard from '@/components/Dashboard.jsx';
 import SEO from '@/components/SEO.jsx';
-import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
 import AuthPage from '@/pages/AuthPage.jsx';
 import ErrorBoundary from '@/components/ErrorBoundary.jsx';
+import { useAuth } from '@/lib/authContext.jsx';
+import { useCart } from '@/lib/cartContext.jsx';
+import { useFavorites } from '@/lib/favoritesContext.jsx';
+import { useSettings } from '@/lib/settingsContext.jsx';
+const AdminRoutes = React.lazy(() => import('@/routes/AdminRoutes.jsx'));
 
 import HomePage from '@/pages/HomePage.jsx';
 import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
@@ -54,7 +57,7 @@ import SplashScreen from '@/components/SplashScreen.jsx';
 import MobileBottomNav from '@/components/MobileBottomNav.jsx';
 import RequireAdmin from '@/components/RequireAdmin.jsx';
 
-import { sellers as initialSellers, branches as initialBranches, users as initialUsers, footerLinks, siteSettings as initialSiteSettings, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
+import { sellers as initialSellers, branches as initialBranches, footerLinks, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
@@ -64,12 +67,11 @@ import { errorHandler } from '@/lib/errorHandler.js';
 const App = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
   const { setLanguage, setLanguages, languages } = useLanguage();
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
+  const { favorites: wishlist, toggleFavorite } = useFavorites();
+  const { settings: siteSettingsState, setSettings: setSiteSettingsState } = useSettings();
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
@@ -83,12 +85,9 @@ const App = () => {
     const stored = localStorage.getItem('branches');
     return stored ? JSON.parse(stored) : initialBranches;
   });
-  const [users, setUsers] = useState(() => {
-    const stored = localStorage.getItem('users');
-    return stored ? JSON.parse(stored) : initialUsers;
-  });
+  const [users, setUsers] = useState([]);
   const [categoriesState, setCategoriesState] = useState([]);
-  const [orders, setOrders] = useState(() => JSON.parse(localStorage.getItem('orders') || '[]'));
+  const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState(() => JSON.parse(localStorage.getItem('payments') || '[]'));
   const [messages, setMessages] = useState([]);
   const [notifications, setNotifications] = useState(() => JSON.parse(localStorage.getItem('notifications') || '[]'));
@@ -102,10 +101,6 @@ const App = () => {
   });
   const [plans, setPlans] = useState(() => JSON.parse(localStorage.getItem('plans') || '[]'));
   const [subscriptions, setSubscriptions] = useState(() => JSON.parse(localStorage.getItem('subscriptions') || '[]'));
-  const [siteSettingsState, setSiteSettingsState] = useState(() => {
-    const stored = localStorage.getItem('siteSettings');
-    return stored ? { ...initialSiteSettings, ...JSON.parse(stored) } : initialSiteSettings;
-  });
   const [heroSlidesState, setHeroSlidesState] = useState(() => {
     const stored = localStorage.getItem('heroSlides');
     return stored ? JSON.parse(stored) : [];
@@ -127,90 +122,11 @@ const App = () => {
     return books.slice(3, 6).concat(books.slice(0, 3));
   }, [books]);
 
-  // التحقق من حالة المصادقة عند تحميل التطبيق
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      try {
-        const user = jwtAuthManager.getCurrentUser();
-        if (user) {
-          setCurrentUser(user);
-          setIsCustomerLoggedIn(true);
-          
-          // التحقق من صلاحيات المدير
-          if (user.isAdmin || user.role === 'admin') {
-            setIsAdminLoggedIn(true);
-          }
-        }
-        
-      } catch (error) {
-        const errorObject = errorHandler.handleError(error, 'auth:status-check');
-        console.error('Auth status check failed:', errorObject);
-        
-        // مسح حالة المصادقة في حالة الخطأ
-        jwtAuthManager.clearTokens();
-        setIsCustomerLoggedIn(false);
-        setIsAdminLoggedIn(false);
-        setCurrentUser(null);
-      }
-    };
-
-    checkAuthStatus();
-  }, []);
-
-  // مراقبة تغييرات حالة المصادقة
-  useEffect(() => {
-    const unsubscribe = firebaseAuth.onAuthStateChange(async ({ user, isAuthenticated }) => {
-      if (isAuthenticated && user) {
-        setCurrentUser(user);
-        setIsCustomerLoggedIn(true);
-        
-        // التحقق من دور المستخدم في Firestore
-        try {
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase.js');
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const userData = userDoc.data();
-          
-          if (userData && (userData.role === 'admin' || userData.role === 'manager')) {
-            setIsAdminLoggedIn(true);
-          } else {
-            setIsAdminLoggedIn(false);
-          }
-        } catch (error) {
-          console.error('Error checking user role:', error);
-          setIsAdminLoggedIn(false);
-        }
-      } else {
-        setCurrentUser(null);
-        setIsCustomerLoggedIn(false);
-        setIsAdminLoggedIn(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   // تحميل البيانات من Firebase
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsAppLoading(true);
-        // تحميل البيانات المحفوظة محلياً أولاً
-        const storedCart = localStorage.getItem('cart');
-        if (storedCart) setCart(JSON.parse(storedCart));
-        const storedWishlist = localStorage.getItem('wishlist');
-        if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
-        const storedAuthors = localStorage.getItem('authors');
-        if (storedAuthors) setAuthors(JSON.parse(storedAuthors));
-        const storedOrders = localStorage.getItem('orders');
-        if (storedOrders) setOrders(JSON.parse(storedOrders));
-        const storedSettings = localStorage.getItem('siteSettings');
-        if (storedSettings) setSiteSettingsState(JSON.parse(storedSettings));
-        const storedFeatures = localStorage.getItem('features');
-        if (storedFeatures) setFeatures(JSON.parse(storedFeatures));
-        const storedMessages = localStorage.getItem('messages');
-        if (storedMessages) setMessages(JSON.parse(storedMessages));
-
         // تحميل البيانات من Firebase
         const [b, a, c, s, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
           api.getBooks().catch(error => {
@@ -444,13 +360,7 @@ const App = () => {
     localStorage.setItem('branches', JSON.stringify(branches));
   }, [branches]);
 
-  useEffect(() => {
-    localStorage.setItem('users', JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders]);
+  // تم إيقاف التخزين المحلي للمستخدمين والطلبات؛ يتم إدارة هذه البيانات عبر Firestore
 
   useEffect(() => {
     localStorage.setItem('payments', JSON.stringify(payments));
@@ -538,21 +448,13 @@ const App = () => {
 
   // دوال معالجة الأحداث
   const handleAddToCart = (book) => {
-    setCart((prevCart) => {
-      const existingBook = prevCart.find(item => item.id === book.id);
-      if (existingBook) {
-        return prevCart.map(item =>
-          item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevCart, { ...book, quantity: 1 }];
-    });
+    addToCart(book);
     setCartDialogBook(book);
     setCartDialogOpen(true);
   };
 
   const handleRemoveFromCart = (bookId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== bookId));
+    removeFromCart(bookId);
     toast({
       title: "تم الحذف من السلة",
       description: "تم حذف المنتج من سلة التسوق.",
@@ -565,27 +467,24 @@ const App = () => {
       handleRemoveFromCart(bookId);
       return;
     }
-    setCart(prevCart => prevCart.map(item => item.id === bookId ? {...item, quantity} : item));
+    updateQuantity(bookId, quantity);
   }
 
   const handleToggleWishlist = (book) => {
-    setWishlist((prevWishlist) => {
-      const isInWishlist = prevWishlist.find(item => item.id === book.id);
-      if (isInWishlist) {
-        toast({
-          title: "تم الحذف من المفضلة",
-          description: `تم حذف "${book.title}" من قائمة الرغبات.`,
-          variant: "destructive"
-        });
-        return prevWishlist.filter(item => item.id !== book.id);
-      } else {
-        toast({
-          title: "تمت الإضافة للمفضلة",
-          description: `تم إضافة "${book.title}" إلى قائمة الرغبات.`,
-        });
-        return [...prevWishlist, book];
-      }
-    });
+    const exists = wishlist.find(item => item.id === book.id);
+    toggleFavorite(book);
+    if (exists) {
+      toast({
+        title: "تم الحذف من المفضلة",
+        description: `تم حذف \"${book.title}\" من قائمة الرغبات.`,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "تمت الإضافة للمفضلة",
+        description: `تم إضافة \"${book.title}\" إلى قائمة الرغبات.`,
+      });
+    }
   };
 
   const handleOpenChat = (contact = { type: 'admin', name: 'الدعم' }) => {
@@ -652,9 +551,6 @@ const App = () => {
       <div className="min-h-screen bg-slate-100 text-gray-800">
         <Header
           handleFeatureClick={handleFeatureClick}
-          cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-          isCustomerLoggedIn={isCustomerLoggedIn}
-          currentUser={currentUser}
           books={books}
           categories={categoriesState}
           siteSettings={siteSettings}
@@ -667,9 +563,7 @@ const App = () => {
           handleFeatureClick={handleFeatureClick}
           siteSettings={siteSettings}
         />
-        <MobileBottomNav 
-          cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        />
+        <MobileBottomNav />
       </div>
     </>
   );
@@ -684,75 +578,56 @@ const App = () => {
         <ScrollToTop />
         <div className="font-sans" dir="rtl">
           <AnimatePresence mode="wait">
+            <Suspense fallback={<div>Loading...</div>}>
             <Routes>
               <Route
-                path="/admin"
+                path="/admin/*"
                 element={
-                  <RequireAdmin>
-                    <Dashboard
-                      dashboardStats={dashboardStatsState}
-                      books={books}
-                      authors={authors}
-                      sellers={sellers}
-                      branches={branches}
-                      categories={categoriesState}
-                      orders={orders}
-                      payments={payments}
-                      paymentMethods={paymentMethods}
-                      plans={plans}
-                      subscriptions={subscriptions}
-                      dashboardSection={dashboardSection}
-                      setDashboardSection={setDashboardSection}
-                      handleFeatureClick={handleFeatureClick}
-                      setBooks={setBooks}
-                      setAuthors={setAuthors}
-                      setSellers={setSellers}
-                      setBranches={setBranches}
-                      setCategories={setCategoriesState}
-                      setOrders={setOrders}
-                      setPayments={setPayments}
-                      setPaymentMethods={setPaymentMethods}
-                      currencies={currenciesState}
-                      setCurrencies={setCurrenciesState}
-                      languages={languages}
-                      setLanguages={setLanguages}
-                      setPlans={setPlans}
-                      setSubscriptions={setSubscriptions}
-                      users={users}
-                      setUsers={setUsers}
-                      messages={messages}
-                      setMessages={setMessages}
-                      notifications={notifications}
-                      setNotifications={setNotifications}
-                      siteSettings={siteSettingsState}
-                      setSiteSettings={setSiteSettingsState}
-                      sliders={heroSlidesState}
-                      setSliders={setHeroSlidesState}
-                      banners={bannersState}
-                      setBanners={setBannersState}
-                      features={features}
-                      setFeatures={setFeatures}
-                    />
-                  </RequireAdmin>
-                }
-              />
-              <Route
-                path="/admin/orders/:id"
-                element={
-                  <RequireAdmin>
-                    <DashboardOrderDetailsPage />
-                  </RequireAdmin>
-                }
-              />
-              <Route
-                path="/admin/login"
-                element={
-                  <AdminLoginPage
-                    onLogin={() => {
-                      setIsAdminLoggedIn(true);
-                      setIsCustomerLoggedIn(true);
+                  <AdminRoutes
+                    dashboardProps={{
+                      dashboardStats: dashboardStatsState,
+                      books,
+                      authors,
+                      sellers,
+                      branches,
+                      categories: categoriesState,
+                      orders,
+                      payments,
+                      paymentMethods,
+                      plans,
+                      subscriptions,
+                      dashboardSection,
+                      setDashboardSection,
+                      handleFeatureClick,
+                      setBooks,
+                      setAuthors,
+                      setSellers,
+                      setBranches,
+                      setCategories: setCategoriesState,
+                      setOrders,
+                      setPayments,
+                      setPaymentMethods,
+                      currencies: currenciesState,
+                      setCurrencies: setCurrenciesState,
+                      languages,
+                      setLanguages,
+                      setPlans,
+                      setSubscriptions,
+                      users,
+                      setUsers,
+                      messages,
+                      setMessages,
+                      notifications,
+                      setNotifications,
+                      siteSettings: siteSettingsState,
+                      setSiteSettings: setSiteSettingsState,
+                      sliders: heroSlidesState,
+                      setSliders: setHeroSlidesState,
+                      banners: bannersState,
+                      setBanners: setBannersState,
+                      features,
+                      setFeatures
                     }}
-                    setCurrentUser={setCurrentUser}
                   />
                 }
               />
@@ -764,7 +639,7 @@ const App = () => {
                   ) : (
                     <MainLayout siteSettings={siteSettingsState}>
                       <PageLayout siteSettings={siteSettingsState}>
-                        <AuthPage onLogin={() => setIsCustomerLoggedIn(true)} />
+                        <AuthPage onLogin={login} />
                       </PageLayout>
                     </MainLayout>
                   )
@@ -851,6 +726,7 @@ const App = () => {
 <Route path="/store-settings" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><StoreSettingsPage /></PageLayout></MainLayout>} />
 <Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><NotFoundPage /></PageLayout></MainLayout>} />
             </Routes>
+            </Suspense>
           </AnimatePresence>
           <Toaster />
           <AddToCartDialog

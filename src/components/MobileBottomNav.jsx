@@ -1,15 +1,18 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  ShoppingBag, 
-  ShoppingCart, 
-  BookOpen, 
-  User 
+import {
+  Home,
+  ShoppingBag,
+  ShoppingCart,
+  BookOpen,
+  User
 } from 'lucide-react';
+import { useCart } from '@/lib/cartContext.jsx';
 
-const MobileBottomNav = ({ cartItemCount = 0 }) => {
+const MobileBottomNav = () => {
   const location = useLocation();
+  const { cart } = useCart();
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = [
     {
