@@ -1,5 +1,7 @@
+import { auth } from './firebase.js';
+
 export async function purchasePlan(api, plan, paymentMethodId = 1) {
-  const userId = localStorage.getItem('currentUserId') || 1;
+  const userId = auth.currentUser?.uid || 1;
   const now = new Date();
   const startDate = now.toISOString();
   const endDate = new Date(now.getTime() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
