@@ -12,13 +12,21 @@ export default function inlineEditDevPlugin() {
     apply: 'serve',
     transformIndexHtml() {
       const scriptPath = resolve(__dirname, 'edit-mode-script.js');
-      const scriptContent = readFileSync(scriptPath, 'utf-8');
+      let scriptContent = readFileSync(scriptPath, 'utf-8');
+
+      const configPath = resolve(__dirname, 'visual-editor-config.js');
+      let configContent = readFileSync(configPath, 'utf-8');
+
+      configContent = configContent.replace(/export\s+/g, '');
+      scriptContent = scriptContent.replace(/^.*import[^\n]*visual-editor-config[^\n]*\n/m, '');
+
+      const combinedContent = `${configContent}\n${scriptContent}`;
 
       return [
         {
           tag: 'script',
           attrs: { type: 'module' },
-          children: scriptContent,
+          children: combinedContent,
           injectTo: 'body'
         },
         {
