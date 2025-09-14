@@ -6,9 +6,13 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
+import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
+
+import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase.js';
 
 export class OrderService {
   constructor() {
@@ -23,8 +27,8 @@ export class OrderService {
       // إنشاء نموذج الطلب
       const order = new Order(orderData);
       
-      // التحقق من صحة البيانات
-      const validationErrors = order.validate();
+      // التحقق من صحة البيانات باستخدام المخطط الموحد
+      const validationErrors = validateData(orderData, Schemas.Order);
       if (validationErrors.length > 0) {
         throw errorHandler.createError(
           'VALIDATION',
@@ -77,16 +81,13 @@ export class OrderService {
       // إضافة total للطلب
       order.total = order.totalAmount;
 
-      // حفظ الطلب في Firebase أولاً للحصول على معرف الطلب
+      // إعداد بيانات الحفظ
       const orderDataToSave = order.toObject();
       orderDataToSave.total = order.totalAmount; // إضافة total للتوافق
-      
-      // إضافة timestamps صحيحة
-      orderDataToSave.createdAt = firebaseApi.serverTimestamp();
-      orderDataToSave.updatedAt = firebaseApi.serverTimestamp();
-      orderDataToSave.orderedAt = firebaseApi.serverTimestamp();
-      
-      // إضافة timestamp لمرحلة الطلب
+      orderDataToSave.createdAt = serverTimestamp();
+      orderDataToSave.updatedAt = serverTimestamp();
+      orderDataToSave.orderedAt = serverTimestamp();
+
       if (orderDataToSave.stageHistory && orderDataToSave.stageHistory.length > 0) {
         orderDataToSave.stageHistory[0].timestamp = firebaseApi.serverTimestamp();
       }
@@ -141,13 +142,74 @@ export class OrderService {
         order.total = orderDoc.total || order.totalAmount;
         logger.debug('Order ID after assignment:', order.id);
         logger.debug('Order total after assignment:', order.total);
+        orderDataToSave.stageHistory[0].timestamp = serverTimestamp();
       }
 
-      // حفظ عناصر الطلب
-      for (const item of orderItems) {
-        item.orderId = order.id; // استخدام orderId بدلاً من id
-        await firebaseApi.addToCollection('order_items', item.toObject());
+      const orderItemsData = orderItems.map(item => item.toObject());
+
+      // تنفيذ المعاملة لحفظ الطلب وتحديث المخزون
+      const maxRetries = 5;
+      let orderDoc;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          orderDoc = await runTransaction(db, async (transaction) => {
+            // التحقق من المخزون وتحديثه
+            for (const item of orderItemsData) {
+              const productRef = doc(db, 'books', item.productId);
+              const productSnap = await transaction.get(productRef);
+              if (!productSnap.exists()) {
+                throw errorHandler.createError(
+                  'NOT_FOUND',
+                  'product/not-found',
+                  'المنتج غير موجود',
+                  `stock-update:${item.productId}`
+                );
+              }
+
+              const currentStock = productSnap.data().stock || 0;
+              if (currentStock < item.quantity) {
+                throw errorHandler.createError(
+                  'VALIDATION',
+                  'validation/stock-unavailable',
+                  `المخزون غير كافي للمنتج ${item.productId}`,
+                  `stock-update:${item.productId}`
+                );
+              }
+
+              transaction.update(productRef, { stock: currentStock - item.quantity });
+            }
+
+            // إنشاء مستند الطلب
+            const orderRef = doc(collection(db, this.collectionName));
+            transaction.set(orderRef, orderDataToSave);
+
+            // حفظ عناصر الطلب
+            for (const item of orderItemsData) {
+              const itemRef = doc(collection(db, 'order_items'));
+              transaction.set(itemRef, { ...item, orderId: orderRef.id });
+            }
+
+            return { id: orderRef.id };
+          });
+          break;
+        } catch (txnError) {
+          if (txnError.code === 'aborted' && attempt < maxRetries) {
+            console.warn(`Transaction conflict detected, retrying... (${attempt})`);
+            continue;
+          }
+          throw txnError;
+        }
       }
+
+      order.id = orderDoc.id;
+      order.total = order.totalAmount;
+
+      // تحديث orderId في عناصر الطلب بعد حفظ المعاملة
+      for (const item of orderItems) {
+        item.orderId = order.id;
+      }
+
+      console.log('Order ID after transaction:', order.id);
 
       // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية) بعد الحصول على معرف الطلب
       let shipping = null;

@@ -1,16 +1,21 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getStorage } from 'firebase/storage';
+
+// دعم بيئات Node التي لا توفر import.meta.env
+const env = typeof import.meta !== 'undefined' && import.meta.env
+  ? import.meta.env
+  : process.env;
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // التحقق من صحة الإعدادات
@@ -26,7 +31,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app, firebaseConfig.storageBucket);
 
 // إعدادات إضافية للتطوير (اختياري)
-if (import.meta.env.VITE_APP_ENV === 'development') {
+if (env.VITE_APP_ENV === 'development') {
   console.log('Firebase initialized in development mode');
   // يمكن إضافة إعدادات التطوير هنا
 }

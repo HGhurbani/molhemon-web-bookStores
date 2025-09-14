@@ -6,6 +6,7 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
+import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import OrderService from './OrderService.js';
 import PaymentService from './PaymentService.js';
@@ -145,6 +146,17 @@ export class CheckoutService {
 
       logger.debug('CheckoutService - Creating order with data:', orderData);
 
+      // التحقق من صحة بيانات الطلب قبل الحفظ
+      const orderValidationErrors = validateData(orderData, Schemas.Order);
+      if (orderValidationErrors.length > 0) {
+        throw errorHandler.createError(
+          'VALIDATION',
+          'validation/order-invalid',
+          `خطأ في بيانات الطلب: ${orderValidationErrors.join(', ')}`,
+          'checkout-order-creation'
+        );
+      }
+
       const order = await this.orderService.createOrder(orderData);
       
       // تسجيل مفصل لبيانات الطلب المُنشأ
@@ -171,7 +183,7 @@ export class CheckoutService {
       // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية)
       let shipping = null;
       if (this.hasPhysicalItems(items)) {
-        shipping = await this.shippingService.createShipping({
+        const shippingData = {
           orderId: order.order.id,
           customerId,
           shippingMethod,
@@ -179,11 +191,21 @@ export class CheckoutService {
           packageWeight: costCalculation.totalWeight,
           packageDimensions: costCalculation.packageDimensions,
           packageCount: items.length
-        });
+        };
+        const shippingErrors = validateData(shippingData, Schemas.Shipping);
+        if (shippingErrors.length > 0) {
+          throw errorHandler.createError(
+            'VALIDATION',
+            'validation/shipping-invalid',
+            `خطأ في بيانات الشحن: ${shippingErrors.join(', ')}`,
+            'checkout-shipping-creation'
+          );
+        }
+        shipping = await this.shippingService.createShipping(shippingData);
       }
 
       // إنشاء عملية الدفع
-      const payment = await this.paymentService.createPayment({
+      const paymentData = {
         orderId: order.order.id,
         customerId,
         amount: order.order.total,
@@ -193,7 +215,17 @@ export class CheckoutService {
         customerEmail: customerInfo.email,
         customerPhone: customerInfo.phone,
         billingAddress: shippingAddress
-      });
+      };
+      const paymentErrors = validateData(paymentData, Schemas.Payment);
+      if (paymentErrors.length > 0) {
+        throw errorHandler.createError(
+          'VALIDATION',
+          'validation/payment-invalid',
+          `خطأ في بيانات الدفع: ${paymentErrors.join(', ')}`,
+          'checkout-payment-creation'
+        );
+      }
+      const payment = await this.paymentService.createPayment(paymentData);
 
       // معالجة الدفع
       let paymentResult;

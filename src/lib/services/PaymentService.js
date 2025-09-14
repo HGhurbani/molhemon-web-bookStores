@@ -3,6 +3,7 @@
  */
 
 import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js';
+import { Schemas, validateData } from '../models/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
@@ -19,9 +20,9 @@ export class PaymentService {
     try {
       // إنشاء نموذج الدفع
       const payment = new Payment(paymentData);
-      
-      // التحقق من صحة البيانات
-      const validationErrors = payment.validate();
+
+      // التحقق من صحة البيانات باستخدام المخطط الموحد
+      const validationErrors = validateData(paymentData, Schemas.Payment);
       if (validationErrors.length > 0) {
         throw errorHandler.createError(
           'VALIDATION',
