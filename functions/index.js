@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 const orderLifecycle = require('./orderLifecycleService');
-const { Schemas, validateData } = require('./schemas.js');
+const { Schemas, validateData } = require('../shared/schemas.js');
 
 // Initialize Firebase Admin
 admin.initializeApp();

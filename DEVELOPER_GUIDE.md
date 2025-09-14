@@ -26,6 +26,8 @@ molhemon-web-bookStores/
 ├── functions/                 # Firebase Functions
 │   ├── index.js              # Functions الرئيسية
 │   └── package.json          # تبعيات Functions
+├── shared/                    # ملفات مشتركة مثل المخططات
+│   └── schemas.js            # مخططات البيانات الموحدة
 ├── src/
 │   ├── components/           # مكونات React
 │   │   ├── ui/              # مكونات واجهة المستخدم الأساسية
@@ -49,6 +51,21 @@ molhemon-web-bookStores/
 ├── firestore.rules          # قواعد Firestore
 ├── storage.rules            # قواعد Storage
 └── .firebaserc              # إعدادات المشروع
+```
+
+## 📦 مشاركة المخططات
+
+لتحقيق إعادة استخدام مخططات البيانات بين واجهة المستخدم ووظائف Firebase، تم نقلها إلى المسار `shared/schemas.js`.
+
+- **الاستيراد داخل وظائف Firebase:**
+```javascript
+const { Schemas, validateData } = require('../shared/schemas.js');
+```
+
+- **الاستيراد داخل خدمات الواجهة:**
+```javascript
+import schemas from '../../../shared/schemas.js';
+const { Schemas, validateData } = schemas;
 ```
 
 ---
