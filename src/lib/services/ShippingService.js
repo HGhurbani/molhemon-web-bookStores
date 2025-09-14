@@ -4,7 +4,7 @@
 
 import { Shipping, SHIPPING_METHODS, SHIPPING_STATUSES } from '../models/Shipping.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 
 export class ShippingService {
   constructor() {

@@ -3,7 +3,7 @@
  */
 
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 import ProductService from './ProductService.js';
 import StoreSettingsService from './StoreSettingsService.js';
 import logger from '../logger.js';

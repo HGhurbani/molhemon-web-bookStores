@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { PaymentService } from '../src/lib/services/PaymentService.js';
 import { PAYMENT_METHODS } from '../src/lib/models/Payment.js';
 import { paymentManager } from '../src/lib/payment/PaymentManager.js';
-import firebaseApi from '../src/lib/firebaseApi.js';
+import firebaseApi from '../src/lib/firebase/baseApi.js';
 
 jest.mock('../src/lib/payment/PaymentManager.js', () => ({
   paymentManager: {
@@ -11,7 +11,7 @@ jest.mock('../src/lib/payment/PaymentManager.js', () => ({
   }
 }));
 
-jest.mock('../src/lib/firebaseApi.js', () => ({
+jest.mock('../src/lib/firebase/baseApi.js', () => ({
   addToCollection: jest.fn(),
   getDocById: jest.fn(),
   updateCollection: jest.fn()

@@ -3,7 +3,7 @@
  */
 
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 
 export class ProductService {
   constructor() {

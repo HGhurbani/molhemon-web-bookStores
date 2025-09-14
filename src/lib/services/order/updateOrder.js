@@ -1,6 +1,6 @@
 import { Order } from '../../models/Order.js';
 import { errorHandler } from '../../errorHandler.js';
-import firebaseApi from '../../firebaseApi.js';
+import firebaseApi from '../../firebase/baseApi.js';
 
 export async function updateOrderStatus(orderId, newStatus, notes = '') {
   try {

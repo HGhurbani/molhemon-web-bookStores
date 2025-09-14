@@ -4,7 +4,7 @@
 
 import Customer from '../models/Customer.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 
 export class CustomerService {
   constructor() {

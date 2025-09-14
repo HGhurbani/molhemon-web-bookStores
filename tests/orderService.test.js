@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('../src/lib/firebaseApi.js', () => ({
+jest.unstable_mockModule('../src/lib/firebase/baseApi.js', () => ({
   default: {
     addToCollection: jest.fn(() => Promise.resolve({ id: '1' })),
     serverTimestamp: jest.fn(() => new Date())
@@ -8,7 +8,7 @@ jest.unstable_mockModule('../src/lib/firebaseApi.js', () => ({
 }));
 
 const { OrderService } = await import('../src/lib/services/OrderService.js');
-const firebaseApi = (await import('../src/lib/firebaseApi.js')).default;
+const firebaseApi = (await import('../src/lib/firebase/baseApi.js')).default;
 
 describe('OrderService', () => {
   test('sets shipping cost to 0 for pickup orders', async () => {

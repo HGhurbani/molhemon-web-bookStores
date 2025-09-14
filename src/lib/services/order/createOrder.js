@@ -3,7 +3,7 @@ import { OrderItem } from '../../models/OrderItem.js';
 import { Shipping } from '../../models/Shipping.js';
 import schemas from '../../../../shared/schemas.js';
 import { errorHandler } from '../../errorHandler.js';
-import firebaseApi from '../../firebaseApi.js';
+import firebaseApi from '../../firebase/baseApi.js';
 import logger from '../../logger.js';
 import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase.js';

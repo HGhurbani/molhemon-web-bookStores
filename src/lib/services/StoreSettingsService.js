@@ -4,7 +4,7 @@
 
 import StoreSettings from '../models/StoreSettings.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
 
 export class StoreSettingsService {

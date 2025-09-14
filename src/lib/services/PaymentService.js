@@ -5,7 +5,7 @@
 import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js';
 import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
 import { paymentManager } from '../payment/PaymentManager.js';
 
