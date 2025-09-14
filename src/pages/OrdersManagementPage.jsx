@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
@@ -38,11 +38,14 @@ import {
 import api from '@/lib/api.js';
 import unifiedPaymentApi from '@/lib/api/unifiedPaymentApi.js';
 import InvoiceGenerator from '@/components/InvoiceGenerator.jsx';
+import { db } from '@/lib/firebase.js';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const OrdersManagementPage = () => {
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -67,28 +70,22 @@ const OrdersManagementPage = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
 
-  useEffect(() => {
-    initializeSystem();
-  }, []);
+  const ordersUnsub = useRef(null);
+  const paymentsUnsub = useRef(null);
 
   const initializeSystem = async () => {
     try {
       setLoading(true);
-      
-      // تهيئة نظام المدفوعات
+      setError(null);
       await unifiedPaymentApi.initialize();
-      
-      // تحميل البيانات
-      await Promise.all([
-        loadOrders(),
-        loadPayments(),
-        loadStats()
-      ]);
-    } catch (error) {
-      console.error('Failed to initialize system:', error);
+      ordersUnsub.current = loadOrders();
+      paymentsUnsub.current = loadPayments();
+    } catch (err) {
+      console.error('Failed to initialize system:', err);
+      setError('فشل في تهيئة النظام');
       toast({
         title: 'فشل في تهيئة النظام',
-        description: error.message,
+        description: err.message,
         variant: 'destructive'
       });
     } finally {
@@ -96,198 +93,79 @@ const OrdersManagementPage = () => {
     }
   };
 
-  const loadOrders = async () => {
+  useEffect(() => {
+    initializeSystem();
+    return () => {
+      if (ordersUnsub.current) ordersUnsub.current();
+      if (paymentsUnsub.current) paymentsUnsub.current();
+    };
+  }, []);
+
+  const loadOrders = () => {
     try {
-      // جلب الطلبات الحقيقية من API
-      const result = await api.orders.getAll();
-      if (result.success && result.data && result.data.length > 0) {
-        setOrders(result.data);
-        return;
-      }
-      
-      // في حالة فشل API أو عدم وجود بيانات، استخدام البيانات التجريبية كـ fallback
-      console.log('Using mock data as fallback');
-      const mockOrders = [
-        {
-          id: 'ORD-001',
-          orderNumber: '#1001',
-          customerId: 'CUST-001',
-          customerName: 'أحمد محمد',
-          customerEmail: 'ahmed@example.com',
-          customerPhone: '+966501234567',
-          customerAddress: {
-            street: 'شارع الملك فهد',
-            city: 'الرياض',
-            postalCode: '12345',
-            country: 'SA'
-          },
-          items: [
-            {
-              id: 'PROD-001',
-              name: 'كتاب الفيزياء الحديثة',
-              type: 'physical', // physical, ebook, audiobook
-              price: 150,
-              quantity: 1,
-              weight: 0.8, // للكتب الورقية
-              dimensions: { length: 20, width: 15, height: 3 }, // سم
-              isbn: '978-1234567890',
-              publisher: 'دار النشر العلمية',
-              publicationYear: 2023,
-              pages: 350,
-              coverType: 'غلاف مقوى',
-              translators: ['محمد أحمد'],
-              originalLanguage: 'الإنجليزية',
-              translatedLanguage: 'العربية'
-            },
-            {
-              id: 'PROD-002',
-              name: 'كتاب الرياضيات الإلكتروني',
-              type: 'ebook',
-              price: 80,
-              quantity: 1,
-              fileFormat: 'PDF',
-              fileSize: '15MB',
-              wordCount: 50000,
-              isDelivered: false,
-              deliveredAt: null,
-              downloadUrl: null
-            }
-          ],
-          subtotal: 230,
-          shippingCost: 25,
-          tax: 34.5,
-          total: 289.5,
-          currency: 'SAR',
-          status: 'ordered', // ordered, paid, shipped, delivered, reviewed
-          currentStage: 'ordered',
-          paymentStatus: 'pending', // pending, paid, failed, refunded
-          paymentMethod: 'stripe',
-          paymentIntentId: 'pi_1234567890',
-          shippingMethod: 'saudiPost',
-          trackingNumber: 'SP123456789',
-          estimatedDelivery: '2024-01-15',
-          createdAt: '2024-01-10T10:30:00Z',
-          updatedAt: '2024-01-10T10:30:00Z',
-          orderedAt: '2024-01-10T10:30:00Z',
-          paidAt: null,
-          shippedAt: null,
-          deliveredAt: null,
-          reviewedAt: null,
-          notes: 'طلب عاجل'
+      return onSnapshot(
+        collection(db, 'orders'),
+        (snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setOrders(data);
+          setError(null);
         },
-        {
-          id: 'ORD-002',
-          orderNumber: '#1002',
-          customerId: 'CUST-002',
-          customerName: 'فاطمة علي',
-          customerEmail: 'fatima@example.com',
-          customerPhone: '+966502345678',
-          customerAddress: {
-            street: 'شارع التحلية',
-            city: 'جدة',
-            postalCode: '23456',
-            country: 'SA'
-          },
-          items: [
-            {
-              id: 'PROD-003',
-              name: 'كتاب التاريخ الصوتي',
-              type: 'audiobook',
-              price: 120,
-              quantity: 1,
-              duration: '8:30:00', // ساعات:دقائق:ثواني
-              narrator: 'أحمد حسن',
-              audioQuality: 'HD',
-              isDelivered: true,
-              deliveredAt: '2024-01-08T14:25:00Z',
-              downloadUrl: '/download/PROD-003?order=ORD-002'
-            }
-          ],
-          subtotal: 120,
-          shippingCost: 0, // الكتب الصوتية لا تحتاج شحن
-          tax: 18,
-          total: 138,
-          currency: 'SAR',
-          status: 'delivered',
-          currentStage: 'delivered',
-          paymentStatus: 'paid',
-          paymentMethod: 'paypal',
-          paymentIntentId: 'pi_0987654321',
-          shippingMethod: null,
-          trackingNumber: null,
-          estimatedDelivery: null,
-          createdAt: '2024-01-08T14:20:00Z',
-          updatedAt: '2024-01-09T16:45:00Z',
-          orderedAt: '2024-01-08T14:20:00Z',
-          paidAt: '2024-01-08T14:25:00Z',
-          shippedAt: null,
-          deliveredAt: '2024-01-09T16:45:00Z',
-          reviewedAt: null,
-          notes: ''
+        (err) => {
+          console.error('Error loading orders:', err);
+          setError('فشل في تحميل الطلبات');
+          toast({
+            title: 'فشل في تحميل الطلبات',
+            description: err.message,
+            variant: 'destructive'
+          });
         }
-      ];
-
-      setOrders(mockOrders);
-    } catch (error) {
-      console.error('Failed to load orders:', error);
-      toast({
-        title: 'فشل في تحميل الطلبات',
-        description: error.message,
-        variant: 'destructive'
-      });
+      );
+    } catch (err) {
+      console.error('Error loading orders:', err);
+      setError('فشل في تحميل الطلبات');
     }
   };
 
-  const loadPayments = async () => {
+  const loadPayments = () => {
     try {
-      const result = await unifiedPaymentApi.getPaymentStats();
-      if (result.success && result.stats) {
-        setPayments([{
-          id: 'PAY-001',
-          orderId: 'ORD-001',
-          amount: 289.5,
-          currency: 'SAR',
-          method: 'stripe',
-          status: 'pending',
-          createdAt: '2024-01-10T10:30:00Z'
-        }]);
-      }
-    } catch (error) {
-      console.error('Failed to load payments:', error);
+      return onSnapshot(
+        collection(db, 'payments'),
+        (snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setPayments(data);
+        },
+        (err) => {
+          console.error('Failed to load payments:', err);
+          toast({
+            title: 'فشل في تحميل المدفوعات',
+            description: err.message,
+            variant: 'destructive'
+          });
+        }
+      );
+    } catch (err) {
+      console.error('Failed to load payments:', err);
     }
   };
-
-  const loadStats = async () => {
-    try {
-      const result = await unifiedPaymentApi.getPaymentStats();
-      if (result.success && result.stats) {
-        const physicalBooks = orders.filter(order => 
-          order.items.some(item => item.type === 'physical')
-        ).length;
-        
-        const ebooks = orders.filter(order => 
-          order.items.some(item => item.type === 'ebook')
-        ).length;
-        
-        const audiobooks = orders.filter(order => 
-          order.items.some(item => item.type === 'audiobook')
-        ).length;
-
-        setStats({
-          ...result.stats,
-          totalOrders: orders.length,
-          totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-          pendingOrders: orders.filter(order => order.status === 'ordered').length,
-          completedOrders: orders.filter(order => order.status === 'reviewed').length,
-          physicalBooks,
-          ebooks,
-          audiobooks
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  };
+  useEffect(() => {
+    const physicalBooks = orders.filter(order => order.items?.some(item => item.type === 'physical')) .length;
+    const ebooks = orders.filter(order => order.items?.some(item => item.type === 'ebook')) .length;
+    const audiobooks = orders.filter(order => order.items?.some(item => item.type === 'audiobook')) .length;
+    const failedPayments = payments.filter(p => p.status === 'failed').length;
+    const successPayments = payments.filter(p => p.status === 'success').length;
+    const successRate = payments.length ? (successPayments / payments.length) * 100 : 0;
+    setStats({
+      totalOrders: orders.length,
+      totalRevenue: orders.reduce((sum, o) => sum + (o.total || 0), 0),
+      pendingOrders: orders.filter(o => o.status === 'ordered').length,
+      completedOrders: orders.filter(o => o.status === 'reviewed').length,
+      failedPayments,
+      successRate,
+      physicalBooks,
+      ebooks,
+      audiobooks
+    });
+  }, [orders, payments]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -307,7 +185,7 @@ const OrdersManagementPage = () => {
         variant: 'success'
       });
       
-      loadStats(); // إعادة تحميل الإحصائيات
+      // سيتم تحديث الإحصائيات تلقائيًا
     } catch (error) {
       console.error('Failed to update order status:', error);
       toast({
@@ -360,7 +238,7 @@ const OrdersManagementPage = () => {
           }
         }
         
-        loadStats(); // إعادة تحميل الإحصائيات
+        // سيتم تحديث الإحصائيات تلقائيًا
       } else {
         throw new Error(result.message || 'فشل في تحديث مرحلة الطلب');
       }
@@ -521,7 +399,7 @@ const OrdersManagementPage = () => {
           variant: 'success'
         });
       
-      loadStats();
+      // سيتم تحديث الإحصائيات تلقائيًا
       } else {
         throw new Error(result.message || 'فشل في استرداد المبلغ');
       }
@@ -612,10 +490,32 @@ const OrdersManagementPage = () => {
     if (filters.status !== 'all' && order.status !== filters.status) return false;
     if (filters.paymentMethod !== 'all' && order.paymentMethod !== filters.paymentMethod) return false;
     if (filters.productType !== 'all' && !order.items.some(item => item.type === filters.productType)) return false;
-    if (filters.search && !order.orderNumber.toLowerCase().includes(filters.search.toLowerCase()) && 
+    if (filters.search && !order.orderNumber.toLowerCase().includes(filters.search.toLowerCase()) &&
         !order.customerName.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
   });
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">جاري تحميل الطلبات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={initializeSystem} className="bg-blue-600 hover:bg-blue-700">إعادة المحاولة</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
