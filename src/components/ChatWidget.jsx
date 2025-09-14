@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button.jsx';
 import { collection, onSnapshot, addDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
 import api from '@/lib/api.js';
+import { auth } from '@/lib/firebase.js';
+import logger from '@/lib/logger.js';
 
 const ChatWidget = ({
   open,
@@ -18,28 +20,41 @@ const ChatWidget = ({
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesRef = useRef(null);
-  const isLoggedIn =
-    !!targetUser || localStorage.getItem('customerLoggedIn') === 'true';
+  const [isLoggedIn, setIsLoggedIn] = useState(!!targetUser || !!auth.currentUser);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
     if (targetUser) {
       setUserId(targetUser.userId || '');
       setName(targetUser.name || '');
       setEmail(targetUser.email || '');
+      setIsLoggedIn(true);
       return;
     }
-    const id = localStorage.getItem('currentUserId');
-    if (id) {
-      setUserId(id);
-      api.getUser(id).then((u) => {
-        if (u) {
-          setName(u.name || '');
-          setEmail(u.email || '');
-        }
-      });
-    }
-  }, [targetUser, isLoggedIn]);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        setUserId(user.uid);
+        setName(user.displayName || '');
+        setEmail(user.email || '');
+      } else {
+        setIsLoggedIn(false);
+        setUserId('');
+        setName('');
+        setEmail('');
+      }
+    });
+    return () => unsubscribe();
+  }, [targetUser]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !userId || targetUser) return;
+    api.getUser(userId).then(u => {
+      if (u) {
+        setName(u.name || '');
+        setEmail(u.email || '');
+      }
+    });
+  }, [userId, isLoggedIn, targetUser]);
 
   useEffect(() => {
     if (!userId && !email) return;
@@ -88,7 +103,7 @@ const ChatWidget = ({
         }, 2000);
       }
     }, (error) => {
-      console.error('Error listening to messages:', error);
+      logger.error('Error listening to messages:', error);
     });
     
     return () => unsub();
@@ -149,7 +164,7 @@ const ChatWidget = ({
       }
       
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       // إزالة الرسالة المحلية في حالة الخطأ
       setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
       setText(trimmed); // إعادة النص

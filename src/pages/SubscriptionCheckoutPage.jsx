@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast.js';
 import FormattedPrice from '@/components/FormattedPrice.jsx';
 import api from '@/lib/api.js';
 import { purchasePlan } from '@/lib/subscriptionUtils.js';
+import { auth } from '@/lib/firebase.js';
 
 const SubscriptionCheckoutPage = () => {
   const { planId } = useParams();
@@ -29,7 +30,7 @@ const SubscriptionCheckoutPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     if (!plan) return;
-    if (!localStorage.getItem('customerLoggedIn')) {
+    if (!auth.currentUser) {
       toast({ title: 'يجب تسجيل الدخول للاشتراك', variant: 'destructive' });
       navigate('/login');
       return;

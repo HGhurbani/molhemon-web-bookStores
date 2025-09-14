@@ -1,6 +1,6 @@
 import { auth } from './firebase';
-import { 
-  signInWithEmailAndPassword, 
+import {
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
@@ -11,139 +11,60 @@ import {
   sendPasswordResetEmail,
   confirmPasswordReset
 } from 'firebase/auth';
+import logger from './logger.js';
 
-// JWT Token Management
 class JWTAuthManager {
-  constructor() {
-    this.tokenKey = 'molhemon_jwt_token';
-    this.refreshTokenKey = 'molhemon_refresh_token';
-    this.userKey = 'molhemon_user_data';
-  }
-
-  // إنشاء JWT token
-  createToken(userData) {
-    try {
-      const token = {
-        user: userData,
-        iat: Date.now(),
-        exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
-        type: 'access'
-      };
-      
-      const refreshToken = {
-        user: { uid: userData.uid },
-        iat: Date.now(),
-        exp: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days
-        type: 'refresh'
-      };
-
-      localStorage.setItem(this.tokenKey, JSON.stringify(token));
-      localStorage.setItem(this.refreshTokenKey, JSON.stringify(refreshToken));
-      localStorage.setItem(this.userKey, JSON.stringify(userData));
-      
-      return { token, refreshToken };
-    } catch (error) {
-      console.error('Error creating JWT token:', error);
-      throw new Error('فشل في إنشاء رمز المصادقة');
+  async getIdToken(forceRefresh = false) {
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken(forceRefresh);
     }
+    return null;
   }
 
-  // التحقق من صحة JWT token
-  verifyToken() {
+  getCurrentUser() {
+    const user = auth.currentUser;
+    if (!user) return null;
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || '',
+      photoURL: user.photoURL,
+      emailVerified: user.emailVerified,
+      providerId: user.providerId,
+      phoneNumber: user.phoneNumber
+    };
+  }
+
+  async updateUserData(updatedUserData) {
+    if (!auth.currentUser) return null;
     try {
-      const tokenStr = localStorage.getItem(this.tokenKey);
-      if (!tokenStr) return null;
-
-      const token = JSON.parse(tokenStr);
-      
-      // التحقق من انتهاء الصلاحية
-      if (Date.now() > token.exp) {
-        this.clearTokens();
-        return null;
-      }
-
-      return token.user;
+      await updateProfile(auth.currentUser, updatedUserData);
+      await auth.currentUser.reload();
+      return this.getIdToken(true);
     } catch (error) {
-      console.error('Error verifying JWT token:', error);
-      this.clearTokens();
-      return null;
-    }
-  }
-
-  // تحديث JWT token
-  refreshToken() {
-    try {
-      const refreshTokenStr = localStorage.getItem(this.refreshTokenKey);
-      if (!refreshTokenStr) return null;
-
-      const refreshToken = JSON.parse(refreshTokenStr);
-      
-      // التحقق من انتهاء صلاحية refresh token
-      if (Date.now() > refreshToken.exp) {
-        this.clearTokens();
-        return null;
-      }
-
-      // إعادة إنشاء access token
-      const userData = JSON.parse(localStorage.getItem(this.userKey));
-      if (userData) {
-        return this.createToken(userData);
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error refreshing JWT token:', error);
-      this.clearTokens();
-      return null;
-    }
-  }
-
-  // مسح جميع tokens
-  clearTokens() {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem(this.userKey);
-  }
-
-  // تحديث بيانات المستخدم
-  updateUserData(updatedUserData) {
-    try {
-      // تحديث البيانات في localStorage
-      localStorage.setItem(this.userKey, JSON.stringify(updatedUserData));
-      
-      // إعادة إنشاء token مع البيانات المحدثة
-      return this.createToken(updatedUserData);
-    } catch (error) {
-      console.error('Error updating user data:', error);
+      logger.error('Error updating user data:', error);
       throw new Error('فشل في تحديث بيانات المستخدم');
     }
   }
 
-  // الحصول على user الحالي
-  getCurrentUser() {
-    return this.verifyToken();
+  clearTokens() {
+    // No local tokens to clear when using Firebase auth
   }
 
-  // التحقق من تسجيل الدخول
   isAuthenticated() {
-    return !!this.verifyToken();
+    return !!auth.currentUser;
   }
 }
 
-// إنشاء instance من JWT Manager
 export const jwtAuthManager = new JWTAuthManager();
 
-// Firebase Authentication Functions
 export const firebaseAuth = {
-  // تسجيل الدخول بالبريد الإلكتروني وكلمة المرور
   async signInWithEmail(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      console.log('User signed in:', user);
-      
-      // إنشاء JWT token
+      logger.info('User signed in:', user);
+      const idToken = await user.getIdToken();
       const userData = {
         uid: user.uid,
         email: user.email,
@@ -152,48 +73,34 @@ export const firebaseAuth = {
         emailVerified: user.emailVerified,
         providerId: user.providerId
       };
-      
-      console.log('Creating JWT token for sign in:', userData);
-      const tokens = jwtAuthManager.createToken(userData);
-      
       return {
         user: userData,
-        tokens,
+        token: idToken,
         success: true
       };
     } catch (error) {
-      console.error('Sign in error:', error);
+      logger.error('Sign in error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // إنشاء حساب جديد
   async createAccount(email, password, displayName) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      console.log('User created:', user);
-      
-      // تحديث اسم المستخدم
+      logger.info('User created:', user);
       if (displayName) {
         try {
           await updateProfile(user, { displayName });
-          console.log('Profile updated successfully with displayName:', displayName);
-          
-          // انتظار قليلاً لضمان تحديث البيانات
+          logger.info('Profile updated successfully with displayName:', displayName);
           await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // التحقق من أن البيانات تم تحديثها
           await user.reload();
-          console.log('User profile after reload:', user);
-          
+          logger.debug('User profile after reload:', user);
         } catch (profileError) {
-          console.warn('Failed to update profile, but continuing:', profileError);
+          logger.error('Failed to update profile, but continuing:', profileError);
         }
       }
-      
-      // إنشاء JWT token مع البيانات المحدثة
+      const idToken = await user.getIdToken();
       const userData = {
         uid: user.uid,
         email: user.email,
@@ -202,29 +109,23 @@ export const firebaseAuth = {
         emailVerified: user.emailVerified,
         providerId: user.providerId
       };
-      
-      console.log('Creating JWT token with user data:', userData);
-      const tokens = jwtAuthManager.createToken(userData);
-      
       return {
         user: userData,
-        tokens,
+        token: idToken,
         success: true
       };
     } catch (error) {
-      console.error('Create account error:', error);
+      logger.error('Create account error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // تسجيل الدخول بـ Google
   async signInWithGoogle() {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      
-      // إنشاء JWT token
+      const idToken = await user.getIdToken();
       const userData = {
         uid: user.uid,
         email: user.email,
@@ -233,28 +134,23 @@ export const firebaseAuth = {
         emailVerified: user.emailVerified,
         providerId: user.providerId
       };
-      
-      const tokens = jwtAuthManager.createToken(userData);
-      
       return {
         user: userData,
-        tokens,
+        token: idToken,
         success: true
       };
     } catch (error) {
-      console.error('Google sign in error:', error);
+      logger.error('Google sign in error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // تسجيل الدخول بـ Facebook
   async signInWithFacebook() {
     try {
       const provider = new FacebookAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      
-      // إنشاء JWT token
+      const idToken = await user.getIdToken();
       const userData = {
         uid: user.uid,
         email: user.email,
@@ -263,60 +159,52 @@ export const firebaseAuth = {
         emailVerified: user.emailVerified,
         providerId: user.providerId
       };
-      
-      const tokens = jwtAuthManager.createToken(userData);
-      
       return {
         user: userData,
-        tokens,
+        token: idToken,
         success: true
       };
     } catch (error) {
-      console.error('Facebook sign in error:', error);
+      logger.error('Facebook sign in error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // تسجيل الخروج
   async signOut() {
     try {
       await signOut(auth);
       jwtAuthManager.clearTokens();
       return { success: true };
     } catch (error) {
-      console.error('Sign out error:', error);
+      logger.error('Sign out error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // إعادة تعيين كلمة المرور
   async resetPassword(email) {
     try {
       await sendPasswordResetEmail(auth, email);
       return { success: true, message: 'تم إرسال رابط إعادة تعيين كلمة المرور' };
     } catch (error) {
-      console.error('Reset password error:', error);
+      logger.error('Reset password error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // تأكيد إعادة تعيين كلمة المرور
   async confirmPasswordReset(code, newPassword) {
     try {
       await confirmPasswordReset(auth, code, newPassword);
       return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
     } catch (error) {
-      console.error('Confirm password reset error:', error);
+      logger.error('Confirm password reset error:', error);
       throw this.handleAuthError(error);
     }
   },
 
-  // مراقبة حالة المصادقة
   onAuthStateChange(callback) {
     return onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log('Auth state changed - user:', user);
-        // تحديث JWT token عند تغيير حالة المستخدم
+        logger.debug('Auth state changed - user:', user);
         const userData = {
           uid: user.uid,
           email: user.email,
@@ -325,19 +213,14 @@ export const firebaseAuth = {
           emailVerified: user.emailVerified,
           providerId: user.providerId
         };
-        
-        console.log('Updating JWT token with user data:', userData);
-        jwtAuthManager.createToken(userData);
         callback({ user: userData, isAuthenticated: true });
       } else {
-        console.log('Auth state changed - no user');
-        jwtAuthManager.clearTokens();
+        logger.debug('Auth state changed - no user');
         callback({ user: null, isAuthenticated: false });
       }
     });
   },
 
-  // معالجة أخطاء المصادقة
   handleAuthError(error) {
     switch (error.code) {
       case 'auth/user-not-found':
@@ -364,6 +247,5 @@ export const firebaseAuth = {
   }
 };
 
-// Export JWT Manager for direct access
 export default jwtAuthManager;
 

@@ -14,6 +14,7 @@ import FormattedPrice from '@/components/FormattedPrice.jsx';
 import { jwtAuthManager } from '@/lib/jwtAuth.js';
 import { auth } from '@/lib/firebase.js';
 import { updateProfile } from 'firebase/auth';
+import logger from '@/lib/logger.js';
 
 const UserProfilePage = ({ handleFeatureClick }) => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
         setIsLoggedIn(true);
         
         // تعبئة البيانات الأساسية من المستخدم
-        console.log('User data from JWT:', user);
+        logger.debug('User data from JWT:', user);
         
         // محاولة جلب البيانات من Firebase مباشرة إذا كانت البيانات المحفوظة فارغة
         let displayName = user.displayName;
@@ -64,11 +65,11 @@ const UserProfilePage = ({ handleFeatureClick }) => {
         
         if (!displayName && auth.currentUser) {
           displayName = auth.currentUser.displayName || '';
-          console.log('Got displayName from Firebase auth:', displayName);
+          logger.debug('Got displayName from Firebase auth:', displayName);
         }
         if (!phoneNumber && auth.currentUser) {
           phoneNumber = auth.currentUser.phoneNumber || '';
-          console.log('Got phoneNumber from Firebase auth:', phoneNumber);
+          logger.debug('Got phoneNumber from Firebase auth:', phoneNumber);
         }
         
         setUserData({
@@ -115,12 +116,12 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           setOrders(ordersData || []);
           
         } catch (error) {
-          console.log('Customer profile not found, using basic user data');
+          logger.info('Customer profile not found, using basic user data');
           // إذا لم يتم العثور على ملف العميل، نستخدم البيانات الأساسية
         }
         
       } catch (error) {
-        console.error('Failed to fetch profile data:', error);
+        logger.error('Failed to fetch profile data:', error);
         toast({
           title: 'خطأ في تحميل البيانات',
           description: 'تعذر تحميل بيانات الملف الشخصي',
@@ -138,7 +139,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       if (firebaseUser && isLoggedIn) {
-        console.log('Firebase auth state changed:', firebaseUser);
+        logger.debug('Firebase auth state changed:', firebaseUser);
         
         // تحديث البيانات من Firebase إذا كانت متوفرة
         const updatedUserData = {
@@ -148,7 +149,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           profilePicture: firebaseUser.photoURL || ''
         };
         
-        console.log('Updating user data from Firebase:', updatedUserData);
+        logger.debug('Updating user data from Firebase:', updatedUserData);
         setUserData(prev => ({
           ...prev,
           ...updatedUserData
@@ -166,9 +167,9 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           
           try {
             jwtAuthManager.updateUserData(updatedJWTData);
-            console.log('JWT data updated successfully');
+            logger.debug('JWT data updated successfully');
           } catch (error) {
-            console.error('Failed to update JWT data:', error);
+            logger.error('Failed to update JWT data:', error);
           }
         }
       }
@@ -205,7 +206,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           await updateProfile(auth.currentUser, { 
             displayName: userData.name 
           });
-          console.log('Firebase profile updated successfully');
+          logger.info('Firebase profile updated successfully');
           
           // تحديث البيانات في JWT أيضاً
           const updatedUserData = {
@@ -215,13 +216,13 @@ const UserProfilePage = ({ handleFeatureClick }) => {
           jwtAuthManager.updateUserData(updatedUserData);
           
         } catch (firebaseError) {
-          console.warn('Failed to update Firebase profile:', firebaseError);
+          logger.error('Failed to update Firebase profile:', firebaseError);
         }
       }
       
       toast({ title: "تم تحديث الملف الشخصي بنجاح!" });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile:', error);
       toast({ title: "تعذر تحديث الملف الشخصي", variant: "destructive" });
     }
   };
@@ -249,7 +250,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
       setAddressDialogOpen(false);
       toast({ title: 'تم حفظ العنوان بنجاح!' });
     } catch (error) {
-      console.error('Error saving address:', error);
+      logger.error('Error saving address:', error);
       toast({ title: 'تعذر حفظ العنوان', variant: 'destructive' });
     }
   };
@@ -263,7 +264,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
       setPaymentDialogOpen(false);
       toast({ title: 'تم حفظ طريقة الدفع بنجاح!' });
     } catch (error) {
-      console.error('Error saving payment method:', error);
+      logger.error('Error saving payment method:', error);
       toast({ title: 'تعذر حفظ طريقة الدفع', variant: 'destructive' });
     }
   };
@@ -284,7 +285,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
       setAddresses(updated);
       toast({ title: 'تم حذف العنوان بنجاح!' });
     } catch (error) {
-      console.error('Error deleting address:', error);
+      logger.error('Error deleting address:', error);
       toast({ title: 'تعذر حذف العنوان', variant: 'destructive' });
     }
   };
@@ -299,7 +300,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
       navigate('/');
       toast({ title: 'تم تسجيل الخروج بنجاح' });
     } catch (error) {
-      console.error('Error logging out:', error);
+      logger.error('Error logging out:', error);
       toast({ title: 'خطأ في تسجيل الخروج', variant: 'destructive' });
     }
   };
@@ -574,7 +575,7 @@ const UserProfilePage = ({ handleFeatureClick }) => {
                      size="sm"
                      className="text-red-600 hover:text-red-700"
                      onClick={async () => {
-                       const uid = localStorage.getItem('currentUserId');
+                       const uid = currentUser?.uid;
                        if (!uid) return;
                        try {
                          await api.deleteUserPaymentMethod(uid, pm.id);

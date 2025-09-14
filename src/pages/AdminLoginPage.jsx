@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '@/lib/jwtAuth.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
+import logger from '@/lib/logger.js';
 
 const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
   const [email, setEmail] = useState('');
@@ -94,7 +95,7 @@ const AdminLoginPage = ({ onLogin, setCurrentUser }) => {
       onLogin();
       navigate('/admin');
     } catch (error) {
-      console.error('Admin login error:', error);
+      logger.error('Admin login error:', error);
       toast({
         title: 'خطأ في تسجيل الدخول',
         description: error.message || 'بيانات غير صحيحة',

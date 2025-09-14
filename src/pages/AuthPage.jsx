@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase.js';
+import logger from '@/lib/logger.js';
 
 const formVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -48,15 +49,11 @@ const AuthPage = ({ onLogin }) => {
 
       // تسجيل الدخول باستخدام jwtAuthManager
       const result = await firebaseAuth.signInWithEmail(email, password);
-      
-      // تحديث localStorage للتوافق مع النظام القديم
-      localStorage.setItem('customerLoggedIn', 'true');
-      localStorage.setItem('currentUserId', result.user.uid);
-      
+
       onLogin();
       navigate('/profile');
     } catch (err) {
-      console.error('Auth error:', err);
+      logger.error('Auth error:', err);
       toast({
         title: err.message || 'بيانات غير صحيحة',
         variant: 'destructive'
@@ -85,19 +82,15 @@ const AuthPage = ({ onLogin }) => {
           { name: result.user.displayName, email: result.user.email, role: 'customer' },
           { merge: true }
         );
-        
-        // تحديث localStorage للتوافق مع النظام القديم
-        localStorage.setItem('customerLoggedIn', 'true');
-        localStorage.setItem('currentUserId', result.user.uid);
-        
+
         onLogin();
         navigate('/profile');
       }
     } catch (err) {
-      console.error('Social auth error:', err);
-      toast({ 
-        title: err.message || 'تعذر تسجيل الدخول بالحساب', 
-        variant: 'destructive' 
+      logger.error('Social auth error:', err);
+      toast({
+        title: err.message || 'تعذر تسجيل الدخول بالحساب',
+        variant: 'destructive'
       });
     }
   };

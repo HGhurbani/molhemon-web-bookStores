@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import logger from './logger.js';
 
 // دعم بيئات Node التي لا توفر import.meta.env
 const env = typeof import.meta !== 'undefined' && import.meta.env
@@ -32,7 +33,7 @@ export const storage = getStorage(app, firebaseConfig.storageBucket);
 
 // إعدادات إضافية للتطوير (اختياري)
 if (env.VITE_APP_ENV === 'development') {
-  console.log('Firebase initialized in development mode');
+  logger.info('Firebase initialized in development mode');
   // يمكن إضافة إعدادات التطوير هنا
 }
 

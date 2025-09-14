@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
+import logger from '@/lib/logger.js';
 
 const AuthContext = createContext(null);
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         const errorObject = errorHandler.handleError(error, 'auth:status-check');
-        console.error('Auth status check failed:', errorObject);
+        logger.error('Auth status check failed:', errorObject);
         jwtAuthManager.clearTokens();
         setIsCustomer(false);
         setIsAdmin(false);
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }) => {
             setIsAdmin(false);
           }
         } catch (err) {
-          console.error('Error checking user role:', err);
+          logger.error('Error checking user role:', err);
           setIsAdmin(false);
         }
       } else {
