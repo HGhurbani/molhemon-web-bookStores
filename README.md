@@ -337,9 +337,9 @@ const result = await api.orders.processCheckout(cartId, checkoutData);
 ## 📞 الدعم والمساعدة
 
 ### التواصل
-- 📧 البريد الإلكتروني: support@molhemon.com
+- 📧 البريد الإلكتروني: hazemhataki@gmail.com
 - 💬 الدردشة المباشرة في الموقع
-- 📱 واتساب: +966-XX-XXX-XXXX
+- 📱 واتساب: +905079975403
 
 ### الموارد
 - 📚 [دليل المستخدم](./docs/user-guide.md)
@@ -362,7 +362,7 @@ const result = await api.orders.processCheckout(cartId, checkoutData);
 
 <div align="center">
 
-**صُنع بـ ❤️ بواسطة فريق دار ملهمون**
+**صُنع بـ ❤️ بواسطة حازم**
 
 [الموقع الرسمي](https://molhemon.com) | [المتجر](https://store.molhemon.com) | [المدونة](https://blog.molhemon.com)
 
