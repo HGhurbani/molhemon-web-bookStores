@@ -22,6 +22,13 @@ describe('PaymentService real payment flow', () => {
     jest.clearAllMocks();
   });
 
+  test('createPayment fails validation with missing fields', async () => {
+    const service = new PaymentService();
+    await expect(service.createPayment({ orderId: 'o1' }))
+      .rejects.toEqual(expect.objectContaining({ code: 'validation/payment-invalid' }));
+    expect(paymentManager.createPaymentIntent).not.toHaveBeenCalled();
+  });
+
   test('processPayment succeeds and updates status with gateway result', async () => {
     const service = new PaymentService();
     paymentManager.createPaymentIntent.mockResolvedValue({
