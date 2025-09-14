@@ -6,7 +6,8 @@
 import { paymentManager } from '../payment/PaymentManager.js';
 import { Payment } from '../models/Payment.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
+import { getSettings, updateSettings } from '../firebase/settingsApi.js';
 import logger from '../logger.js';
 
 export class UnifiedPaymentService {
@@ -41,7 +42,7 @@ export class UnifiedPaymentService {
    */
   async getPaymentSettings() {
     try {
-      const settings = await firebaseApi.getSettings();
+      const settings = await getSettings();
       return settings.payments || {};
     } catch (error) {
       logger.error('Failed to get payment settings:', error);
@@ -435,7 +436,7 @@ export class UnifiedPaymentService {
   async updatePaymentSettings(newSettings) {
     try {
       // تحديث الإعدادات في Firebase
-      const currentSettings = await firebaseApi.getSettings();
+      const currentSettings = await getSettings();
       const updatedSettings = {
         ...currentSettings,
         payments: {
@@ -444,7 +445,7 @@ export class UnifiedPaymentService {
         }
       };
 
-      await firebaseApi.updateSettings(updatedSettings);
+      await updateSettings(updatedSettings);
 
       // تحديث إعدادات مدير المدفوعات
       await paymentManager.updateSettings(newSettings);

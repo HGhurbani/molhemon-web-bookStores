@@ -7,7 +7,7 @@ import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
 import { errorHandler } from '../errorHandler.js';
-import firebaseApi from '../firebaseApi.js';
+import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
 
 import { createOrder as createOrderHandler } from './order/createOrder.js';
