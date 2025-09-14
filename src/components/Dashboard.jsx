@@ -1540,7 +1540,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
 
   const handleAdd = async (data) => {
     try {
-      const newItem = await api.addSlider(data);
+      const newItem = await api.home.addSlider(data);
       setSliders(prev => [newItem, ...prev]);
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
@@ -1551,7 +1551,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
 
   const handleEdit = async (data) => {
     try {
-      const updated = await api.updateSlider(editing.id, data);
+      const updated = await api.home.updateSlider(editing.id, data);
       setSliders(prev => prev.map(s => s.id === updated.id ? updated : s));
       toast({ title: 'تم التعديل بنجاح!' });
       setShowForm(false);
@@ -1564,7 +1564,7 @@ const DashboardSliders = ({ sliders, setSliders }) => {
   const handleDelete = async (id) => {
     if (!confirmDelete()) return;
     try {
-      await api.deleteSlider(id);
+      await api.home.deleteSlider(id);
       setSliders(prev => prev.filter(s => s.id !== id));
       toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
@@ -1682,7 +1682,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
 
   const handleAdd = async (data) => {
     try {
-      const newItem = await api.addBanner(data);
+      const newItem = await api.home.addBanner(data);
       setBanners(prev => [newItem, ...prev]);
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
@@ -1693,7 +1693,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
 
   const handleEdit = async (data) => {
     try {
-      const updated = await api.updateBanner(editing.id, data);
+      const updated = await api.home.updateBanner(editing.id, data);
       setBanners(prev => prev.map(b => b.id === updated.id ? updated : b));
       toast({ title: 'تم التعديل بنجاح!' });
       setShowForm(false);
@@ -1706,7 +1706,7 @@ const DashboardBanners = ({ banners, setBanners }) => {
   const handleDelete = async (id) => {
     if (!confirmDelete()) return;
     try {
-      await api.deleteBanner(id);
+      await api.home.deleteBanner(id);
       setBanners(prev => prev.filter(b => b.id !== id));
       toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
@@ -1817,7 +1817,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
 
   const handleAdd = async (data) => {
     try {
-      const newItem = await api.addFeature(data);
+      const newItem = await api.home.addFeature(data);
       setFeatures(prev => [newItem, ...prev]);
       toast({ title: 'تمت الإضافة بنجاح!' });
       setShowForm(false);
@@ -1828,7 +1828,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
 
   const handleEdit = async (data) => {
     try {
-      const updated = await api.updateFeature(editing.id, data);
+      const updated = await api.home.updateFeature(editing.id, data);
       setFeatures(prev => prev.map(f => f.id === updated.id ? updated : f));
       toast({ title: 'تم التعديل بنجاح!' });
       setShowForm(false);
@@ -1841,7 +1841,7 @@ const DashboardFeatures = ({ features, setFeatures }) => {
   const handleDelete = async (id) => {
     if (!confirmDelete()) return;
     try {
-      await api.deleteFeature(id);
+      await api.home.deleteFeature(id);
       setFeatures(prev => prev.filter(f => f.id !== id));
       toast({ title: 'تم الحذف بنجاح!' });
     } catch (e) {
