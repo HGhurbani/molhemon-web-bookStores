@@ -1,63 +1,23 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
-import Header from '@/components/Header.jsx';
-import Footer from '@/components/Footer.jsx';
-import SEO from '@/components/SEO.jsx';
-import AuthPage from '@/pages/AuthPage.jsx';
 import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 import { useAuth } from '@/lib/authContext.jsx';
 import { useCart } from '@/lib/cartContext.jsx';
 import { useFavorites } from '@/lib/favoritesContext.jsx';
 import { useSettings } from '@/lib/settingsContext.jsx';
 const AdminRoutes = React.lazy(() => import('@/routes/AdminRoutes.jsx'));
-
-import HomePage from '@/pages/HomePage.jsx';
-import BookDetailsPage from '@/pages/BookDetailsPage.jsx';
-import AuthorPage from '@/pages/AuthorPage.jsx';
-import CategoryPage from '@/pages/CategoryPage.jsx';
-import CartPage from '@/pages/CartPage.jsx';
-import CheckoutPage from '@/pages/CheckoutPage.jsx';
-import UserProfilePage from '@/pages/UserProfilePage.jsx';
-import OrderDetailsPage from '@/pages/OrderDetailsPage.jsx';
-import DashboardOrderDetailsPage from '@/pages/DashboardOrderDetailsPage.jsx';
-import TrackOrderPage from '@/pages/TrackOrderPage.jsx';
-import NotFoundPage from '@/pages/NotFoundPage.jsx';
-import AudiobookPage from '@/pages/AudiobookPage.jsx';
-import EbookPage from '@/pages/EbookPage.jsx';
-import ReadSamplePage from '@/pages/ReadSamplePage.jsx';
-import ListenSamplePage from '@/pages/ListenSamplePage.jsx';
-import EbookReaderPage from '@/pages/EbookReaderPage.jsx';
-import AudiobookPlayerPage from '@/pages/AudiobookPlayerPage.jsx';
-import SubscriptionCheckoutPage from '@/pages/SubscriptionCheckoutPage.jsx';
-import SearchResultsPage from '@/pages/SearchResultsPage.jsx';
-import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage.jsx';
-import TermsOfServicePage from '@/pages/TermsOfServicePage.jsx';
-import ReturnPolicyPage from '@/pages/ReturnPolicyPage.jsx';
-import AuthorsSectionPage from '@/pages/AuthorsSectionPage.jsx';
-import DesignServicesPage from '@/pages/DesignServicesPage.jsx';
-import PublishingServicesPage from '@/pages/PublishingServicesPage.jsx';
-import PublishPage from '@/pages/PublishPage.jsx';
-import AboutPage from '@/pages/AboutPage.jsx';
-import TeamPage from '@/pages/TeamPage.jsx';
-import BlogPage from '@/pages/BlogPage.jsx';
-import BlogDetailsPage from '@/pages/BlogDetailsPage.jsx';
-import BlogTestPage from '@/pages/BlogTestPage.jsx';
-import HelpCenterPage from '@/pages/HelpCenterPage.jsx';
-import DistributorsPage from '@/pages/DistributorsPage.jsx';
-import StoreSettingsPage from '@/pages/StoreSettingsPage.jsx';
+const ShopRoutes = React.lazy(() => import('@/routes/ShopRoutes.jsx'));
 import AddToCartDialog from '@/components/AddToCartDialog.jsx';
 import ScrollToTop from '@/components/ScrollToTop.jsx';
 import ChatWidget from '@/components/ChatWidget.jsx';
 import SplashScreen from '@/components/SplashScreen.jsx';
-import MobileBottomNav from '@/components/MobileBottomNav.jsx';
-import RequireAdmin from '@/components/RequireAdmin.jsx';
 
-import { sellers as initialSellers, branches as initialBranches, footerLinks, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
+import { sellers as initialSellers, branches as initialBranches, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
@@ -521,53 +481,6 @@ const App = () => {
     });
   };
 
-  const PageLayout = ({ children, siteSettings }) => {
-    const location = useLocation();
-    return (
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {React.Children.map(children, child => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement(child, { siteSettings });
-          }
-          return child;
-        })}
-      </motion.div>
-    );
-  };
-  
-  const MainLayout = ({ children, siteSettings }) => (
-    <>
-      <SEO
-        title={siteSettings.siteName}
-        description={siteSettings.description}
-        keywords="كتب, متجر كتب, كتب صوتية, كتب إلكترونية, دار نشر"
-      />
-      <div className="min-h-screen bg-slate-100 text-gray-800">
-        <Header
-          handleFeatureClick={handleFeatureClick}
-          books={books}
-          categories={categoriesState}
-          siteSettings={siteSettings}
-        />
-        <div className="pb-16 md:pb-0">
-          {children}
-        </div>
-        <Footer
-          footerLinks={footerLinks}
-          handleFeatureClick={handleFeatureClick}
-          siteSettings={siteSettings}
-        />
-        <MobileBottomNav />
-      </div>
-    </>
-  );
-
   if (isAppLoading) {
     return <SplashScreen siteSettings={siteSettingsState} />;
   }
@@ -579,153 +492,88 @@ const App = () => {
         <div className="font-sans" dir="rtl">
           <AnimatePresence mode="wait">
             <Suspense fallback={<div>Loading...</div>}>
-            <Routes>
-              <Route
-                path="/admin/*"
-                element={
-                  <AdminRoutes
-                    dashboardProps={{
-                      dashboardStats: dashboardStatsState,
-                      books,
-                      authors,
-                      sellers,
-                      branches,
-                      categories: categoriesState,
-                      orders,
-                      payments,
-                      paymentMethods,
-                      plans,
-                      subscriptions,
-                      dashboardSection,
-                      setDashboardSection,
-                      handleFeatureClick,
-                      setBooks,
-                      setAuthors,
-                      setSellers,
-                      setBranches,
-                      setCategories: setCategoriesState,
-                      setOrders,
-                      setPayments,
-                      setPaymentMethods,
-                      currencies: currenciesState,
-                      setCurrencies: setCurrenciesState,
-                      languages,
-                      setLanguages,
-                      setPlans,
-                      setSubscriptions,
-                      users,
-                      setUsers,
-                      messages,
-                      setMessages,
-                      notifications,
-                      setNotifications,
-                      siteSettings: siteSettingsState,
-                      setSiteSettings: setSiteSettingsState,
-                      sliders: heroSlidesState,
-                      setSliders: setHeroSlidesState,
-                      banners: bannersState,
-                      setBanners: setBannersState,
-                      features,
-                      setFeatures
-                    }}
-                  />
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  isCustomerLoggedIn ? (
-                    <Navigate to="/profile" />
-                  ) : (
-                    <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout siteSettings={siteSettingsState}>
-                        <AuthPage onLogin={login} />
-                      </PageLayout>
-                    </MainLayout>
-                  )
-                }
-              />
-              <Route path="/" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><HomePage books={books} authors={authors} heroSlides={heroSlidesState} banners={bannersState} categories={categoriesState} recentSearchBooks={recentSearchBooks} bestsellerBooks={bestsellerBooks} featuresData={features} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/book/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BookDetailsPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} onOpenChat={handleOpenChat} /></PageLayout></MainLayout>} />
-              <Route path="/author/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AuthorPage authors={authors} books={books} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/search" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><SearchResultsPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/category/:categoryId" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><CategoryPage books={books} categories={categoriesState} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} /></PageLayout></MainLayout>} />
-              <Route path="/cart" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><CartPage cart={cart} handleRemoveFromCart={handleRemoveFromCart} handleUpdateQuantity={handleUpdateQuantity} /></PageLayout></MainLayout>} />
-              <Route
-                path="/checkout"
-                element={
-                  isCustomerLoggedIn ? (
-                    <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout siteSettings={siteSettingsState}>
-                        <CheckoutPage
-                          cart={cart}
-                          setCart={setCart}
-                          setOrders={setOrders}
-                          currentUser={currentUser}
-                        />
-                      </PageLayout>
-                    </MainLayout>
-                  ) : (
-                    <Navigate to="/login" />
-                  )
-                }
-              />
-              <Route
-                path="/subscribe/:planId"
-                element={
-                  isCustomerLoggedIn ? (
-                    <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout siteSettings={siteSettingsState}>
-                        <SubscriptionCheckoutPage />
-                      </PageLayout>
-                    </MainLayout>
-                  ) : (
-                    <Navigate to="/login" />
-                  )
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  isCustomerLoggedIn ? (
-                    <MainLayout siteSettings={siteSettingsState}>
-                      <PageLayout siteSettings={siteSettingsState}>
-                        <UserProfilePage 
-                          handleFeatureClick={handleFeatureClick}
-                          currentUser={currentUser}
-                        />
-                      </PageLayout>
-                    </MainLayout>
-                  ) : (
-                    <Navigate to="/login" />
-                  )
-                }
-              />
-              <Route path="/orders/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><OrderDetailsPage /></PageLayout></MainLayout>} />
-              <Route path="/track-order" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TrackOrderPage /></PageLayout></MainLayout>} />
-              <Route path="/ebooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><EbookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/audiobooks" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AudiobookPage books={books} authors={authors} handleAddToCart={handleAddToCart} handleToggleWishlist={handleToggleWishlist} wishlist={wishlist} handleFeatureClick={handleFeatureClick} /></PageLayout></MainLayout>} />
-              <Route path="/read/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ReadSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/reader/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><EbookReaderPage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/listen/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ListenSamplePage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/player/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AudiobookPlayerPage books={books} /></PageLayout></MainLayout>} />
-              <Route path="/privacy-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PrivacyPolicyPage /></PageLayout></MainLayout>} />
-              <Route path="/terms-of-service" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TermsOfServicePage /></PageLayout></MainLayout>} />
-              <Route path="/return-policy" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><ReturnPolicyPage /></PageLayout></MainLayout>} />
-              <Route path="/authors" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AuthorsSectionPage /></PageLayout></MainLayout>} />
-              <Route path="/design-services" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><DesignServicesPage /></PageLayout></MainLayout>} />
-              <Route path="/publishing-services" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PublishingServicesPage /></PageLayout></MainLayout>} />
-              <Route path="/publish" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><PublishPage /></PageLayout></MainLayout>} />
-              <Route path="/about" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><AboutPage /></PageLayout></MainLayout>} />
-              <Route path="/team" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><TeamPage /></PageLayout></MainLayout>} />
-              <Route path="/blog" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogPage /></PageLayout></MainLayout>} />
-              <Route path="/blog/:id" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogDetailsPage /></PageLayout></MainLayout>} />
-              <Route path="/blog-test" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><BlogTestPage /></PageLayout></MainLayout>} />
-              <Route path="/help" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><HelpCenterPage /></PageLayout></MainLayout>} />
-              <Route path="/distributors" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><DistributorsPage /></PageLayout></MainLayout>} />
-<Route path="/store-settings" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><StoreSettingsPage /></PageLayout></MainLayout>} />
-<Route path="*" element={<MainLayout siteSettings={siteSettingsState}><PageLayout siteSettings={siteSettingsState}><NotFoundPage /></PageLayout></MainLayout>} />
-            </Routes>
+              <Routes>
+                <Route
+                  path="/admin/*"
+                  element={
+                    <AdminRoutes
+                      dashboardProps={{
+                        dashboardStats: dashboardStatsState,
+                        books,
+                        authors,
+                        sellers,
+                        branches,
+                        categories: categoriesState,
+                        orders,
+                        payments,
+                        paymentMethods,
+                        plans,
+                        subscriptions,
+                        dashboardSection,
+                        setDashboardSection,
+                        handleFeatureClick,
+                        setBooks,
+                        setAuthors,
+                        setSellers,
+                        setBranches,
+                        setCategories: setCategoriesState,
+                        setOrders,
+                        setPayments,
+                        setPaymentMethods,
+                        currencies: currenciesState,
+                        setCurrencies: setCurrenciesState,
+                        languages,
+                        setLanguages,
+                        setPlans,
+                        setSubscriptions,
+                        users,
+                        setUsers,
+                        messages,
+                        setMessages,
+                        notifications,
+                        setNotifications,
+                        siteSettings: siteSettingsState,
+                        setSiteSettings: setSiteSettingsState,
+                        sliders: heroSlidesState,
+                        setSliders: setHeroSlidesState,
+                        banners: bannersState,
+                        setBanners: setBannersState,
+                        features,
+                        setFeatures
+                      }}
+                    />
+                  }
+                />
+                <Route
+                  path="/*"
+                  element={
+                    <ShopRoutes
+                      isCustomerLoggedIn={isCustomerLoggedIn}
+                      login={login}
+                      currentUser={currentUser}
+                      books={books}
+                      authors={authors}
+                      categories={categoriesState}
+                      cart={cart}
+                      setCart={setCart}
+                      setOrders={setOrders}
+                      handleAddToCart={handleAddToCart}
+                      handleRemoveFromCart={handleRemoveFromCart}
+                      handleUpdateQuantity={handleUpdateQuantity}
+                      handleToggleWishlist={handleToggleWishlist}
+                      handleFeatureClick={handleFeatureClick}
+                      handleOpenChat={handleOpenChat}
+                      recentSearchBooks={recentSearchBooks}
+                      bestsellerBooks={bestsellerBooks}
+                      heroSlides={heroSlidesState}
+                      banners={bannersState}
+                      wishlist={wishlist}
+                      siteSettings={siteSettingsState}
+                      features={features}
+                    />
+                  }
+                />
+              </Routes>
             </Suspense>
           </AnimatePresence>
           <Toaster />
