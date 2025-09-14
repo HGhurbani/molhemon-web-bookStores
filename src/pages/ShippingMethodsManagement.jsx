@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import { Plus, Save, Trash2, Settings, Globe, Scale, Truck, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Plus, Save, Trash2, Settings, Globe, Scale, Truck, CheckCircle2, AlertTriangle, Download, Upload } from 'lucide-react';
 import api from '@/lib/api.js';
 
 const defaultNewMethod = {
@@ -91,17 +91,40 @@ const ShippingMethodsManagement = () => {
   const saveAll = async () => {
     try {
       setSaving(true);
-      const payload = {
-        shippingMethods: methods,
-        shippingZones: zones
-      };
-      await api.storeSettings.updateStoreSettings(payload);
+      const payload = { methods, zones };
+      await api.storeSettings.saveShippingMethods(payload);
       toast({ title: 'تم حفظ إعدادات الشحن بنجاح' });
       await loadSettings();
     } catch (error) {
       toast({ title: 'خطأ في حفظ الإعدادات', description: error.message, variant: 'destructive' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleBackup = async () => {
+    try {
+      await api.storeSettings.saveShippingMethods({ methods, zones });
+      toast({ title: 'تم إنشاء نسخة احتياطية', variant: 'success' });
+    } catch (error) {
+      toast({ title: 'خطأ في النسخ الاحتياطي', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      const version = prompt('أدخل رقم النسخة المراد استعادتها:');
+      if (!version) return;
+      const data = await api.storeSettings.restoreShippingMethods(Number(version));
+      if (data) {
+        setMethods({ ...(data.methods || {}) });
+        setZones({ ...(data.zones || {}) });
+        toast({ title: 'تمت الاستعادة بنجاح', variant: 'success' });
+      } else {
+        toast({ title: 'لم يتم العثور على النسخة', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'خطأ في الاستعادة', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -126,6 +149,8 @@ const ShippingMethodsManagement = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2"><Truck className="w-5 h-5"/> إدارة طرق الشحن</h3>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleBackup} disabled={saving}><Download className="w-4 h-4 ml-2"/>نسخ احتياطي</Button>
+            <Button variant="outline" onClick={handleRestore} disabled={saving}><Upload className="w-4 h-4 ml-2"/>استعادة</Button>
             <Button onClick={saveAll} disabled={saving}><Save className="w-4 h-4 ml-2"/>حفظ</Button>
           </div>
         </div>
