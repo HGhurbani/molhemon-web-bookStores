@@ -6,15 +6,14 @@ import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
-import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
 
-import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase.js';
-
-const { Schemas, validateData } = schemas;
+import { createOrder as createOrderHandler } from './order/createOrder.js';
+import { updateOrderStatus as updateOrderStatusHandler, updateOrderStage as updateOrderStageHandler } from './order/updateOrder.js';
+import { updateOrderItem as updateOrderItemHandler } from './order/orderItems.js';
+import { refundOrderPayment as refundOrderPaymentHandler } from './order/refundPayment.js';
 
 export class OrderService {
   constructor() {
@@ -25,298 +24,7 @@ export class OrderService {
    * إنشاء طلب جديد
    */
   async createOrder(orderData) {
-    try {
-      // إنشاء نموذج الطلب
-      const order = new Order(orderData);
-      
-      // التحقق من صحة البيانات باستخدام المخطط الموحد
-      const validationErrors = validateData(orderData, Schemas.Order);
-      if (validationErrors.length > 0) {
-        throw errorHandler.createError(
-          'VALIDATION',
-          'validation/order-invalid',
-          `خطأ في بيانات الطلب: ${validationErrors.join(', ')}`,
-          'order-creation'
-        );
-      }
-
-      // التحقق من طريقة الشحن - إذا كان استلام من المتجر، فالشحن = 0
-      const isPickup = orderData.shippingMethod === 'pickup' || 
-                      orderData.shippingMethod?.name === 'استلام من المتجر' ||
-                      orderData.shippingMethod?.id === 'pickup' ||
-                      orderData.shippingMethod?.type === 'pickup';
-      
-      if (isPickup) {
-        logger.debug('OrderService - Pickup method detected, setting shipping cost to 0');
-        order.shippingCost = 0;
-      }
-
-      // حساب التكاليف
-      order.calculateTotal();
-      
-      // التأكد من أن total موجود
-      if (!order.totalAmount && order.totalAmount !== 0) {
-        order.totalAmount = order.subtotal + order.shippingCost + order.taxAmount - order.discountAmount;
-      }
-
-      // إنشاء عناصر الطلب
-      const orderItems = orderData.items.map(itemData => {
-        const orderItem = new OrderItem({
-          id: itemData.id || null,
-          productId: itemData.productId || itemData.id,
-          productType: itemData.productType || itemData.type || 'physical',
-          title: itemData.title || itemData.name || itemData.productName || '',
-          author: itemData.author || '',
-          quantity: itemData.quantity || 1,
-          unitPrice: itemData.unitPrice || itemData.price || 0,
-          weight: itemData.weight || 0,
-          dimensions: itemData.dimensions || { length: 0, width: 0, height: 0 },
-          coverImage: itemData.coverImage || itemData.image || '',
-          isbn: itemData.isbn || '',
-          publisher: itemData.publisher || '',
-          format: itemData.format || ''
-        });
-        orderItem.calculateTotalPrice();
-        return orderItem;
-      });
-      
-      // إضافة total للطلب
-      order.total = order.totalAmount;
-
-      // إعداد بيانات الحفظ
-      const orderDataToSave = order.toObject();
-      orderDataToSave.total = order.totalAmount; // إضافة total للتوافق
-      orderDataToSave.createdAt = serverTimestamp();
-      orderDataToSave.updatedAt = serverTimestamp();
-      orderDataToSave.orderedAt = serverTimestamp();
-
-      if (orderDataToSave.stageHistory && orderDataToSave.stageHistory.length > 0) {
-        orderDataToSave.stageHistory[0].timestamp = firebaseApi.serverTimestamp();
-      }
-      
-      logger.debug('OrderService - Order before saving to Firebase:', {
-        subtotal: orderDataToSave.subtotal,
-        shippingCost: orderDataToSave.shippingCost,
-        taxAmount: orderDataToSave.taxAmount,
-        total: orderDataToSave.total,
-        totalAmount: orderDataToSave.totalAmount,
-        createdAt: orderDataToSave.createdAt
-      });
-      const orderDoc = await firebaseApi.addToCollection(this.collectionName, orderDataToSave);
-      logger.debug('Order document returned from Firebase:', orderDoc);
-      
-      // إضافة total إلى orderDoc إذا لم يكن موجوداً
-      if (orderDoc && !orderDoc.total) {
-        orderDoc.total = order.totalAmount;
-      }
-      
-      // التحقق من وجود معرف الطلب
-      if (!orderDoc || !orderDoc.id) {
-        logger.error('OrderService - Failed to get order ID from Firebase:', {
-          orderDoc,
-          hasId: orderDoc?.id,
-          orderDocKeys: orderDoc ? Object.keys(orderDoc) : 'N/A'
-        });
-        
-        // إنشاء معرف احتياطي
-        const fallbackId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        logger.info('OrderService - Using fallback order ID:', fallbackId);
-        
-        order.id = fallbackId;
-        order.total = order.totalAmount;
-        
-        // محاولة إعادة حفظ الطلب مع المعرف الاحتياطي
-        try {
-          const orderDataWithId = { ...order.toObject(), id: fallbackId };
-          await firebaseApi.updateCollection(this.collectionName, fallbackId, orderDataWithId);
-          logger.debug('OrderService - Order saved with fallback ID successfully');
-        } catch (retryError) {
-          logger.error('OrderService - Failed to save order with fallback ID:', retryError);
-          throw errorHandler.createError(
-            'DATABASE',
-            'database/order-creation-failed',
-            'فشل في إنشاء الطلب - لم يتم الحصول على معرف الطلب من Firebase',
-            'order-creation'
-          );
-        }
-      } else {
-        order.id = orderDoc.id;
-        order.total = orderDoc.total || order.totalAmount;
-        logger.debug('Order ID after assignment:', order.id);
-        logger.debug('Order total after assignment:', order.total);
-        orderDataToSave.stageHistory[0].timestamp = serverTimestamp();
-      }
-
-      const orderItemsData = orderItems.map(item => item.toObject());
-
-      // تنفيذ المعاملة لحفظ الطلب وتحديث المخزون
-      const maxRetries = 5;
-      let orderDoc;
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          orderDoc = await runTransaction(db, async (transaction) => {
-            // التحقق من المخزون وتحديثه
-            for (const item of orderItemsData) {
-              const productRef = doc(db, 'books', item.productId);
-              const productSnap = await transaction.get(productRef);
-              if (!productSnap.exists()) {
-                throw errorHandler.createError(
-                  'NOT_FOUND',
-                  'product/not-found',
-                  'المنتج غير موجود',
-                  `stock-update:${item.productId}`
-                );
-              }
-
-              const currentStock = productSnap.data().stock || 0;
-              if (currentStock < item.quantity) {
-                throw errorHandler.createError(
-                  'VALIDATION',
-                  'validation/stock-unavailable',
-                  `المخزون غير كافي للمنتج ${item.productId}`,
-                  `stock-update:${item.productId}`
-                );
-              }
-
-              transaction.update(productRef, { stock: currentStock - item.quantity });
-            }
-
-            // إنشاء مستند الطلب
-            const orderRef = doc(collection(db, this.collectionName));
-            transaction.set(orderRef, orderDataToSave);
-
-            // حفظ عناصر الطلب
-            for (const item of orderItemsData) {
-              const itemRef = doc(collection(db, 'order_items'));
-              transaction.set(itemRef, { ...item, orderId: orderRef.id });
-            }
-
-            return { id: orderRef.id };
-          });
-          break;
-        } catch (txnError) {
-          if (txnError.code === 'aborted' && attempt < maxRetries) {
-            logger.info(`Transaction conflict detected, retrying... (${attempt})`);
-            continue;
-          }
-          throw txnError;
-        }
-      }
-
-      order.id = orderDoc.id;
-      order.total = order.totalAmount;
-
-      // تحديث orderId في عناصر الطلب بعد حفظ المعاملة
-      for (const item of orderItems) {
-        item.orderId = order.id;
-      }
-
-      logger.debug('Order ID after transaction:', order.id);
-
-      // إنشاء معلومات الشحن (إذا كان هناك منتجات مادية) بعد الحصول على معرف الطلب
-      let shipping = null;
-      if (order.hasPhysicalItems()) {
-        // التحقق من وجود معرف الطلب قبل إنشاء معلومات الشحن
-        if (!order.id) {
-          throw errorHandler.createError(
-            'VALIDATION',
-            'validation/order-id-missing',
-            'معرف الطلب مفقود - لا يمكن إنشاء معلومات الشحن',
-            'shipping-creation'
-          );
-        }
-        
-        // إعداد عنوان الشحن مع التأكد من وجود name
-        const shippingAddress = {
-          ...order.shippingAddress,
-          name: order.shippingAddress.name || 
-                (order.shippingAddress.firstName && order.shippingAddress.lastName 
-                  ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`
-                  : order.shippingAddress.firstName || order.shippingAddress.lastName || '')
-        };
-        
-        shipping = new Shipping({
-          orderId: order.id, // الآن order.id متوفر ومؤكد
-          customerId: order.customerId,
-          shippingMethod: order.shippingMethod,
-          shippingAddress: shippingAddress,
-          packageWeight: order.getTotalWeight(),
-          packageDimensions: this.calculatePackageDimensions(orderItems),
-          packageCount: orderItems.length
-        });
-        
-        // التحقق من صحة بيانات الشحن
-        logger.debug('Shipping data before validation:', {
-          orderId: shipping.orderId,
-          customerId: shipping.customerId,
-          shippingAddress: shipping.shippingAddress,
-          phone: shipping.shippingAddress?.phone,
-          name: shipping.shippingAddress?.name
-        });
-        
-        const shippingValidationErrors = shipping.validate();
-        logger.debug('Shipping validation errors:', shippingValidationErrors);
-        
-        if (shippingValidationErrors.length > 0) {
-          // حذف الطلب وعناصره إذا فشل التحقق من الشحن
-          if (order.id) {
-            try {
-              await firebaseApi.deleteFromCollection(this.collectionName, order.id);
-              // حذف عناصر الطلب (استخدام orderId للبحث)
-              const orderItemsSnapshot = await firebaseApi.getCollection('order_items');
-              const itemsToDelete = orderItemsSnapshot.filter(item => item.orderId === order.id);
-              for (const item of itemsToDelete) {
-                if (item.id) {
-                  await firebaseApi.deleteFromCollection('order_items', item.id);
-                }
-              }
-            } catch (deleteError) {
-              logger.error('Error cleaning up order after shipping validation failure:', deleteError);
-            }
-          }
-          throw errorHandler.createError(
-            'VALIDATION',
-            'validation/shipping-invalid',
-            `خطأ في بيانات الشحن: ${shippingValidationErrors.join(', ')}`,
-            'shipping-creation'
-          );
-        }
-        
-        shipping.calculateShippingCost();
-        await firebaseApi.addToCollection('shipping', shipping.toObject());
-      }
-
-      const orderResult = order.toObject();
-      orderResult.total = order.total || order.totalAmount;
-      
-      // تسجيل مفصل قبل الإرجاع
-      logger.debug('OrderService - Final order result:', {
-        id: orderResult.id,
-        total: orderResult.total,
-        totalAmount: orderResult.totalAmount,
-        keys: Object.keys(orderResult)
-      });
-      logger.debug('OrderService - Order items count:', orderItems.length);
-      logger.debug('OrderService - Has shipping:', !!shipping);
-      
-      const finalResult = {
-        order: orderResult,
-        items: orderItems.map(item => item.toObject()),
-        shipping: shipping ? shipping.toObject() : null
-      };
-      
-      logger.debug('OrderService - Returning final result:', {
-        hasOrder: !!finalResult.order,
-        orderId: finalResult.order?.id,
-        itemsCount: finalResult.items?.length,
-        hasShipping: !!finalResult.shipping
-      });
-      
-      return finalResult;
-
-    } catch (error) {
-      throw errorHandler.handleError(error, 'order-creation');
-    }
+    return createOrderHandler.call(this, orderData);
   }
 
   /**
@@ -409,90 +117,14 @@ export class OrderService {
    * تحديث حالة الطلب
    */
   async updateOrderStatus(orderId, newStatus, notes = '') {
-    try {
-      const order = await this.getOrderById(orderId);
-      if (!order) {
-        throw errorHandler.createError(
-          'NOT_FOUND',
-          'order/not-found',
-          'الطلب غير موجود',
-          `order-status:${orderId}`
-        );
-      }
-
-      // تحديث حالة الطلب
-      const orderModel = new Order(order.order);
-      orderModel.updateStatus(newStatus);
-      
-      // حفظ التحديث
-      await firebaseApi.updateCollection(this.collectionName, orderId, {
-        status: newStatus,
-        updatedAt: new Date()
-      });
-
-      // إضافة ملاحظة إذا كانت موجودة
-      if (notes) {
-        await firebaseApi.addToCollection('order_notes', {
-          orderId,
-          note: notes,
-          createdAt: new Date(),
-          createdBy: 'system'
-        });
-      }
-
-      return orderModel.toObject();
-
-    } catch (error) {
-      throw errorHandler.handleError(error, `order-status:${orderId}`);
-    }
+    return updateOrderStatusHandler.call(this, orderId, newStatus, notes);
   }
 
   /**
    * تحديث مرحلة الطلب
    */
   async updateOrderStage(orderId, newStage, notes = '') {
-    try {
-      const order = await this.getOrderById(orderId);
-      if (!order) {
-        throw errorHandler.createError(
-          'NOT_FOUND',
-          'order/not-found',
-          'الطلب غير موجود',
-          `order-stage:${orderId}`
-        );
-      }
-
-      const orderModel = new Order(order.order);
-      
-      // التحقق من إمكانية الانتقال للمرحلة الجديدة
-      if (!orderModel.canMoveToStage(newStage)) {
-        throw errorHandler.createError(
-          'VALIDATION',
-          'order/invalid-stage-transition',
-          'لا يمكن الانتقال لهذه المرحلة',
-          `order-stage:${orderId}`
-        );
-      }
-
-      // تحديث المرحلة
-      orderModel.updateStage(newStage, notes);
-      
-      // حفظ التحديث
-      await firebaseApi.updateCollection(this.collectionName, orderId, {
-        currentStage: newStage,
-        status: newStage,
-        stageHistory: orderModel.stageHistory,
-        updatedAt: new Date()
-      });
-
-      // معالجة خاصة حسب المرحلة
-      await this.handleStageTransition(orderId, newStage, orderModel);
-
-      return orderModel.toObject();
-
-    } catch (error) {
-      throw errorHandler.handleError(error, `order-stage:${orderId}`);
-    }
+    return updateOrderStageHandler.call(this, orderId, newStage, notes);
   }
 
   /**
@@ -933,66 +565,14 @@ export class OrderService {
    * تحديث عنصر في الطلب
    */
   async updateOrderItem(itemId, updateData) {
-    try {
-      await firebaseApi.updateCollection('order_items', itemId, {
-        ...updateData,
-        updatedAt: new Date()
-      });
-
-      return {
-        success: true,
-        message: 'تم تحديث عنصر الطلب بنجاح'
-      };
-
-    } catch (error) {
-      throw errorHandler.handleError(error, `order-item:update:${itemId}`);
-    }
+    return updateOrderItemHandler.call(this, itemId, updateData);
   }
 
   /**
    * استرداد مبلغ الطلب
    */
   async refundOrderPayment(orderId, refundData) {
-    try {
-      const order = await this.getOrderById(orderId);
-      if (!order) {
-        throw errorHandler.createError(
-          'NOT_FOUND',
-          'order/not-found',
-          'الطلب غير موجود',
-          `order-refund:${orderId}`
-        );
-      }
-
-      // تحديث حالة الطلب
-      await firebaseApi.updateCollection(this.collectionName, orderId, {
-        paymentStatus: 'refunded',
-        status: 'cancelled',
-        currentStage: 'cancelled',
-        refundReason: refundData.reason,
-        refundedAt: new Date(),
-        updatedAt: new Date()
-      });
-
-      // إذا كان هناك دفع مرتبط، قم بتحديثه
-      if (order.payment) {
-        await firebaseApi.updateCollection('payments', order.payment.id, {
-          paymentStatus: 'refunded',
-          refundAmount: refundData.amount,
-          refundReason: refundData.reason,
-          refundedAt: new Date(),
-          updatedAt: new Date()
-        });
-      }
-
-      return {
-        success: true,
-        message: 'تم استرداد المبلغ بنجاح'
-      };
-
-    } catch (error) {
-      throw errorHandler.handleError(error, `order-refund:${orderId}`);
-    }
+    return refundOrderPaymentHandler.call(this, orderId, refundData);
   }
 
   /**
