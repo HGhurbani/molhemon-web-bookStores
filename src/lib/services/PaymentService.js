@@ -3,7 +3,7 @@
  */
 
 import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js';
-import schemas from '../../../functions/schemas.js';
+import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
 import firebaseApi from '../firebaseApi.js';
 import logger from '../logger.js';
