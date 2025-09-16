@@ -64,7 +64,8 @@ const ShopRoutes = ({
   banners,
   wishlist,
   siteSettings,
-  features
+  features,
+  languages,
 }) => {
   const PageLayout = ({ children }) => {
     const location = useLocation();
@@ -96,6 +97,7 @@ const ShopRoutes = ({
           books={books}
           categories={categories}
           siteSettings={siteSettings}
+          languages={languages}
         />
         <div className="pb-16 md:pb-0">{children}</div>
         <Footer

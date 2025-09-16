@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultLanguages as languages } from '@/lib/languageContext.jsx';
 import api from '@/lib/api.js';
 import ExcelJS from 'exceljs';
 import FormattedPrice from './FormattedPrice.jsx';
@@ -75,7 +74,6 @@ import logger from '@/lib/logger.js';
 import { Link } from 'react-router-dom';
 import firebaseApi from '../lib/firebaseApi';
 import authManager from '../lib/authManager';
-import { useLanguage } from '../lib/languageContext';
 import { useCurrency } from '../lib/currencyContext';
 import { useNavigate } from 'react-router-dom';
 import ShippingMethodsManagement from '@/pages/ShippingMethodsManagement.jsx';

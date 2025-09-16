@@ -5,12 +5,33 @@ import { Link } from 'react-router-dom';
 import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe, Headphones, BookOpen } from 'lucide-react'; // Ensure Headphones and BookOpen are imported
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
-import { useLanguage } from '@/lib/languageContext.jsx';
 import { useTranslation } from 'react-i18next';
+import { ensureLanguageList, storeLanguageCode } from '@/lib/languagePreferences.js';
 
-const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
-  const { language, setLanguage, languages } = useLanguage();
-  const { t } = useTranslation();
+const TopBar = ({ handleFeatureClick, isLoggedIn, languages: providedLanguages = [] }) => {
+  const { t, i18n } = useTranslation();
+  const languageOptions = React.useMemo(
+    () => ensureLanguageList(providedLanguages),
+    [providedLanguages],
+  );
+  const activeLanguageCode = i18n.language || i18n.resolvedLanguage;
+  const activeLanguage = React.useMemo(
+    () =>
+      languageOptions.find((languageOption) => languageOption.code === activeLanguageCode) ||
+      languageOptions[0] ||
+      null,
+    [languageOptions, activeLanguageCode],
+  );
+  const handleLanguageChange = React.useCallback(
+    (code) => {
+      storeLanguageCode(code);
+      void i18n.changeLanguage(code);
+    },
+    [i18n],
+  );
+  const languageLabel =
+    (activeLanguage && (activeLanguage.name || activeLanguage.label)) ||
+    (activeLanguage?.code ? activeLanguage.code.toUpperCase() : t('language'));
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
     {
@@ -110,13 +131,13 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
                 <Globe className="w-3 h-3 ml-2 rtl:mr-2 rtl:ml-0" />
-                {language.name}
+                {languageLabel}
                 <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
-              {languages.map(l => (
-                <DropdownMenuItem key={l.code} onClick={() => handleFeatureClick(`change-language-${l.code}`)} className="hover:bg-blue-50">
+              {languageOptions.map(l => (
+                <DropdownMenuItem key={l.code} onClick={() => handleLanguageChange(l.code)} className="hover:bg-blue-50">
                   {l.name}
                 </DropdownMenuItem>
               ))}

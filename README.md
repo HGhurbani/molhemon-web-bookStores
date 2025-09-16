@@ -264,7 +264,7 @@ const result = await api.orders.processCheckout(cartId, checkoutData);
 
 ### إضافة لغة جديدة
 1. أنشئ ملف ترجمة في `src/locales/`
-2. أضف اللغة في `src/lib/languageContext.jsx`
+2. أضف اللغة في `src/lib/languages.js`
 3. قم بتحديث مكون اختيار اللغة
 
 ## 💰 العملات المدعومة
