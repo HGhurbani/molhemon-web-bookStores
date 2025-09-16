@@ -130,11 +130,13 @@ const ChatWidget = ({
     if (!name || !email) return;
     
     setIsLoading(true);
-    
+
+    const tempId = `temp-${Date.now()}`;
+
     try {
       // إضافة الرسالة فوراً للحالة المحلية
       const newMessage = {
-        id: `temp-${Date.now()}`,
+        id: tempId,
         userId: userId || null,
         name,
         email,
@@ -172,7 +174,7 @@ const ChatWidget = ({
     } catch (error) {
       logger.error('Error sending message:', error);
       // إزالة الرسالة المحلية في حالة الخطأ
-      setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
       setText(trimmed); // إعادة النص
     } finally {
       setIsLoading(false);
