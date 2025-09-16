@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
@@ -26,11 +26,13 @@ import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
 import useDirection from '@/lib/useDirection.js';
 
-const App = () => {
+const AppContent = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
   const { i18n } = useTranslation();
   useDirection(i18n);
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
   const { setLanguage, setLanguages, languages } = useLanguage();
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
@@ -386,11 +388,37 @@ const App = () => {
 
   // تحديث اللغة الافتراضية
   useEffect(() => {
-    if (siteSettingsState.defaultLanguage) {
-      const lang = languages.find(l => l.code === siteSettingsState.defaultLanguage);
-      if (lang) setLanguage(lang);
+    const chosenLanguageCode =
+      isAdmin && siteSettingsState.adminDefaultLanguage
+        ? siteSettingsState.adminDefaultLanguage
+        : siteSettingsState.defaultLanguage;
+
+    if (!chosenLanguageCode) {
+      return;
     }
-  }, [siteSettingsState.defaultLanguage, setLanguage, languages]);
+
+    const selectedLanguage = languages.find(l => l.code === chosenLanguageCode);
+    if (selectedLanguage) {
+      setLanguage(selectedLanguage);
+    }
+
+    i18n.changeLanguage(chosenLanguageCode);
+
+    if (typeof document !== 'undefined') {
+      const direction = typeof i18n.dir === 'function' ? i18n.dir(chosenLanguageCode) : 'ltr';
+      document.dir = direction;
+      if (document.documentElement) {
+        document.documentElement.dir = direction;
+      }
+    }
+  }, [
+    i18n,
+    isAdmin,
+    languages,
+    setLanguage,
+    siteSettingsState.adminDefaultLanguage,
+    siteSettingsState.defaultLanguage,
+  ]);
 
   // تحديث العملة الافتراضية
   useEffect(() => {
@@ -485,13 +513,12 @@ const App = () => {
   }
 
   return (
-    <ErrorBoundary>
-      <Router>
-        <ScrollToTop />
-        <div className="font-sans" dir={i18n.dir()}>
-          <AnimatePresence mode="wait">
-            <Suspense fallback={<div>Loading...</div>}>
-              <Routes>
+    <>
+      <ScrollToTop />
+      <div className="font-sans" dir={i18n.dir()}>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
                 <Route
                   path="/admin/*"
                   element={
@@ -572,28 +599,35 @@ const App = () => {
                     />
                   }
                 />
-              </Routes>
-            </Suspense>
-          </AnimatePresence>
-          <Toaster />
-          <AddToCartDialog
-            open={cartDialogOpen}
-            onOpenChange={setCartDialogOpen}
-            book={cartDialogBook}
-            handleAddToCart={handleAddToCart}
-            handleToggleWishlist={handleToggleWishlist}
-            wishlist={wishlist}
-            authors={authors}
-          />
-          <ChatWidget
-            open={chatOpen}
-            onOpenChange={setChatOpen}
-            contact={chatContact}
-          />
-        </div>
-      </Router>
-    </ErrorBoundary>
+            </Routes>
+          </Suspense>
+        </AnimatePresence>
+        <Toaster />
+        <AddToCartDialog
+          open={cartDialogOpen}
+          onOpenChange={setCartDialogOpen}
+          book={cartDialogBook}
+          handleAddToCart={handleAddToCart}
+          handleToggleWishlist={handleToggleWishlist}
+          wishlist={wishlist}
+          authors={authors}
+        />
+        <ChatWidget
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          contact={chatContact}
+        />
+      </div>
+    </>
   );
 };
+
+const App = () => (
+  <ErrorBoundary>
+    <Router>
+      <AppContent />
+    </Router>
+  </ErrorBoundary>
+);
 
 export default App;
