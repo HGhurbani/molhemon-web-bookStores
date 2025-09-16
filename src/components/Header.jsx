@@ -78,6 +78,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const navigate = useNavigate();
 
   const [hideTopRow, setHideTopRow] = useState(false);
+  const cartItemCount = React.useMemo(
+    () => cart.reduce((sum, item) => sum + (item.quantity ?? 0), 0),
+    [cart],
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -417,21 +421,30 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               )}
                 </AnimatePresence>
               <Button
-                  className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white transition-all duration-200"
+                aria-label={t('submit_search', { defaultValue: 'Search' })}
+                className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white transition-all duration-200"
                 onClick={() => handleSearchSubmit()}
                 size="sm"
+                type="button"
               >
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-              
+
               {/* Mobile Search Button - Visible only on Mobile */}
               <div className="md:hidden flex-1 flex justify-center">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="text-white hover:text-gray-200 w-12 h-12 transition-all duration-200"
                   onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                  aria-label={
+                    isMobileSearchOpen
+                      ? t('close_search_panel', { defaultValue: 'Close search panel' })
+                      : t('open_search_panel', { defaultValue: 'Open search panel' })
+                  }
+                  aria-expanded={isMobileSearchOpen}
+                  type="button"
                 >
                   <Search className="w-6 h-6" />
                 </Button>
@@ -444,31 +457,44 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
               {/* Mobile Menu Button */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="md:hidden text-white hover:text-gray-200 w-10 h-10 transition-all duration-200"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={
+                  isMobileMenuOpen
+                    ? t('close_navigation_menu', { defaultValue: 'Close navigation menu' })
+                    : t('open_navigation_menu', { defaultValue: 'Open navigation menu' })
+                }
+                aria-expanded={isMobileMenuOpen}
+                type="button"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </Button>
 
               <Button asChild variant="ghost" size="icon" className="text-white hover:text-gray-200 w-10 h-10 transition-all duration-200">
-              <Link to="/profile?tab=wishlist">
+              <Link
+                to="/profile?tab=wishlist"
+                aria-label={t('my_library', { defaultValue: 'My library' })}
+              >
                 <Bookmark className="w-5 h-5" />
               </Link>
             </Button>
 
               <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-gray-200 w-10 h-10 transition-all duration-200">
-              <Link to="/cart">
+              <Link
+                to="/cart"
+                aria-label={t('view_cart', { defaultValue: `View cart${cartItemCount ? ` (${cartItemCount})` : ''}` })}
+              >
                 <ShoppingCart className="w-5 h-5" />
-                {cart.reduce((sum, item) => sum + item.quantity, 0) > 0 && (
+                {cartItemCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-semibold rounded-full w-3.5 h-3.5 flex items-center justify-center"
                     >
-                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                    {cartItemCount}
                     </motion.span>
                 )}
               </Link>
@@ -545,6 +571,8 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                   size="icon"
                   onClick={closeMobileSearch}
                   className="w-8 h-8 text-gray-500 hover:text-gray-700"
+                  aria-label={t('close_search_panel', { defaultValue: 'Close search panel' })}
+                  type="button"
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -701,6 +729,8 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                     size="icon"
                     onClick={closeMobileMenu}
                     className="w-8 h-8 text-gray-500 hover:text-gray-700"
+                    aria-label={t('close_navigation_menu', { defaultValue: 'Close navigation menu' })}
+                    type="button"
                   >
                     <X className="w-5 h-5" />
                   </Button>
