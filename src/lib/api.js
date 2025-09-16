@@ -84,6 +84,7 @@ const api = {
         siteName: { required: true, type: 'string', minLength: 2 },
         description: { required: true, type: 'string', minLength: 10 },
         defaultLanguage: { required: true, type: 'string' },
+        adminDefaultLanguage: { required: true, type: 'string' },
         defaultCurrency: { required: true, type: 'string' }
       };
 
