@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api.js';
 import logger from '@/lib/logger.js';
+import { SUPPORTED_LANGUAGES } from '@/lib/languages.js';
 
 const SettingsNavigation = ({ activeTab, setActiveTab }) => {
   const { t } = useTranslation();
@@ -394,6 +395,16 @@ const CheckoutSettings = ({ settings, onSave }) => {
 
 // Store Details Settings
 const StoreDetailsSettings = ({ settings, onSave }) => {
+  const storeSettings = settings?.store || {};
+  const {
+    defaultLanguage: storeDefaultLanguage,
+    adminDefaultLanguage: storeAdminDefaultLanguage,
+    ...normalizedStoreSettings
+  } = storeSettings;
+
+  const fallbackSiteLanguage = SUPPORTED_LANGUAGES[0]?.code || 'ar';
+  const fallbackAdminLanguage = SUPPORTED_LANGUAGES[1]?.code || fallbackSiteLanguage;
+
   const [formData, setFormData] = useState({
     storeName: 'Darmolhimon',
     storeDescription: 'Your trusted platform for books, eBooks, and audiobooks',
@@ -409,7 +420,11 @@ const StoreDetailsSettings = ({ settings, onSave }) => {
       saturday: { open: '09:00', close: '18:00', closed: false },
       sunday: { open: '09:00', close: '18:00', closed: false }
     },
-    ...settings?.store
+    ...normalizedStoreSettings,
+    defaultLanguage:
+      settings?.defaultLanguage ?? storeDefaultLanguage ?? fallbackSiteLanguage,
+    adminDefaultLanguage:
+      settings?.adminDefaultLanguage ?? storeAdminDefaultLanguage ?? fallbackAdminLanguage
   });
 
   const handleChange = (e) => {
@@ -432,8 +447,13 @@ const StoreDetailsSettings = ({ settings, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { defaultLanguage, adminDefaultLanguage, ...storeData } = formData;
     try {
-      await onSave({ store: formData });
+      await onSave({
+        store: storeData,
+        defaultLanguage,
+        adminDefaultLanguage
+      });
       toast({ title: 'تم حفظ إعدادات المتجر بنجاح!' });
     } catch (error) {
       toast({ title: 'حدث خطأ أثناء الحفظ', variant: 'destructive' });
@@ -494,7 +514,7 @@ const StoreDetailsSettings = ({ settings, onSave }) => {
                 placeholder="+966 50 123 4567"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="storeAddress">العنوان</Label>
               <Input
@@ -504,6 +524,42 @@ const StoreDetailsSettings = ({ settings, onSave }) => {
                 onChange={handleChange}
                 placeholder="Riyadh, Saudi Arabia"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="defaultLanguage">اللغة الافتراضية للموقع</Label>
+              <select
+                id="defaultLanguage"
+                name="defaultLanguage"
+                value={formData.defaultLanguage}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+              >
+                {SUPPORTED_LANGUAGES.map(({ code, label }) => (
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="adminDefaultLanguage">اللغة الافتراضية للوحة التحكم</Label>
+              <select
+                id="adminDefaultLanguage"
+                name="adminDefaultLanguage"
+                value={formData.adminDefaultLanguage}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+              >
+                {SUPPORTED_LANGUAGES.map(({ code, label }) => (
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1062,10 +1118,20 @@ const DashboardSettings = ({ settings, setSettings }) => {
       setSaving(true);
       const updatedSettings = { ...settings, ...data };
       setSettings(updatedSettings);
-      
+
       // Save to API
+      if (data.defaultLanguage !== undefined || data.adminDefaultLanguage !== undefined) {
+        await api.updateSettings({
+          siteName: updatedSettings.siteName,
+          description: updatedSettings.description,
+          defaultCurrency: updatedSettings.defaultCurrency,
+          defaultLanguage: updatedSettings.defaultLanguage,
+          adminDefaultLanguage: updatedSettings.adminDefaultLanguage
+        });
+      }
+
       await api.storeSettings.updateStoreSettings(updatedSettings);
-      
+
       toast({ title: 'تم حفظ الإعدادات بنجاح!' });
     } catch (error) {
       logger.error('Error saving settings:', error);
