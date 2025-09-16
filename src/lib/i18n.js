@@ -1,8 +1,7 @@
 import i18n from 'i18next';
 import HttpBackend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
-
-const SUPPORTED_LANGUAGES = ['ar', 'en'];
+import { SUPPORTED_LANGUAGES } from './languages.js';
 
 i18n
   .use(HttpBackend)
@@ -10,7 +9,7 @@ i18n
   .init({
     lng: 'ar',
     fallbackLng: 'en',
-    supportedLngs: SUPPORTED_LANGUAGES,
+    supportedLngs: SUPPORTED_LANGUAGES.map(({ code }) => code),
     interpolation: { escapeValue: false },
     backend: {
       loadPath: '/api/translations/{{lng}}',
