@@ -15,6 +15,7 @@ import { errorHandler } from '@/lib/errorHandler.js';
 import api from '@/lib/api.js';
 import unifiedPaymentApi from '@/lib/api/unifiedPaymentApi.js';
 import firebaseApi from '@/lib/firebaseApi.js';
+import { resolveCheckoutFallbackId } from '@/lib/checkoutFallback.js';
 import logger from '@/lib/logger.js';
 import '@/lib/test/checkoutTest.js'; // استيراد ملف الاختبار
 import {
@@ -1348,10 +1349,10 @@ const CheckoutPage = ({ cart, setCart }) => {
         logger.error('CheckoutPage - Order ID is missing after checkout:', orderResult);
         
         // محاولة استخدام معرفات بديلة
-        const fallbackId = orderResult?.order?.id || orderResult?.orderNumber || `temp_${Date.now()}`;
+        const { fallbackId, isTempId } = resolveCheckoutFallbackId(orderResult);
         logger.info('CheckoutPage - Using fallback ID:', fallbackId);
-        
-        if (fallbackId && fallbackId !== `temp_${Date.now()}`) {
+
+        if (fallbackId && !isTempId) {
           orderResult.id = fallbackId;
         } else {
           throw new Error('فشل في الحصول على معرف الطلب بعد إتمام الشراء');
