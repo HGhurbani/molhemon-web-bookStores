@@ -13,14 +13,34 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
   const { t } = useTranslation();
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
-    { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },
-    { icon: BookOpen, text: 'كتاب إلكتروني', action: 'ebook-top', link: '/category/ebooks' }, // Assuming a category for ebooks or similar
-    { icon: Headphones, text: 'كتاب مسموع', action: 'audiobook-top', link: '/audiobooks' },
-    { icon: Tag, text: 'قائمة الرغبات', action: 'wishlist-top', link: '/profile?tab=wishlist' },
+    {
+      icon: UserCircle,
+      text: isLoggedIn ? t('my_account') : t('login_or_register'),
+      action: 'profile-top',
+      link: isLoggedIn ? '/profile' : '/login'
+    },
+    { icon: BookOpen, text: t('ebooks'), action: 'ebook-top', link: '/category/ebooks' },
+    { icon: Headphones, text: t('audiobooks'), action: 'audiobook-top', link: '/audiobooks' },
+    { icon: Tag, text: t('wishlist'), action: 'wishlist-top', link: '/profile?tab=wishlist' },
     { icon: Box, text: t('trackOrder'), action: 'track-order-top', link: '/track-order' },
     { icon: Download, text: t('downloadApp'), action: 'download-app-top' },
     { icon: HelpCircle, text: t('help'), action: 'help-top' },
     { icon: MapPin, text: t('locations'), action: 'locations-top' },
+  ];
+
+  const countryItems = [
+    {
+      action: 'change-country-ksa',
+      flag: 'https://cdn.countryflags.com/thumbs/saudi-arabia/flag-round-250.png',
+      label: t('country_ksa_label'),
+      name: t('country_ksa_name')
+    },
+    {
+      action: 'change-country-eg',
+      flag: 'https://vectorflags.s3.amazonaws.com/flags/eg-circle-01.png',
+      label: t('country_eg_label'),
+      name: t('country_eg_name')
+    }
   ];
 
   return (
@@ -32,7 +52,7 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
             const content = (
               <>
                 {index === 0 && isLoggedIn ? (
-                  <img src={userPhoto} alt="صورة المستخدم" className="w-4 h-4 rounded-full" />
+                  <img src={userPhoto} alt={t('user_photo_alt')} className="w-4 h-4 rounded-full" />
                 ) : (
                   <IconComponent className="w-4 h-4" />
                 )}
@@ -68,20 +88,22 @@ const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-xs text-white hover:bg-blue-600 hover:text-white p-1 h-auto">
-                <img  alt="علم الإمارات العربية المتحدة" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://darmolhimon.com/wp-content/uploads/2025/06/united-arab-emirates-svgrepo-com.svg" />
-                الإمارات | UAE
+                <img  alt={t('flag_of', { name: t('country_uae_name') })} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://darmolhimon.com/wp-content/uploads/2025/06/united-arab-emirates-svgrepo-com.svg" />
+                {t('country_uae_label')}
                 <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800">
-              <DropdownMenuItem onClick={() => handleFeatureClick('change-country-ksa')} className="hover:bg-blue-50 flex items-center">
-                <img  alt="علم المملكة العربية السعودية" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://cdn.countryflags.com/thumbs/saudi-arabia/flag-round-250.png" />
-                المملكة العربية السعودية | KSA
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleFeatureClick('change-country-eg')} className="hover:bg-blue-50 flex items-center">
-                 <img  alt="علم مصر" className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src="https://vectorflags.s3.amazonaws.com/flags/eg-circle-01.png" />
-                مصر | EG
-              </DropdownMenuItem>
+              {countryItems.map((country) => (
+                <DropdownMenuItem
+                  key={country.action}
+                  onClick={() => handleFeatureClick(country.action)}
+                  className="hover:bg-blue-50 flex items-center"
+                >
+                  <img  alt={t('flag_of', { name: country.name })} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={country.flag} />
+                  {country.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>

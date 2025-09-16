@@ -133,7 +133,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
         <DropdownMenuContent align="start" className="bg-white shadow-lg rounded-md border border-gray-200 min-w-[200px]">
           <input
             type="text"
-            placeholder="ابحث..."
+            placeholder={t('search')}
             className="w-full px-3 py-2 text-sm border-b outline-none mb-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-t-md text-gray-900"
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
@@ -163,32 +163,32 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
           <DropdownMenuTrigger asChild>
             <button className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200 transition-colors duration-200">
               <UserCircle className="w-4 h-4" />
-              <span>حسابي</span>
+              <span>{t('my_account')}</span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent dir="rtl" align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[180px]">
             <DropdownMenuItem asChild className="px-4 py-3 hover:bg-blue-50 transition-colors duration-150">
               <Link to="/profile?tab=wishlist" className="flex items-center">
                 <Bookmark className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
-                مكتبتي
+                {t('my_library')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="px-4 py-3 hover:bg-blue-50 transition-colors duration-150">
               <Link to="/profile" className="flex items-center">
                 <User className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
-                حسابي
+                {t('my_account')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="px-4 py-3 hover:bg-blue-50 transition-colors duration-150">
               <Link to="/profile?tab=orders" className="flex items-center">
                 <ShoppingBag className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
-                مشترياتي
+                {t('my_orders')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleFeatureClick('logout')} className="flex items-center text-red-600 px-4 py-3 hover:bg-red-50 transition-colors duration-150">
               <LogOut className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
-              تسجيل الخروج
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -197,21 +197,27 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
     return (
       <Link to="/login" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-200 transition-colors duration-200">
         <UserCircle className="w-4 h-4" />
-        <span>تسجيل الدخول / إنشاء حساب</span>
+        <span>{t('login_or_register')}</span>
       </Link>
     );
   };
 
-  const categoryItems = categories.length
-    ? categories
-    : [
-        { id: 'fiction', name: 'الخيال' },
-        { id: 'nonfiction', name: 'غير الخيال' },
-        { id: 'kids', name: 'أطفال' },
-        { id: 'science', name: 'علوم' },
-      ];
+  const defaultCategoryItems = React.useMemo(
+    () => [
+      { id: 'fiction', name: t('category_fiction') },
+      { id: 'nonfiction', name: t('category_nonfiction') },
+      { id: 'kids', name: t('category_kids') },
+      { id: 'science', name: t('category_science') },
+    ],
+    [t]
+  );
 
-  const deliveryItems = ["توصيل سريع", "شحن عادي", "استلام من المتجر"];
+  const categoryItems = categories.length ? categories : defaultCategoryItems;
+
+  const deliveryItems = React.useMemo(
+    () => [t('delivery_express'), t('delivery_standard'), t('delivery_pickup')],
+    [t]
+  );
 
   const searchSuggestions = React.useMemo(() => {
     const randoms = randomSuggestions.filter(t => !recentSearches.includes(t));
@@ -266,31 +272,31 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             <span className="mx-2">|</span>
               <Link to="/ebooks" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-gray-200 transition-colors duration-200">
               <Book className="w-4 h-4" />
-              <span>كتاب إلكتروني</span>
+              <span>{t('ebooks')}</span>
             </Link>
             <span className="mx-2">|</span>
               <Link to="/audiobooks" className="flex items-center space-x-1 rtl:space-x-reverse hover:text-gray-200 transition-colors duration-200">
   <Headphones className="w-4 h-4" />
-  <span>كتاب مسموع</span>
+  <span>{t('audiobooks')}</span>
 </Link>
             <span className="mx-2">|</span>
               <Link to="/track-order" className="hover:text-gray-200 transition-colors duration-200">{t('trackOrder')}</Link>
               <span className="mx-2">|</span>
-              <Link to="/blog" className="hover:text-gray-200 transition-colors duration-200">المدونة</Link>
+              <Link to="/blog" className="hover:text-gray-200 transition-colors duration-200">{t('blog')}</Link>
             <span className="mx-2">|</span>
               <button onClick={() => handleFeatureClick('download-app-top')} className="hover:text-gray-200 transition-colors duration-200">{t('downloadApp')}</button>
             <span className="mx-2">|</span>
-              <Link to="/help" className="hover:text-gray-200 transition-colors duration-200">المساعدة</Link>
+              <Link to="/help" className="hover:text-gray-200 transition-colors duration-200">{t('help')}</Link>
             <span className="mx-2">|</span>
-              <Link to="/distributors" className="hover:text-gray-200 transition-colors duration-200">مواقعنا</Link>
+              <Link to="/distributors" className="hover:text-gray-200 transition-colors duration-200">{t('locations')}</Link>
             <span className="mx-2">|</span>
-              <Link to="/publishing-services" className="hover:text-gray-200 transition-colors duration-200">إنشر معنا</Link>
+              <Link to="/publishing-services" className="hover:text-gray-200 transition-colors duration-200">{t('publish_with_us')}</Link>
           </div>
           <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="text-xs text-white hover:bg-gray-500 hover:text-white p-1 h-auto transition-all duration-200">
-                  <img alt={`علم ${currency.name}`} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={currency.flag} />
+                  <img alt={t('flag_of', { name: currency.name })} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={currency.flag} />
                   {currency.name}
                     <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0 transition-transform duration-200" />
                 </Button>
@@ -298,7 +304,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                 <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[160px]">
                 {currencies.map(c => (
                     <DropdownMenuItem key={c.code} onClick={() => setCurrency(c)} className="hover:bg-blue-50 flex items-center px-4 py-2 transition-colors duration-150">
-                    <img alt={`علم ${c.name}`} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={c.flag} />
+                    <img alt={t('flag_of', { name: c.name })} className="w-5 h-3 ml-2 object-contain rtl:mr-2 rtl:ml-0" src={c.flag} />
                     {c.name} | {c.code}
                   </DropdownMenuItem>
                 ))}
@@ -333,11 +339,11 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             >
               <Link to="/" className="flex items-center">
                 <img
-                  alt={siteSettings.siteName || 'شعار ملهمون'}
+                  alt={siteSettings.siteName || t('site_logo_alt')}
                   className="h-10 w-auto mr-2 rtl:ml-2 rtl:mr-0"
                   src="https://darmolhimon.com/wp-content/uploads/2021/07/Dar.png"
                 />
-                <span className="sr-only">{siteSettings.siteName || 'ملهمون'}</span>
+                <span className="sr-only">{siteSettings.siteName || t('site_name')}</span>
               </Link>
             </motion.div>
           </div>
@@ -347,7 +353,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               <div className="relative flex-1 hidden md:block">
               <input
                 type="text"
-                placeholder="ابحث حسب العنوان، المؤلف، الكلمة المفتاحية، رقم ISBN..."
+                placeholder={t('search_placeholder_detailed')}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm h-10 transition-all duration-200 text-gray-900 placeholder-gray-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -396,9 +402,9 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                 </Button>
               </div>
               
-            <DropdownWithSearch label="تصفح الفئات" items={categoryItems} isCategory hideOnMobile />
-            <DropdownWithSearch label="العلامات التجارية" items={["دار الشروق", "دار الآداب", "مكتبة جرير"]} hideOnMobile />
-            <DropdownWithSearch label="اختر طريقة التوصيل" items={deliveryItems} hideOnMobile />
+            <DropdownWithSearch label={t('browse_categories')} items={categoryItems} isCategory hideOnMobile />
+            <DropdownWithSearch label={t('brands')} items={["دار الشروق", "دار الآداب", "مكتبة جرير"]} hideOnMobile />
+            <DropdownWithSearch label={t('choose_delivery_method')} items={deliveryItems} hideOnMobile />
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -487,7 +493,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800">البحث</h2>
+                <h2 className="text-lg font-bold text-gray-800">{t('search_title')}</h2>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -503,7 +509,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="ابحث في الكتب..."
+                    placeholder={t('search_books_placeholder')}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder-gray-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -522,7 +528,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               {/* Search Suggestions */}
               {searchSuggestions.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-gray-600 mb-2">اقتراحات البحث</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 mb-2">{t('search_suggestions')}</h3>
                   <div className="flex flex-wrap gap-2">
             {searchSuggestions.map((item, idx) => (
                       <button
@@ -539,11 +545,11 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
               {/* Quick Filters */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-600">تصفح سريع</h3>
-                
+                <h3 className="text-sm font-semibold text-gray-600">{t('quick_browse')}</h3>
+
                 {/* Categories */}
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 mb-2">الفئات</h4>
+                  <h4 className="text-xs font-medium text-gray-500 mb-2">{t('categories')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {categoryItems.map((item, idx) => (
                       <button
@@ -562,7 +568,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Brands */}
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 mb-2">العلامات التجارية</h4>
+                  <h4 className="text-xs font-medium text-gray-500 mb-2">{t('brands')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {["دار الشروق", "دار الآداب", "مكتبة جرير"].map((item, idx) => (
                       <button
@@ -581,7 +587,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Delivery Options */}
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 mb-2">طرق التوصيل</h4>
+                  <h4 className="text-xs font-medium text-gray-500 mb-2">{t('delivery_methods')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {deliveryItems.map((item, idx) => (
                       <button
@@ -630,7 +636,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">القائمة</h2>
+                  <h2 className="text-xl font-bold text-gray-800">{t('menu')}</h2>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -643,20 +649,20 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Main Navigation */}
                 <div className="space-y-2 mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">الصفحات الرئيسية</h3>
-                  <MobileMenuItem to="/" icon={Home}>الرئيسية</MobileMenuItem>
-                  <MobileMenuItem to="/ebooks" icon={Book}>كتاب إلكتروني</MobileMenuItem>
-                  <MobileMenuItem to="/audiobooks" icon={Headphones}>كتاب مسموع</MobileMenuItem>
-                  <MobileMenuItem to="/track-order" icon={Truck}>تتبع الطلب</MobileMenuItem>
-                  <MobileMenuItem to="/blog" icon={FileText}>المدونة</MobileMenuItem>
-                  <MobileMenuItem to="/help" icon={HelpCircle}>المساعدة</MobileMenuItem>
-                  <MobileMenuItem to="/distributors" icon={MapPin}>مواقعنا</MobileMenuItem>
-                  <MobileMenuItem to="/publishing-services" icon={Building2}>إنشر معنا</MobileMenuItem>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">{t('main_pages')}</h3>
+                  <MobileMenuItem to="/" icon={Home}>{t('home')}</MobileMenuItem>
+                  <MobileMenuItem to="/ebooks" icon={Book}>{t('ebooks')}</MobileMenuItem>
+                  <MobileMenuItem to="/audiobooks" icon={Headphones}>{t('audiobooks')}</MobileMenuItem>
+                  <MobileMenuItem to="/track-order" icon={Truck}>{t('trackOrder')}</MobileMenuItem>
+                  <MobileMenuItem to="/blog" icon={FileText}>{t('blog')}</MobileMenuItem>
+                  <MobileMenuItem to="/help" icon={HelpCircle}>{t('help')}</MobileMenuItem>
+                  <MobileMenuItem to="/distributors" icon={MapPin}>{t('locations')}</MobileMenuItem>
+                  <MobileMenuItem to="/publishing-services" icon={Building2}>{t('publish_with_us')}</MobileMenuItem>
                 </div>
 
                 {/* Categories */}
                 <div className="space-y-2 mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">تصفح الفئات</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">{t('browse_categories')}</h3>
                   {categoryItems.map((item, idx) => (
                     <MobileMenuItem key={idx} to={`/category/${item.id}`}>
                       {item.name}
@@ -666,7 +672,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Brands */}
                 <div className="space-y-2 mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">العلامات التجارية</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">{t('brands')}</h3>
                   {["دار الشروق", "دار الآداب", "مكتبة جرير"].map((item, idx) => (
                     <MobileMenuItem 
                       key={idx} 
@@ -682,7 +688,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Delivery Options */}
                 <div className="space-y-2 mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">اختر طريقة التوصيل</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">{t('choose_delivery_method')}</h3>
                   {deliveryItems.map((item, idx) => (
                     <MobileMenuItem 
                       key={idx} 
@@ -698,16 +704,16 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
                 {/* Admin Panel */}
                 <div className="space-y-2 mb-6">
-                  <MobileMenuItem to="/admin" icon={Briefcase}>لوحة التحكم</MobileMenuItem>
+                  <MobileMenuItem to="/admin" icon={Briefcase}>{t('dashboard')}</MobileMenuItem>
                 </div>
 
                 {/* User Section */}
                 <div className="border-t pt-4">
                   {isCustomerLoggedIn ? (
                     <div className="space-y-2">
-                      <MobileMenuItem to="/profile" icon={User}>حسابي</MobileMenuItem>
-                      <MobileMenuItem to="/profile?tab=wishlist" icon={Bookmark}>مكتبتي</MobileMenuItem>
-                      <MobileMenuItem to="/profile?tab=orders" icon={ShoppingBag}>مشترياتي</MobileMenuItem>
+                      <MobileMenuItem to="/profile" icon={User}>{t('my_account')}</MobileMenuItem>
+                      <MobileMenuItem to="/profile?tab=wishlist" icon={Bookmark}>{t('my_library')}</MobileMenuItem>
+                      <MobileMenuItem to="/profile?tab=orders" icon={ShoppingBag}>{t('my_orders')}</MobileMenuItem>
                       <MobileMenuItem 
                         onClick={() => {
                           handleFeatureClick('logout');
@@ -716,11 +722,11 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                         icon={LogOut}
                         className="text-red-600"
                       >
-                        تسجيل الخروج
+                        {t('logout')}
                       </MobileMenuItem>
                     </div>
                   ) : (
-                    <MobileMenuItem to="/login" icon={LogIn}>تسجيل الدخول / إنشاء حساب</MobileMenuItem>
+                    <MobileMenuItem to="/login" icon={LogIn}>{t('login_or_register')}</MobileMenuItem>
                   )}
                 </div>
               </div>
