@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Bell, Mail, Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -6,14 +5,8 @@ import { Input } from '@/components/ui/input.jsx';
 const DashboardHeader = ({ sidebarOpen, setSidebarOpen }) => {
   const { i18n, t } = useTranslation();
 
-  // تغيير اتجاه الصفحة عند تغيير اللغة
-  React.useEffect(() => {
-    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
-  }, [i18n.language]);
-
   const handleChangeLang = (lang) => {
     i18n.changeLanguage(lang);
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   };
 
   return (
