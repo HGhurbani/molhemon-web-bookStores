@@ -6,12 +6,20 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
 import { Trash2, Plus, Minus, ShoppingCart, CreditCard, Heart, ChevronLeft, Tag } from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
-// import { Checkbox } from '@/components/ui/checkbox.jsx'; // Assuming you have a Checkbox component from shadcn/ui
+import { Checkbox } from '@/components/ui/checkbox.jsx';
 
 const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
   const { currency } = useCurrency();
   const totalPrice = cart.reduce((sum, item) => sum + getPriceForCurrency(item, currency.code) * item.quantity, 0);
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const [isSelectAllChecked, setIsSelectAllChecked] = React.useState(false);
+
+  React.useEffect(() => {
+    if (cart.length === 0) {
+      setIsSelectAllChecked(false);
+    }
+  }, [cart.length]);
 
   // Example logic for discounts based on total price
   const discountThreshold = 105.00; // Example: Discount if total is over 105 AED
@@ -183,8 +191,11 @@ const CartPage = ({ cart, handleRemoveFromCart, handleUpdateQuantity }) => {
             </div>
 
             <div className="flex items-center mb-5 text-sm text-gray-600 space-x-2 rtl:space-x-reverse">
-              {/* <Checkbox id="terms" /> */} {/* Removed due to missing component */}
-              <input type="checkbox" id="terms" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" /> {/* Basic checkbox added */}
+              <Checkbox
+                id="terms"
+                checked={isSelectAllChecked}
+                onChange={(checked) => setIsSelectAllChecked(Boolean(checked))}
+              />
               <label htmlFor="terms" className="cursor-pointer">
                 أختر الكل ({totalQuantity} منتجات)
               </label>
