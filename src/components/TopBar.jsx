@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom';
 import { UserCircle, Tag, Box, Download, HelpCircle, MapPin, ChevronDown, Globe, Headphones, BookOpen } from 'lucide-react'; // Ensure Headphones and BookOpen are imported
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.jsx';
-import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
+import { useLanguage } from '@/lib/languageContext.jsx';
+import { useTranslation } from 'react-i18next';
 
 const TopBar = ({ handleFeatureClick, isLoggedIn }) => {
   const { language, setLanguage, languages } = useLanguage();
-  const t = useTranslation();
+  const { t } = useTranslation();
   const userPhoto = 'https://images.unsplash.com/photo-1572119003128-d110c07af847';
   const topNavItems = [
     { icon: UserCircle, text: 'بروس وين', action: 'profile-top', link: '/profile' },

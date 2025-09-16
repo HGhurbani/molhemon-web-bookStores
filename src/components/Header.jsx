@@ -29,9 +29,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
-import { useLanguage, useTranslation } from '@/lib/languageContext.jsx';
+import { useLanguage } from '@/lib/languageContext.jsx';
 import { useCart } from '@/lib/cartContext.jsx';
 import { useAuth } from '@/lib/authContext.jsx';
+import { useTranslation } from 'react-i18next';
 
 const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,7 +51,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const { language, setLanguage, languages } = useLanguage();
   const { cart } = useCart();
   const { isCustomer: isCustomerLoggedIn } = useAuth();
-  const t = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [hideTopRow, setHideTopRow] = useState(false);
