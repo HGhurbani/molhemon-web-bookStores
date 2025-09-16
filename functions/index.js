@@ -14,6 +14,7 @@ const db = admin.firestore();
 
 export { syncPaymentStatus, syncShippingStatus } from './statusSync.js';
 export { handlePaymentWebhook, handleShipmentWebhook, checkPendingOrders } from './orderLifecycleService.js';
+export { importGoogleMerchantCatalog } from './googleMerchantImport.js';
 
 // ===== PAYMENT FUNCTIONS =====
 

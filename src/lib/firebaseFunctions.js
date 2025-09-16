@@ -8,6 +8,9 @@ const functions = getFunctions();
 export const createStripePaymentIntent = httpsCallable(functions, 'createStripePaymentIntent');
 export const createPayPalOrder = httpsCallable(functions, 'createPayPalOrder');
 
+// Google Merchant Functions
+export const importGoogleMerchantCatalog = httpsCallable(functions, 'importGoogleMerchantCatalog');
+
 // Order Functions
 export const processOrder = httpsCallable(functions, 'processOrder');
 
@@ -108,6 +111,19 @@ export const firebaseFunctionsApi = {
         return result.data;
       } catch (error) {
         logger.error('Access Validation Error:', error);
+        throw error;
+      }
+    }
+  },
+
+  // Google Merchant operations
+  googleMerchant: {
+    importCatalog: async (config) => {
+      try {
+        const result = await importGoogleMerchantCatalog(config);
+        return result.data;
+      } catch (error) {
+        logger.error('Google Merchant import error:', error);
         throw error;
       }
     }

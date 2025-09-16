@@ -39,11 +39,22 @@ const api = {
 
   // Google Merchant import - سيتم تنفيذها عبر Firebase Functions
   importGoogleMerchant: async (cfg = {}) => {
+    const context = 'google-merchant:import';
     try {
-      // TODO: تنفيذ عبر Firebase Functions
-      throw new Error('Google Merchant import سيتم تنفيذها قريباً عبر Firebase Functions');
+      const result = await firebaseFunctionsApi.googleMerchant.importCatalog(cfg);
+
+      if (!result?.success) {
+        throw errorHandler.createError(
+          errorHandler.errorTypes.UNKNOWN,
+          result?.errorCode || 'google-merchant/import-failed',
+          result?.message || 'فشل استيراد Google Merchant',
+          context
+        );
+      }
+
+      return result;
     } catch (error) {
-      throw errorHandler.handleError(error, 'google-merchant:import');
+      throw errorHandler.handleError(error, context);
     }
   },
 
