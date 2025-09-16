@@ -55,22 +55,3 @@ export const LanguageProvider = ({ children }) => {
   );
 };
 
-export const useTranslation = () => {
-  const { language } = useLanguage();
-  return (key) => translations[language.code]?.[key] || key;
-};
-
-export const translations = {
-  ar: {
-    trackOrder: 'تتبع الطلب',
-    downloadApp: 'حمل تطبيقنا',
-    help: 'المساعدة',
-    locations: 'مواقعنا',
-  },
-  en: {
-    trackOrder: 'Track Order',
-    downloadApp: 'Download App',
-    help: 'Help',
-    locations: 'Our Locations',
-  }
-};
