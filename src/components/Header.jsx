@@ -29,12 +29,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
-import { useLanguage } from '@/lib/languageContext.jsx';
 import { useCart } from '@/lib/cartContext.jsx';
 import { useAuth } from '@/lib/authContext.jsx';
 import { useTranslation } from 'react-i18next';
+import { ensureLanguageList, storeLanguageCode } from '@/lib/languagePreferences.js';
 
-const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {} }) => {
+const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {}, languages: providedLanguages = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -48,10 +48,31 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { currency, setCurrency, currencies } = useCurrency();
-  const { language, setLanguage, languages } = useLanguage();
   const { cart } = useCart();
   const { isCustomer: isCustomerLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
+  const languageOptions = React.useMemo(
+    () => ensureLanguageList(providedLanguages),
+    [providedLanguages],
+  );
+  const activeLanguageCode = i18n.language || i18n.resolvedLanguage;
+  const activeLanguage = React.useMemo(
+    () =>
+      languageOptions.find((languageOption) => languageOption.code === activeLanguageCode) ||
+      languageOptions[0] ||
+      null,
+    [languageOptions, activeLanguageCode],
+  );
+  const handleLanguageChange = React.useCallback(
+    (code) => {
+      storeLanguageCode(code);
+      void i18n.changeLanguage(code);
+    },
+    [i18n],
+  );
+  const languageLabel =
+    (activeLanguage && (activeLanguage.name || activeLanguage.label)) ||
+    (activeLanguage?.code ? activeLanguage.code.toUpperCase() : t('language'));
   const navigate = useNavigate();
 
   const [hideTopRow, setHideTopRow] = useState(false);
@@ -313,16 +334,16 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="text-xs text-white hover:bg-gray-500 hover:text-white p-1 h-auto transition-all duration-200">
-                  {language.name}
+                  {languageLabel}
                     <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0 transition-transform duration-200" />
                 </Button>
               </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[120px]">
-                {languages.map(l => (
-                    <DropdownMenuItem key={l.code} onClick={() => handleFeatureClick(`change-language-${l.code}`)} className="hover:bg-blue-50 px-4 py-2 transition-colors duration-150">
-                    {l.name}
-                  </DropdownMenuItem>
-                ))}
+                {languageOptions.map(l => (
+                    <DropdownMenuItem key={l.code} onClick={() => handleLanguageChange(l.code)} className="hover:bg-blue-50 px-4 py-2 transition-colors duration-150">
+                  {l.name}
+                </DropdownMenuItem>
+              ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

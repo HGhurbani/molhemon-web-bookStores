@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -20,8 +20,15 @@ import SplashScreen from '@/components/SplashScreen.jsx';
 import { sellers as initialSellers, branches as initialBranches, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
-import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
 import { useTranslation } from 'react-i18next';
+import {
+  defaultLanguages,
+  ensureLanguageList,
+  getStoredLanguageCode,
+  getStoredLanguages,
+  storeLanguageCode,
+  storeLanguages,
+} from '@/lib/languagePreferences.js';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
 import useDirection from '@/lib/useDirection.js';
@@ -34,7 +41,13 @@ const AppContent = () => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
   const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
-  const { setLanguage, setLanguages, languages } = useLanguage();
+  const [languages, setLanguagesState] = useState(() => getStoredLanguages());
+  const setLanguages = useCallback((nextLanguages) => {
+    setLanguagesState((prev) => {
+      const value = typeof nextLanguages === 'function' ? nextLanguages(prev) : nextLanguages;
+      return ensureLanguageList(value);
+    });
+  }, []);
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
   const { favorites: wishlist, toggleFavorite } = useFavorites();
   const { settings: siteSettingsState, setSettings: setSiteSettingsState, refreshSettings } = useSettings();
@@ -72,6 +85,10 @@ const AppContent = () => {
     return stored ? JSON.parse(stored) : [];
   });
   const [features, setFeatures] = useState([]);
+  
+  useEffect(() => {
+    storeLanguages(languages);
+  }, [languages]);
   const [bannersState, setBannersState] = useState(() => {
     const stored = localStorage.getItem('banners');
     return stored ? JSON.parse(stored) : [];
@@ -388,37 +405,43 @@ const AppContent = () => {
 
   // تحديث اللغة الافتراضية
   useEffect(() => {
-    const chosenLanguageCode =
+    const storedLanguage = getStoredLanguageCode();
+    const preferredLanguageFromSettings =
       isAdmin && siteSettingsState.adminDefaultLanguage
         ? siteSettingsState.adminDefaultLanguage
         : siteSettingsState.defaultLanguage;
 
-    if (!chosenLanguageCode) {
+    const fallbackLanguage = languages.length ? languages[0].code : null;
+
+    let nextLanguage = storedLanguage || preferredLanguageFromSettings || fallbackLanguage;
+
+    if (nextLanguage && !languages.some((language) => language.code === nextLanguage)) {
+      nextLanguage = fallbackLanguage;
+    }
+
+    if (!nextLanguage) {
       return;
     }
 
-    const selectedLanguage = languages.find(l => l.code === chosenLanguageCode);
-    if (selectedLanguage) {
-      setLanguage(selectedLanguage);
+    if (i18n.language !== nextLanguage) {
+      void i18n.changeLanguage(nextLanguage);
     }
 
-    i18n.changeLanguage(chosenLanguageCode);
-
-    if (typeof document !== 'undefined') {
-      const direction = typeof i18n.dir === 'function' ? i18n.dir(chosenLanguageCode) : 'ltr';
-      document.dir = direction;
-      if (document.documentElement) {
-        document.documentElement.dir = direction;
-      }
-    }
+    storeLanguageCode(nextLanguage);
   }, [
     i18n,
     isAdmin,
     languages,
-    setLanguage,
     siteSettingsState.adminDefaultLanguage,
     siteSettingsState.defaultLanguage,
   ]);
+
+  useEffect(() => {
+    const activeLanguage = i18n.language || i18n.resolvedLanguage;
+    if (activeLanguage) {
+      storeLanguageCode(activeLanguage);
+    }
+  }, [i18n.language, i18n.resolvedLanguage]);
 
   // تحديث العملة الافتراضية
   useEffect(() => {
@@ -492,14 +515,6 @@ const AppContent = () => {
         });
       });
       return;
-    }
-    if (feature.startsWith('change-language-')) {
-      const code = feature.split('change-language-')[1];
-      const lang = languages.find(l => l.code === code);
-      if (lang) {
-        setLanguage(lang);
-        return;
-      }
     }
     toast({
       title: "🚧 هذه الميزة غير مطبقة بعد",
@@ -596,6 +611,7 @@ const AppContent = () => {
                       wishlist={wishlist}
                       siteSettings={siteSettingsState}
                       features={features}
+                      languages={languages}
                     />
                   }
                 />
