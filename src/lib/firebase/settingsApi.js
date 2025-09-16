@@ -6,12 +6,40 @@ import { errorHandler } from '../errorHandler.js';
 export async function getSettings() {
   try {
     const snap = await getDoc(doc(db, 'settings', 'main'));
-    return snap.exists() ? { id: snap.id, ...snap.data() } : {};
+
+    if (!snap.exists()) {
+      return {};
+    }
+
+    const data = { id: snap.id, ...snap.data() };
+
+    if (!data.adminDefaultLanguage) {
+      data.adminDefaultLanguage = 'en';
+    }
+
+    return data;
   } catch (error) {
     throw errorHandler.handleFirebaseError(error, 'settings:get');
   }
 }
 
-export const updateSettings = (data) => baseApi.setSingletonDoc('settings', data);
+export async function updateSettings(data = {}) {
+  try {
+    const payload = {
+      ...data,
+      adminDefaultLanguage: data?.adminDefaultLanguage ?? 'en'
+    };
+
+    const updated = await baseApi.setSingletonDoc('settings', payload);
+
+    if (!updated.adminDefaultLanguage) {
+      updated.adminDefaultLanguage = payload.adminDefaultLanguage;
+    }
+
+    return updated;
+  } catch (error) {
+    throw errorHandler.handleFirebaseError(error, 'settings:update');
+  }
+}
 
 export default { getSettings, updateSettings };

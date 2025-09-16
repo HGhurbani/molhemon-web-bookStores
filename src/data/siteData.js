@@ -430,6 +430,7 @@ export const siteSettings = {
   address: 'الإمارات العربية المتحدة',
   languages: 'ar,en',
   defaultLanguage: 'ar',
+  adminDefaultLanguage: 'en',
   defaultCurrency: 'AED',
   detectCurrencyByCountry: false,
   facebook: '',
