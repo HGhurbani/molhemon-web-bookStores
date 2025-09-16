@@ -15,25 +15,39 @@ const createProviderMock = (name) => {
   return { Provider, initialize };
 };
 
-const stripe = createProviderMock('stripe');
-const paypal = createProviderMock('paypal');
-const tabby = createProviderMock('tabby');
-const cod = createProviderMock('cash_on_delivery');
+const mockStripe = createProviderMock('stripe');
+const mockPaypal = createProviderMock('paypal');
+const mockTabby = createProviderMock('tabby');
+const mockCod = createProviderMock('cash_on_delivery');
 
-jest.mock('../src/lib/payment/providers/StripeProvider.js', () => ({
-  StripeProvider: stripe.Provider,
+jest.unstable_mockModule('../src/lib/payment/providers/StripeProvider.js', () => ({
+  StripeProvider: mockStripe.Provider,
 }));
-jest.mock('../src/lib/payment/providers/PayPalProvider.js', () => ({
-  PayPalProvider: paypal.Provider,
+jest.unstable_mockModule('../src/lib/payment/providers/PayPalProvider.js', () => ({
+  PayPalProvider: mockPaypal.Provider,
 }));
-jest.mock('../src/lib/payment/providers/TabbyProvider.js', () => ({
-  TabbyProvider: tabby.Provider,
+jest.unstable_mockModule('../src/lib/payment/providers/TabbyProvider.js', () => ({
+  TabbyProvider: mockTabby.Provider,
 }));
-jest.mock('../src/lib/payment/providers/CashOnDeliveryProvider.js', () => ({
-  CashOnDeliveryProvider: cod.Provider,
+jest.unstable_mockModule('../src/lib/payment/providers/CashOnDeliveryProvider.js', () => ({
+  CashOnDeliveryProvider: mockCod.Provider,
 }));
 
-import { PaymentManager } from '../src/lib/payment/PaymentManager.js';
+jest.unstable_mockModule('../src/lib/logger.js', () => ({
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
+  }
+}));
+
+let PaymentManager;
+
+beforeAll(async () => {
+  ({ PaymentManager } = await import('../src/lib/payment/PaymentManager.js'));
+});
 
 describe('PaymentManager provider initialization', () => {
   beforeEach(() => {
@@ -51,15 +65,15 @@ describe('PaymentManager provider initialization', () => {
 
     await manager.initialize(settings);
 
-    expect(stripe.Provider).toHaveBeenCalled();
-    expect(paypal.Provider).toHaveBeenCalled();
-    expect(tabby.Provider).toHaveBeenCalled();
-    expect(cod.Provider).toHaveBeenCalled();
+    expect(mockStripe.Provider).toHaveBeenCalled();
+    expect(mockPaypal.Provider).toHaveBeenCalled();
+    expect(mockTabby.Provider).toHaveBeenCalled();
+    expect(mockCod.Provider).toHaveBeenCalled();
 
-    expect(stripe.initialize).toHaveBeenCalled();
-    expect(paypal.initialize).toHaveBeenCalled();
-    expect(tabby.initialize).toHaveBeenCalled();
-    expect(cod.initialize).toHaveBeenCalled();
+    expect(mockStripe.initialize).toHaveBeenCalled();
+    expect(mockPaypal.initialize).toHaveBeenCalled();
+    expect(mockTabby.initialize).toHaveBeenCalled();
+    expect(mockCod.initialize).toHaveBeenCalled();
 
     expect(manager.activeProvider.providerName).toBe('stripe');
   });
@@ -73,7 +87,63 @@ describe('PaymentManager provider initialization', () => {
 
     await manager.initialize(settings);
 
-    expect(stripe.Provider).not.toHaveBeenCalled();
+    expect(mockStripe.Provider).not.toHaveBeenCalled();
     expect(manager.activeProvider.providerName).toBe('paypal');
+  });
+});
+
+describe('PaymentManager provider resolution by payment intent', () => {
+  test('falls back to provider that resolves payment status for unknown id', async () => {
+    const manager = new PaymentManager();
+    const failingProvider = {
+      getPaymentStatus: jest.fn().mockRejectedValue(new Error('not found'))
+    };
+    const nullProvider = {
+      getPaymentStatus: jest.fn().mockResolvedValue(null)
+    };
+    const successProvider = {
+      getPaymentStatus: jest.fn().mockResolvedValue({ id: 'resolved', status: 'succeeded' })
+    };
+
+    manager.providers = new Map([
+      ['stripe', failingProvider],
+      ['paypal', nullProvider],
+      ['tabby', successProvider]
+    ]);
+
+    const provider = await manager.getProviderFromPaymentIntent('unknown_123');
+
+    expect(failingProvider.getPaymentStatus).toHaveBeenCalledWith('unknown_123');
+    expect(nullProvider.getPaymentStatus).toHaveBeenCalledWith('unknown_123');
+    expect(successProvider.getPaymentStatus).toHaveBeenCalledWith('unknown_123');
+
+    expect(
+      failingProvider.getPaymentStatus.mock.invocationCallOrder[0]
+    ).toBeLessThan(nullProvider.getPaymentStatus.mock.invocationCallOrder[0]);
+    expect(
+      nullProvider.getPaymentStatus.mock.invocationCallOrder[0]
+    ).toBeLessThan(successProvider.getPaymentStatus.mock.invocationCallOrder[0]);
+
+    expect(provider).toBe(successProvider);
+  });
+
+  test('returns null when providers cannot resolve unknown intent', async () => {
+    const manager = new PaymentManager();
+    const firstProvider = {
+      getPaymentStatus: jest.fn().mockRejectedValue(new Error('not for us'))
+    };
+    const secondProvider = {
+      getPaymentStatus: jest.fn().mockRejectedValue(new Error('still not found'))
+    };
+
+    manager.providers = new Map([
+      ['stripe', firstProvider],
+      ['paypal', secondProvider]
+    ]);
+
+    await expect(manager.getProviderFromPaymentIntent('mystery_456')).resolves.toBeNull();
+
+    expect(firstProvider.getPaymentStatus).toHaveBeenCalledWith('mystery_456');
+    expect(secondProvider.getPaymentStatus).toHaveBeenCalledWith('mystery_456');
   });
 });
