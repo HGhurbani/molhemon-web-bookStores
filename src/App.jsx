@@ -21,12 +21,16 @@ import { sellers as initialSellers, branches as initialBranches, paymentMethods 
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
 import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
+import { useTranslation } from 'react-i18next';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
+import useDirection from '@/lib/useDirection.js';
 
 const App = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
+  const { i18n } = useTranslation();
+  useDirection(i18n.language);
   const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
   const { setLanguage, setLanguages, languages } = useLanguage();
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();

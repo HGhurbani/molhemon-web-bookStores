@@ -28,8 +28,6 @@ export const LanguageProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('language', language.code);
-    document.documentElement.lang = language.code;
-    document.documentElement.dir = language.code === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
   useEffect(() => {
