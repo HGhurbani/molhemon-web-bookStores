@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultLanguages as languages } from '@/lib/languageContext.jsx';
 import api from '@/lib/api.js';
+import ExcelJS from 'exceljs';
 import FormattedPrice from './FormattedPrice.jsx';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button.jsx';
@@ -44,7 +45,8 @@ import {
   Truck,
   PenTool,
   HelpCircle,
-  Shield
+  Shield,
+  Download
 } from 'lucide-react';
 import * as AllIcons from 'lucide-react';
 import { Input } from '@/components/ui/input.jsx';
@@ -61,7 +63,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import CsvImportDialog from './CsvImportDialog.jsx';
+import CsvImportDialog, { FIELDS } from './CsvImportDialog.jsx';
 import ChatWidget from './ChatWidget.jsx';
 import DashboardChat from './DashboardChat.jsx';
 import DashboardLanguages from './DashboardLanguages.jsx';
@@ -4924,6 +4926,61 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
     toast({ title: 'تم الاستيراد بنجاح!' });
   };
 
+  const handleExportBooks = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Books');
+
+      worksheet.columns = FIELDS.map((field) => ({
+        header: field.label,
+        key: field.key,
+        width: Math.max(20, String(field.label ?? '').length + 5),
+      }));
+
+      books.forEach((book) => {
+        const row = {};
+        FIELDS.forEach((field) => {
+          const value = book?.[field.key];
+          if (Array.isArray(value)) {
+            row[field.key] = value.join(', ');
+          } else if (value && typeof value === 'object') {
+            if (field.key === 'category') {
+              row[field.key] = value.name ?? value.id ?? JSON.stringify(value);
+            } else {
+              row[field.key] = JSON.stringify(value);
+            }
+          } else if (value === null || value === undefined) {
+            row[field.key] = '';
+          } else {
+            row[field.key] = value;
+          }
+        });
+        worksheet.addRow(row);
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      if (typeof window !== 'undefined') {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'books-template.xlsx';
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }
+
+      toast({ title: 'تم تصدير الملف بنجاح!' });
+    } catch (error) {
+      logger.error('Export error', error);
+      toast({ title: 'تعذر تصدير الملف. حاول مجدداً.', variant: 'destructive' });
+    }
+  };
+
   if (showForm) {
     return (
       <BookForm
@@ -4984,6 +5041,10 @@ const DashboardBooks = ({ books, setBooks, authors, categories, setCategories, c
                   : filterType === 'physical'
                   ? 'إضافة كتاب ورقي جديد'
                   : 'إضافة كتاب جديد'}
+              </Button>
+              <Button variant="outline" onClick={handleExportBooks}>
+                <Download className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                تصدير قالب Excel
               </Button>
               <Button variant="outline" onClick={() => setImportOpen(true)}>
                 استيراد من ملف CSV/JSON
