@@ -7,7 +7,7 @@ import { Label } from './ui/label.jsx';
 
 // Available book fields that can be mapped when importing
 // Feel free to extend this list if the schema changes
-const FIELDS = [
+export const FIELDS = [
   { key: 'title', label: 'العنوان' },
   { key: 'author', label: 'المؤلف' },
   { key: 'price', label: 'السعر' },
