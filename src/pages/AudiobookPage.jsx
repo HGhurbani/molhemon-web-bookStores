@@ -7,8 +7,10 @@ import { toast } from '@/components/ui/use-toast.js';
 import api from '@/lib/api.js';
 import { purchasePlan } from '@/lib/subscriptionUtils.js';
 import logger from '@/lib/logger.js';
+import { useTranslation } from 'react-i18next';
 
 const AudiobookPage = () => {
+  const { t } = useTranslation();
   // Mock data
   const sampleBooks = [
     { id: 1, title: "بلسماً لأحزان", cover: "https://darmolhimon.com/wp-content/uploads/2025/05/بيكي-بلايندرز-1-300x450.jpeg" },
@@ -100,18 +102,18 @@ const AudiobookPage = () => {
         {/* Content - Text positioned on the right side at the bottom */}
         <div className="absolute bottom-0 left-0 right-0 sm:left-auto sm:right-0 p-6 sm:p-8 z-10 text-center sm:text-left rtl:text-right max-w-none sm:max-w-lg"> {/* Adjusted positioning and text alignment */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">
-            اختر باقة الاستماع المناسبة لك
+            {t('choose_listening_plan')}
           </h1>
           <p className="text-lg sm:text-xl text-white/90 mb-6">
-            قصص بلا حدود، رواة خبراء، أينما كنت.
+            {t('listening_plan_subtitle')}
           </p>
           <button
             className="bg-white text-blue-600 hover:bg-blue-50 rounded-full shadow-lg text-base sm:text-lg px-6 py-3 transition-colors"
           >
-            تجربة مجانية لمدة ٧ أيام
+            {t('free_trial_7_days')}
           </button>
           <p className="text-white/70 text-xs sm:text-sm mt-3">
-            التجديد التلقائي - إلغِ في أي وقت
+            {t('auto_renewal_notice')}
           </p>
         </div>
       </motion.section>
@@ -124,7 +126,7 @@ const AudiobookPage = () => {
         <div className="relative w-40 h-56 sm:w-48 sm:h-64 md:w-60 md:h-80 flex-shrink-0 z-30 -mt-20 mx-auto md:mx-0 mb-12 md:mt-[-260px] md:mr-16 lg:ml-24"> {/* Added negative margin-bottom and right margin for positioning */}
           <img
             src="https://darmolhimon.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-13-at-10.40.18-AM-300x450.jpeg"
-            alt="روميليا والأسد"
+            alt={t('featured_audiobook_alt')}
             className="w-full h-full object-cover rounded-lg shadow-xl"
           />
           {/* Play button overlay */}
@@ -137,12 +139,12 @@ const AudiobookPage = () => {
           <Button
             className="absolute -bottom-12 sm:-bottom-16 w-full py-3 rounded-xl font-medium transition-all duration-200 bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base sm:text-lg px-6 shadow-md"
         >
-            تصفح الكتب الصوتية
+            {t('browse_audiobooks')}
           </Button>
         </div>
       </motion.div>
       <section className="mt-10 sm:mt-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">استمتع بقراءة واستماع غير محدودين</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">{t('unlimited_reading_heading')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <motion.div
@@ -154,7 +156,7 @@ const AudiobookPage = () => {
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
               {plan.featured && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">الأكثر شيوعاً</span>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">{t('most_popular')}</span>
               )}
               <div className="text-center mb-6 mt-2">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
@@ -162,7 +164,7 @@ const AudiobookPage = () => {
                 </h3>
                 <div className="mb-4">
                   <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-600 text-sm mr-1">{plan.duration} يوم</span>
+                  <span className="text-gray-600 text-sm mr-1">{plan.duration} {t('days')}</span>
                 </div>
               </div>
               <p className="text-sm text-gray-700 mb-6 text-center" dangerouslySetInnerHTML={{ __html: plan.description }} />
@@ -170,7 +172,7 @@ const AudiobookPage = () => {
                 className="w-full bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF]"
                 onClick={() => handlePlanSelect(plan)}
               >
-                اختر باقتك
+                {t('choose_your_plan')}
               </Button>
             </motion.div>
           ))}
@@ -204,13 +206,12 @@ const AudiobookPage = () => {
               ))}
             </div>
 <div className="md:w-1/2 text-right" dir="rtl">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">قصص مختارة بعناية</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{t('curated_stories_heading')}</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
-                تابع مؤلفات أو رواة في مسلسلاتك المفضلة، واحصل على توصيات
-                مخصصة بناء على ما استمعت إليه سابقاً.
+                {t('curated_stories_description')}
               </p>
               <button className="bg-blue-600 hover:bg-blue-700 text-white text-base py-3 px-8 shadow-lg hover:shadow-xl rounded-lg transition-all">
-                تجربة مجانية لمدة ٧ أيام
+                {t('free_trial_7_days')}
               </button>
             </div>
           </div>
@@ -236,12 +237,12 @@ const AudiobookPage = () => {
             </div>
 
 <div className="md:w-1/2 text-right" dir="rtl">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">في أي وقت، وفي أي مكان.</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{t('anytime_anywhere_heading')}</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
-                استمع إلى الكتب الصوتية المفضلة لديك أينما كنت. قم بتنزيل كتبك للاستماع إليها دون اتصال بالإنترنت.
+                {t('anytime_anywhere_description')}
               </p>
               <Button className="bg-[#E4E6FF] hover:bg-[#d6d8f2] text-[#315dfb] border border-[#E4E6FF] text-base px-8 py-3 rounded-xl font-medium shadow-md transition-all">
-                تصفح الكتب الصوتية
+                {t('browse_audiobooks')}
               </Button>
             </div>
           </div>
@@ -260,10 +261,9 @@ const AudiobookPage = () => {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4">
               <Headphones className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">مكتبة فاخرة</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{t('premium_library_heading')}</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              آلاف الكتب التي تشمل الكتب العالمية والعربية مع
-              أكثر من 500,000 كتاب مصوّر أو كتاب صوتي عالي الجودة
+              {t('premium_library_description')}
             </p>
           </motion.div>
 
@@ -277,10 +277,9 @@ const AudiobookPage = () => {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4">
               <Clock className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">بيئة آمنة للأطفال</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{t('kids_safe_heading')}</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              بيئة آمنة مصممة خصيصاً للأطفال - معايير آمنة في البحث والتصفح -
-              تطبيق منفصل للأطفال ضمان أمان البيانات
+              {t('kids_safe_description')}
             </p>
           </motion.div>
 
@@ -294,9 +293,9 @@ const AudiobookPage = () => {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4">
               <Award className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">أعمال دارملهمون الأصلية</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{t('original_works_heading')}</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              احصل على إصدارات حصرية لأعمال جديدة للمؤلفين والمبدعين، مصممة خصيصاً لمنصة دار الهيمون
+              {t('original_works_description')}
             </p>
           </motion.div>
         </div>
