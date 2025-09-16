@@ -1,15 +1,23 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from './api.js';
+import { SUPPORTED_LANGUAGES } from './languages.js';
 
-export const defaultLanguages = [
-  { code: 'ar', name: 'العربية' },
-  { code: 'en', name: 'English' },
-];
+const normalizeLanguages = (languages) =>
+  languages.map(({ code, name, label, ...rest }) => ({
+    ...rest,
+    code,
+    name: name ?? label ?? '',
+    label: label ?? name ?? '',
+  }));
+
+export const defaultLanguages = normalizeLanguages(
+  SUPPORTED_LANGUAGES.map(({ code, label }) => ({ code, name: label })),
+);
 
 export const getStoredLanguages = () => {
   try {
     const stored = localStorage.getItem('languages');
-    return stored ? JSON.parse(stored) : defaultLanguages;
+    return stored ? normalizeLanguages(JSON.parse(stored)) : defaultLanguages;
   } catch {
     return defaultLanguages;
   }

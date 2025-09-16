@@ -4,11 +4,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { motion } from 'framer-motion';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-
-const SUPPORTED_LANGUAGES = [
-  { code: 'ar', label: 'العربية' },
-  { code: 'en', label: 'English' },
-];
+import { SUPPORTED_LANGUAGES } from '@/lib/languages.js';
 
 const createEmptyTranslations = () =>
   SUPPORTED_LANGUAGES.reduce((acc, { code }) => {
