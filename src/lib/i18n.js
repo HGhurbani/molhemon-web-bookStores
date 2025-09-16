@@ -1,25 +1,27 @@
 import i18n from 'i18next';
+import HttpBackend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 
-import ar from '../locales/ar.json';
-import en from '../locales/en.json';
-
-const resources = {
-  ar: { translation: ar },
-  en: { translation: en },
-};
+const SUPPORTED_LANGUAGES = ['ar', 'en'];
 
 i18n
+  .use(HttpBackend)
   .use(initReactI18next)
   .init({
-    resources,
     lng: 'ar',
     fallbackLng: 'en',
+    supportedLngs: SUPPORTED_LANGUAGES,
     interpolation: { escapeValue: false },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
+    backend: {
+      loadPath: '/api/translations/{{lng}}',
+      requestOptions: {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      },
+    },
+    react: {
+      useSuspense: false,
     },
   });
 
-export default i18n; 
+export default i18n;
