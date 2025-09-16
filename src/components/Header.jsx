@@ -25,6 +25,7 @@ import {
   Download,
   Truck,
   Building2,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
@@ -33,6 +34,7 @@ import { useCart } from '@/lib/cartContext.jsx';
 import { useAuth } from '@/lib/authContext.jsx';
 import { useTranslation } from 'react-i18next';
 import { ensureLanguageList, storeLanguageCode } from '@/lib/languagePreferences.js';
+import { toast } from '@/components/ui/use-toast.js';
 
 const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {}, languages: providedLanguages = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,7 +98,11 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   }, [books]);
 
   useEffect(() => {
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    if (recentSearches.length > 0) {
+      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    } else {
+      localStorage.removeItem('recentSearches');
+    }
   }, [recentSearches]);
 
   useEffect(() => {
@@ -132,6 +138,14 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const closeMobileSearch = () => {
     setIsMobileSearchOpen(false);
   };
+
+  const clearRecentSearches = React.useCallback(() => {
+    localStorage.removeItem('recentSearches');
+    setRecentSearches([]);
+    toast({
+      description: t('recent_searches_cleared', { defaultValue: 'Search history cleared' }),
+    });
+  }, [t]);
 
   const DropdownWithSearch = ({ label, items, isCategory = false, hideOnMobile = false }) => {
     const [filterText, setFilterText] = useState('');
@@ -463,10 +477,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
           </div>
 
           {/* Search Suggestions Row */}
-          <motion.div 
+          <motion.div
             className="flex items-center justify-center space-x-3 rtl:space-x-reverse py-2 text-xs text-white overflow-x-auto whitespace-nowrap"
             initial={false}
-            animate={{ 
+            animate={{
               maxHeight: hideTopRow ? 0 : 40,
               opacity: hideTopRow ? 0 : 1,
               paddingTop: hideTopRow ? 0 : 8,
@@ -475,9 +489,9 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             {searchSuggestions.map((item, idx) => (
-              <motion.span 
-                key={idx} 
-                className="cursor-pointer hover:text-gray-200 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-500/20" 
+              <motion.span
+                key={idx}
+                className="cursor-pointer hover:text-gray-200 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-500/20"
                 onClick={() => handleSearchSubmit(item)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -485,6 +499,17 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                 {item}
               </motion.span>
             ))}
+            {recentSearches.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearRecentSearches}
+                className="text-white hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 h-7 px-3 flex items-center space-x-1 rtl:space-x-reverse shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t('clear_search_history', { defaultValue: 'Clear history' })}</span>
+              </Button>
+            )}
           </motion.div>
         </div>
 
@@ -549,7 +574,20 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               {/* Search Suggestions */}
               {searchSuggestions.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-gray-600 mb-2">{t('search_suggestions')}</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-600">{t('search_suggestions')}</h3>
+                    {recentSearches.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearRecentSearches}
+                        className="text-gray-600 hover:text-gray-800"
+                      >
+                        <Trash2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                        {t('clear_search_history', { defaultValue: 'Clear history' })}
+                      </Button>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-2">
             {searchSuggestions.map((item, idx) => (
                       <button
