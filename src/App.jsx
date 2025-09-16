@@ -30,7 +30,7 @@ const App = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
   const { i18n } = useTranslation();
-  useDirection(i18n.language);
+  useDirection(i18n);
   const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
   const { setLanguage, setLanguages, languages } = useLanguage();
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
@@ -488,7 +488,7 @@ const App = () => {
     <ErrorBoundary>
       <Router>
         <ScrollToTop />
-        <div className="font-sans" dir="rtl">
+        <div className="font-sans" dir={i18n.dir()}>
           <AnimatePresence mode="wait">
             <Suspense fallback={<div>Loading...</div>}>
               <Routes>
