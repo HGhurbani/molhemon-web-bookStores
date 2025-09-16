@@ -205,7 +205,7 @@ const AudiobookPage = () => {
                 </motion.div>
               ))}
             </div>
-<div className="md:w-1/2 text-right" dir="rtl">
+            <div className="md:w-1/2 text-right">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{t('curated_stories_heading')}</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 {t('curated_stories_description')}
@@ -236,7 +236,7 @@ const AudiobookPage = () => {
               ))}
             </div>
 
-<div className="md:w-1/2 text-right" dir="rtl">
+            <div className="md:w-1/2 text-right">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{t('anytime_anywhere_heading')}</h2>
               <p className="text-gray-600 text-sm sm:text-base mb-6">
                 {t('anytime_anywhere_description')}

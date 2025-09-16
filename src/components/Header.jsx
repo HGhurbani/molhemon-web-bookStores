@@ -51,7 +51,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const { language, setLanguage, languages } = useLanguage();
   const { cart } = useCart();
   const { isCustomer: isCustomerLoggedIn } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const [hideTopRow, setHideTopRow] = useState(false);
@@ -166,7 +166,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               <span>{t('my_account')}</span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent dir="rtl" align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[180px]">
+          <DropdownMenuContent dir={i18n.dir()} align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[180px]">
             <DropdownMenuItem asChild className="px-4 py-3 hover:bg-blue-50 transition-colors duration-150">
               <Link to="/profile?tab=wishlist" className="flex items-center">
                 <Bookmark className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
@@ -490,7 +490,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="fixed top-0 left-0 right-0 bg-white shadow-2xl z-50 md:hidden p-4"
-              dir="rtl"
+              dir={i18n.dir()}
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-800">{t('search_title')}</h2>
@@ -631,7 +631,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               exit={{ opacity: 0, x: '100%' }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl z-50 md:hidden overflow-y-auto"
-              dir="rtl"
+              dir={i18n.dir()}
             >
               <div className="p-6">
                 {/* Header */}

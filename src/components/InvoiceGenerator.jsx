@@ -34,7 +34,7 @@ const InvoiceGenerator = ({ order, onPrint, onDownload, onShare }) => {
   if (!order) return null;
 
   return (
-    <div className="bg-white p-8 max-w-4xl mx-auto" dir="rtl">
+    <div className="bg-white p-8 max-w-4xl mx-auto">
       {/* Invoice Header */}
       <div className="border-b pb-6 mb-6">
         <div className="flex justify-between items-start">
