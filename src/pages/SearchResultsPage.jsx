@@ -36,9 +36,9 @@ const SearchResultsPage = ({ books, categories, handleAddToCart, handleToggleWis
   const handleLanguageChange = (lang) =>
     setLanguage((prev) => toggleArrayItem(prev, lang));
 
-  const now = Date.now();
-
   useEffect(() => {
+    const now = Date.now();
+
     let result = books.filter((book) => {
       const term = searchText.toLowerCase();
       return (
@@ -88,7 +88,7 @@ const SearchResultsPage = ({ books, categories, handleAddToCart, handleToggleWis
     });
 
     setFilteredBooks(result);
-  }, [searchText, selectedTypes, selectedCategories, priceRange, newRelease, rating, language, audioProgram, audioLength, books, currency.code, now]);
+  }, [books, searchText, selectedTypes, selectedCategories, priceRange, newRelease, rating, language, audioProgram, audioLength, currency.code]);
 
   const onToggleWishlist = (book) => {
     handleToggleWishlist(book);
