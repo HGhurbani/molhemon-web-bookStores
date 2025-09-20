@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import NewsletterSection from '@/components/NewsletterSection.jsx';
+import { useTranslation } from 'react-i18next';
 
 const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
+  const { t } = useTranslation();
   return (
     <>
     <NewsletterSection handleFeatureClick={handleFeatureClick} />
@@ -59,7 +61,7 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
 
           {footerLinks.map((section, index) => (
             <div key={index}>
-              <h4 className="font-semibold text-sm sm:text-base text-white mb-3 sm:mb-4">{section.title}</h4>
+              <h4 className="font-semibold text-sm sm:text-base text-white mb-3 sm:mb-4">{t(section.title, { defaultValue: section.title })}</h4>
               <ul className="space-y-2 sm:space-y-2.5">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
@@ -67,16 +69,16 @@ const Footer = ({ footerLinks, handleFeatureClick, siteSettings = {} }) => {
                        <a
                         href={link.href}
                         className="text-white hover:text-blue-200 text-[11px] sm:text-xs transition-colors"
-                        onClick={(e) => { e.preventDefault(); handleFeatureClick(link.action || link.text.toLowerCase().replace(/\s/g, '-'));}}
+                        onClick={(e) => { e.preventDefault(); handleFeatureClick(link.action || link.id || String(link.text));}}
                       >
-                        {link.text}
+                        {t(link.text, { defaultValue: link.text })}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
                         className="text-white hover:text-blue-200 text-[11px] sm:text-xs transition-colors"
                       >
-                        {link.text}
+                        {t(link.text, { defaultValue: link.text })}
                       </Link>
                     )}
                   </li>

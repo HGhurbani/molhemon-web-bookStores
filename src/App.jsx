@@ -36,7 +36,7 @@ import useDirection from '@/lib/useDirection.js';
 const AppContent = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   useDirection(i18n);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -54,7 +54,7 @@ const AppContent = () => {
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatContact, setChatContact] = useState({ type: 'admin', name: 'الدعم' });
+  const [chatContact, setChatContact] = useState({ type: 'admin', name: t('app.chat.supportName', { defaultValue: 'Support' }) });
   const [dashboardStatsState, setDashboardStatsState] = useState([]);
   const [sellers, setSellers] = useState(() => {
     const stored = localStorage.getItem('sellers');
@@ -85,10 +85,90 @@ const AppContent = () => {
     return stored ? JSON.parse(stored) : [];
   });
   const [features, setFeatures] = useState([]);
+
+  const showDataLoadError = useCallback((resourceKey, errorObject) => {
+    const genericTitle = t('app.toast.loadError.generic.title', { defaultValue: 'Error loading data' });
+    toast({
+      title: t(`app.toast.loadError.${resourceKey}.title`, { defaultValue: genericTitle }),
+      description: t('app.toast.loadError.description', {
+        message: errorObject.message,
+        defaultValue: errorObject.message,
+      }),
+      variant: 'destructive',
+    });
+  }, [t]);
+
+  const localizeBook = useCallback(
+    (book) => ({
+      ...book,
+      title: t(book?.title, { defaultValue: book?.title }),
+      author: t(book?.author, { defaultValue: book?.author }),
+      description: t(book?.description, { defaultValue: book?.description }),
+      imgPlaceholder: t(book?.imgPlaceholder, { defaultValue: book?.imgPlaceholder }),
+      publisher: t(book?.publisher, { defaultValue: book?.publisher }),
+      format: t(book?.format, { defaultValue: book?.format }),
+      deliveryMethod: t(book?.deliveryMethod, { defaultValue: book?.deliveryMethod }),
+    }),
+    [t],
+  );
+
+  const localizeAuthor = useCallback(
+    (author) => ({
+      ...author,
+      name: t(author?.name, { defaultValue: author?.name }),
+      imgPlaceholder: t(author?.imgPlaceholder, { defaultValue: author?.imgPlaceholder }),
+      bio: t(author?.bio, { defaultValue: author?.bio }),
+    }),
+    [t],
+  );
+
+  const localizeCategory = useCallback(
+    (category) => ({
+      ...category,
+      name: t(category?.name, { defaultValue: category?.name }),
+    }),
+    [t],
+  );
+
+  const localizeFeature = useCallback(
+    (feature) => ({
+      ...feature,
+      title: t(feature?.title, { defaultValue: feature?.title }),
+      description: t(feature?.description, { defaultValue: feature?.description }),
+    }),
+    [t],
+  );
+
+  const localizeSeller = useCallback(
+    (seller) => ({
+      ...seller,
+      name: t(seller?.name, { defaultValue: seller?.name }),
+    }),
+    [t],
+  );
+
+  const localizeBranch = useCallback(
+    (branch) => ({
+      ...branch,
+      name: t(branch?.name, { defaultValue: branch?.name }),
+      address: t(branch?.address, { defaultValue: branch?.address }),
+    }),
+    [t],
+  );
   
   useEffect(() => {
     storeLanguages(languages);
   }, [languages]);
+
+  useEffect(() => {
+    setChatContact((prev) => {
+      if (!prev || prev.type !== 'admin') {
+        return prev;
+      }
+      const name = t('app.chat.supportName', { defaultValue: 'Support' });
+      return prev.name === name ? prev : { ...prev, name };
+    });
+  }, [t]);
   const [bannersState, setBannersState] = useState(() => {
     const stored = localStorage.getItem('banners');
     return stored ? JSON.parse(stored) : [];
@@ -105,6 +185,15 @@ const AppContent = () => {
     return books.slice(3, 6).concat(books.slice(0, 3));
   }, [books]);
 
+  const localizedBooks = React.useMemo(() => books.map(localizeBook), [books, localizeBook]);
+  const localizedRecentSearchBooks = React.useMemo(() => recentSearchBooks.map(localizeBook), [recentSearchBooks, localizeBook]);
+  const localizedBestsellerBooks = React.useMemo(() => bestsellerBooks.map(localizeBook), [bestsellerBooks, localizeBook]);
+  const localizedAuthors = React.useMemo(() => authors.map(localizeAuthor), [authors, localizeAuthor]);
+  const localizedCategories = React.useMemo(() => categoriesState.map(localizeCategory), [categoriesState, localizeCategory]);
+  const localizedFeatures = React.useMemo(() => features.map(localizeFeature), [features, localizeFeature]);
+  const localizedSellers = React.useMemo(() => sellers.map(localizeSeller), [sellers, localizeSeller]);
+  const localizedBranches = React.useMemo(() => branches.map(localizeBranch), [branches, localizeBranch]);
+
   // تحميل البيانات من Firebase
   useEffect(() => {
     const loadData = async () => {
@@ -114,164 +203,92 @@ const AppContent = () => {
         const [b, a, c, _settings, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
           api.getBooks().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:books');
-            toast({
-              title: "خطأ في تحميل الكتب",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('books', errorObject);
             return [];
           }),
           api.getAuthors().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:authors');
-            toast({
-              title: "خطأ في تحميل المؤلفين",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('authors', errorObject);
             return [];
           }),
           api.getCategories().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:categories');
-            toast({
-              title: "خطأ في تحميل الفئات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('categories', errorObject);
             return [];
           }),
           refreshSettings(true).catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:settings');
-            toast({
-              title: "خطأ في تحميل الإعدادات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('settings', errorObject);
             return {};
           }),
           api.getOrders().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:orders');
-            toast({
-              title: "خطأ في تحميل الطلبات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('orders', errorObject);
             return [];
           }),
           api.getPayments().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:payments');
-            toast({
-              title: "خطأ في تحميل المدفوعات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('payments', errorObject);
             return [];
           }),
           api.getPaymentMethods().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:payment-methods');
-            toast({
-              title: "خطأ في تحميل طرق الدفع",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('paymentMethods', errorObject);
             return [];
           }),
           api.getCurrencies().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:currencies');
-            toast({
-              title: "خطأ في تحميل العملات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('currencies', errorObject);
             return [];
           }),
           api.getLanguages().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:languages');
-            toast({
-              title: "خطأ في تحميل اللغات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('languages', errorObject);
             return [];
           }),
           api.getPlans().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:plans');
-            toast({
-              title: "خطأ في تحميل الخطط",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('plans', errorObject);
             return [];
           }),
           api.getUsers().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:users');
-            toast({
-              title: "خطأ في تحميل المستخدمين",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('users', errorObject);
             return [];
           }),
           api.getSliders().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:sliders');
-            toast({
-              title: "خطأ في تحميل الشرائح",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('sliders', errorObject);
             return [];
           }),
           api.getBanners().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:banners');
-            toast({
-              title: "خطأ في تحميل البانرات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('banners', errorObject);
             return [];
           }),
           api.getFeatures().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:features');
-            toast({
-              title: "خطأ في تحميل الميزات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('features', errorObject);
             return [];
           }),
           api.getSellers().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:sellers');
-            toast({
-              title: "خطأ في تحميل البائعين",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('sellers', errorObject);
             return [];
           }),
           api.getBranches().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:branches');
-            toast({
-              title: "خطأ في تحميل الفروع",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('branches', errorObject);
             return [];
           }),
           api.getSubscriptions().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:subscriptions');
-            toast({
-              title: "خطأ في تحميل الاشتراكات",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('subscriptions', errorObject);
             return [];
           }),
           api.getMessages().catch(error => {
             const errorObject = errorHandler.handleError(error, 'data:messages');
-            toast({
-              title: "خطأ في تحميل الرسائل",
-              description: errorObject.message,
-              variant: "destructive"
-            });
+            showDataLoadError('messages', errorObject);
             return [];
           }),
         ]);
@@ -299,19 +316,15 @@ const AppContent = () => {
         // حساب إحصائيات لوحة التحكم
         const sales = pay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
         setDashboardStatsState([
-          { title: 'إجمالي الكتب', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
-          { title: 'المؤلفون', value: a.length, icon: Users, color: 'bg-green-500' },
-          { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
-          { title: 'المستخدمون', value: u.length, icon: Eye, color: 'bg-orange-500' },
+          { title: 'siteData.dashboardStats.totalBooks', value: b.length, icon: BookOpen, color: 'bg-blue-500' },
+          { title: 'siteData.dashboardStats.authors', value: a.length, icon: Users, color: 'bg-green-500' },
+          { title: 'siteData.dashboardStats.salesToday', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
+          { title: 'siteData.dashboardStats.visitors', value: u.length, icon: Eye, color: 'bg-orange-500' },
         ]);
 
       } catch (error) {
         const errorObject = errorHandler.handleError(error, 'data:initial-load');
-        toast({
-          title: "خطأ في تحميل البيانات",
-          description: errorObject.message,
-          variant: "destructive"
-        });
+        showDataLoadError('initialLoad', errorObject);
       } finally {
         // تأخير بسيط لتحسين تجربة التحميل وتجنب الوميض
         setTimeout(() => setIsAppLoading(false), 300);
@@ -389,12 +402,12 @@ const AppContent = () => {
   useEffect(() => {
     const sales = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     setDashboardStatsState([
-      { title: 'إجمالي الكتب', value: books.length, icon: BookOpen, color: 'bg-blue-500' },
-      { title: 'المؤلفون', value: authors.length, icon: Users, color: 'bg-green-500' },
-      { title: 'المبيعات', value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
-      { title: 'المستخدمون', value: users.length, icon: Eye, color: 'bg-orange-500' },
+      { title: t('siteData.dashboardStats.totalBooks', { defaultValue: 'Total Books' }), value: books.length, icon: BookOpen, color: 'bg-blue-500' },
+      { title: t('siteData.dashboardStats.authors', { defaultValue: 'Authors' }), value: authors.length, icon: Users, color: 'bg-green-500' },
+      { title: t('siteData.dashboardStats.salesToday', { defaultValue: 'Sales' }), value: `${sales.toLocaleString()} د.إ`, icon: DollarSign, color: 'bg-purple-500' },
+      { title: t('siteData.dashboardStats.visitors', { defaultValue: 'Visitors' }), value: users.length, icon: Eye, color: 'bg-orange-500' },
     ]);
-  }, [books, authors, payments, users]);
+  }, [books, authors, payments, users, t]);
 
   // تحديث عنوان الصفحة
   useEffect(() => {
@@ -466,9 +479,9 @@ const AppContent = () => {
   const handleRemoveFromCart = (bookId) => {
     removeFromCart(bookId);
     toast({
-      title: "تم الحذف من السلة",
-      description: "تم حذف المنتج من سلة التسوق.",
-      variant: "destructive"
+      title: t('app.toast.cart.remove.title', { defaultValue: 'Removed from cart' }),
+      description: t('app.toast.cart.remove.description', { defaultValue: 'The item was removed from your cart.' }),
+      variant: 'destructive'
     });
   };
 
@@ -485,19 +498,25 @@ const AppContent = () => {
     toggleFavorite(book);
     if (exists) {
       toast({
-        title: "تم الحذف من المفضلة",
-        description: `تم حذف \"${book.title}\" من قائمة الرغبات.`,
-        variant: "destructive"
+        title: t('app.toast.wishlist.removed.title', { defaultValue: 'Removed from wishlist' }),
+        description: t('app.toast.wishlist.removed.description', {
+          book: t(book.title, { defaultValue: book.title }),
+          defaultValue: `"${book.title}" was removed from your wishlist.`,
+        }),
+        variant: 'destructive'
       });
     } else {
       toast({
-        title: "تمت الإضافة للمفضلة",
-        description: `تم إضافة \"${book.title}\" إلى قائمة الرغبات.`,
+        title: t('app.toast.wishlist.added.title', { defaultValue: 'Added to wishlist' }),
+        description: t('app.toast.wishlist.added.description', {
+          book: t(book.title, { defaultValue: book.title }),
+          defaultValue: `"${book.title}" was added to your wishlist.`,
+        }),
       });
     }
   };
 
-  const handleOpenChat = (contact = { type: 'admin', name: 'الدعم' }) => {
+  const handleOpenChat = (contact = { type: 'admin', name: t('app.chat.supportName', { defaultValue: 'Support' }) }) => {
     setChatContact(contact);
     setChatOpen(true);
   };
@@ -505,20 +524,23 @@ const AppContent = () => {
   const handleFeatureClick = (feature) => {
     if (feature === 'logout') {
       firebaseAuth.signOut().then(() => {
-        toast({ title: 'تم تسجيل الخروج' });
+        toast({ title: t('app.toast.logout.success', { defaultValue: 'You have been signed out.' }) });
       }).catch(error => {
         const errorObject = errorHandler.handleError(error, 'auth:signout');
         toast({
-          title: 'خطأ في تسجيل الخروج',
-          description: errorObject.message,
+          title: t('app.toast.logout.error.title', { defaultValue: 'Sign out failed' }),
+          description: t('app.toast.logout.error.description', {
+            message: errorObject.message,
+            defaultValue: errorObject.message,
+          }),
           variant: 'destructive'
         });
       });
       return;
     }
     toast({
-      title: "🚧 هذه الميزة غير مطبقة بعد",
-      description: "لا تقلق! سيتم تطبيقها الأيام القادمة",
+      title: t('app.toast.feature.unavailable.title', { defaultValue: 'This feature is coming soon' }),
+      description: t('app.toast.feature.unavailable.description', { defaultValue: 'Hang tight! We are working on it.' }),
       duration: 3000,
     });
   };
@@ -592,9 +614,9 @@ const AppContent = () => {
                       isCustomerLoggedIn={isCustomerLoggedIn}
                       login={login}
                       currentUser={currentUser}
-                      books={books}
-                      authors={authors}
-                      categories={categoriesState}
+                      books={localizedBooks}
+                      authors={localizedAuthors}
+                      categories={localizedCategories}
                       cart={cart}
                       setCart={setCart}
                       setOrders={setOrders}
@@ -604,13 +626,13 @@ const AppContent = () => {
                       handleToggleWishlist={handleToggleWishlist}
                       handleFeatureClick={handleFeatureClick}
                       handleOpenChat={handleOpenChat}
-                      recentSearchBooks={recentSearchBooks}
-                      bestsellerBooks={bestsellerBooks}
+                      recentSearchBooks={localizedRecentSearchBooks}
+                      bestsellerBooks={localizedBestsellerBooks}
                       heroSlides={heroSlidesState}
                       banners={bannersState}
                       wishlist={wishlist}
                       siteSettings={siteSettingsState}
-                      features={features}
+                      features={localizedFeatures}
                       languages={languages}
                     />
                   }
