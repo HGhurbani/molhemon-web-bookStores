@@ -8,7 +8,7 @@
   "edit": "تعديل",
   "delete": "حذف",
   "save": "حفظ",
-  "cancel": "إلغاء",
+  "cancel": "ملغي",
   "language": "اللغة",
   "arabic": "العربية",
   "english": "الإنجليزية",
@@ -27,6 +27,9 @@
   "analytics": "التحليلات",
   "marketing": "التسويق",
   "promotions": "العروض",
+  "features": "الميزات",
+  "sliders": "الشرائح",
+  "banners": "البانرات",
   "branches": "الفروع",
   "subscriptions": "الاشتراكات",
   "logout": "تسجيل الخروج",
@@ -60,7 +63,6 @@
   "unpaid": "غير مدفوع",
   "refund": "مسترد",
   "waiting": "في الانتظار",
-  "cancel": "ملغي",
   "shipped": "مشحون",
   "delivered": "مسلم",
   "pending": "معلق",
@@ -95,6 +97,7 @@
   "my_account": "حسابي",
   "my_library": "مكتبتي",
   "my_orders": "مشترياتي",
+  "view_cart": "عرض السلة",
   "login_or_register": "تسجيل الدخول / إنشاء حساب",
   "category_fiction": "الخيال",
   "category_nonfiction": "غير الخيال",
@@ -110,9 +113,15 @@
   "brands": "العلامات التجارية",
   "choose_delivery_method": "اختر طريقة التوصيل",
   "search_suggestions": "اقتراحات البحث",
+  "clear_search_history": "مسح سجل البحث",
+  "recent_searches_cleared": "تم مسح سجل البحث",
+  "open_search_panel": "فتح لوحة البحث",
+  "close_search_panel": "إغلاق لوحة البحث",
   "quick_browse": "تصفح سريع",
   "delivery_methods": "طرق التوصيل",
   "menu": "القائمة",
+  "open_navigation_menu": "فتح قائمة التنقل",
+  "close_navigation_menu": "إغلاق قائمة التنقل",
   "main_pages": "الصفحات الرئيسية",
   "home": "الرئيسية",
   "most_popular": "الأكثر شيوعاً",
@@ -149,6 +158,7 @@
   "ebooks": "الكتب الإلكترونية",
   "search_title": "البحث",
   "search_books_placeholder": "ابحث في الكتب...",
+  "submit_search": "بحث",
   "home_bestsellers_audiobooks": "الكتب الصوتية الأكثر مبيعاً",
   "home_bestsellers_all_books": "الكتب الأكثر مبيعاً",
   "app": {
@@ -161,25 +171,63 @@
           "title": "خطأ في تحميل البيانات"
         },
         "description": "{{message}}",
-        "books": { "title": "تعذر تحميل قائمة الكتب" },
-        "authors": { "title": "تعذر تحميل قائمة المؤلفين" },
-        "categories": { "title": "تعذر تحميل الفئات" },
-        "settings": { "title": "تعذر تحميل الإعدادات" },
-        "orders": { "title": "تعذر تحميل الطلبات" },
-        "payments": { "title": "تعذر تحميل المدفوعات" },
-        "paymentMethods": { "title": "تعذر تحميل طرق الدفع" },
-        "currencies": { "title": "تعذر تحميل العملات" },
-        "languages": { "title": "تعذر تحميل اللغات" },
-        "plans": { "title": "تعذر تحميل الخطط" },
-        "users": { "title": "تعذر تحميل المستخدمين" },
-        "sliders": { "title": "تعذر تحميل الشرائح" },
-        "banners": { "title": "تعذر تحميل البانرات" },
-        "features": { "title": "تعذر تحميل الميزات" },
-        "sellers": { "title": "تعذر تحميل البائعين" },
-        "branches": { "title": "تعذر تحميل الفروع" },
-        "subscriptions": { "title": "تعذر تحميل الاشتراكات" },
-        "messages": { "title": "تعذر تحميل الرسائل" },
-        "initialLoad": { "title": "تعذر تحميل البيانات" }
+        "books": {
+          "title": "تعذر تحميل قائمة الكتب"
+        },
+        "authors": {
+          "title": "تعذر تحميل قائمة المؤلفين"
+        },
+        "categories": {
+          "title": "تعذر تحميل الفئات"
+        },
+        "settings": {
+          "title": "تعذر تحميل الإعدادات"
+        },
+        "orders": {
+          "title": "تعذر تحميل الطلبات"
+        },
+        "payments": {
+          "title": "تعذر تحميل المدفوعات"
+        },
+        "paymentMethods": {
+          "title": "تعذر تحميل طرق الدفع"
+        },
+        "currencies": {
+          "title": "تعذر تحميل العملات"
+        },
+        "languages": {
+          "title": "تعذر تحميل اللغات"
+        },
+        "plans": {
+          "title": "تعذر تحميل الخطط"
+        },
+        "users": {
+          "title": "تعذر تحميل المستخدمين"
+        },
+        "sliders": {
+          "title": "تعذر تحميل الشرائح"
+        },
+        "banners": {
+          "title": "تعذر تحميل البانرات"
+        },
+        "features": {
+          "title": "تعذر تحميل الميزات"
+        },
+        "sellers": {
+          "title": "تعذر تحميل البائعين"
+        },
+        "branches": {
+          "title": "تعذر تحميل الفروع"
+        },
+        "subscriptions": {
+          "title": "تعذر تحميل الاشتراكات"
+        },
+        "messages": {
+          "title": "تعذر تحميل الرسائل"
+        },
+        "initialLoad": {
+          "title": "تعذر تحميل البيانات"
+        }
       },
       "cart": {
         "remove": {
@@ -333,8 +381,12 @@
       }
     },
     "sellers": {
-      "seller1": { "name": "مكتبة المعرفة" },
-      "seller2": { "name": "دار الحكمة" }
+      "seller1": {
+        "name": "مكتبة المعرفة"
+      },
+      "seller2": {
+        "name": "دار الحكمة"
+      }
     },
     "branches": {
       "branch1": {

@@ -13,7 +13,9 @@
     "firebase:deploy": "firebase deploy",
     "firebase:deploy:hosting": "firebase deploy --only hosting",
     "firebase:deploy:functions": "firebase deploy --only functions",
-    "firebase:deploy:firestore": "firebase deploy --only firestore"
+    "firebase:deploy:firestore": "firebase deploy --only firestore",
+    "sync:locales": "node scripts/sync-locales.mjs",
+    "check:translations": "python3 scripts/find_missing_translations.py"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",

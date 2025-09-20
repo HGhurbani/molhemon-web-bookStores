@@ -70,7 +70,7 @@ const HomePage = ({
             handleAddToCart={handleAddToCart}
             handleToggleWishlist={handleToggleWishlist}
             wishlist={wishlist}
-          title={t('home.bestsellers.audiobooks', { defaultValue: 'Top-selling audiobooks' })}
+          title={t('home_bestsellers_audiobooks', { defaultValue: 'Top-selling audiobooks' })}
           icon={TrendingUp}
           squareImages
         />
@@ -81,7 +81,7 @@ const HomePage = ({
             handleAddToCart={handleAddToCart}
             handleToggleWishlist={handleToggleWishlist}
             wishlist={wishlist}
-          title={t('home.bestsellers.allBooks', { defaultValue: 'Best-selling books' })}
+          title={t('home_bestsellers_all_books', { defaultValue: 'Best-selling books' })}
           icon={TrendingUp}
           bgColor="bg-slate-100"
           likeCardStyle

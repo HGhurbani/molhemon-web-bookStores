@@ -27,6 +27,9 @@
   "analytics": "Analytics",
   "marketing": "Marketing",
   "promotions": "Promotions",
+  "features": "Features",
+  "sliders": "Sliders",
+  "banners": "Banners",
   "branches": "Branches",
   "subscriptions": "Subscriptions",
   "logout": "Logout",
@@ -60,7 +63,6 @@
   "unpaid": "Unpaid",
   "refund": "Refund",
   "waiting": "Waiting",
-  "cancel": "Cancel",
   "shipped": "Shipped",
   "delivered": "Delivered",
   "pending": "Pending",
@@ -95,6 +97,7 @@
   "my_account": "My Account",
   "my_library": "My Library",
   "my_orders": "My Orders",
+  "view_cart": "View cart",
   "login_or_register": "Sign In / Create Account",
   "category_fiction": "Fiction",
   "category_nonfiction": "Nonfiction",
@@ -110,9 +113,15 @@
   "brands": "Brands",
   "choose_delivery_method": "Choose Delivery Method",
   "search_suggestions": "Search Suggestions",
+  "clear_search_history": "Clear history",
+  "recent_searches_cleared": "Search history cleared",
+  "open_search_panel": "Open search panel",
+  "close_search_panel": "Close search panel",
   "quick_browse": "Quick Browse",
   "delivery_methods": "Delivery Methods",
   "menu": "Menu",
+  "open_navigation_menu": "Open navigation menu",
+  "close_navigation_menu": "Close navigation menu",
   "main_pages": "Main Pages",
   "home": "Home",
   "most_popular": "Most Popular",
@@ -149,6 +158,7 @@
   "ebooks": "Ebooks",
   "search_title": "Search",
   "search_books_placeholder": "Search books...",
+  "submit_search": "Search",
   "home_bestsellers_audiobooks": "Top-selling audiobooks",
   "home_bestsellers_all_books": "Best-selling books",
   "app": {
@@ -161,25 +171,63 @@
           "title": "Error loading data"
         },
         "description": "{{message}}",
-        "books": { "title": "We couldn't load the books" },
-        "authors": { "title": "We couldn't load the authors" },
-        "categories": { "title": "We couldn't load the categories" },
-        "settings": { "title": "We couldn't load the settings" },
-        "orders": { "title": "We couldn't load the orders" },
-        "payments": { "title": "We couldn't load the payments" },
-        "paymentMethods": { "title": "We couldn't load the payment methods" },
-        "currencies": { "title": "We couldn't load the currencies" },
-        "languages": { "title": "We couldn't load the languages" },
-        "plans": { "title": "We couldn't load the plans" },
-        "users": { "title": "We couldn't load the users" },
-        "sliders": { "title": "We couldn't load the sliders" },
-        "banners": { "title": "We couldn't load the banners" },
-        "features": { "title": "We couldn't load the features" },
-        "sellers": { "title": "We couldn't load the sellers" },
-        "branches": { "title": "We couldn't load the branches" },
-        "subscriptions": { "title": "We couldn't load the subscriptions" },
-        "messages": { "title": "We couldn't load the messages" },
-        "initialLoad": { "title": "We couldn't load the data" }
+        "books": {
+          "title": "We couldn't load the books"
+        },
+        "authors": {
+          "title": "We couldn't load the authors"
+        },
+        "categories": {
+          "title": "We couldn't load the categories"
+        },
+        "settings": {
+          "title": "We couldn't load the settings"
+        },
+        "orders": {
+          "title": "We couldn't load the orders"
+        },
+        "payments": {
+          "title": "We couldn't load the payments"
+        },
+        "paymentMethods": {
+          "title": "We couldn't load the payment methods"
+        },
+        "currencies": {
+          "title": "We couldn't load the currencies"
+        },
+        "languages": {
+          "title": "We couldn't load the languages"
+        },
+        "plans": {
+          "title": "We couldn't load the plans"
+        },
+        "users": {
+          "title": "We couldn't load the users"
+        },
+        "sliders": {
+          "title": "We couldn't load the sliders"
+        },
+        "banners": {
+          "title": "We couldn't load the banners"
+        },
+        "features": {
+          "title": "We couldn't load the features"
+        },
+        "sellers": {
+          "title": "We couldn't load the sellers"
+        },
+        "branches": {
+          "title": "We couldn't load the branches"
+        },
+        "subscriptions": {
+          "title": "We couldn't load the subscriptions"
+        },
+        "messages": {
+          "title": "We couldn't load the messages"
+        },
+        "initialLoad": {
+          "title": "We couldn't load the data"
+        }
       },
       "cart": {
         "remove": {
@@ -333,8 +381,12 @@
       }
     },
     "sellers": {
-      "seller1": { "name": "Knowledge Bookstore" },
-      "seller2": { "name": "Dar Al Hikma" }
+      "seller1": {
+        "name": "Knowledge Bookstore"
+      },
+      "seller2": {
+        "name": "Dar Al Hikma"
+      }
     },
     "branches": {
       "branch1": {
