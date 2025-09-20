@@ -1,6 +1,6 @@
 import functions from 'firebase-functions';
 import admin from 'firebase-admin';
-import { Schemas, validateData } from '../shared/schemas.js';
+import { Schemas, validateData } from './shared/schemas.js';
 import Stripe from 'stripe';
 import paypal from '@paypal/checkout-server-sdk';
 
