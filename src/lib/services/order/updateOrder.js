@@ -1,6 +1,10 @@
 import { Order } from '../../models/Order.js';
 import { errorHandler } from '../../errorHandler.js';
+import { getActiveLanguage } from '../../languageUtils.js';
 import firebaseApi from '../../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export async function updateOrderStatus(orderId, newStatus, notes = '') {
   try {
@@ -37,7 +41,7 @@ export async function updateOrderStatus(orderId, newStatus, notes = '') {
     return orderModel.toObject();
 
   } catch (error) {
-    throw errorHandler.handleError(error, `order-status:${orderId}`);
+    throw handleErrorWithLanguage(error, `order-status:${orderId}`);
   }
 }
 
@@ -82,6 +86,6 @@ export async function updateOrderStage(orderId, newStage, notes = '') {
     return orderModel.toObject();
 
   } catch (error) {
-    throw errorHandler.handleError(error, `order-stage:${orderId}`);
+    throw handleErrorWithLanguage(error, `order-stage:${orderId}`);
   }
 }

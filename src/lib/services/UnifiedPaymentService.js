@@ -6,9 +6,13 @@
 import { paymentManager } from '../payment/PaymentManager.js';
 import { Payment } from '../models/Payment.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
 import { getSettings, updateSettings } from '../firebase/settingsApi.js';
 import logger from '../logger.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class UnifiedPaymentService {
   constructor() {
@@ -84,7 +88,7 @@ export class UnifiedPaymentService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-creation');
+      throw handleErrorWithLanguage(error, 'payment-creation');
     }
   }
 
@@ -140,7 +144,7 @@ export class UnifiedPaymentService {
         error: error.message
       });
       
-      throw errorHandler.handleError(error, `payment-process:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-process:${paymentId}`);
     }
   }
 
@@ -162,7 +166,7 @@ export class UnifiedPaymentService {
       return new Payment(paymentDoc).toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment:${paymentId}`);
     }
   }
 
@@ -177,7 +181,7 @@ export class UnifiedPaymentService {
         .map(payment => new Payment(payment).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-payments:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-payments:${orderId}`);
     }
   }
 
@@ -209,7 +213,7 @@ export class UnifiedPaymentService {
       return paymentModel.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-status:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-status:${paymentId}`);
     }
   }
 
@@ -259,7 +263,7 @@ export class UnifiedPaymentService {
       return { success: true, message: 'تم استرداد الدفع بنجاح', refund: refundResult };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-refund:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-refund:${paymentId}`);
     }
   }
 
@@ -288,7 +292,7 @@ export class UnifiedPaymentService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-stats');
+      throw handleErrorWithLanguage(error, 'payment-stats');
     }
   }
 
@@ -303,7 +307,7 @@ export class UnifiedPaymentService {
 
       return paymentManager.getAvailablePaymentMethods(orderData);
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-methods:get');
+      throw handleErrorWithLanguage(error, 'payment-methods:get');
     }
   }
 
@@ -318,7 +322,7 @@ export class UnifiedPaymentService {
 
       return await paymentManager.testProviderConnection(providerName);
     } catch (error) {
-      throw errorHandler.handleError(error, `provider-test:${providerName}`);
+      throw handleErrorWithLanguage(error, `provider-test:${providerName}`);
     }
   }
 
@@ -353,7 +357,7 @@ export class UnifiedPaymentService {
 
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, `webhook:${providerName}`);
+      throw handleErrorWithLanguage(error, `webhook:${providerName}`);
     }
   }
 
@@ -366,7 +370,7 @@ export class UnifiedPaymentService {
       const payment = payments.find(p => p.paymentIntentId === paymentIntentId);
       return payment ? new Payment(payment).toObject() : null;
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-by-intent:${paymentIntentId}`);
+      throw handleErrorWithLanguage(error, `payment-by-intent:${paymentIntentId}`);
     }
   }
 
@@ -381,7 +385,7 @@ export class UnifiedPaymentService {
 
       return await paymentManager.createCustomer(providerName, customerData);
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-create:${providerName}`);
+      throw handleErrorWithLanguage(error, `customer-create:${providerName}`);
     }
   }
 
@@ -396,7 +400,7 @@ export class UnifiedPaymentService {
 
       return await paymentManager.savePaymentMethod(providerName, customerId, paymentMethodData);
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-method-save:${providerName}`);
+      throw handleErrorWithLanguage(error, `payment-method-save:${providerName}`);
     }
   }
 
@@ -411,7 +415,7 @@ export class UnifiedPaymentService {
 
       return await paymentManager.getCustomerPaymentMethods(providerName, customerId);
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-payment-methods:${providerName}`);
+      throw handleErrorWithLanguage(error, `customer-payment-methods:${providerName}`);
     }
   }
 
@@ -426,7 +430,7 @@ export class UnifiedPaymentService {
 
       return await paymentManager.deletePaymentMethod(providerName, customerId, paymentMethodId);
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-method-delete:${providerName}`);
+      throw handleErrorWithLanguage(error, `payment-method-delete:${providerName}`);
     }
   }
 
@@ -452,7 +456,7 @@ export class UnifiedPaymentService {
 
       return { success: true };
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-settings-update');
+      throw handleErrorWithLanguage(error, 'payment-settings-update');
     }
   }
 
@@ -467,7 +471,7 @@ export class UnifiedPaymentService {
 
       return paymentManager.getAvailableProviders();
     } catch (error) {
-      throw errorHandler.handleError(error, 'provider-info');
+      throw handleErrorWithLanguage(error, 'provider-info');
     }
   }
 

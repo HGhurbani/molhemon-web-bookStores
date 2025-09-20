@@ -16,7 +16,14 @@ import {
 import { db } from '../firebase.js';
 import { isImageSizeValid } from '../imageUtils.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import logger from '../logger.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
+
+const handleFirebaseErrorWithLanguage = (error, context) =>
+  errorHandler.handleFirebaseError(error, context, getActiveLanguage());
 
 // Process data before storing in Firestore
 async function processDataForStorage(data) {
@@ -48,7 +55,7 @@ async function processDataForStorage(data) {
 
     return processedData;
   } catch (error) {
-    throw errorHandler.handleError(error, 'data-processing');
+    throw handleErrorWithLanguage(error, 'data-processing');
   }
 }
 
@@ -67,7 +74,7 @@ async function getCollection(name) {
     const snapshot = await getDocs(collection(db, name));
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `collection:${name}`);
+    throw handleFirebaseErrorWithLanguage(error, `collection:${name}`);
   }
 }
 
@@ -95,7 +102,7 @@ async function addToCollection(name, data) {
     const ref = await addDoc(collection(db, name), processedData);
     return { ...processedData, id: ref.id };
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `add:${name}`);
+    throw handleFirebaseErrorWithLanguage(error, `add:${name}`);
   }
 }
 
@@ -143,7 +150,7 @@ async function updateCollection(name, id, data) {
     }
     return { id: snap.id, ...snap.data() };
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `update:${name}:${id}`);
+    throw handleFirebaseErrorWithLanguage(error, `update:${name}:${id}`);
   }
 }
 
@@ -169,7 +176,7 @@ async function deleteFromCollection(name, id) {
     }
     await deleteDoc(doc(db, name, id.toString()));
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `delete:${name}:${id}`);
+    throw handleFirebaseErrorWithLanguage(error, `delete:${name}:${id}`);
   }
 }
 
@@ -199,7 +206,7 @@ async function getDocById(name, id) {
     }
     return null;
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `get:${name}:${id}`);
+    throw handleFirebaseErrorWithLanguage(error, `get:${name}:${id}`);
   }
 }
 
@@ -210,7 +217,7 @@ async function setSingletonDoc(name, data) {
     const snap = await getDoc(ref);
     return { id: snap.id, ...snap.data() };
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `set:${name}`);
+    throw handleFirebaseErrorWithLanguage(error, `set:${name}`);
   }
 }
 
@@ -221,7 +228,7 @@ async function setDocument(name, id, data) {
     const snap = await getDoc(ref);
     return { id: snap.id, ...snap.data() };
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, `set:${name}:${id}`);
+    throw handleFirebaseErrorWithLanguage(error, `set:${name}:${id}`);
   }
 }
 

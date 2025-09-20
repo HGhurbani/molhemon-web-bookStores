@@ -5,11 +5,15 @@
 import { Payment, PAYMENT_STATUSES, PAYMENT_METHODS } from '../models/Payment.js';
 import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
 import { paymentManager } from '../payment/PaymentManager.js';
 
 const { Schemas, validateData } = schemas;
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class PaymentService {
   constructor() {
@@ -74,7 +78,7 @@ export class PaymentService {
       return { ...payment.toObject(), paymentIntent };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-creation');
+      throw handleErrorWithLanguage(error, 'payment-creation');
     }
   }
 
@@ -122,7 +126,7 @@ export class PaymentService {
         error: error.message
       });
       
-      throw errorHandler.handleError(error, `payment-process:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-process:${paymentId}`);
     }
   }
 
@@ -145,7 +149,7 @@ export class PaymentService {
       return new Payment(paymentDoc).toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment:${paymentId}`);
     }
   }
 
@@ -160,7 +164,7 @@ export class PaymentService {
         .map(payment => new Payment(payment).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-payments:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-payments:${orderId}`);
     }
   }
 
@@ -192,7 +196,7 @@ export class PaymentService {
       return paymentModel.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-status:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-status:${paymentId}`);
     }
   }
 
@@ -230,7 +234,7 @@ export class PaymentService {
       return { success: true, message: 'تم استرداد الدفع بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-refund:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-refund:${paymentId}`);
     }
   }
 
@@ -259,7 +263,7 @@ export class PaymentService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-stats');
+      throw handleErrorWithLanguage(error, 'payment-stats');
     }
   }
 
@@ -322,7 +326,7 @@ export class PaymentService {
       
       return availableMethods;
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-methods:get');
+      throw handleErrorWithLanguage(error, 'payment-methods:get');
     }
   }
 

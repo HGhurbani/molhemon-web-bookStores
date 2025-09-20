@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
 import logger from '@/lib/logger.js';
@@ -9,6 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCustomer, setIsCustomer] = useState(false);
+  const { i18n } = useTranslation();
+  const activeLanguage = i18n.language || i18n.resolvedLanguage || 'ar';
 
   useEffect(() => {
     const checkAuthStatus = () => {
@@ -22,7 +25,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (error) {
-        const errorObject = errorHandler.handleError(error, 'auth:status-check');
+        const errorObject = errorHandler.handleError(error, 'auth:status-check', activeLanguage);
         logger.error('Auth status check failed:', errorObject);
         jwtAuthManager.clearTokens();
         setIsCustomer(false);
@@ -31,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checkAuthStatus();
-  }, []);
+  }, [activeLanguage]);
 
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthStateChange(async ({ user, isAuthenticated }) => {

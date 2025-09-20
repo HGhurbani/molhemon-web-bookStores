@@ -2,6 +2,10 @@ import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import baseApi from './baseApi.js';
 import { db } from '../firebase.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
+
+const handleFirebaseErrorWithLanguage = (error, context) =>
+  errorHandler.handleFirebaseError(error, context, getActiveLanguage());
 
 export const getBlogPosts = () => baseApi.getCollection('blog_posts');
 export const getBlogPost = (id) => baseApi.getDocById('blog_posts', id);
@@ -32,7 +36,7 @@ export async function addBlogPostWithImage(data, imageFile) {
     }
     return { id: blogRef.id, ...blogData };
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, 'blog:add-with-image');
+    throw handleFirebaseErrorWithLanguage(error, 'blog:add-with-image');
   }
 }
 
@@ -46,7 +50,7 @@ export async function updateBlogPostWithImage(id, data, imageFile) {
     }
     return await updateBlogPost(id, data);
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, 'blog:update-with-image');
+    throw handleFirebaseErrorWithLanguage(error, 'blog:update-with-image');
   }
 }
 

@@ -8,6 +8,7 @@ import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
 import schemas from '../../../shared/schemas.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import OrderService from './OrderService.js';
 import PaymentService from './PaymentService.js';
 import ShippingService from './ShippingService.js';
@@ -15,6 +16,9 @@ import ProductService from './ProductService.js';
 import logger from '../logger.js';
 
 const { Schemas, validateData } = schemas;
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class CheckoutService {
   constructor() {
@@ -307,7 +311,7 @@ export class CheckoutService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'checkout-creation');
+      throw handleErrorWithLanguage(error, 'checkout-creation');
     }
   }
 
@@ -350,7 +354,7 @@ export class CheckoutService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'cost-calculation');
+      throw handleErrorWithLanguage(error, 'cost-calculation');
     }
   }
 
@@ -374,7 +378,7 @@ export class CheckoutService {
       return { available: true, message: 'جميع المنتجات متوفرة في المخزون' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'stock-availability-check');
+      throw handleErrorWithLanguage(error, 'stock-availability-check');
     }
   }
 
@@ -513,7 +517,7 @@ export class CheckoutService {
       const result = await this.orderService.cancelOrder(orderId, reason);
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, `order-cancellation:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-cancellation:${orderId}`);
     }
   }
 
@@ -525,7 +529,7 @@ export class CheckoutService {
       const result = await this.orderService.updateOrderStatus(orderId, newStatus, notes);
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, `order-status-update:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-status-update:${orderId}`);
     }
   }
 
@@ -537,7 +541,7 @@ export class CheckoutService {
       const order = await this.orderService.getOrderById(orderId);
       return order;
     } catch (error) {
-      throw errorHandler.handleError(error, `order-details:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-details:${orderId}`);
     }
   }
 
@@ -549,7 +553,7 @@ export class CheckoutService {
       const orders = await this.orderService.getCustomerOrders(customerId, status);
       return orders;
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-orders:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-orders:${customerId}`);
     }
   }
 
@@ -561,7 +565,7 @@ export class CheckoutService {
       const result = await this.orderService.addItemToOrder(orderId, itemData);
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, `add-item-to-order:${orderId}`);
+      throw handleErrorWithLanguage(error, `add-item-to-order:${orderId}`);
     }
   }
 
@@ -573,7 +577,7 @@ export class CheckoutService {
       const result = await this.orderService.removeItemFromOrder(orderId, itemId);
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, `remove-item-from-order:${orderId}`);
+      throw handleErrorWithLanguage(error, `remove-item-from-order:${orderId}`);
     }
   }
 
@@ -585,7 +589,7 @@ export class CheckoutService {
       const total = await this.orderService.recalculateOrderTotal(orderId);
       return total;
     } catch (error) {
-      throw errorHandler.handleError(error, `recalculate-order-total:${orderId}`);
+      throw handleErrorWithLanguage(error, `recalculate-order-total:${orderId}`);
     }
   }
 
@@ -597,7 +601,7 @@ export class CheckoutService {
       const stats = await this.orderService.getOrderStats(customerId);
       return stats;
     } catch (error) {
-      throw errorHandler.handleError(error, 'order-stats');
+      throw handleErrorWithLanguage(error, 'order-stats');
     }
   }
 
@@ -609,7 +613,7 @@ export class CheckoutService {
       const stats = await this.paymentService.getPaymentStats(customerId);
       return stats;
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-stats');
+      throw handleErrorWithLanguage(error, 'payment-stats');
     }
   }
 
@@ -621,7 +625,7 @@ export class CheckoutService {
       const stats = await this.shippingService.getShippingStats();
       return stats;
     } catch (error) {
-      throw errorHandler.handleError(error, 'shipping-stats');
+      throw handleErrorWithLanguage(error, 'shipping-stats');
     }
   }
 
@@ -692,7 +696,7 @@ export class CheckoutService {
 
       return paymentResult;
     } catch (error) {
-      throw errorHandler.handleError(error, `advanced-payment:${orderId}`);
+      throw handleErrorWithLanguage(error, `advanced-payment:${orderId}`);
     }
   }
 
@@ -734,7 +738,7 @@ export class CheckoutService {
         totalWithFees: orderTotal + this.paymentService.calculatePaymentFees(orderTotal, method.id)
       }));
     } catch (error) {
-      throw errorHandler.handleError(error, 'payment-methods-with-fees');
+      throw handleErrorWithLanguage(error, 'payment-methods-with-fees');
     }
   }
 
@@ -772,7 +776,7 @@ export class CheckoutService {
           );
       }
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-link:${orderId}`);
+      throw handleErrorWithLanguage(error, `payment-link:${orderId}`);
     }
   }
 
@@ -791,7 +795,7 @@ export class CheckoutService {
 
       return paymentLink;
     } catch (error) {
-      throw errorHandler.handleError(error, 'tabby-payment-link');
+      throw handleErrorWithLanguage(error, 'tabby-payment-link');
     }
   }
 
@@ -810,7 +814,7 @@ export class CheckoutService {
 
       return paymentLink;
     } catch (error) {
-      throw errorHandler.handleError(error, 'tamara-payment-link');
+      throw handleErrorWithLanguage(error, 'tamara-payment-link');
     }
   }
 
@@ -828,7 +832,7 @@ export class CheckoutService {
 
       return paymentLink;
     } catch (error) {
-      throw errorHandler.handleError(error, 'stc-pay-payment-link');
+      throw handleErrorWithLanguage(error, 'stc-pay-payment-link');
     }
   }
 
@@ -846,7 +850,7 @@ export class CheckoutService {
 
       return paymentLink;
     } catch (error) {
-      throw errorHandler.handleError(error, 'urway-payment-link');
+      throw handleErrorWithLanguage(error, 'urway-payment-link');
     }
   }
 }

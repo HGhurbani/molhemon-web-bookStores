@@ -4,7 +4,11 @@
 
 import { Shipping, SHIPPING_METHODS, SHIPPING_STATUSES } from '../models/Shipping.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class ShippingService {
   constructor() {
@@ -40,7 +44,7 @@ export class ShippingService {
       return shipping.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'shipping-creation');
+      throw handleErrorWithLanguage(error, 'shipping-creation');
     }
   }
 
@@ -62,7 +66,7 @@ export class ShippingService {
       return new Shipping(shippingDoc).toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `shipping:${shippingId}`);
+      throw handleErrorWithLanguage(error, `shipping:${shippingId}`);
     }
   }
 
@@ -81,7 +85,7 @@ export class ShippingService {
       return new Shipping(shipping).toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-shipping:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-shipping:${orderId}`);
     }
   }
 
@@ -123,7 +127,7 @@ export class ShippingService {
       return shippingModel.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `shipping-status:${shippingId}`);
+      throw handleErrorWithLanguage(error, `shipping-status:${shippingId}`);
     }
   }
 
@@ -156,7 +160,7 @@ export class ShippingService {
       return shippingModel.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `shipping-tracking:${shippingId}`);
+      throw handleErrorWithLanguage(error, `shipping-tracking:${shippingId}`);
     }
   }
 
@@ -182,7 +186,7 @@ export class ShippingService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'shipping-cost-calculation');
+      throw handleErrorWithLanguage(error, 'shipping-cost-calculation');
     }
   }
 
@@ -406,7 +410,7 @@ export class ShippingService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'shipping-stats');
+      throw handleErrorWithLanguage(error, 'shipping-stats');
     }
   }
 
@@ -447,7 +451,7 @@ export class ShippingService {
       return shipping.map(ship => new Shipping(ship).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'shipping-search');
+      throw handleErrorWithLanguage(error, 'shipping-search');
     }
   }
 
@@ -481,7 +485,7 @@ export class ShippingService {
       return { success: true, message: 'تم تحديث معلومات الشحن بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `shipping-update:${shippingId}`);
+      throw handleErrorWithLanguage(error, `shipping-update:${shippingId}`);
     }
   }
 
@@ -506,7 +510,7 @@ export class ShippingService {
       return { success: true, message: 'تم حذف معلومات الشحن بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `shipping-delete:${shippingId}`);
+      throw handleErrorWithLanguage(error, `shipping-delete:${shippingId}`);
     }
   }
 }

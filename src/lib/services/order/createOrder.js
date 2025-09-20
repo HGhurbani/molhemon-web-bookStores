@@ -3,12 +3,16 @@ import { OrderItem } from '../../models/OrderItem.js';
 import { Shipping } from '../../models/Shipping.js';
 import schemas from '../../../../shared/schemas.js';
 import { errorHandler } from '../../errorHandler.js';
+import { getActiveLanguage } from '../../languageUtils.js';
 import firebaseApi from '../../firebase/baseApi.js';
 import logger from '../../logger.js';
 import { runTransaction, doc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase.js';
 
 const { Schemas, validateData } = schemas;
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export async function createOrder(orderData) {
   try {
@@ -301,6 +305,6 @@ export async function createOrder(orderData) {
     return finalResult;
 
   } catch (error) {
-    throw errorHandler.handleError(error, 'order-creation');
+    throw handleErrorWithLanguage(error, 'order-creation');
   }
 }
