@@ -6,6 +6,7 @@ import messagesApi from './firebase/messagesApi.js';
 import settingsApi from './firebase/settingsApi.js';
 import ratingsApi from './firebase/ratingsApi.js';
 import homeApi from './firebase/homeApi.js';
+import firebaseFunctionsApi from './firebaseFunctions.js';
 
 // Aggregate all domain APIs into a single object for backwards compatibility
 export default {
@@ -16,5 +17,6 @@ export default {
   ...messagesApi,
   ...settingsApi,
   ...ratingsApi,
-  ...homeApi
+  ...homeApi,
+  getDashboardStats: () => firebaseFunctionsApi.analytics.getDashboardStats()
 };
