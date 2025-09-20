@@ -8,6 +8,7 @@ import RecentSearchSkeleton from '@/components/RecentSearchSkeleton.jsx';
 import BookBestsellerSkeleton from '@/components/BookBestsellerSkeleton.jsx';
 import FeaturesSkeleton from '@/components/FeaturesSkeleton.jsx';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const FlashSaleSection = React.lazy(() => import('@/components/FlashSaleSection.jsx'));
 const AuthorsSection = React.lazy(() => import('@/components/AuthorsSection.jsx'));
@@ -26,13 +27,14 @@ const HomePage = ({
   banners,
   handleAddToCart,
   handleToggleWishlist,
-  wishlist, 
+  wishlist,
   handleFeatureClick
 }) => {
+  const { t } = useTranslation();
   const displayedCategories = React.useMemo(() => {
     const list = categories.slice(0, 11);
     if (categories.length > 11) {
-      list.push({ id: 'more', name: 'المزيد', icon: 'Menu' });
+      list.push({ id: 'more', name: 'siteData.categories.more', icon: 'Menu' });
     }
     return list;
   }, [categories]);
@@ -63,23 +65,23 @@ const HomePage = ({
         />
       </React.Suspense>
       <React.Suspense fallback={<BookBestsellerSkeleton />}>
-        <BookBestsellerSection
-          books={bestsellerBooks}
-          handleAddToCart={handleAddToCart}
-          handleToggleWishlist={handleToggleWishlist}
-          wishlist={wishlist}
-          title="الكتب الصوتية الأكثر مبيعاً"
+          <BookBestsellerSection
+            books={bestsellerBooks}
+            handleAddToCart={handleAddToCart}
+            handleToggleWishlist={handleToggleWishlist}
+            wishlist={wishlist}
+          title={t('home.bestsellers.audiobooks', { defaultValue: 'Top-selling audiobooks' })}
           icon={TrendingUp}
           squareImages
         />
       </React.Suspense>
       <React.Suspense fallback={<BookBestsellerSkeleton />}>
-        <BookBestsellerSection
-          books={bestsellerBooks.slice(0,3).concat(bestsellerBooks.slice(0,3))}
-          handleAddToCart={handleAddToCart}
-          handleToggleWishlist={handleToggleWishlist}
-          wishlist={wishlist}
-          title="الكتب الأكثر مبيعاً"
+          <BookBestsellerSection
+            books={bestsellerBooks.slice(0,3).concat(bestsellerBooks.slice(0,3))}
+            handleAddToCart={handleAddToCart}
+            handleToggleWishlist={handleToggleWishlist}
+            wishlist={wishlist}
+          title={t('home.bestsellers.allBooks', { defaultValue: 'Best-selling books' })}
           icon={TrendingUp}
           bgColor="bg-slate-100"
           likeCardStyle

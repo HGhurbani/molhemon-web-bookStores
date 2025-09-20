@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
+  const { t } = useTranslation();
   return (
     <section className="py-8 sm:py-10 bg-slate-100">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,7 +17,7 @@ const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
                 whileHover={{ y: -4, boxShadow: "0 6px 12px rgba(0,0,0,0.06)" }}
                 transition={{ type: "spring", stiffness: 250, damping: 10 }}
                 className="flex items-center p-3 sm:p-4 bg-white rounded-lg shadow-sm cursor-pointer space-x-3 rtl:space-x-reverse text-black"
-                onClick={() => handleFeatureClick(feature.title.toLowerCase().replace(/\s/g, '-'))}
+                onClick={() => handleFeatureClick(feature.action || feature.id || String(feature.title))}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -23,8 +25,8 @@ const FeaturesSection = ({ features, banners = [], handleFeatureClick }) => {
               >
                 <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 text-blue-600" />
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base mb-1">{feature.title}</h3>
-                  <p className="text-[11px] sm:text-xs">{feature.description}</p>
+                  <h3 className="font-bold text-sm sm:text-base mb-1">{t(feature.title, { defaultValue: feature.title })}</h3>
+                  <p className="text-[11px] sm:text-xs">{t(feature.description, { defaultValue: feature.description })}</p>
                 </div>
               </motion.div>
             );

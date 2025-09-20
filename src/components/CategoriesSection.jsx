@@ -3,8 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const CategoriesSection = ({ categories }) => {
+  const { t } = useTranslation();
   return (
     <section className="py-6 sm:py-8 bg-slate-100">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +28,7 @@ const CategoriesSection = ({ categories }) => {
                   <div className="bg-slate-100 p-2 sm:p-2.5 rounded-md mb-1.5 transition-colors duration-200 group-hover:bg-blue-500">
                     <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 transition-colors duration-200 group-hover:text-white" />
                   </div>
-                  <span className="text-[9px] sm:text-[11px] text-center text-gray-700 font-medium group-hover:text-blue-600 transition-colors duration-200">{category.name}</span>
+                  <span className="text-[9px] sm:text-[11px] text-center text-gray-700 font-medium group-hover:text-blue-600 transition-colors duration-200">{t(category.name, { defaultValue: category.name })}</span>
                 </Link>
               </motion.div>
             );
