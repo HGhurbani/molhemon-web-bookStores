@@ -83,6 +83,40 @@ import UnifiedOrderDetails from './UnifiedOrderDetails.jsx';
 
 const confirmDelete = () => window.confirm('هل أنت متأكد من الحذف؟');
 
+const DEFAULT_DASHBOARD_SUMMARY = {
+  books: 0,
+  authors: 0,
+  sales: 0,
+  users: 0,
+  orders: 0,
+  revenue: 0
+};
+
+const toNumber = (value) => {
+  if (value === undefined || value === null) {
+    return 0;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const normalizeDashboardStats = (rawStats) => {
+  if (!rawStats || rawStats.success === false) {
+    return { ...DEFAULT_DASHBOARD_SUMMARY };
+  }
+
+  const statsData = rawStats.stats ?? rawStats;
+
+  return {
+    books: toNumber(statsData.books ?? statsData.totalBooks),
+    authors: toNumber(statsData.authors ?? statsData.totalAuthors),
+    sales: toNumber(statsData.sales ?? statsData.totalRevenue ?? statsData.revenue),
+    users: toNumber(statsData.users ?? statsData.totalUsers),
+    orders: toNumber(statsData.orders ?? statsData.totalOrders),
+    revenue: toNumber(statsData.revenue ?? statsData.totalRevenue ?? statsData.sales)
+  };
+};
+
 /**
  * Adds a sample order when no orders exist during development.
  * This helper is intended for development use only and will not run
@@ -5359,7 +5393,8 @@ const Dashboard = ({ dashboardStats, books, authors, sellers, branches, categori
         }
         
         // Fetch basic stats
-        const dashboardStats = await firebaseApi.getDashboardStats();
+        const dashboardStatsResponse = await firebaseApi.getDashboardStats();
+        const dashboardStats = normalizeDashboardStats(dashboardStatsResponse);
         
         // Fetch orders from Firebase
         const firebaseOrders = await firebaseApi.getOrders();
