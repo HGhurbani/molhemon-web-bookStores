@@ -1,9 +1,12 @@
 import React from 'react';
 import { errorHandler } from '@/lib/errorHandler';
+import i18n from '@/lib/i18n.js';
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import logger from '@/lib/logger.js';
+
+const getCurrentLanguage = () => i18n.language || i18n.resolvedLanguage || 'ar';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -22,7 +25,11 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // تسجيل الخطأ
-    const errorObject = errorHandler.handleError(error, 'react:error-boundary');
+    const errorObject = errorHandler.handleError(
+      error,
+      'react:error-boundary',
+      getCurrentLanguage(),
+    );
     
     this.setState({
       error: error,
@@ -198,7 +205,11 @@ const ErrorFallback = ({ error, errorInfo, errorId, onReset }) => {
 // Hook لاستخدام Error Boundary
 export const useErrorHandler = () => {
   const handleError = (error, context = '') => {
-    const errorObject = errorHandler.handleError(error, context);
+    const errorObject = errorHandler.handleError(
+      error,
+      context,
+      getCurrentLanguage(),
+    );
     
     // يمكن إضافة منطق إضافي هنا مثل:
     // - إظهار toast notification

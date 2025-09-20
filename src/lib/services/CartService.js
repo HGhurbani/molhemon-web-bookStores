@@ -3,10 +3,14 @@
  */
 
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
 import ProductService from './ProductService.js';
 import StoreSettingsService from './StoreSettingsService.js';
 import logger from '../logger.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class CartService {
   constructor() {
@@ -47,7 +51,7 @@ export class CartService {
       return cart;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'cart-creation');
+      throw handleErrorWithLanguage(error, 'cart-creation');
     }
   }
 
@@ -80,7 +84,7 @@ export class CartService {
       return cartDoc;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart:${cartId}`);
     }
   }
 
@@ -101,7 +105,7 @@ export class CartService {
         throw error;
       }
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-get-or-create:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-get-or-create:${cartId}`);
     }
   }
 
@@ -127,7 +131,7 @@ export class CartService {
       return customerCart;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-cart:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-cart:${customerId}`);
     }
   }
 
@@ -205,7 +209,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-add:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-add:${cartId}`);
     }
   }
 
@@ -260,7 +264,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-update:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-update:${cartId}`);
     }
   }
 
@@ -296,7 +300,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-remove:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-remove:${cartId}`);
     }
   }
 
@@ -353,7 +357,7 @@ export class CartService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-recalculate:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-recalculate:${cartId}`);
     }
   }
 
@@ -387,7 +391,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-shipping:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-shipping:${cartId}`);
     }
   }
 
@@ -437,7 +441,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-shipping-method:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-shipping-method:${cartId}`);
     }
   }
 
@@ -470,7 +474,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-payment-method:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-payment-method:${cartId}`);
     }
   }
 
@@ -515,7 +519,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-discount:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-discount:${cartId}`);
     }
   }
 
@@ -536,7 +540,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-discount-remove:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-discount-remove:${cartId}`);
     }
   }
 
@@ -553,7 +557,7 @@ export class CartService {
       return await this.getCart(cartId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-notes:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-notes:${cartId}`);
     }
   }
 
@@ -587,7 +591,7 @@ export class CartService {
       return await this.getCart(cart.id);
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-update:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-update:${cartId}`);
     }
   }
 
@@ -614,7 +618,7 @@ export class CartService {
       return { success: true, message: 'تم مسح السلة بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-clear:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-clear:${cartId}`);
     }
   }
 
@@ -627,7 +631,7 @@ export class CartService {
       return { success: true, message: 'تم حذف السلة بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-delete:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-delete:${cartId}`);
     }
   }
 
@@ -640,7 +644,7 @@ export class CartService {
       return { success: true, message: 'تم مسح السلة منتهية الصلاحية' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `cart-expired:${cartId}`);
+      throw handleErrorWithLanguage(error, `cart-expired:${cartId}`);
     }
   }
 
@@ -699,7 +703,7 @@ export class CartService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'cart-stats');
+      throw handleErrorWithLanguage(error, 'cart-stats');
     }
   }
 }

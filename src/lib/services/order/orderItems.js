@@ -1,5 +1,9 @@
 import { errorHandler } from '../../errorHandler.js';
+import { getActiveLanguage } from '../../languageUtils.js';
 import firebaseApi from '../../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export async function updateOrderItem(itemId, updateData) {
   try {
@@ -14,6 +18,6 @@ export async function updateOrderItem(itemId, updateData) {
     };
 
   } catch (error) {
-    throw errorHandler.handleError(error, `order-item:update:${itemId}`);
+    throw handleErrorWithLanguage(error, `order-item:update:${itemId}`);
   }
 }

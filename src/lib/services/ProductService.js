@@ -3,7 +3,11 @@
  */
 
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class ProductService {
   constructor() {
@@ -40,7 +44,7 @@ export class ProductService {
       return product;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'product-creation');
+      throw handleErrorWithLanguage(error, 'product-creation');
     }
   }
 
@@ -62,7 +66,7 @@ export class ProductService {
       return product;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `product:${productId}`);
+      throw handleErrorWithLanguage(error, `product:${productId}`);
     }
   }
 
@@ -118,7 +122,7 @@ export class ProductService {
       return products;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'products-get-all');
+      throw handleErrorWithLanguage(error, 'products-get-all');
     }
   }
 
@@ -140,7 +144,7 @@ export class ProductService {
       // التحقق من صحة البيانات المحدثة
       const validationErrors = this.validateProduct({ ...product, ...updateData });
       if (validationErrors.length > 0) {
-        throw errorHandler.handleError(
+        throw handleErrorWithLanguage(
           'VALIDATION',
           'validation/product-update-invalid',
           `خطأ في بيانات التحديث: ${validationErrors.join(', ')}`,
@@ -160,7 +164,7 @@ export class ProductService {
       return { success: true, message: 'تم تحديث المنتج بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `product-update:${productId}`);
+      throw handleErrorWithLanguage(error, `product-update:${productId}`);
     }
   }
 
@@ -185,7 +189,7 @@ export class ProductService {
       return { success: true, message: 'تم حذف المنتج بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `product-delete:${productId}`);
+      throw handleErrorWithLanguage(error, `product-delete:${productId}`);
     }
   }
 
@@ -227,7 +231,7 @@ export class ProductService {
       return products;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'product-search');
+      throw handleErrorWithLanguage(error, 'product-search');
     }
   }
 
@@ -240,7 +244,7 @@ export class ProductService {
       return products;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `products-by-type:${type}`);
+      throw handleErrorWithLanguage(error, `products-by-type:${type}`);
     }
   }
 
@@ -299,7 +303,7 @@ export class ProductService {
       return { success: true, newStock };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `stock-update:${productId}`);
+      throw handleErrorWithLanguage(error, `stock-update:${productId}`);
     }
   }
 
@@ -324,7 +328,7 @@ export class ProductService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `stock-check:${productId}`);
+      throw handleErrorWithLanguage(error, `stock-check:${productId}`);
     }
   }
 
@@ -343,7 +347,7 @@ export class ProductService {
       return bestSellers;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'best-sellers');
+      throw handleErrorWithLanguage(error, 'best-sellers');
     }
   }
 
@@ -362,7 +366,7 @@ export class ProductService {
       return newProducts;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'new-products');
+      throw handleErrorWithLanguage(error, 'new-products');
     }
   }
 
@@ -386,7 +390,7 @@ export class ProductService {
       return discountedProducts;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'discounted-products');
+      throw handleErrorWithLanguage(error, 'discounted-products');
     }
   }
 
@@ -521,7 +525,7 @@ export class ProductService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'product-stats');
+      throw handleErrorWithLanguage(error, 'product-stats');
     }
   }
 
@@ -576,7 +580,7 @@ export class ProductService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `download-url:${productId}`);
+      throw handleErrorWithLanguage(error, `download-url:${productId}`);
     }
   }
 }

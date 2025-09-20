@@ -37,6 +37,11 @@ const AppContent = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
   const { t, i18n } = useTranslation();
+  const activeLanguage = i18n.language || i18n.resolvedLanguage || 'ar';
+  const handleErrorWithLanguage = useCallback(
+    (error, context) => errorHandler.handleError(error, context, activeLanguage),
+    [activeLanguage],
+  );
   useDirection(i18n);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -202,92 +207,92 @@ const AppContent = () => {
         // تحميل البيانات من Firebase
         const [b, a, c, _settings, o, pay, methods, currenciesData, languagesData, p, u, sliders, banners, feats, sellData, branchData, subs, msgs] = await Promise.all([
           api.getBooks().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:books');
+            const errorObject = handleErrorWithLanguage(error, 'data:books');
             showDataLoadError('books', errorObject);
             return [];
           }),
           api.getAuthors().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:authors');
+            const errorObject = handleErrorWithLanguage(error, 'data:authors');
             showDataLoadError('authors', errorObject);
             return [];
           }),
           api.getCategories().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:categories');
+            const errorObject = handleErrorWithLanguage(error, 'data:categories');
             showDataLoadError('categories', errorObject);
             return [];
           }),
           refreshSettings(true).catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:settings');
+            const errorObject = handleErrorWithLanguage(error, 'data:settings');
             showDataLoadError('settings', errorObject);
             return {};
           }),
           api.getOrders().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:orders');
+            const errorObject = handleErrorWithLanguage(error, 'data:orders');
             showDataLoadError('orders', errorObject);
             return [];
           }),
           api.getPayments().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:payments');
+            const errorObject = handleErrorWithLanguage(error, 'data:payments');
             showDataLoadError('payments', errorObject);
             return [];
           }),
           api.getPaymentMethods().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:payment-methods');
+            const errorObject = handleErrorWithLanguage(error, 'data:payment-methods');
             showDataLoadError('paymentMethods', errorObject);
             return [];
           }),
           api.getCurrencies().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:currencies');
+            const errorObject = handleErrorWithLanguage(error, 'data:currencies');
             showDataLoadError('currencies', errorObject);
             return [];
           }),
           api.getLanguages().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:languages');
+            const errorObject = handleErrorWithLanguage(error, 'data:languages');
             showDataLoadError('languages', errorObject);
             return [];
           }),
           api.getPlans().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:plans');
+            const errorObject = handleErrorWithLanguage(error, 'data:plans');
             showDataLoadError('plans', errorObject);
             return [];
           }),
           api.getUsers().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:users');
+            const errorObject = handleErrorWithLanguage(error, 'data:users');
             showDataLoadError('users', errorObject);
             return [];
           }),
           api.getSliders().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:sliders');
+            const errorObject = handleErrorWithLanguage(error, 'data:sliders');
             showDataLoadError('sliders', errorObject);
             return [];
           }),
           api.getBanners().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:banners');
+            const errorObject = handleErrorWithLanguage(error, 'data:banners');
             showDataLoadError('banners', errorObject);
             return [];
           }),
           api.getFeatures().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:features');
+            const errorObject = handleErrorWithLanguage(error, 'data:features');
             showDataLoadError('features', errorObject);
             return [];
           }),
           api.getSellers().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:sellers');
+            const errorObject = handleErrorWithLanguage(error, 'data:sellers');
             showDataLoadError('sellers', errorObject);
             return [];
           }),
           api.getBranches().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:branches');
+            const errorObject = handleErrorWithLanguage(error, 'data:branches');
             showDataLoadError('branches', errorObject);
             return [];
           }),
           api.getSubscriptions().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:subscriptions');
+            const errorObject = handleErrorWithLanguage(error, 'data:subscriptions');
             showDataLoadError('subscriptions', errorObject);
             return [];
           }),
           api.getMessages().catch(error => {
-            const errorObject = errorHandler.handleError(error, 'data:messages');
+            const errorObject = handleErrorWithLanguage(error, 'data:messages');
             showDataLoadError('messages', errorObject);
             return [];
           }),
@@ -323,7 +328,7 @@ const AppContent = () => {
         ]);
 
       } catch (error) {
-        const errorObject = errorHandler.handleError(error, 'data:initial-load');
+        const errorObject = handleErrorWithLanguage(error, 'data:initial-load');
         showDataLoadError('initialLoad', errorObject);
       } finally {
         // تأخير بسيط لتحسين تجربة التحميل وتجنب الوميض
@@ -526,7 +531,7 @@ const AppContent = () => {
       firebaseAuth.signOut().then(() => {
         toast({ title: t('app.toast.logout.success', { defaultValue: 'You have been signed out.' }) });
       }).catch(error => {
-        const errorObject = errorHandler.handleError(error, 'auth:signout');
+        const errorObject = handleErrorWithLanguage(error, 'auth:signout');
         toast({
           title: t('app.toast.logout.error.title', { defaultValue: 'Sign out failed' }),
           description: t('app.toast.logout.error.description', {

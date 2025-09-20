@@ -4,8 +4,12 @@
 
 import StoreSettings from '../models/StoreSettings.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class StoreSettingsService {
   constructor() {
@@ -38,7 +42,7 @@ export class StoreSettingsService {
       return this.settings;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:get');
+      throw handleErrorWithLanguage(error, 'store-settings:get');
     }
   }
 
@@ -73,7 +77,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم حفظ الإعدادات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:save');
+      throw handleErrorWithLanguage(error, 'store-settings:save');
     }
   }
 
@@ -94,7 +98,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث الإعدادات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:update');
+      throw handleErrorWithLanguage(error, 'store-settings:update');
     }
   }
 
@@ -109,7 +113,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم إعادة تعيين الإعدادات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:reset');
+      throw handleErrorWithLanguage(error, 'store-settings:reset');
     }
   }
 
@@ -139,7 +143,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات الشحن بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:shipping-update');
+      throw handleErrorWithLanguage(error, 'store-settings:shipping-update');
     }
   }
 
@@ -166,7 +170,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات الدفع بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:payment-update');
+      throw handleErrorWithLanguage(error, 'store-settings:payment-update');
     }
   }
 
@@ -193,7 +197,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات الضرائب بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:tax-update');
+      throw handleErrorWithLanguage(error, 'store-settings:tax-update');
     }
   }
 
@@ -223,7 +227,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات الطلبات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:order-update');
+      throw handleErrorWithLanguage(error, 'store-settings:order-update');
     }
   }
 
@@ -250,7 +254,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات العملاء بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:customer-update');
+      throw handleErrorWithLanguage(error, 'store-settings:customer-update');
     }
   }
 
@@ -277,7 +281,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث إعدادات الإشعارات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:notification-update');
+      throw handleErrorWithLanguage(error, 'store-settings:notification-update');
     }
   }
 
@@ -298,7 +302,7 @@ export class StoreSettingsService {
       return settings.getAvailableShippingMethods(country, orderAmount, productWeight);
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:shipping-methods');
+      throw handleErrorWithLanguage(error, 'store-settings:shipping-methods');
     }
   }
 
@@ -311,7 +315,7 @@ export class StoreSettingsService {
       return settings.getAvailablePaymentMethods();
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:payment-methods');
+      throw handleErrorWithLanguage(error, 'store-settings:payment-methods');
     }
   }
 
@@ -324,7 +328,7 @@ export class StoreSettingsService {
       return settings.getAvailablePaymentGateways();
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:payment-gateways');
+      throw handleErrorWithLanguage(error, 'store-settings:payment-gateways');
     }
   }
 
@@ -337,7 +341,7 @@ export class StoreSettingsService {
       return settings.calculateShippingCost(country, orderAmount, productWeight, shippingMethodId);
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:shipping-cost');
+      throw handleErrorWithLanguage(error, 'store-settings:shipping-cost');
     }
   }
 
@@ -350,7 +354,7 @@ export class StoreSettingsService {
       return settings.getShippingZoneByCountry(country);
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:shipping-zone');
+      throw handleErrorWithLanguage(error, 'store-settings:shipping-zone');
     }
   }
 
@@ -368,7 +372,7 @@ export class StoreSettingsService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:validate');
+      throw handleErrorWithLanguage(error, 'store-settings:validate');
     }
   }
 
@@ -381,7 +385,7 @@ export class StoreSettingsService {
       return settings.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:export');
+      throw handleErrorWithLanguage(error, 'store-settings:export');
     }
   }
 
@@ -410,7 +414,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم استيراد الإعدادات بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:import');
+      throw handleErrorWithLanguage(error, 'store-settings:import');
     }
   }
 
@@ -436,7 +440,7 @@ export class StoreSettingsService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'store-settings:stats');
+      throw handleErrorWithLanguage(error, 'store-settings:stats');
     }
   }
 
@@ -468,7 +472,7 @@ export class StoreSettingsService {
       return { success: true, message: 'تم تحديث بوابة الدفع بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `store-settings:gateway-update:${gatewayId}`);
+      throw handleErrorWithLanguage(error, `store-settings:gateway-update:${gatewayId}`);
     }
   }
 
@@ -495,7 +499,7 @@ export class StoreSettingsService {
       return { success: true, message: `تم ${status} بوابة الدفع بنجاح` };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `store-settings:gateway-toggle:${gatewayId}`);
+      throw handleErrorWithLanguage(error, `store-settings:gateway-toggle:${gatewayId}`);
     }
   }
 

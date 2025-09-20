@@ -2,6 +2,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import baseApi from './baseApi.js';
 import { db } from '../firebase.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
+
+const handleFirebaseErrorWithLanguage = (error, context) =>
+  errorHandler.handleFirebaseError(error, context, getActiveLanguage());
 
 export async function getSettings() {
   try {
@@ -19,7 +23,7 @@ export async function getSettings() {
 
     return data;
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, 'settings:get');
+    throw handleFirebaseErrorWithLanguage(error, 'settings:get');
   }
 }
 
@@ -38,7 +42,7 @@ export async function updateSettings(data = {}) {
 
     return updated;
   } catch (error) {
-    throw errorHandler.handleFirebaseError(error, 'settings:update');
+    throw handleFirebaseErrorWithLanguage(error, 'settings:update');
   }
 }
 
