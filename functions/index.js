@@ -261,8 +261,9 @@ export const getDashboardStats = functions.https.onCall(async (data, context) =>
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
   try {
-    const [booksSnap, ordersSnap, usersSnap, paymentsSnap] = await Promise.all([
+    const [booksSnap, authorsSnap, ordersSnap, usersSnap, paymentsSnap] = await Promise.all([
       db.collection('books').get(),
+      db.collection('authors').get(),
       db.collection('orders').get(),
       db.collection('users').get(),
       db.collection('payments').get()
@@ -276,13 +277,25 @@ export const getDashboardStats = functions.https.onCall(async (data, context) =>
       }
     });
 
+    const normalizedRevenue = Math.round(totalRevenue * 100) / 100;
+
+    const summary = {
+      books: booksSnap.size,
+      authors: authorsSnap.size,
+      sales: normalizedRevenue,
+      users: usersSnap.size,
+      orders: ordersSnap.size,
+      revenue: normalizedRevenue
+    };
+
     return {
       success: true,
+      ...summary,
       stats: {
-        totalBooks: booksSnap.size,
-        totalOrders: ordersSnap.size,
-        totalUsers: usersSnap.size,
-        totalRevenue: Math.round(totalRevenue * 100) / 100
+        totalBooks: summary.books,
+        totalOrders: summary.orders,
+        totalUsers: summary.users,
+        totalRevenue: summary.revenue
       }
     };
   } catch (error) {
