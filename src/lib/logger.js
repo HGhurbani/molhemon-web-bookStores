@@ -1,4 +1,4 @@
-const levels = { debug: 0, info: 1, error: 2, none: 3 };
+const levels = { debug: 0, info: 1, warn: 2, error: 3, none: 4 };
 
 const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
 const isProd = Boolean(env.PROD);
@@ -15,13 +15,14 @@ function shouldLog(level) {
 function log(level, args) {
   if (!shouldLog(level)) return;
   if (isProd && level === 'debug') return;
-  const fn = console[level] || console.log;
+  const fn = level === 'warn' ? console.warn : console[level] || console.log;
   fn(...args);
 }
 
 const logger = {
   debug: (...args) => log('debug', args),
   info: (...args) => log('info', args),
+  warn: (...args) => log('warn', args),
   error: (...args) => log('error', args)
 };
 
