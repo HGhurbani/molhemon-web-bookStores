@@ -7,6 +7,7 @@ import { OrderItem } from '../models/OrderItem.js';
 import { Payment } from '../models/Payment.js';
 import { Shipping } from '../models/Shipping.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
 import logger from '../logger.js';
 
@@ -14,6 +15,9 @@ import { createOrder as createOrderHandler } from './order/createOrder.js';
 import { updateOrderStatus as updateOrderStatusHandler, updateOrderStage as updateOrderStageHandler } from './order/updateOrder.js';
 import { updateOrderItem as updateOrderItemHandler } from './order/orderItems.js';
 import { refundOrderPayment as refundOrderPaymentHandler } from './order/refundPayment.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class OrderService {
   constructor() {
@@ -84,7 +88,7 @@ export class OrderService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order:${orderId}`);
+      throw handleErrorWithLanguage(error, `order:${orderId}`);
     }
   }
 
@@ -109,7 +113,7 @@ export class OrderService {
       return orders.map(order => new Order(order).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-orders:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-orders:${customerId}`);
     }
   }
 
@@ -283,7 +287,7 @@ export class OrderService {
       return { success: true, message: 'تم إلغاء الطلب بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-cancel:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-cancel:${orderId}`);
     }
   }
 
@@ -325,7 +329,7 @@ export class OrderService {
       return savedItem;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-add-item:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-add-item:${orderId}`);
     }
   }
 
@@ -363,7 +367,7 @@ export class OrderService {
       return { success: true, message: 'تم إزالة المنتج بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-remove-item:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-remove-item:${orderId}`);
     }
   }
 
@@ -390,7 +394,7 @@ export class OrderService {
       return orderModel.total;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-recalculate:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-recalculate:${orderId}`);
     }
   }
 
@@ -472,7 +476,7 @@ export class OrderService {
       return { success: true, message: 'تم استرداد الدفع بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `payment-refund:${paymentId}`);
+      throw handleErrorWithLanguage(error, `payment-refund:${paymentId}`);
     }
   }
 
@@ -501,7 +505,7 @@ export class OrderService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'order-stats');
+      throw handleErrorWithLanguage(error, 'order-stats');
     }
   }
 
@@ -557,7 +561,7 @@ export class OrderService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'orders:get-all');
+      throw handleErrorWithLanguage(error, 'orders:get-all');
     }
   }
 
@@ -618,7 +622,7 @@ export class OrderService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `order-delete:${orderId}`);
+      throw handleErrorWithLanguage(error, `order-delete:${orderId}`);
     }
   }
 }

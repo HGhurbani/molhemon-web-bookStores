@@ -34,7 +34,8 @@ import {
 } from 'lucide-react';
 
 const CheckoutPage = ({ cart, setCart }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const activeLanguage = i18n.language || i18n.resolvedLanguage || 'ar';
   const navigate = useNavigate();
   const { currency } = useCurrency();
   
@@ -851,7 +852,7 @@ const CheckoutPage = ({ cart, setCart }) => {
       
       // عرض رسالة الخطأ فقط إذا كان هناك خطأ حقيقي
       if (error.message && !error.message.includes('auth/user-not-found') && !error.message.includes('auth/invalid-email')) {
-        const errorObject = errorHandler.handleError(error, 'checkout:initialize');
+        const errorObject = errorHandler.handleError(error, 'checkout:initialize', activeLanguage);
         setTimeout(() => {
           toast({
             title: 'خطأ في تحميل بيانات الطلب',
@@ -953,7 +954,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         });
       }, 0);
     } catch (error) {
-      const errorObject = errorHandler.handleError(error, 'checkout:add-address');
+      const errorObject = errorHandler.handleError(error, 'checkout:add-address', activeLanguage);
       setTimeout(() => {
         toast({
           title: 'خطأ في إضافة العنوان',
@@ -988,7 +989,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         });
       }, 0);
     } catch (error) {
-      const errorObject = errorHandler.handleError(error, 'checkout:add-payment');
+      const errorObject = errorHandler.handleError(error, 'checkout:add-payment', activeLanguage);
       setTimeout(() => {
         toast({
           title: 'خطأ في إضافة طريقة الدفع',
@@ -1391,7 +1392,7 @@ const CheckoutPage = ({ cart, setCart }) => {
       navigate(`/orders/${orderResult.id}?success=true`);
 
     } catch (error) {
-      const errorObject = errorHandler.handleError(error, 'checkout:place-order');
+      const errorObject = errorHandler.handleError(error, 'checkout:place-order', activeLanguage);
       logger.error('CheckoutPage - Order creation failed:', errorObject);
       
       setTimeout(() => {

@@ -34,25 +34,25 @@ export const heroSlides = [
 
 
 export const categories = [
-  { id: 'books', name: 'الكتب', icon: 'BookOpen' },
-  { id: 'fiction', name: 'الخيال', icon: 'BookOpen' },
-  { id: 'nonfiction', name: 'غير الخيال', icon: 'BookOpen' },
-  { id: 'ebooks', name: 'إلكترونية', icon: 'Smartphone' },
-  { id: 'audiobooks', name: 'صوتية', icon: 'Headphones' },
-  { id: 'teen', name: 'المراهقين', icon: 'Users' },
-  { id: 'kids', name: 'الأطفال', icon: 'Gift' },
-  { id: 'trending', name: 'رائجة', icon: 'TrendingUp'},
-  { id: 'deals', name: 'العروض', icon: 'DollarSign' },
-  { id: 'bestseller', name: 'الأكثر مبيعاً', icon: 'Award' },
-  { id: 'etc1', name: 'إلخ', icon: 'Menu' },
-  { id: 'etc2', name: 'إلخ', icon: 'Menu' }
+  { id: 'books', name: 'siteData.categories.books', icon: 'BookOpen' },
+  { id: 'fiction', name: 'siteData.categories.fiction', icon: 'BookOpen' },
+  { id: 'nonfiction', name: 'siteData.categories.nonfiction', icon: 'BookOpen' },
+  { id: 'ebooks', name: 'siteData.categories.ebooks', icon: 'Smartphone' },
+  { id: 'audiobooks', name: 'siteData.categories.audiobooks', icon: 'Headphones' },
+  { id: 'teen', name: 'siteData.categories.teen', icon: 'Users' },
+  { id: 'kids', name: 'siteData.categories.kids', icon: 'Gift' },
+  { id: 'trending', name: 'siteData.categories.trending', icon: 'TrendingUp'},
+  { id: 'deals', name: 'siteData.categories.deals', icon: 'DollarSign' },
+  { id: 'bestseller', name: 'siteData.categories.bestseller', icon: 'Award' },
+  { id: 'etc1', name: 'siteData.categories.etc1', icon: 'Menu' },
+  { id: 'etc2', name: 'siteData.categories.etc2', icon: 'Menu' }
 ];
 
 export const books = [
   {
     id: 1,
-    title: 'عمرنا الآن ستة',
-    author: 'ليلي ويليامز',
+    title: 'siteData.books.book1.title',
+    author: 'siteData.books.book1.author',
     authorId: 1,
     price: 45.00,
     prices: { AED: 45.00, SAR: 45.00 },
@@ -60,23 +60,23 @@ export const books = [
     rating: 4.4,
     reviews: 296,
     category: 'kids',
-    imgPlaceholder: 'غلاف كتاب عمرنا الآن ستة لأطفال مرسومين',
-    description: 'مجموعة قصصية ساحرة تأخذ الأطفال في رحلة خيالية مليئة بالمغامرات والشخصيات المحببة. تعلمهم قيم الصداقة والشجاعة وحب الاستكشاف.',
+    imgPlaceholder: 'siteData.books.book1.imgPlaceholder',
+    description: 'siteData.books.book1.description',
     isbn: '978-3-16-148410-0',
-    publisher: 'دار الفراشة للنشر',
+    publisher: 'siteData.books.book1.publisher',
     publishDate: '2023-05-15',
     pages: 120,
-    format: 'غلاف ورقي',
+    format: 'siteData.books.book1.format',
     coverImage: '',
     type: 'physical',
-    deliveryMethod: 'شحن عادي',
+    deliveryMethod: 'siteData.books.book1.deliveryMethod',
     sampleAudio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     tags: ''
   },
   {
     id: 2,
-    title: 'أحاديث داخلية',
-    author: 'دينا خوجة',
+    title: 'siteData.books.book2.title',
+    author: 'siteData.books.book2.author',
     authorId: 4,
     price: 60.00,
     prices: { AED: 60.00, SAR: 60.00 },
@@ -84,22 +84,22 @@ export const books = [
     rating: 4.8,
     reviews: 350,
     category: 'nonfiction',
-    imgPlaceholder: 'غلاف كتاب أحاديث داخلية رسم خطي لوجه امرأة',
-    description: 'كتاب تأملي عميق يستكشف خبايا النفس البشرية والعلاقات الإنسانية. تقدم الكاتبة رؤى ملهمة حول كيفية تحقيق التوازن الداخلي والسلام النفسي.',
+    imgPlaceholder: 'siteData.books.book2.imgPlaceholder',
+    description: 'siteData.books.book2.description',
     isbn: '978-1-23-456789-7',
-    publisher: 'دار الحكمة للنشر',
+    publisher: 'siteData.books.book2.publisher',
     publishDate: '2024-01-20',
     pages: 250,
-    format: 'غلاف مقوى',
+    format: 'siteData.books.book2.format',
     coverImage: '',
     type: 'physical',
-    deliveryMethod: 'توصيل سريع',
+    deliveryMethod: 'siteData.books.book2.deliveryMethod',
     tags: ''
   },
   {
     id: 3,
-    title: 'ما تبقى من البقايا',
-    author: 'كلارك كينت',
+    title: 'siteData.books.book3.title',
+    author: 'siteData.books.book3.author',
     authorId: 3,
     price: 45.00,
     prices: { AED: 45.00, SAR: 45.00 },
@@ -107,13 +107,13 @@ export const books = [
     rating: 4.2,
     reviews: 180,
     category: 'fiction',
-    imgPlaceholder: 'غلاف كتاب ما تبقى من البقايا مع تدرجات بنية',
-    description: 'رواية مثيرة تدور أحداثها في عالم ما بعد الكارثة، حيث يكافح الناجون من أجل البقاء وإعادة بناء الحضارة. مليئة بالتشويق والمفاجآت.',
+    imgPlaceholder: 'siteData.books.book3.imgPlaceholder',
+    description: 'siteData.books.book3.description',
     isbn: '978-0-98-765432-1',
-    publisher: 'مكتبة المستقبل',
+    publisher: 'siteData.books.book3.publisher',
     publishDate: '2022-11-01',
     pages: 320,
-    format: 'كتاب إلكتروني',
+    format: 'siteData.books.book3.format',
     coverImage: '',
     type: 'ebook',
     ebookFile: '',
@@ -121,8 +121,8 @@ export const books = [
   },
    {
     id: 4,
-    title: 'عمرنا الآن ستة (مكرر)',
-    author: 'ليلي ويليامز',
+    title: 'siteData.books.book4.title',
+    author: 'siteData.books.book4.author',
     authorId: 1,
     price: 45.00,
     prices: { AED: 45.00, SAR: 45.00 },
@@ -130,21 +130,21 @@ export const books = [
     rating: 4.4,
     reviews: 296,
     category: 'kids',
-    imgPlaceholder: 'غلاف كتاب عمرنا الآن ستة بتصميم مختلف',
-    description: 'وصف مكرر لكتاب عمرنا الآن ستة.',
+    imgPlaceholder: 'siteData.books.book4.imgPlaceholder',
+    description: 'siteData.books.book4.description',
     isbn: '978-3-16-148410-1',
-    publisher: 'دار الفراشة للنشر',
+    publisher: 'siteData.books.book4.publisher',
     publishDate: '2023-05-15',
     pages: 120,
-    format: 'غلاف ورقي',
+    format: 'siteData.books.book4.format',
     coverImage: '',
     type: 'physical',
     tags: ''
   },
   {
     id: 5,
-    title: 'أحاديث داخلية (مكرر)',
-    author: 'دينا خوجة',
+    title: 'siteData.books.book5.title',
+    author: 'siteData.books.book5.author',
     authorId: 4,
     price: 60.00,
     prices: { AED: 60.00, SAR: 60.00 },
@@ -152,21 +152,21 @@ export const books = [
     rating: 4.8,
     reviews: 350,
     category: 'nonfiction',
-    imgPlaceholder: 'غلاف كتاب أحاديث داخلية بتصميم مختلف',
-    description: 'وصف مكرر لكتاب أحاديث داخلية.',
+    imgPlaceholder: 'siteData.books.book5.imgPlaceholder',
+    description: 'siteData.books.book5.description',
     isbn: '978-1-23-456789-8',
-    publisher: 'دار الحكمة للنشر',
+    publisher: 'siteData.books.book5.publisher',
     publishDate: '2024-01-20',
     pages: 250,
-    format: 'غلاف مقوى',
+    format: 'siteData.books.book5.format',
     coverImage: '',
     type: 'physical',
     tags: ''
   },
   {
     id: 6,
-    title: 'ما تبقى من البقايا (مكرر)',
-    author: 'كلارك كينت',
+    title: 'siteData.books.book6.title',
+    author: 'siteData.books.book6.author',
     authorId: 3,
     price: 45.00,
     prices: { AED: 45.00, SAR: 45.00 },
@@ -174,13 +174,13 @@ export const books = [
     rating: 4.2,
     reviews: 180,
     category: 'fiction',
-    imgPlaceholder: 'غلاف كتاب ما تبقى من البقايا بتصميم مختلف',
-    description: 'وصف مكرر لكتاب ما تبقى من البقايا.',
+    imgPlaceholder: 'siteData.books.book6.imgPlaceholder',
+    description: 'siteData.books.book6.description',
     isbn: '978-0-98-765432-2',
-    publisher: 'مكتبة المستقبل',
+    publisher: 'siteData.books.book6.publisher',
     publishDate: '2022-11-01',
     pages: 320,
-    format: 'كتاب إلكتروني',
+    format: 'siteData.books.book6.format',
     coverImage: '',
     type: 'ebook',
     tags: ''
@@ -192,12 +192,12 @@ export const bestsellerBooks = books.slice(0,6);
 
 
 export const authors = [
-  { 
-    id: 1, 
-    name: 'ليلي ويليامز', 
-    books: 15, 
-    imgPlaceholder: 'صورة ليلي ويليامز كرتونية', 
-    bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.',
+  {
+    id: 1,
+    name: 'siteData.authors.author1.name',
+    books: 15,
+    imgPlaceholder: 'siteData.authors.author1.imgPlaceholder',
+    bio: 'siteData.authors.author1.bio',
     socialMedia: {
       facebook: 'https://facebook.com/lilywilliams',
       twitter: 'https://twitter.com/lilywilliams',
@@ -205,101 +205,101 @@ export const authors = [
       website: 'https://lilywilliams.com'
     }
   },
-  { 
-    id: 2, 
-    name: 'ماك كارتني', 
-    books: 8, 
-    imgPlaceholder: 'صورة ماك كارتني كرتونية', 
-    bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.',
+  {
+    id: 2,
+    name: 'siteData.authors.author2.name',
+    books: 8,
+    imgPlaceholder: 'siteData.authors.author2.imgPlaceholder',
+    bio: 'siteData.authors.author2.bio',
     socialMedia: {
       twitter: 'https://twitter.com/maccartney',
       linkedin: 'https://linkedin.com/in/maccartney',
       website: 'https://maccartney.com'
     }
   },
-  { 
-    id: 3, 
-    name: 'واشنطن', 
-    books: 12, 
-    imgPlaceholder: 'صورة واشنطن كرتونية', 
-    bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.',
+  {
+    id: 3,
+    name: 'siteData.authors.author3.name',
+    books: 12,
+    imgPlaceholder: 'siteData.authors.author3.imgPlaceholder',
+    bio: 'siteData.authors.author3.bio',
     socialMedia: {
       facebook: 'https://facebook.com/washington',
       youtube: 'https://youtube.com/washington',
       website: 'https://washington.com'
     }
   },
-  { 
-    id: 4, 
-    name: 'دينا خوجة', 
-    books: 6, 
-    imgPlaceholder: 'صورة ديانا روز كرتونية', 
-    bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.',
+  {
+    id: 4,
+    name: 'siteData.authors.author4.name',
+    books: 6,
+    imgPlaceholder: 'siteData.authors.author4.imgPlaceholder',
+    bio: 'siteData.authors.author4.bio',
     socialMedia: {
       instagram: 'https://instagram.com/dinakhouja',
       twitter: 'https://twitter.com/dinakhouja',
       linkedin: 'https://linkedin.com/in/dinakhouja'
     }
   },
-  { 
-    id: 5, 
-    name: 'ناتالي', 
-    books: 10, 
-    imgPlaceholder: 'صورة ناتالي كرتونية', 
-    bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.',
+  {
+    id: 5,
+    name: 'siteData.authors.author5.name',
+    books: 10,
+    imgPlaceholder: 'siteData.authors.author5.imgPlaceholder',
+    bio: 'siteData.authors.author5.bio',
     socialMedia: {
       facebook: 'https://facebook.com/natalie',
       instagram: 'https://instagram.com/natalie',
       website: 'https://natalie.com'
     }
   },
-  { 
-    id: 6, 
-    name: 'ليلي ويليامز مكرر', 
-    books: 15, 
-    imgPlaceholder: 'صورة ليلي ويليامز كرتونية مكررة', 
-    bio: 'ليلي ويليامز كاتبة متخصصة في أدب الأطفال، تتميز بقدرتها على خلق قصص آسرة وشخصيات لا تُنسى.',
+  {
+    id: 6,
+    name: 'siteData.authors.author6.name',
+    books: 15,
+    imgPlaceholder: 'siteData.authors.author6.imgPlaceholder',
+    bio: 'siteData.authors.author6.bio',
     socialMedia: {
       facebook: 'https://facebook.com/lilywilliams2',
       twitter: 'https://twitter.com/lilywilliams2'
     }
   },
-  { 
-    id: 7, 
-    name: 'ماك كارتني مكرر', 
-    books: 8, 
-    imgPlaceholder: 'صورة ماك كارتني كرتونية مكررة', 
-    bio: 'ماك كارتني روائي بريطاني معروف بأعماله في الخيال العلمي والتشويق.',
+  {
+    id: 7,
+    name: 'siteData.authors.author7.name',
+    books: 8,
+    imgPlaceholder: 'siteData.authors.author7.imgPlaceholder',
+    bio: 'siteData.authors.author7.bio',
     socialMedia: {
       linkedin: 'https://linkedin.com/in/maccartney2'
     }
   },
-  { 
-    id: 8, 
-    name: 'واشنطن مكرر', 
-    books: 12, 
-    imgPlaceholder: 'صورة واشنطن كرتونية مكررة', 
-    bio: 'مؤرخ وكاتب أمريكي، يركز في كتاباته على التاريخ الاجتماعي والثقافي.',
+  {
+    id: 8,
+    name: 'siteData.authors.author8.name',
+    books: 12,
+    imgPlaceholder: 'siteData.authors.author8.imgPlaceholder',
+    bio: 'siteData.authors.author8.bio',
     socialMedia: {
       youtube: 'https://youtube.com/washington2'
     }
   },
-  { 
-    id: 9, 
-    name: 'ديانا روز مكرر', 
-    books: 6, 
-    imgPlaceholder: 'صورة ديانا روز كرتونية مكررة', 
-    bio: 'دينا خوجة كاتبة سعودية، اشتهرت بأعمالها التي تناقش قضايا المرأة والمجتمع.',
+  {
+    id: 9,
+    name: 'siteData.authors.author9.name',
+    books: 6,
+    imgPlaceholder: 'siteData.authors.author9.imgPlaceholder',
+    bio: 'siteData.authors.author9.bio',
     socialMedia: {
       instagram: 'https://instagram.com/dianarose2'
     }
   },
-  { 
-    id: 10, 
-    name: 'ناتالي مكرر', 
-    books: 10, 
-    imgPlaceholder: 'صورة ناتالي كرتونية مكررة', 
-    bio: 'ناتالي شاعرة وكاتبة فرنسية، تتميز كتاباتها بالعمق الفلسفي والجمال اللغوي.',
+  {
+    id: 10,
+    name: 'siteData.authors.author10.name',
+    books: 10,
+    imgPlaceholder: 'siteData.authors.author10.imgPlaceholder',
+    bio: 'siteData.authors.author10.bio',
     socialMedia: {
       website: 'https://natalie2.com'
     }
@@ -307,15 +307,15 @@ export const authors = [
 ];
 
 export const sellers = [
-  { id: 1, name: 'مكتبة المعرفة', email: 'info@knowledge.ae', phone: '+971 50 111 2222' },
-  { id: 2, name: 'دار الحكمة', email: 'contact@hikma.ae', phone: '+971 50 333 4444' },
+  { id: 1, name: 'siteData.sellers.seller1.name', email: 'info@knowledge.ae', phone: '+971 50 111 2222' },
+  { id: 2, name: 'siteData.sellers.seller2.name', email: 'contact@hikma.ae', phone: '+971 50 333 4444' },
 ];
 
 export const branches = [
   {
     id: 1,
-    name: 'الفرع الرئيسي',
-    address: 'دبي، الإمارات',
+    name: 'siteData.branches.branch1.name',
+    address: 'siteData.branches.branch1.address',
     phone: '+971 4 123 4567',
     email: 'main@example.com',
     code: 'DXB',
@@ -331,8 +331,8 @@ export const branches = [
   },
   {
     id: 2,
-    name: 'فرع أبوظبي',
-    address: 'أبوظبي، الإمارات',
+    name: 'siteData.branches.branch2.name',
+    address: 'siteData.branches.branch2.address',
     phone: '+971 2 765 4321',
     email: 'abudhabi@example.com',
     code: 'AUH',
@@ -354,71 +354,79 @@ export const users = [
 ];
 
 export const dashboardStats = [
-  { title: 'إجمالي الكتب', value: '2,847', icon: BookOpen, color: 'bg-blue-500' },
-  { title: 'المؤلفون', value: '156', icon: Users, color: 'bg-green-500' },
-  { title: 'المبيعات اليوم', value: '1,234 د.إ', icon: DollarSign, color: 'bg-purple-500' },
-  { title: 'الزوار', value: '8,945', icon: Eye, color: 'bg-orange-500' }
+  { title: 'siteData.dashboardStats.totalBooks', value: '2,847', icon: BookOpen, color: 'bg-blue-500' },
+  { title: 'siteData.dashboardStats.authors', value: '156', icon: Users, color: 'bg-green-500' },
+  { title: 'siteData.dashboardStats.salesToday', value: '1,234 د.إ', icon: DollarSign, color: 'bg-purple-500' },
+  { title: 'siteData.dashboardStats.visitors', value: '8,945', icon: Eye, color: 'bg-orange-500' }
 ];
 
 export const featuresData = [
   {
+    id: 'reading-rewards',
     icon: Briefcase,
-    title: 'القراءة والمكافآت',
-    description: 'انضم الآن لكسب كتب مجانية'
+    title: 'siteData.features.readingRewards.title',
+    description: 'siteData.features.readingRewards.description'
   },
   {
+    id: 'molhemoon-deals',
     icon: Gift,
-    title: 'عروض ملهمون',
-    description: 'وفر حتى 20% على أي منتج مؤهل'
+    title: 'siteData.features.molhemoonDeals.title',
+    description: 'siteData.features.molhemoonDeals.description'
   },
   {
+    id: 'free-shipping',
     icon: Truck,
-    title: 'الشحن المجاني',
-    description: 'للطلبات أكثر من 100 درهم'
+    title: 'siteData.features.freeShipping.title',
+    description: 'siteData.features.freeShipping.description'
   },
   {
+    id: 'mobile-app',
     icon: Smartphone,
-    title: 'تطبيق الجوال',
-    description: 'تسوق أسرع واكسب نقاط إضافية'
+    title: 'siteData.features.mobileApp.title',
+    description: 'siteData.features.mobileApp.description'
   },
 ];
 
 export const footerLinks = [
   {
-    title: 'حول ملهمون',
+    id: 'about',
+    title: 'siteData.footer.sections.about.title',
     links: [
-      { text: 'حول دار ملهمون', href: '/about' },
-      { text: 'فريق الدار', href: '/team' },
-      { text: 'المؤلفون', href: '/authors' },
-      { text: 'قراء ملهمون', href: '#', action: 'molhemoon-readers-club' },
-      { text: 'مقالات الدار', href: '/blog' },
+      { id: 'about-us', text: 'siteData.footer.sections.about.links.aboutUs', href: '/about' },
+      { id: 'team', text: 'siteData.footer.sections.about.links.team', href: '/team' },
+      { id: 'authors', text: 'siteData.footer.sections.about.links.authors', href: '/authors' },
+      { id: 'readers-club', text: 'siteData.footer.sections.about.links.readersClub', href: '#', action: 'molhemoon-readers-club' },
+      { id: 'blog', text: 'siteData.footer.sections.about.links.blog', href: '/blog' },
     ],
   },
   {
-    title: 'أكاديمية ملهمون',
+    id: 'academy',
+    title: 'siteData.footer.sections.academy.title',
     links: [
-      { text: 'سجل كمدرب', href: '#', action: 'register-trainer' },
-      { text: 'الدورات التدريبية', href: '/courses' },
-      { text: 'استفسارات المدربين', href: '#', action: 'trainer-inquiries' },
-      { text: 'قارئ ملهمون', href: '#', action: 'molhemoon-reader-program' },
+      { id: 'register-trainer', text: 'siteData.footer.sections.academy.links.registerTrainer', href: '#', action: 'register-trainer' },
+      { id: 'courses', text: 'siteData.footer.sections.academy.links.courses', href: '/courses' },
+      { id: 'trainer-inquiries', text: 'siteData.footer.sections.academy.links.trainerInquiries', href: '#', action: 'trainer-inquiries' },
+      { id: 'reader-program', text: 'siteData.footer.sections.academy.links.readerProgram', href: '#', action: 'molhemoon-reader-program' },
     ],
   },
   {
-    title: 'خدمات ملهمون',
+    id: 'services',
+    title: 'siteData.footer.sections.services.title',
     links: [
-      { text: 'خدمات النشر', href: '/publishing-services' },
-      { text: 'خدمات التصميم والإنتاج', href: '/design-services' },
-      { text: 'خدمة توزيع المطبوعات', href: '/distribution-services' },
-      { text: 'طلب قائمة منشورات الدار', href: '#', action: 'request-publications-list' },
+      { id: 'publishing-services', text: 'siteData.footer.sections.services.links.publishing', href: '/publishing-services' },
+      { id: 'design-services', text: 'siteData.footer.sections.services.links.design', href: '/design-services' },
+      { id: 'distribution-services', text: 'siteData.footer.sections.services.links.distribution', href: '/distribution-services' },
+      { id: 'request-publications', text: 'siteData.footer.sections.services.links.requestPublications', href: '#', action: 'request-publications-list' },
     ],
   },
   {
-    title: 'خدمة العملاء',
+    id: 'support',
+    title: 'siteData.footer.sections.support.title',
     links: [
-      { text: 'تتبع حالة الطلب', href: '/profile?tab=orders' },
-      { text: 'بطاقة هدية ملهمون', href: '/gift-card' },
-      { text: 'اتصل بنا', href: '/contact-us' },
-      { text: '0097165551184', href: 'tel:0097165551184', action: 'call-support' },
+      { id: 'track-order', text: 'siteData.footer.sections.support.links.trackOrder', href: '/profile?tab=orders' },
+      { id: 'gift-card', text: 'siteData.footer.sections.support.links.giftCard', href: '/gift-card' },
+      { id: 'contact-us', text: 'siteData.footer.sections.support.links.contactUs', href: '/contact-us' },
+      { id: 'call-support', text: 'siteData.footer.sections.support.links.supportPhone', href: 'tel:0097165551184', action: 'call-support' },
     ],
   },
 ];

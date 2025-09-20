@@ -4,7 +4,11 @@
 
 import Customer from '../models/Customer.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import firebaseApi from '../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export class CustomerService {
   constructor() {
@@ -48,7 +52,7 @@ export class CustomerService {
       return customer.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'customer-creation');
+      throw handleErrorWithLanguage(error, 'customer-creation');
     }
   }
 
@@ -72,7 +76,7 @@ export class CustomerService {
       return customer;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer:${customerId}`);
     }
   }
 
@@ -118,7 +122,7 @@ export class CustomerService {
       return customer.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-get-or-create:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-get-or-create:${customerId}`);
     }
   }
 
@@ -133,7 +137,7 @@ export class CustomerService {
       return customer ? new Customer(customer).toObject() : null;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer:email:${email}`);
+      throw handleErrorWithLanguage(error, `customer:email:${email}`);
     }
   }
 
@@ -175,7 +179,7 @@ export class CustomerService {
       return updatedCustomer.toObject();
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-update:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-update:${customerId}`);
     }
   }
 
@@ -200,7 +204,7 @@ export class CustomerService {
       return { success: true, message: 'تم حذف العميل بنجاح' };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-delete:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-delete:${customerId}`);
     }
   }
 
@@ -239,7 +243,7 @@ export class CustomerService {
       return newAddress;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-address-add:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-address-add:${customerId}`);
     }
   }
 
@@ -278,7 +282,7 @@ export class CustomerService {
       return updatedAddress;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-address-update:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-address-update:${customerId}`);
     }
   }
 
@@ -317,7 +321,7 @@ export class CustomerService {
       return result;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-address-remove:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-address-remove:${customerId}`);
     }
   }
 
@@ -355,7 +359,7 @@ export class CustomerService {
       return newPaymentMethod;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-payment-add:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-payment-add:${customerId}`);
     }
   }
 
@@ -393,7 +397,7 @@ export class CustomerService {
       return updatedPaymentMethod;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-payment-update:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-payment-update:${customerId}`);
     }
   }
 
@@ -431,7 +435,7 @@ export class CustomerService {
       return result;
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-payment-remove:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-payment-remove:${customerId}`);
     }
   }
 
@@ -478,7 +482,7 @@ export class CustomerService {
       };
 
     } catch (error) {
-      throw errorHandler.handleError(error, `customer-order-update:${customerId}`);
+      throw handleErrorWithLanguage(error, `customer-order-update:${customerId}`);
     }
   }
 
@@ -526,7 +530,7 @@ export class CustomerService {
       return customers.map(customer => new Customer(customer).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'customer-search');
+      throw handleErrorWithLanguage(error, 'customer-search');
     }
   }
 
@@ -627,7 +631,7 @@ export class CustomerService {
       return stats;
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'customer-stats');
+      throw handleErrorWithLanguage(error, 'customer-stats');
     }
   }
 
@@ -655,7 +659,7 @@ export class CustomerService {
       return sortedCustomers.slice(0, limit).map(customer => new Customer(customer).toObject());
 
     } catch (error) {
-      throw errorHandler.handleError(error, 'customer-top');
+      throw handleErrorWithLanguage(error, 'customer-top');
     }
   }
 }

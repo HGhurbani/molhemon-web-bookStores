@@ -86,6 +86,12 @@ firebase deploy --only hosting # نشر Hosting فقط
 firebase deploy --only functions # نشر Functions فقط
 ```
 
+### **أوامر الترجمة:**
+```bash
+npm run check:translations      # يتحقق من المفاتيح المفقودة في الواجهة
+npm run sync:locales            # ينسخ ملفات الترجمة من src/locales إلى functions/locales
+```
+
 ### **Firebase Emulators:**
 ```bash
 # تشغيل جميع Emulators

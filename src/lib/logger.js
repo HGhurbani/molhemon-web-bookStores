@@ -1,7 +1,8 @@
 const levels = { debug: 0, info: 1, error: 2, none: 3 };
 
-const isProd = import.meta.env.PROD;
-const envLevel = (import.meta.env.VITE_LOG_LEVEL || '').toLowerCase();
+const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+const isProd = Boolean(env.PROD);
+const envLevel = (env.VITE_LOG_LEVEL || '').toLowerCase();
 let currentLevel = levels[envLevel];
 if (currentLevel === undefined) {
   currentLevel = isProd ? levels.error : levels.debug;

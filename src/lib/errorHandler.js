@@ -1,5 +1,10 @@
 // Error Handler System
 import logger from './logger.js';
+import {
+  DEFAULT_LANGUAGE,
+  getActiveLanguage,
+  resolveLanguage as resolveLanguageCode,
+} from './languageUtils.js';
 
 class ErrorHandler {
   constructor() {
@@ -44,7 +49,50 @@ class ErrorHandler {
         'firebase/unavailable': 'Firebase غير متاح حالياً',
         'firebase/unauthenticated': 'لم يتم تسجيل الدخول',
         'firebase/invalid-argument': 'معرف العنصر غير صالح',
-        
+        'firebase/connection-failed': 'فشل الاتصال بفايربيس',
+        'firebase/document-not-found': 'المستند غير موجود',
+
+        // أخطاء العربة
+        'cart/not-found': 'السلة غير موجودة',
+        'cart/no-shipping-address': 'عنوان الشحن مطلوب',
+        'cart/no-physical-items': 'لا توجد عناصر مادية للشحن',
+        'cart/invalid-shipping-method': 'طريقة الشحن غير صالحة',
+        'cart/invalid-payment-method': 'طريقة الدفع غير صالحة للسلة',
+        'cart/invalid-discount': 'كود الخصم غير صالح',
+        'cart/expired': 'انتهت صلاحية السلة',
+        'cart-item/not-found': 'عنصر السلة غير موجود',
+
+        // أخطاء التكوين
+        'config/api-base-url-missing': 'رابط واجهة البرمجة غير مضبوط',
+
+        // أخطاء العملاء
+        'customer/not-found': 'العميل غير موجود',
+
+        // أخطاء الإعدادات
+        'settings/import-validation-failed': 'فشل التحقق من إعدادات الاستيراد',
+        'settings/not-initialized': 'لم يتم تهيئة الإعدادات',
+        'settings/validation-failed': 'فشل التحقق من الإعدادات',
+
+        // أخطاء البوابات
+        'gateway/not-found': 'بوابة الدفع غير موجودة',
+
+        // أخطاء الطلبات
+        'order/not-found': 'الطلب غير موجود',
+        'order-not-found': 'الطلب غير موجود',
+        'order/cannot-cancel': 'لا يمكن إلغاء الطلب',
+        'order/cannot-modify': 'لا يمكن تعديل الطلب',
+        'order/invalid-stage-transition': 'انتقال غير صالح بين مراحل الطلب',
+        'order/creation-failed': 'فشل إنشاء الطلب',
+        'database/order-creation-failed': 'فشل إنشاء الطلب في قاعدة البيانات',
+
+        // أخطاء المنتجات
+        'product/not-found': 'المنتج غير موجود',
+        'product/not-digital': 'المنتج ليس رقمياً',
+        'product/insufficient-stock': 'كمية المنتج غير كافية',
+
+        // أخطاء الشحن
+        'shipping/not-found': 'طريقة الشحن غير موجودة',
+
         // أخطاء الأذونات المحددة
         'permission-denied': 'لا تملك صلاحية الوصول - يرجى تسجيل الدخول كمدير',
         'insufficient-permissions': 'صلاحيات غير كافية - يرجى تسجيل الدخول كمدير',
@@ -61,6 +109,9 @@ class ErrorHandler {
         'payment/card-declined': 'تم رفض البطاقة',
         'payment/expired-card': 'البطاقة منتهية الصلاحية',
         'payment/invalid-cvv': 'رمز CVV غير صحيح',
+        'payment/not-found': 'الدفعة غير موجودة',
+        'payment/cannot-refund': 'لا يمكن استرداد الدفعة',
+        'payment/unsupported-method': 'طريقة الدفع غير مدعومة',
         
         // أخطاء التحقق
         'validation/required': 'هذا الحقل مطلوب',
@@ -72,7 +123,22 @@ class ErrorHandler {
         'validation/date': 'التاريخ غير صحيح',
         'validation/file-size': 'حجم الملف كبير جداً',
         'validation/file-type': 'نوع الملف غير مدعوم',
-        
+        'validation/customer-creation-invalid': 'بيانات إنشاء العميل غير صالحة',
+        'validation/customer-update-invalid': 'بيانات تحديث العميل غير صالحة',
+        'validation/customer-invalid': 'بيانات العميل غير صالحة',
+        'validation/checkout-invalid': 'بيانات إتمام الطلب غير صالحة',
+        'validation/payment-invalid': 'بيانات الدفع غير صالحة',
+        'validation/product-invalid': 'بيانات المنتج غير صالحة',
+        'validation/shipping-invalid': 'بيانات الشحن غير صالحة',
+        'validation/stock-unavailable': 'الكمية المطلوبة غير متوفرة',
+        'validation/order-invalid': 'بيانات الطلب غير صالحة',
+        'validation/order-missing': 'معلومات الطلب مفقودة',
+        'validation/order-id-missing': 'معرف الطلب مطلوب',
+        'validation/invalid-order-id': 'معرف الطلب غير صالح',
+        'validation/user-id-missing': 'معرف المستخدم مطلوب',
+        'validation/invalid-data': 'البيانات غير صالحة',
+        'validation/missing-id': 'المعرف مطلوب',
+
         // أخطاء عامة
         'general/not-found': 'الصفحة المطلوبة غير موجودة',
         'general/server-error': 'خطأ في الخادم',
@@ -110,7 +176,50 @@ class ErrorHandler {
         'firebase/unavailable': 'Firebase unavailable',
         'firebase/unauthenticated': 'Not authenticated',
         'firebase/invalid-argument': 'Invalid item ID',
-        
+        'firebase/connection-failed': 'Failed to connect to Firebase',
+        'firebase/document-not-found': 'Document not found',
+
+        // Cart errors
+        'cart/not-found': 'Cart not found',
+        'cart/no-shipping-address': 'Shipping address is required',
+        'cart/no-physical-items': 'No physical items available for shipping',
+        'cart/invalid-shipping-method': 'Invalid shipping method',
+        'cart/invalid-payment-method': 'Invalid payment method for cart',
+        'cart/invalid-discount': 'Invalid discount code',
+        'cart/expired': 'Cart session expired',
+        'cart-item/not-found': 'Cart item not found',
+
+        // Configuration errors
+        'config/api-base-url-missing': 'API base URL is not configured',
+
+        // Customer errors
+        'customer/not-found': 'Customer not found',
+
+        // Settings errors
+        'settings/import-validation-failed': 'Settings import validation failed',
+        'settings/not-initialized': 'Settings have not been initialized',
+        'settings/validation-failed': 'Settings validation failed',
+
+        // Gateway errors
+        'gateway/not-found': 'Payment gateway not found',
+
+        // Order errors
+        'order/not-found': 'Order not found',
+        'order-not-found': 'Order not found',
+        'order/cannot-cancel': 'Order cannot be cancelled',
+        'order/cannot-modify': 'Order cannot be modified',
+        'order/invalid-stage-transition': 'Invalid order stage transition',
+        'order/creation-failed': 'Order creation failed',
+        'database/order-creation-failed': 'Failed to create order in the database',
+
+        // Product errors
+        'product/not-found': 'Product not found',
+        'product/not-digital': 'Product is not digital',
+        'product/insufficient-stock': 'Insufficient product stock',
+
+        // Shipping errors
+        'shipping/not-found': 'Shipping method not found',
+
         // Network errors
         'network/failed': 'Network connection failed',
         'network/timeout': 'Connection timeout',
@@ -123,7 +232,10 @@ class ErrorHandler {
         'payment/card-declined': 'Card declined',
         'payment/expired-card': 'Card expired',
         'payment/invalid-cvv': 'Invalid CVV',
-        
+        'payment/not-found': 'Payment not found',
+        'payment/cannot-refund': 'Payment cannot be refunded',
+        'payment/unsupported-method': 'Unsupported payment method',
+
         // Validation errors
         'validation/required': 'This field is required',
         'validation/email': 'Invalid email address',
@@ -134,7 +246,27 @@ class ErrorHandler {
         'validation/date': 'Invalid date',
         'validation/file-size': 'File size too large',
         'validation/file-type': 'File type not supported',
-        
+        'validation/type': 'Invalid value type',
+        'validation/minLength': 'Value is shorter than the minimum length',
+        'validation/maxLength': 'Value exceeds the maximum length',
+        'validation/pattern': 'Value does not match the required pattern',
+        'validation/customer-creation-invalid': 'Customer data is invalid',
+        'validation/customer-update-invalid': 'Customer update data is invalid',
+        'validation/customer-invalid': 'Customer data is invalid',
+        'validation/checkout-invalid': 'Checkout data is invalid',
+        'validation/payment-invalid': 'Payment information is invalid',
+        'validation/product-invalid': 'Product data is invalid',
+        'validation/shipping-invalid': 'Shipping data is invalid',
+        'validation/stock-unavailable': 'Requested stock is unavailable',
+        'validation/order-invalid': 'Order data is invalid',
+        'validation/order-missing': 'Order information is missing',
+        'validation/order-id-missing': 'Order ID is required',
+        'validation/invalid-order-id': 'Invalid order ID',
+        'validation/user-id-missing': 'User ID is required',
+        'validation/invalid-data': 'Provided data is invalid',
+        'validation/missing-id': 'Identifier is required',
+        'validation/email-exists': 'Email already exists',
+
         // General errors
         'general/not-found': 'Page not found',
         'general/server-error': 'Server error',
@@ -142,6 +274,30 @@ class ErrorHandler {
         'general/rate-limit': 'Rate limit exceeded, try later'
       }
     };
+
+    this.defaultLanguage = DEFAULT_LANGUAGE;
+    this.languageResolver = () => getActiveLanguage();
+  }
+
+  setLanguageResolver(resolver) {
+    if (typeof resolver === 'function') {
+      this.languageResolver = resolver;
+    }
+  }
+
+  resolveLanguage(language) {
+    if (language) {
+      return resolveLanguageCode(language);
+    }
+
+    if (typeof this.languageResolver === 'function') {
+      const resolved = this.languageResolver();
+      if (resolved) {
+        return resolveLanguageCode(resolved);
+      }
+    }
+
+    return this.defaultLanguage;
   }
 
   // تحديد نوع الخطأ
@@ -165,43 +321,64 @@ class ErrorHandler {
   }
 
   // الحصول على رسالة الخطأ
-  getErrorMessage(error, language = 'ar') {
-    const lang = this.errorMessages[language] || this.errorMessages.ar;
-    
+  getErrorMessage(error, language) {
+    const resolvedLanguage = this.resolveLanguage(language);
+    const lang = this.errorMessages[resolvedLanguage] || this.errorMessages[this.defaultLanguage];
+    const fallbackLang = this.errorMessages[this.defaultLanguage];
+
     // البحث عن رسالة خطأ محددة
-    if (error.code && lang[error.code]) {
-      return lang[error.code];
+    if (error.code) {
+      if (lang[error.code]) {
+        return lang[error.code];
+      }
+
+      if (fallbackLang[error.code]) {
+        return fallbackLang[error.code];
+      }
     }
-    
+
     // البحث عن رسالة خطأ عامة
-    if (error.message && lang[error.message]) {
-      return lang[error.message];
+    if (error.message) {
+      if (lang[error.message]) {
+        return lang[error.message];
+      }
+
+      if (fallbackLang[error.message]) {
+        return fallbackLang[error.message];
+      }
     }
-    
+
     // استخدام رسالة الخطأ الأصلية
     if (error.message) {
       return error.message;
     }
-    
+
     // رسالة افتراضية
-    return lang[this.getErrorType(error)];
+    const errorType = this.getErrorType(error);
+    return (
+      lang[errorType] ||
+      fallbackLang[errorType] ||
+      fallbackLang.UNKNOWN_ERROR
+    );
   }
 
   // معالجة الخطأ وإرجاع كائن منظم
-  handleError(error, context = '') {
+  handleError(error, context = '', language) {
     const errorType = this.getErrorType(error);
-    const message = this.getErrorMessage(error);
-    
+    const resolvedLanguage = this.resolveLanguage(language);
+    const message = this.getErrorMessage(error, resolvedLanguage);
+
     const errorObject = {
       type: errorType,
       code: error.code || 'unknown',
       message: message,
       originalError: error,
       context: context,
+      language: resolvedLanguage,
       timestamp: new Date().toISOString(),
       stack: error.stack
     };
-    
+
     // تسجيل الخطأ
     this.logError(errorObject);
     
@@ -210,7 +387,8 @@ class ErrorHandler {
 
   // تسجيل الأخطاء
   logError(errorObject) {
-    if (import.meta.env.VITE_APP_ENV === 'development') {
+    const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+    if (env.VITE_APP_ENV === 'development') {
       logger.error('Error Handler:', errorObject);
     }
     
@@ -219,13 +397,13 @@ class ErrorHandler {
   }
 
   // إنشاء خطأ مخصص
-  createError(type, code, message, context = '') {
+  createError(type, code, message, context = '', language) {
     const error = new Error(message);
     error.code = code;
     error.type = type;
     error.context = context;
-    
-    return this.handleError(error, context);
+
+    return this.handleError(error, context, language);
   }
 
   // التحقق من صحة البيانات
@@ -286,24 +464,24 @@ class ErrorHandler {
   }
 
   // معالجة أخطاء API
-  handleApiError(response, context = '') {
+  handleApiError(response, context = '', language) {
     if (!response.ok) {
       const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
       error.status = response.status;
       error.statusText = response.statusText;
-      
-      return this.handleError(error, context);
+
+      return this.handleError(error, context, language);
     }
-    
+
     return null;
   }
 
   // معالجة أخطاء Firebase
-  handleFirebaseError(error, context = '') {
+  handleFirebaseError(error, context = '', language) {
     if (error.code) {
-      return this.handleError(error, context);
+      return this.handleError(error, context, language);
     }
-    
+
     // أخطاء عامة
     if (error.message.includes('permission-denied')) {
       error.code = 'firebase/permission-denied';
@@ -312,24 +490,24 @@ class ErrorHandler {
     } else if (error.message.includes('unavailable')) {
       error.code = 'firebase/unavailable';
     }
-    
-    return this.handleError(error, context);
+
+    return this.handleError(error, context, language);
   }
 
   // معالجة أخطاء الدفع
-  handlePaymentError(error, context = '') {
+  handlePaymentError(error, context = '', language) {
     if (error.code && error.code.startsWith('payment/')) {
-      return this.handleError(error, context);
+      return this.handleError(error, context, language);
     }
-    
+
     // تحويل أخطاء Stripe
     if (error.type === 'StripeCardError') {
       error.code = `payment/${error.code}`;
     } else if (error.type === 'StripeInvalidRequestError') {
       error.code = 'payment/invalid-request';
     }
-    
-    return this.handleError(error, context);
+
+    return this.handleError(error, context, language);
   }
 
   // إعادة المحاولة مع تأخير

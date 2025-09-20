@@ -1,6 +1,7 @@
 import firebaseApi from './firebaseApi';
 import firebaseFunctionsApi from './firebaseFunctions';
 import { errorHandler } from './errorHandler';
+import { getActiveLanguage } from './languageUtils.js';
 import CheckoutService from './services/CheckoutService.js';
 import OrderService from './services/OrderService.js';
 import PaymentService from './services/PaymentService.js';
@@ -44,6 +45,9 @@ const ensureArrayResponse = (payload, key) => {
 
   return [];
 };
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 async function requestUserData(userId, resource, { method = 'GET', body } = {}) {
   const context = `user-data:${resource}:${userId || 'anonymous'}`;
@@ -107,7 +111,7 @@ async function requestUserData(userId, resource, { method = 'GET', body } = {}) 
 
     return null;
   } catch (error) {
-    throw errorHandler.handleError(error, context);
+    throw handleErrorWithLanguage(error, context);
   }
 }
 
@@ -117,7 +121,7 @@ const userDataApi = {
       const response = await requestUserData(userId, 'favorites');
       return ensureArrayResponse(response, 'favorites');
     } catch (error) {
-      throw errorHandler.handleError(error, `user-data:get-favorites:${userId}`);
+      throw handleErrorWithLanguage(error, `user-data:get-favorites:${userId}`);
     }
   },
 
@@ -132,7 +136,7 @@ const userDataApi = {
       });
       return response == null ? favorites : ensureArrayResponse(response, 'favorites');
     } catch (error) {
-      throw errorHandler.handleError(error, `user-data:save-favorites:${userId}`);
+      throw handleErrorWithLanguage(error, `user-data:save-favorites:${userId}`);
     }
   },
 
@@ -141,7 +145,7 @@ const userDataApi = {
       const response = await requestUserData(userId, 'cart');
       return ensureArrayResponse(response, 'items');
     } catch (error) {
-      throw errorHandler.handleError(error, `user-data:get-cart:${userId}`);
+      throw handleErrorWithLanguage(error, `user-data:get-cart:${userId}`);
     }
   },
 
@@ -156,7 +160,7 @@ const userDataApi = {
       });
       return response == null ? cartItems : ensureArrayResponse(response, 'items');
     } catch (error) {
-      throw errorHandler.handleError(error, `user-data:save-cart:${userId}`);
+      throw handleErrorWithLanguage(error, `user-data:save-cart:${userId}`);
     }
   }
 };
@@ -180,7 +184,7 @@ const api = {
       await encryptedCache.setItem('siteSettings', settings);
       return settings;
     } catch (error) {
-      throw errorHandler.handleError(error, 'settings:get');
+      throw handleErrorWithLanguage(error, 'settings:get');
     }
   },
 
@@ -201,7 +205,7 @@ const api = {
 
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, context);
+      throw handleErrorWithLanguage(error, context);
     }
   },
 
@@ -210,7 +214,7 @@ const api = {
     try {
       return await firebaseFunctionsApi.payments.createStripeIntent(data);
     } catch (error) {
-      throw errorHandler.handleError(error, 'stripe:payment-intent');
+      throw handleErrorWithLanguage(error, 'stripe:payment-intent');
     }
   },
 
@@ -219,7 +223,7 @@ const api = {
     try {
       return await firebaseFunctionsApi.payments.createPayPalOrder(data);
     } catch (error) {
-      throw errorHandler.handleError(error, 'paypal:order');
+      throw handleErrorWithLanguage(error, 'paypal:order');
     }
   },
 
@@ -260,7 +264,7 @@ const api = {
 
       return result;
     } catch (error) {
-      throw errorHandler.handleError(error, 'settings:update');
+      throw handleErrorWithLanguage(error, 'settings:update');
     }
   },
 
@@ -296,7 +300,7 @@ const api = {
       try {
         return await CheckoutService.createOrderWithCheckout(orderData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'order:create');
+        throw handleErrorWithLanguage(error, 'order:create');
       }
     },
 
@@ -305,7 +309,7 @@ const api = {
       try {
         return await firebaseFunctionsApi.orders.process(orderData, paymentData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'order:process');
+        throw handleErrorWithLanguage(error, 'order:process');
       }
     },
 
@@ -314,7 +318,7 @@ const api = {
       try {
         return await CheckoutService.getOrderDetails(orderId);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:get:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:get:${orderId}`);
       }
     },
 
@@ -323,7 +327,7 @@ const api = {
       try {
         return await CheckoutService.getCustomerOrders(customerId, status);
       } catch (error) {
-        throw errorHandler.handleError(error, `orders:customer:${customerId}`);
+        throw handleErrorWithLanguage(error, `orders:customer:${customerId}`);
       }
     },
 
@@ -332,7 +336,7 @@ const api = {
       try {
         return await CheckoutService.updateOrderStatus(orderId, newStatus, notes);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:status:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:status:${orderId}`);
       }
     },
 
@@ -341,7 +345,7 @@ const api = {
       try {
         return await OrderService.updateOrderStage(orderId, newStage, notes);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:stage:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:stage:${orderId}`);
       }
     },
 
@@ -350,7 +354,7 @@ const api = {
       try {
         return await CheckoutService.cancelOrder(orderId, reason);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:cancel:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:cancel:${orderId}`);
       }
     },
 
@@ -359,7 +363,7 @@ const api = {
       try {
         return await CheckoutService.addItemToOrder(orderId, itemData);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:add-item:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:add-item:${orderId}`);
       }
     },
 
@@ -368,7 +372,7 @@ const api = {
       try {
         return await CheckoutService.removeItemFromOrder(orderId, itemId);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:remove-item:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:remove-item:${orderId}`);
       }
     },
 
@@ -377,7 +381,7 @@ const api = {
       try {
         return await CheckoutService.recalculateOrderTotal(orderId);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:recalculate:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:recalculate:${orderId}`);
       }
     },
 
@@ -386,7 +390,7 @@ const api = {
       try {
         return await CheckoutService.getOrderStats(customerId);
       } catch (error) {
-        throw errorHandler.handleError(error, 'orders:stats');
+        throw handleErrorWithLanguage(error, 'orders:stats');
       }
     },
 
@@ -454,7 +458,7 @@ const api = {
           order: orderResult.order
         };
       } catch (error) {
-        throw errorHandler.handleError(error, 'order:checkout');
+        throw handleErrorWithLanguage(error, 'order:checkout');
       }
     },
 
@@ -463,7 +467,7 @@ const api = {
       try {
         return await OrderService.getAllOrders(filters);
       } catch (error) {
-        throw errorHandler.handleError(error, 'orders:get-all');
+        throw handleErrorWithLanguage(error, 'orders:get-all');
       }
     },
 
@@ -476,7 +480,7 @@ const api = {
           return await OrderService.getAllOrders();
         }
       } catch (error) {
-        throw errorHandler.handleError(error, 'orders:get');
+        throw handleErrorWithLanguage(error, 'orders:get');
       }
     },
 
@@ -485,7 +489,7 @@ const api = {
       try {
         return await OrderService.updateOrderItem(itemId, updateData);
       } catch (error) {
-        throw errorHandler.handleError(error, `order-item:update:${itemId}`);
+        throw handleErrorWithLanguage(error, `order-item:update:${itemId}`);
       }
     },
 
@@ -494,7 +498,7 @@ const api = {
       try {
         return await OrderService.deleteOrder(orderId);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:delete:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:delete:${orderId}`);
       }
     },
 
@@ -503,7 +507,7 @@ const api = {
       try {
         return await OrderService.refundOrderPayment(orderId, refundData);
       } catch (error) {
-        throw errorHandler.handleError(error, `order:refund:${orderId}`);
+        throw handleErrorWithLanguage(error, `order:refund:${orderId}`);
       }
     }
   },
@@ -515,7 +519,7 @@ const api = {
       try {
         return await unifiedPaymentApi.createPaymentIntent(paymentData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'payment:create');
+        throw handleErrorWithLanguage(error, 'payment:create');
       }
     },
 
@@ -524,7 +528,7 @@ const api = {
       try {
         return await unifiedPaymentApi.confirmPayment(paymentId, paymentMethodData);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:process:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:process:${paymentId}`);
       }
     },
 
@@ -533,7 +537,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getPaymentById(paymentId);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:get:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:get:${paymentId}`);
       }
     },
 
@@ -543,7 +547,7 @@ const api = {
         // في النظام الموحد، يتم تحديث الحالة تلقائياً
         return await unifiedPaymentApi.getPaymentById(paymentId);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:status:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:status:${paymentId}`);
       }
     },
 
@@ -552,7 +556,7 @@ const api = {
       try {
         return await unifiedPaymentApi.refundPayment(paymentId, amount, reason);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:refund:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:refund:${paymentId}`);
       }
     },
 
@@ -561,7 +565,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getPaymentStats(customerId);
       } catch (error) {
-        throw errorHandler.handleError(error, 'payments:stats');
+        throw handleErrorWithLanguage(error, 'payments:stats');
       }
     },
 
@@ -570,7 +574,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getAvailablePaymentMethods(orderData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'payment:methods:get');
+        throw handleErrorWithLanguage(error, 'payment:methods:get');
       }
     },
 
@@ -579,7 +583,7 @@ const api = {
       try {
         return await unifiedPaymentApi.testProviderConnection(providerName);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:provider-test:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:provider-test:${providerName}`);
       }
     },
 
@@ -588,7 +592,7 @@ const api = {
       try {
         return await unifiedPaymentApi.updatePaymentSettings(settings);
       } catch (error) {
-        throw errorHandler.handleError(error, 'payment:settings:update');
+        throw handleErrorWithLanguage(error, 'payment:settings:update');
       }
     },
 
@@ -597,7 +601,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getPaymentProviders();
       } catch (error) {
-        throw errorHandler.handleError(error, 'payment:providers:get');
+        throw handleErrorWithLanguage(error, 'payment:providers:get');
       }
     },
 
@@ -606,7 +610,7 @@ const api = {
       try {
         return await unifiedPaymentApi.createCustomer(providerName, customerData);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:customer-create:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:customer-create:${providerName}`);
       }
     },
 
@@ -615,7 +619,7 @@ const api = {
       try {
         return await unifiedPaymentApi.savePaymentMethod(providerName, customerId, paymentMethodData);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:method-save:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:method-save:${providerName}`);
       }
     },
 
@@ -624,7 +628,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getCustomerPaymentMethods(providerName, customerId);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:customer-methods:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:customer-methods:${providerName}`);
       }
     },
 
@@ -633,7 +637,7 @@ const api = {
       try {
         return await unifiedPaymentApi.deletePaymentMethod(providerName, customerId, paymentMethodId);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:method-delete:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:method-delete:${providerName}`);
       }
     },
 
@@ -642,7 +646,7 @@ const api = {
       try {
         return await unifiedPaymentApi.calculatePaymentFees(amount, providerName);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:fees:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:fees:${providerName}`);
       }
     },
 
@@ -651,7 +655,7 @@ const api = {
       try {
         return await unifiedPaymentApi.isPaymentMethodAvailable(providerName, orderData);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:method-availability:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:method-availability:${providerName}`);
       }
     },
 
@@ -660,7 +664,7 @@ const api = {
       try {
         return await unifiedPaymentApi.handleWebhook(providerName, webhookData, signature);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:webhook:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:webhook:${providerName}`);
       }
     },
 
@@ -669,7 +673,7 @@ const api = {
       try {
         return await unifiedPaymentApi.cancelPayment(paymentId, reason);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:cancel:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:cancel:${paymentId}`);
       }
     },
 
@@ -678,7 +682,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getProviderInfo(providerName);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:provider-info:${providerName}`);
+        throw handleErrorWithLanguage(error, `payment:provider-info:${providerName}`);
       }
     },
 
@@ -687,7 +691,7 @@ const api = {
       try {
         return await unifiedPaymentApi.getPaymentLogs(paymentId, limit);
       } catch (error) {
-        throw errorHandler.handleError(error, `payment:logs:${paymentId}`);
+        throw handleErrorWithLanguage(error, `payment:logs:${paymentId}`);
       }
     }
   },
@@ -699,7 +703,7 @@ const api = {
       try {
         return await ShippingService.createShipping(shippingData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'shipping:create');
+        throw handleErrorWithLanguage(error, 'shipping:create');
       }
     },
 
@@ -708,7 +712,7 @@ const api = {
       try {
         return await firebaseFunctionsApi.shipping.calculate(orderItems, shippingAddress, shippingMethod);
       } catch (error) {
-        throw errorHandler.handleError(error, 'shipping:cost-calculation');
+        throw handleErrorWithLanguage(error, 'shipping:cost-calculation');
       }
     },
 
@@ -722,7 +726,7 @@ const api = {
       try {
         return await ShippingService.updateShippingStatus(shippingId, newStatus, notes);
       } catch (error) {
-        throw errorHandler.handleError(error, `shipping:status:${shippingId}`);
+        throw handleErrorWithLanguage(error, `shipping:status:${shippingId}`);
       }
     },
 
@@ -731,7 +735,7 @@ const api = {
       try {
         return await ShippingService.addTrackingNumber(shippingId, trackingNumber, shippingCompany);
       } catch (error) {
-        throw errorHandler.handleError(error, `shipping:tracking:${shippingId}`);
+        throw handleErrorWithLanguage(error, `shipping:tracking:${shippingId}`);
       }
     },
 
@@ -740,7 +744,7 @@ const api = {
       try {
         return await ShippingService.getShippingStats();
       } catch (error) {
-        throw errorHandler.handleError(error, 'shipping:stats');
+        throw handleErrorWithLanguage(error, 'shipping:stats');
       }
     }
   },
@@ -752,7 +756,7 @@ const api = {
       try {
         return await ProductService.createProduct(productData);
       } catch (error) {
-        throw errorHandler.handleError(error, 'product:create');
+        throw handleErrorWithLanguage(error, 'product:create');
       }
     },
 
@@ -761,7 +765,7 @@ const api = {
       try {
         return await ProductService.getProductById(productId);
       } catch (error) {
-        throw errorHandler.handleError(error, `product:get:${productId}`);
+        throw handleErrorWithLanguage(error, `product:get:${productId}`);
       }
     },
 
@@ -770,7 +774,7 @@ const api = {
       try {
         return await ProductService.getAllProducts(filters);
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:get-all');
+        throw handleErrorWithLanguage(error, 'products:get-all');
       }
     },
 
@@ -779,7 +783,7 @@ const api = {
       try {
         return await ProductService.searchProducts(query, filters);
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:search');
+        throw handleErrorWithLanguage(error, 'products:search');
       }
     },
 
@@ -788,7 +792,7 @@ const api = {
       try {
         return await ProductService.getProductsByType(type);
       } catch (error) {
-        throw errorHandler.handleError(error, `products:type:${type}`);
+        throw handleErrorWithLanguage(error, `products:type:${type}`);
       }
     },
 
@@ -797,7 +801,7 @@ const api = {
       try {
         return await firebaseFunctionsApi.inventory.updateStock(productId, quantity, operation);
       } catch (error) {
-        throw errorHandler.handleError(error, `product:stock:${productId}`);
+        throw handleErrorWithLanguage(error, `product:stock:${productId}`);
       }
     },
 
@@ -806,7 +810,7 @@ const api = {
       try {
         return await ProductService.checkStockAvailability(productId, requestedQuantity);
       } catch (error) {
-        throw errorHandler.handleError(error, `product:stock-check:${productId}`);
+        throw handleErrorWithLanguage(error, `product:stock-check:${productId}`);
       }
     },
 
@@ -815,7 +819,7 @@ const api = {
       try {
         return await ProductService.getBestSellers(limit);
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:best-sellers');
+        throw handleErrorWithLanguage(error, 'products:best-sellers');
       }
     },
 
@@ -824,7 +828,7 @@ const api = {
       try {
         return await ProductService.getNewProducts(limit);
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:new');
+        throw handleErrorWithLanguage(error, 'products:new');
       }
     },
 
@@ -833,7 +837,7 @@ const api = {
       try {
         return await ProductService.getDiscountedProducts(limit);
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:discounted');
+        throw handleErrorWithLanguage(error, 'products:discounted');
       }
     },
 
@@ -842,7 +846,7 @@ const api = {
       try {
         return await ProductService.getProductStats();
       } catch (error) {
-        throw errorHandler.handleError(error, 'products:stats');
+        throw handleErrorWithLanguage(error, 'products:stats');
       }
     },
 
@@ -851,7 +855,7 @@ const api = {
       try {
         return await ProductService.generateDownloadUrl(productId, orderId);
       } catch (error) {
-        throw errorHandler.handleError(error, `product:download-url:${productId}`);
+        throw handleErrorWithLanguage(error, `product:download-url:${productId}`);
       }
     }
   },
@@ -865,7 +869,7 @@ const api = {
       return { 
         connected: false, 
         message: errorHandler.getErrorMessage(error),
-        error: errorHandler.handleError(error, 'connection:check')
+        error: handleErrorWithLanguage(error, 'connection:check')
       };
     }
   },
@@ -884,7 +888,7 @@ const api = {
     try {
       return await CustomerService.getOrCreateCustomer(customerId, userData);
     } catch (error) {
-      throw errorHandler.handleError(error, `api:get-or-create-customer:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:get-or-create-customer:${customerId}`);
     }
   },
   
@@ -893,7 +897,7 @@ const api = {
     try {
       return await CustomerService.addCustomerAddress(customerId, addressData, userData);
     } catch (error) {
-      throw errorHandler.handleError(error, `api:add-customer-address:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:add-customer-address:${customerId}`);
     }
   },
   
@@ -902,7 +906,7 @@ const api = {
     try {
       return await CustomerService.addCustomerPaymentMethod(customerId, paymentData);
     } catch (error) {
-      throw errorHandler.handleError(error, `api:add-customer-payment:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:add-customer-payment:${customerId}`);
     }
   },
   
@@ -911,7 +915,7 @@ const api = {
     try {
       return await CustomerService.updateCustomer(customerId, updateData);
     } catch (error) {
-      throw errorHandler.handleError(error, `api:update-customer:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:update-customer:${customerId}`);
     }
   },
   
@@ -920,7 +924,7 @@ const api = {
     try {
       return await CustomerService.getCustomerById(customerId);
     } catch (error) {
-      throw errorHandler.handleError(error, `api:get-customer:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:get-customer:${customerId}`);
     }
   },
   
@@ -930,7 +934,7 @@ const api = {
       const customer = await CustomerService.getOrCreateCustomer(customerId);
       return customer.addresses || [];
     } catch (error) {
-      throw errorHandler.handleError(error, `api:get-customer-addresses:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:get-customer-addresses:${customerId}`);
     }
   },
   
@@ -940,7 +944,7 @@ const api = {
       const customer = await CustomerService.getOrCreateCustomer(customerId);
       return customer.paymentMethods || [];
     } catch (error) {
-      throw errorHandler.handleError(error, `api:get-customer-payment-methods:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:get-customer-payment-methods:${customerId}`);
     }
   },
   
@@ -969,7 +973,7 @@ const api = {
         }
       }
     } catch (error) {
-      throw errorHandler.handleError(error, `api:get-customer-data:${customerId}`);
+      throw handleErrorWithLanguage(error, `api:get-customer-data:${customerId}`);
     }
   },
   userData: userDataApi,

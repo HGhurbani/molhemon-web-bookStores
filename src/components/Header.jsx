@@ -53,6 +53,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const { cart } = useCart();
   const { isCustomer: isCustomerLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
+  const translate = React.useCallback(
+    (value, defaultValue) => (typeof value === 'string' ? t(value, { defaultValue: defaultValue ?? value }) : value),
+    [t],
+  );
   const languageOptions = React.useMemo(
     () => ensureLanguageList(providedLanguages),
     [providedLanguages],
@@ -96,10 +100,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
       const randomTitles = [...books]
         .sort(() => 0.5 - Math.random())
         .slice(0, 8)
-        .map(b => b.title);
+        .map((b) => translate(b.title));
       setRandomSuggestions(randomTitles);
     }
-  }, [books]);
+  }, [books, translate]);
 
   useEffect(() => {
     if (recentSearches.length > 0) {
@@ -115,14 +119,14 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
       return;
     }
     const term = searchTerm.toLowerCase();
-    const filtered = books.filter(
-      (b) =>
-        (b.title && b.title.toLowerCase().includes(term)) ||
-        (b.author && b.author.toLowerCase().includes(term)) ||
-        (b.isbn && b.isbn.toLowerCase().includes(term))
-    ).slice(0, 5);
+    const filtered = books.filter((b) => {
+      const matchesTitle = b.title && translate(b.title)?.toLowerCase().includes(term);
+      const matchesAuthor = b.author && translate(b.author)?.toLowerCase().includes(term);
+      const matchesIsbn = b.isbn && b.isbn.toLowerCase().includes(term);
+      return Boolean(matchesTitle || matchesAuthor || matchesIsbn);
+    }).slice(0, 5);
     setSuggestions(filtered);
-  }, [searchTerm, books]);
+  }, [searchTerm, books, translate]);
 
   const handleSearchSubmit = (term = searchTerm) => {
     const query = term.trim();
@@ -154,8 +158,8 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const DropdownWithSearch = ({ label, items, isCategory = false, hideOnMobile = false }) => {
     const [filterText, setFilterText] = useState('');
     const filteredItems = items.filter((item) => {
-      const text = item.name || item;
-      return text.toLowerCase().includes(filterText.toLowerCase());
+      const text = translate(item.name || item);
+      return typeof text === 'string' && text.toLowerCase().includes(filterText.toLowerCase());
     });
 
     return (
@@ -181,10 +185,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
           {filteredItems.map((item, index) => (
               <DropdownMenuItem key={index} asChild className="px-4 py-2 hover:bg-indigo-50 text-gray-700 transition-colors duration-150">
               {isCategory ? (
-                <Link to={`/category/${item.id || item.toLowerCase().replace(/\s/g, '-')}`}>{item.name || item}</Link>
+                <Link to={`/category/${item.id || String(item).toLowerCase().replace(/\s/g, '-')}`}>{translate(item.name || item)}</Link>
               ) : (
-                <button onClick={() => handleFeatureClick(item.toLowerCase().replace(/\s/g, '-'))} className="w-full text-right">
-                  {item.name || item}
+                <button onClick={() => handleFeatureClick(item.id || String(item).toLowerCase().replace(/\s/g, '-'))} className="w-full text-right">
+                  {translate(item.name || item)}
                 </button>
               )}
             </DropdownMenuItem>
@@ -414,7 +418,7 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                     >
                   {suggestions.map((s) => (
                         <li key={s.id} className="px-3 py-2 hover:bg-gray-100 transition-colors duration-150">
-                          <Link to={`/book/${s.id}`} state={{ book: s }} className="text-gray-900 hover:text-blue-600">{s.title}</Link>
+                          <Link to={`/book/${s.id}`} state={{ book: s }} className="text-gray-900 hover:text-blue-600">{translate(s.title)}</Link>
                     </li>
                   ))}
                     </motion.ul>

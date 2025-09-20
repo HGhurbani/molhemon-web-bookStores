@@ -2,7 +2,11 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import baseApi from './baseApi.js';
 import { db } from '../firebase.js';
 import { errorHandler } from '../errorHandler.js';
+import { getActiveLanguage } from '../languageUtils.js';
 import logger from '../logger.js';
+
+const handleFirebaseErrorWithLanguage = (error, context) =>
+  errorHandler.handleFirebaseError(error, context, getActiveLanguage());
 
 export async function fetchAllMessages() {
   try {
@@ -22,7 +26,7 @@ export async function fetchAllMessages() {
         return dateB - dateA;
       });
     } catch (fallbackError) {
-      throw errorHandler.handleFirebaseError(fallbackError, 'messages:fetch-all-fallback');
+      throw handleFirebaseErrorWithLanguage(fallbackError, 'messages:fetch-all-fallback');
     }
   }
 }
@@ -52,7 +56,7 @@ export async function fetchUserMessages({ userId, email }) {
           return dateA - dateB;
         });
     } catch (fallbackError) {
-      throw errorHandler.handleFirebaseError(fallbackError, 'messages:fetch-user-fallback');
+      throw handleFirebaseErrorWithLanguage(fallbackError, 'messages:fetch-user-fallback');
     }
   }
 }

@@ -27,6 +27,9 @@
   "analytics": "Analytics",
   "marketing": "Marketing",
   "promotions": "Promotions",
+  "features": "Features",
+  "sliders": "Sliders",
+  "banners": "Banners",
   "branches": "Branches",
   "subscriptions": "Subscriptions",
   "logout": "Logout",
@@ -60,7 +63,6 @@
   "unpaid": "Unpaid",
   "refund": "Refund",
   "waiting": "Waiting",
-  "cancel": "Cancel",
   "shipped": "Shipped",
   "delivered": "Delivered",
   "pending": "Pending",
@@ -95,6 +97,7 @@
   "my_account": "My Account",
   "my_library": "My Library",
   "my_orders": "My Orders",
+  "view_cart": "View cart",
   "login_or_register": "Sign In / Create Account",
   "category_fiction": "Fiction",
   "category_nonfiction": "Nonfiction",
@@ -110,9 +113,15 @@
   "brands": "Brands",
   "choose_delivery_method": "Choose Delivery Method",
   "search_suggestions": "Search Suggestions",
+  "clear_search_history": "Clear history",
+  "recent_searches_cleared": "Search history cleared",
+  "open_search_panel": "Open search panel",
+  "close_search_panel": "Close search panel",
   "quick_browse": "Quick Browse",
   "delivery_methods": "Delivery Methods",
   "menu": "Menu",
+  "open_navigation_menu": "Open navigation menu",
+  "close_navigation_menu": "Close navigation menu",
   "main_pages": "Main Pages",
   "home": "Home",
   "most_popular": "Most Popular",
@@ -148,5 +157,311 @@
   "featured_audiobook_alt": "Romelia and the Lion",
   "ebooks": "Ebooks",
   "search_title": "Search",
-  "search_books_placeholder": "Search books..."
+  "search_books_placeholder": "Search books...",
+  "submit_search": "Search",
+  "home_bestsellers_audiobooks": "Top-selling audiobooks",
+  "home_bestsellers_all_books": "Best-selling books",
+  "app": {
+    "chat": {
+      "supportName": "Support"
+    },
+    "toast": {
+      "loadError": {
+        "generic": {
+          "title": "Error loading data"
+        },
+        "description": "{{message}}",
+        "books": {
+          "title": "We couldn't load the books"
+        },
+        "authors": {
+          "title": "We couldn't load the authors"
+        },
+        "categories": {
+          "title": "We couldn't load the categories"
+        },
+        "settings": {
+          "title": "We couldn't load the settings"
+        },
+        "orders": {
+          "title": "We couldn't load the orders"
+        },
+        "payments": {
+          "title": "We couldn't load the payments"
+        },
+        "paymentMethods": {
+          "title": "We couldn't load the payment methods"
+        },
+        "currencies": {
+          "title": "We couldn't load the currencies"
+        },
+        "languages": {
+          "title": "We couldn't load the languages"
+        },
+        "plans": {
+          "title": "We couldn't load the plans"
+        },
+        "users": {
+          "title": "We couldn't load the users"
+        },
+        "sliders": {
+          "title": "We couldn't load the sliders"
+        },
+        "banners": {
+          "title": "We couldn't load the banners"
+        },
+        "features": {
+          "title": "We couldn't load the features"
+        },
+        "sellers": {
+          "title": "We couldn't load the sellers"
+        },
+        "branches": {
+          "title": "We couldn't load the branches"
+        },
+        "subscriptions": {
+          "title": "We couldn't load the subscriptions"
+        },
+        "messages": {
+          "title": "We couldn't load the messages"
+        },
+        "initialLoad": {
+          "title": "We couldn't load the data"
+        }
+      },
+      "cart": {
+        "remove": {
+          "title": "Removed from cart",
+          "description": "The item was removed from your cart."
+        }
+      },
+      "wishlist": {
+        "removed": {
+          "title": "Removed from wishlist",
+          "description": "\"{{book}}\" was removed from your wishlist."
+        },
+        "added": {
+          "title": "Added to wishlist",
+          "description": "\"{{book}}\" was added to your wishlist."
+        }
+      },
+      "logout": {
+        "success": "You have been signed out.",
+        "error": {
+          "title": "Sign out failed",
+          "description": "{{message}}"
+        }
+      },
+      "feature": {
+        "unavailable": {
+          "title": "This feature is coming soon",
+          "description": "Hang tight! We are working on it."
+        }
+      }
+    }
+  },
+  "siteData": {
+    "categories": {
+      "books": "Books",
+      "fiction": "Fiction",
+      "nonfiction": "Nonfiction",
+      "ebooks": "eBooks",
+      "audiobooks": "Audiobooks",
+      "teen": "Teens",
+      "kids": "Kids",
+      "trending": "Trending",
+      "deals": "Deals",
+      "bestseller": "Bestsellers",
+      "etc1": "Misc",
+      "etc2": "More",
+      "more": "More"
+    },
+    "books": {
+      "book1": {
+        "title": "We Are Now Six",
+        "author": "Lily Williams",
+        "imgPlaceholder": "Cover of 'We Are Now Six' featuring illustrated children",
+        "description": "A charming collection of stories that takes children on an imaginative journey filled with beloved characters and adventures that celebrate friendship and curiosity.",
+        "publisher": "Butterfly Publishing House",
+        "format": "Paperback",
+        "deliveryMethod": "Standard Shipping"
+      },
+      "book2": {
+        "title": "Inner Dialogues",
+        "author": "Dina Khouja",
+        "imgPlaceholder": "Cover of 'Inner Dialogues' with a line-art portrait of a woman",
+        "description": "A reflective exploration of the human mind and relationships, offering inspiring insights on finding inner balance and peace.",
+        "publisher": "Dar Al Hikma Publishing",
+        "format": "Hardcover",
+        "deliveryMethod": "Express Delivery"
+      },
+      "book3": {
+        "title": "What Remains of the Remnants",
+        "author": "Clark Kent",
+        "imgPlaceholder": "Cover of 'What Remains of the Remnants' with warm brown gradients",
+        "description": "A gripping post-apocalyptic novel where survivors fight to rebuild civilization amid suspense and unexpected twists.",
+        "publisher": "Future Library",
+        "format": "eBook"
+      },
+      "book4": {
+        "title": "We Are Now Six (Alternate Edition)",
+        "author": "Lily Williams",
+        "imgPlaceholder": "Alternate cover of 'We Are Now Six'",
+        "description": "A companion edition of the beloved children's classic.",
+        "publisher": "Butterfly Publishing House",
+        "format": "Paperback"
+      },
+      "book5": {
+        "title": "Inner Dialogues (Alternate Edition)",
+        "author": "Dina Khouja",
+        "imgPlaceholder": "Alternate cover of 'Inner Dialogues'",
+        "description": "An alternative edition of the reflective bestseller.",
+        "publisher": "Dar Al Hikma Publishing",
+        "format": "Hardcover"
+      },
+      "book6": {
+        "title": "What Remains of the Remnants (Alternate Edition)",
+        "author": "Clark Kent",
+        "imgPlaceholder": "Alternate cover of 'What Remains of the Remnants'",
+        "description": "An alternate presentation of the post-apocalyptic adventure.",
+        "publisher": "Future Library",
+        "format": "eBook"
+      }
+    },
+    "authors": {
+      "author1": {
+        "name": "Lily Williams",
+        "imgPlaceholder": "Illustration of Lily Williams",
+        "bio": "Lily Williams is a children's author known for her captivating stories and unforgettable characters."
+      },
+      "author2": {
+        "name": "Mac Cartney",
+        "imgPlaceholder": "Illustration of Mac Cartney",
+        "bio": "Mac Cartney is a British novelist celebrated for his science fiction and thriller works."
+      },
+      "author3": {
+        "name": "Washington",
+        "imgPlaceholder": "Illustration of Washington",
+        "bio": "A historian and American writer focusing on social and cultural history."
+      },
+      "author4": {
+        "name": "Dina Khouja",
+        "imgPlaceholder": "Illustration of Dina Khouja",
+        "bio": "A Saudi author renowned for works that highlight women's issues and society."
+      },
+      "author5": {
+        "name": "Natalie",
+        "imgPlaceholder": "Illustration of Natalie",
+        "bio": "A French poet and writer recognized for philosophical depth and linguistic beauty."
+      },
+      "author6": {
+        "name": "Lily Williams (Alt)",
+        "imgPlaceholder": "Alternate illustration of Lily Williams",
+        "bio": "Lily Williams is a children's author known for her captivating stories and unforgettable characters."
+      },
+      "author7": {
+        "name": "Mac Cartney (Alt)",
+        "imgPlaceholder": "Alternate illustration of Mac Cartney",
+        "bio": "Mac Cartney is a British novelist celebrated for his science fiction and thriller works."
+      },
+      "author8": {
+        "name": "Washington (Alt)",
+        "imgPlaceholder": "Alternate illustration of Washington",
+        "bio": "A historian and American writer focusing on social and cultural history."
+      },
+      "author9": {
+        "name": "Dina Khouja (Alt)",
+        "imgPlaceholder": "Alternate illustration of Dina Khouja",
+        "bio": "A Saudi author renowned for works that highlight women's issues and society."
+      },
+      "author10": {
+        "name": "Natalie (Alt)",
+        "imgPlaceholder": "Alternate illustration of Natalie",
+        "bio": "A French poet and writer recognized for philosophical depth and linguistic beauty."
+      }
+    },
+    "sellers": {
+      "seller1": {
+        "name": "Knowledge Bookstore"
+      },
+      "seller2": {
+        "name": "Dar Al Hikma"
+      }
+    },
+    "branches": {
+      "branch1": {
+        "name": "Main Branch",
+        "address": "Dubai, United Arab Emirates"
+      },
+      "branch2": {
+        "name": "Abu Dhabi Branch",
+        "address": "Abu Dhabi, United Arab Emirates"
+      }
+    },
+    "dashboardStats": {
+      "totalBooks": "Total Books",
+      "authors": "Authors",
+      "salesToday": "Sales",
+      "visitors": "Visitors"
+    },
+    "features": {
+      "readingRewards": {
+        "title": "Read & Earn",
+        "description": "Join now to earn free books."
+      },
+      "molhemoonDeals": {
+        "title": "Molhemon Deals",
+        "description": "Save up to 20% on eligible items."
+      },
+      "freeShipping": {
+        "title": "Free Shipping",
+        "description": "For orders over 100 AED."
+      },
+      "mobileApp": {
+        "title": "Mobile App",
+        "description": "Shop faster and earn extra points."
+      }
+    },
+    "footer": {
+      "sections": {
+        "about": {
+          "title": "About Molhemon",
+          "links": {
+            "aboutUs": "About Molhemon Publishing",
+            "team": "Our Team",
+            "authors": "Authors",
+            "readersClub": "Molhemon Readers Club",
+            "blog": "Molhemon Blog"
+          }
+        },
+        "academy": {
+          "title": "Molhemon Academy",
+          "links": {
+            "registerTrainer": "Register as a Trainer",
+            "courses": "Training Courses",
+            "trainerInquiries": "Trainer Inquiries",
+            "readerProgram": "Molhemon Reader Program"
+          }
+        },
+        "services": {
+          "title": "Molhemon Services",
+          "links": {
+            "publishing": "Publishing Services",
+            "design": "Design & Production",
+            "distribution": "Print Distribution",
+            "requestPublications": "Request Our Catalog"
+          }
+        },
+        "support": {
+          "title": "Customer Service",
+          "links": {
+            "trackOrder": "Track Order Status",
+            "giftCard": "Molhemon Gift Card",
+            "contactUs": "Contact Us",
+            "supportPhone": "0097165551184"
+          }
+        }
+      }
+    }
+  }
 }

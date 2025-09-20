@@ -1,5 +1,9 @@
 import { errorHandler } from '../../errorHandler.js';
+import { getActiveLanguage } from '../../languageUtils.js';
 import firebaseApi from '../../firebase/baseApi.js';
+
+const handleErrorWithLanguage = (error, context) =>
+  errorHandler.handleError(error, context, getActiveLanguage());
 
 export async function refundOrderPayment(orderId, refundData) {
   try {
@@ -40,6 +44,6 @@ export async function refundOrderPayment(orderId, refundData) {
     };
 
   } catch (error) {
-    throw errorHandler.handleError(error, `order-refund:${orderId}`);
+    throw handleErrorWithLanguage(error, `order-refund:${orderId}`);
   }
 }
