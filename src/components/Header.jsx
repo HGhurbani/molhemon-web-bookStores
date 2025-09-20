@@ -25,16 +25,18 @@ import {
   Download,
   Truck,
   Building2,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
-import { useLanguage } from '@/lib/languageContext.jsx';
 import { useCart } from '@/lib/cartContext.jsx';
 import { useAuth } from '@/lib/authContext.jsx';
 import { useTranslation } from 'react-i18next';
+import { ensureLanguageList, storeLanguageCode } from '@/lib/languagePreferences.js';
+import { toast } from '@/components/ui/use-toast.js';
 
-const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {} }) => {
+const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings = {}, languages: providedLanguages = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -48,13 +50,38 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { currency, setCurrency, currencies } = useCurrency();
-  const { language, setLanguage, languages } = useLanguage();
   const { cart } = useCart();
   const { isCustomer: isCustomerLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
+  const languageOptions = React.useMemo(
+    () => ensureLanguageList(providedLanguages),
+    [providedLanguages],
+  );
+  const activeLanguageCode = i18n.language || i18n.resolvedLanguage;
+  const activeLanguage = React.useMemo(
+    () =>
+      languageOptions.find((languageOption) => languageOption.code === activeLanguageCode) ||
+      languageOptions[0] ||
+      null,
+    [languageOptions, activeLanguageCode],
+  );
+  const handleLanguageChange = React.useCallback(
+    (code) => {
+      storeLanguageCode(code);
+      void i18n.changeLanguage(code);
+    },
+    [i18n],
+  );
+  const languageLabel =
+    (activeLanguage && (activeLanguage.name || activeLanguage.label)) ||
+    (activeLanguage?.code ? activeLanguage.code.toUpperCase() : t('language'));
   const navigate = useNavigate();
 
   const [hideTopRow, setHideTopRow] = useState(false);
+  const cartItemCount = React.useMemo(
+    () => cart.reduce((sum, item) => sum + (item.quantity ?? 0), 0),
+    [cart],
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,7 +102,11 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   }, [books]);
 
   useEffect(() => {
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    if (recentSearches.length > 0) {
+      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    } else {
+      localStorage.removeItem('recentSearches');
+    }
   }, [recentSearches]);
 
   useEffect(() => {
@@ -111,6 +142,14 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
   const closeMobileSearch = () => {
     setIsMobileSearchOpen(false);
   };
+
+  const clearRecentSearches = React.useCallback(() => {
+    localStorage.removeItem('recentSearches');
+    setRecentSearches([]);
+    toast({
+      description: t('recent_searches_cleared', { defaultValue: 'Search history cleared' }),
+    });
+  }, [t]);
 
   const DropdownWithSearch = ({ label, items, isCategory = false, hideOnMobile = false }) => {
     const [filterText, setFilterText] = useState('');
@@ -313,16 +352,16 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="text-xs text-white hover:bg-gray-500 hover:text-white p-1 h-auto transition-all duration-200">
-                  {language.name}
+                  {languageLabel}
                     <ChevronDown className="w-3 h-3 mr-2 rtl:ml-2 rtl:mr-0 transition-transform duration-200" />
                 </Button>
               </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md border border-gray-200 text-gray-800 min-w-[120px]">
-                {languages.map(l => (
-                    <DropdownMenuItem key={l.code} onClick={() => handleFeatureClick(`change-language-${l.code}`)} className="hover:bg-blue-50 px-4 py-2 transition-colors duration-150">
-                    {l.name}
-                  </DropdownMenuItem>
-                ))}
+                {languageOptions.map(l => (
+                    <DropdownMenuItem key={l.code} onClick={() => handleLanguageChange(l.code)} className="hover:bg-blue-50 px-4 py-2 transition-colors duration-150">
+                  {l.name}
+                </DropdownMenuItem>
+              ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -382,21 +421,30 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               )}
                 </AnimatePresence>
               <Button
-                  className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white transition-all duration-200"
+                aria-label={t('submit_search', { defaultValue: 'Search' })}
+                className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 h-8 text-white transition-all duration-200"
                 onClick={() => handleSearchSubmit()}
                 size="sm"
+                type="button"
               >
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-              
+
               {/* Mobile Search Button - Visible only on Mobile */}
               <div className="md:hidden flex-1 flex justify-center">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="text-white hover:text-gray-200 w-12 h-12 transition-all duration-200"
                   onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                  aria-label={
+                    isMobileSearchOpen
+                      ? t('close_search_panel', { defaultValue: 'Close search panel' })
+                      : t('open_search_panel', { defaultValue: 'Open search panel' })
+                  }
+                  aria-expanded={isMobileSearchOpen}
+                  type="button"
                 >
                   <Search className="w-6 h-6" />
                 </Button>
@@ -409,31 +457,44 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
               {/* Mobile Menu Button */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="md:hidden text-white hover:text-gray-200 w-10 h-10 transition-all duration-200"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={
+                  isMobileMenuOpen
+                    ? t('close_navigation_menu', { defaultValue: 'Close navigation menu' })
+                    : t('open_navigation_menu', { defaultValue: 'Open navigation menu' })
+                }
+                aria-expanded={isMobileMenuOpen}
+                type="button"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </Button>
 
               <Button asChild variant="ghost" size="icon" className="text-white hover:text-gray-200 w-10 h-10 transition-all duration-200">
-              <Link to="/profile?tab=wishlist">
+              <Link
+                to="/profile?tab=wishlist"
+                aria-label={t('my_library', { defaultValue: 'My library' })}
+              >
                 <Bookmark className="w-5 h-5" />
               </Link>
             </Button>
 
               <Button asChild variant="ghost" size="icon" className="relative text-white hover:text-gray-200 w-10 h-10 transition-all duration-200">
-              <Link to="/cart">
+              <Link
+                to="/cart"
+                aria-label={t('view_cart', { defaultValue: `View cart${cartItemCount ? ` (${cartItemCount})` : ''}` })}
+              >
                 <ShoppingCart className="w-5 h-5" />
-                {cart.reduce((sum, item) => sum + item.quantity, 0) > 0 && (
+                {cartItemCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-semibold rounded-full w-3.5 h-3.5 flex items-center justify-center"
                     >
-                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                    {cartItemCount}
                     </motion.span>
                 )}
               </Link>
@@ -442,10 +503,10 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
           </div>
 
           {/* Search Suggestions Row */}
-          <motion.div 
+          <motion.div
             className="flex items-center justify-center space-x-3 rtl:space-x-reverse py-2 text-xs text-white overflow-x-auto whitespace-nowrap"
             initial={false}
-            animate={{ 
+            animate={{
               maxHeight: hideTopRow ? 0 : 40,
               opacity: hideTopRow ? 0 : 1,
               paddingTop: hideTopRow ? 0 : 8,
@@ -454,9 +515,9 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             {searchSuggestions.map((item, idx) => (
-              <motion.span 
-                key={idx} 
-                className="cursor-pointer hover:text-gray-200 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-500/20" 
+              <motion.span
+                key={idx}
+                className="cursor-pointer hover:text-gray-200 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-500/20"
                 onClick={() => handleSearchSubmit(item)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -464,6 +525,17 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                 {item}
               </motion.span>
             ))}
+            {recentSearches.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearRecentSearches}
+                className="text-white hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 h-7 px-3 flex items-center space-x-1 rtl:space-x-reverse shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t('clear_search_history', { defaultValue: 'Clear history' })}</span>
+              </Button>
+            )}
           </motion.div>
         </div>
 
@@ -499,6 +571,8 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                   size="icon"
                   onClick={closeMobileSearch}
                   className="w-8 h-8 text-gray-500 hover:text-gray-700"
+                  aria-label={t('close_search_panel', { defaultValue: 'Close search panel' })}
+                  type="button"
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -528,7 +602,20 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
               {/* Search Suggestions */}
               {searchSuggestions.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-gray-600 mb-2">{t('search_suggestions')}</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-600">{t('search_suggestions')}</h3>
+                    {recentSearches.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearRecentSearches}
+                        className="text-gray-600 hover:text-gray-800"
+                      >
+                        <Trash2 className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0" />
+                        {t('clear_search_history', { defaultValue: 'Clear history' })}
+                      </Button>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-2">
             {searchSuggestions.map((item, idx) => (
                       <button
@@ -642,6 +729,8 @@ const Header = ({ handleFeatureClick, books = [], categories = [], siteSettings 
                     size="icon"
                     onClick={closeMobileMenu}
                     className="w-8 h-8 text-gray-500 hover:text-gray-700"
+                    aria-label={t('close_navigation_menu', { defaultValue: 'Close navigation menu' })}
+                    type="button"
                   >
                     <X className="w-5 h-5" />
                   </Button>

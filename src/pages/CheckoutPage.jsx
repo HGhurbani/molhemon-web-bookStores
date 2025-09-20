@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { toast } from '@/components/ui/use-toast.js';
-import FormattedPrice from '@/components/FormattedPrice.jsx';
 import PaymentMethodSelector from '@/components/PaymentMethodSelector.jsx';
+import ProgressBar from '@/components/ProgressBar.jsx';
 import { useCurrency } from '@/lib/currencyContext.jsx';
 import { jwtAuthManager } from '@/lib/jwtAuth.js';
 import { auth } from '@/lib/firebase.js';
@@ -15,6 +15,7 @@ import { errorHandler } from '@/lib/errorHandler.js';
 import api from '@/lib/api.js';
 import unifiedPaymentApi from '@/lib/api/unifiedPaymentApi.js';
 import firebaseApi from '@/lib/firebaseApi.js';
+import { resolveCheckoutFallbackId } from '@/lib/checkoutFallback.js';
 import logger from '@/lib/logger.js';
 import '@/lib/test/checkoutTest.js'; // استيراد ملف الاختبار
 import {
@@ -91,6 +92,16 @@ const CheckoutPage = ({ cart, setCart }) => {
   // متغير لتأخير الحفظ وحالة الحفظ
   const [saveTimeout, setSaveTimeout] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // حالة التقدم في خطوات الطلب
+  const steps = [
+    { id: 'personal', label: 'المعلومات الشخصية' },
+    { id: 'address', label: 'العنوان' },
+    { id: 'payment', label: 'الدفع' },
+    { id: 'review', label: 'المراجعة' }
+  ];
+  const [currentStep, setCurrentStep] = useState(0);
+  const [totalSteps] = useState(steps.length);
 
   // حساب إجمالي الطلب
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -1079,6 +1090,54 @@ const CheckoutPage = ({ cart, setCart }) => {
 
   const validateOrder = () => getValidationStatus().ok;
 
+  const isStepValid = (stepIndex) => {
+    switch (stepIndex) {
+      case 0:
+        return Boolean(orderData.customerInfo?.name && orderData.customerInfo?.email);
+      case 1:
+        if (!hasPhysicalProducts) {
+          return true;
+        }
+        return Boolean(orderData.shippingAddress && orderData.shippingMethod);
+      case 2:
+        return Boolean(orderData.paymentMethod);
+      case 3:
+        return validateOrder();
+      default:
+        return true;
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < totalSteps - 1 && isStepValid(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => Math.max(prev - 1, 0));
+    }
+  };
+
+  const canProceedToNext = isStepValid(currentStep);
+
+  const getStepRequirementMessage = () => {
+    if (currentStep === 0 && !isStepValid(0)) {
+      return 'يرجى إدخال الاسم والبريد الإلكتروني للمتابعة.';
+    }
+    if (currentStep === 1 && hasPhysicalProducts && !isStepValid(1)) {
+      return 'يرجى اختيار عنوان وطريقة الشحن قبل المتابعة.';
+    }
+    if (currentStep === 2 && !isStepValid(2)) {
+      return 'يرجى اختيار طريقة الدفع قبل المتابعة.';
+    }
+    return '';
+  };
+
+  const stepRequirementMessage =
+    currentStep < totalSteps - 1 && !canProceedToNext ? getStepRequirementMessage() : '';
+
   const handlePlaceOrder = async () => {
     if (!validateOrder()) {
       // عرض رسائل الخطأ المناسبة عند محاولة إتمام الطلب
@@ -1290,10 +1349,10 @@ const CheckoutPage = ({ cart, setCart }) => {
         logger.error('CheckoutPage - Order ID is missing after checkout:', orderResult);
         
         // محاولة استخدام معرفات بديلة
-        const fallbackId = orderResult?.order?.id || orderResult?.orderNumber || `temp_${Date.now()}`;
+        const { fallbackId, isTempId } = resolveCheckoutFallbackId(orderResult);
         logger.info('CheckoutPage - Using fallback ID:', fallbackId);
-        
-        if (fallbackId && fallbackId !== `temp_${Date.now()}`) {
+
+        if (fallbackId && !isTempId) {
           orderResult.id = fallbackId;
         } else {
           throw new Error('فشل في الحصول على معرف الطلب بعد إتمام الشراء');
@@ -1381,6 +1440,8 @@ const CheckoutPage = ({ cart, setCart }) => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ProgressBar steps={steps} currentStep={currentStep} totalSteps={totalSteps} />
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">إتمام الطلب</h1>
           <p className="mt-2 text-gray-600">راجع طلبك وأكمل عملية الشراء</p>
@@ -1389,78 +1450,140 @@ const CheckoutPage = ({ cart, setCart }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* معلومات الطلب */}
           <div className="lg:col-span-2 space-y-6">
-            {/* معلومات العميل */}
-            <CustomerInfoSection
-              customerInfo={orderData.customerInfo}
-              isLoggedIn={isLoggedIn}
-              onUpdate={handleCustomerInfoUpdate}
-              isSaving={isSaving}
-            />
-
-            {/* عناوين الشحن */}
-            {hasPhysicalProducts && (
-              <ShippingAddressSection
-                selectedAddress={orderData.shippingAddress}
-                savedAddresses={savedAddresses}
+            {currentStep === 0 && (
+              <CustomerInfoSection
+                customerInfo={orderData.customerInfo}
                 isLoggedIn={isLoggedIn}
-                onAddressSelect={handleAddressSelect}
-                onAddNewAddress={handleAddNewAddress}
-                showForm={showAddressForm}
-                setShowForm={setShowAddressForm}
+                onUpdate={handleCustomerInfoUpdate}
+                isSaving={isSaving}
               />
             )}
 
-            {/* طرق الشحن - للمنتجات المادية فقط */}
-            {hasPhysicalProducts && orderData.shippingAddress && (
-              <ShippingMethodSection
-                availableMethods={availableShippingMethods}
-                selectedMethod={orderData.shippingMethod}
-                onMethodSelect={handleShippingMethodSelect}
-                shippingAddress={orderData.shippingAddress}
-                cartTotal={subtotal}
-                formatPrice={formatPrice}
-              />
-            )}
+            {currentStep === 1 && (
+              hasPhysicalProducts ? (
+                <>
+                  <ShippingAddressSection
+                    selectedAddress={orderData.shippingAddress}
+                    savedAddresses={savedAddresses}
+                    isLoggedIn={isLoggedIn}
+                    onAddressSelect={handleAddressSelect}
+                    onAddNewAddress={handleAddNewAddress}
+                    showForm={showAddressForm}
+                    setShowForm={setShowAddressForm}
+                  />
 
-            {/* رسالة للمنتجات الرقمية */}
-            {!hasPhysicalProducts && (
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <div className="flex items-center">
-                  <div className="text-green-600 mr-3">✅</div>
-                  <div>
-                    <h3 className="text-sm font-medium text-green-800">منتجات رقمية</h3>
-                    <p className="text-sm text-green-700">
-                      المنتجات متاحة فوراً بعد الدفع. لا حاجة للشحن.
-                    </p>
+                  {orderData.shippingAddress && (
+                    <ShippingMethodSection
+                      availableMethods={availableShippingMethods}
+                      selectedMethod={orderData.shippingMethod}
+                      onMethodSelect={handleShippingMethodSelect}
+                      shippingAddress={orderData.shippingAddress}
+                      cartTotal={subtotal}
+                      formatPrice={formatPrice}
+                    />
+                  )}
+                </>
+              ) : (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center">
+                    <div className="text-green-600 mr-3">✅</div>
+                    <div>
+                      <h3 className="text-sm font-medium text-green-800">منتجات رقمية</h3>
+                      <p className="text-sm text-green-700">
+                        المنتجات متاحة فوراً بعد الدفع. لا حاجة للشحن.
+                      </p>
+                    </div>
                   </div>
                 </div>
+              )
+            )}
+
+            {currentStep === 2 && (
+              <PaymentMethodSection
+                availableMethods={availablePaymentMethods}
+                savedMethods={savedPaymentMethods}
+                selectedMethod={orderData.paymentMethod}
+                isLoggedIn={isLoggedIn}
+                onMethodSelect={handlePaymentSelect}
+                onAddNewMethod={handleAddNewPaymentMethod}
+                showForm={showPaymentForm}
+                setShowForm={setShowPaymentForm}
+                storeSettings={storeSettings}
+                hasPhysicalProducts={hasPhysicalProducts}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">ملاحظات إضافية</h3>
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={4}
+                    placeholder="أي ملاحظات أو طلبات خاصة..."
+                    value={orderData.notes}
+                    onChange={(e) => setOrderData(prev => ({ ...prev, notes: e.target.value }))}
+                  />
+                </div>
+
+                <ReviewSection
+                  orderData={orderData}
+                  hasPhysicalProducts={hasPhysicalProducts}
+                  formatPrice={formatPrice}
+                  subtotal={subtotal}
+                  shippingCost={shippingCost}
+                  taxAmount={taxAmount}
+                  total={total}
+                />
+              </>
+            )}
+
+            {currentStep < totalSteps - 1 && stepRequirementMessage && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">
+                {stepRequirementMessage}
               </div>
             )}
 
-                    {/* طرق الدفع */}
-        <PaymentMethodSection
-          availableMethods={availablePaymentMethods}
-          savedMethods={savedPaymentMethods}
-          selectedMethod={orderData.paymentMethod}
-          isLoggedIn={isLoggedIn}
-          onMethodSelect={handlePaymentSelect}
-          onAddNewMethod={handleAddNewPaymentMethod}
-          showForm={showPaymentForm}
-          setShowForm={setShowPaymentForm}
-          storeSettings={storeSettings}
-          hasPhysicalProducts={hasPhysicalProducts}
-        />
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrevStep}
+                disabled={currentStep === 0}
+                className="sm:w-auto w-full"
+              >
+                السابق
+              </Button>
 
-            {/* ملاحظات إضافية */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">ملاحظات إضافية</h3>
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={4}
-                placeholder="أي ملاحظات أو طلبات خاصة..."
-                value={orderData.notes}
-                onChange={(e) => setOrderData(prev => ({ ...prev, notes: e.target.value }))}
-              />
+              {currentStep < totalSteps - 1 ? (
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={!canProceedToNext}
+                  className="checkout-button sm:w-auto w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  التالي
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handlePlaceOrder}
+                  disabled={!validateOrder() || processing}
+                  className="checkout-button sm:w-auto w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {processing ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      جاري المعالجة...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <Lock className="w-4 h-4 mr-2" />
+                      تأكيد الطلب
+                    </div>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -1476,7 +1599,7 @@ const CheckoutPage = ({ cart, setCart }) => {
               storeSettings={storeSettings}
               onPlaceOrder={handlePlaceOrder}
               processing={processing}
-              canPlaceOrder={validateOrder()}
+              canPlaceOrder={validateOrder() && currentStep === totalSteps - 1}
               formatPrice={formatPrice}
               orderData={orderData}
               hasPhysicalProducts={hasPhysicalProducts}
@@ -1931,6 +2054,155 @@ const PaymentMethodSection = ({
       hasPhysicalProducts={hasPhysicalProducts}
       currency="SAR"
     />
+  );
+};
+
+// مكون مراجعة البيانات قبل إتمام الطلب
+const ReviewSection = ({
+  orderData,
+  hasPhysicalProducts,
+  formatPrice,
+  subtotal,
+  shippingCost,
+  taxAmount,
+  total
+}) => {
+  const customerInfo = orderData.customerInfo || {};
+  const shippingAddress = orderData.shippingAddress;
+  const shippingMethod = orderData.shippingMethod;
+  const paymentMethod = orderData.paymentMethod;
+
+  const renderAddressLine = () => {
+    if (!shippingAddress) {
+      return 'لم يتم اختيار عنوان الشحن بعد.';
+    }
+
+    const parts = [shippingAddress.street, shippingAddress.city, shippingAddress.state, shippingAddress.country]
+      .filter(Boolean)
+      .join(', ');
+
+    return parts || 'لم يتم توفير تفاصيل العنوان.';
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <Check className="w-5 h-5 mr-2 text-green-600" />
+          مراجعة البيانات
+        </h3>
+
+        <div className="space-y-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center text-gray-900 font-semibold mb-2">
+              <User className="w-4 h-4 mr-2 text-blue-600" />
+              بيانات العميل
+            </div>
+            <p className="text-sm text-gray-700">{customerInfo.name || 'لم يتم إدخال الاسم'}</p>
+            <p className="text-sm text-gray-700">{customerInfo.email || 'لم يتم إدخال البريد الإلكتروني'}</p>
+            {customerInfo.phone && (
+              <p className="text-sm text-gray-700">{customerInfo.phone}</p>
+            )}
+          </div>
+
+          {hasPhysicalProducts ? (
+            <div className="border border-gray-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center text-gray-900 font-semibold mb-2">
+                <MapPin className="w-4 h-4 mr-2 text-blue-600" />
+                تفاصيل الشحن
+              </div>
+              {shippingAddress ? (
+                <>
+                  <p className="text-sm text-gray-700">
+                    {(shippingAddress.firstName || shippingAddress.lastName)
+                      ? `${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim()
+                      : shippingAddress.name || 'عنوان بدون اسم'}
+                  </p>
+                  <p className="text-sm text-gray-700">{renderAddressLine()}</p>
+                  {shippingAddress.phone && (
+                    <p className="text-sm text-gray-700">{shippingAddress.phone}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-red-600">لم يتم اختيار عنوان الشحن بعد.</p>
+              )}
+              {shippingMethod ? (
+                <p className="text-sm text-gray-700">
+                  طريقة الشحن: {shippingMethod.name}
+                  {typeof shippingMethod.cost === 'number' && (
+                    <span className="mr-1">- {formatPrice(shippingMethod.cost)}</span>
+                  )}
+                </p>
+              ) : (
+                <p className="text-sm text-red-600">لم يتم اختيار طريقة الشحن.</p>
+              )}
+            </div>
+          ) : (
+            <div className="border border-green-200 rounded-lg p-4 bg-green-50">
+              <div className="flex items-center text-green-800 font-semibold mb-2">
+                <Truck className="w-4 h-4 mr-2" />
+                المنتجات رقمية
+              </div>
+              <p className="text-sm text-green-700">
+                لا حاجة لعنوان شحن. ستتمكن من الوصول إلى مشترياتك فوراً بعد إتمام الدفع.
+              </p>
+            </div>
+          )}
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center text-gray-900 font-semibold mb-2">
+              <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+              طريقة الدفع
+            </div>
+            {paymentMethod ? (
+              <>
+                <p className="text-sm text-gray-700">
+                  {paymentMethod.name || paymentMethod.type || 'طريقة الدفع المختارة'}
+                </p>
+                {paymentMethod.description && (
+                  <p className="text-xs text-gray-500 mt-1">{paymentMethod.description}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-red-600">لم يتم اختيار طريقة الدفع.</p>
+            )}
+          </div>
+
+          {orderData.notes && (
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="text-gray-900 font-semibold mb-2">ملاحظات الطلب</div>
+              <p className="text-sm text-gray-700 whitespace-pre-line">{orderData.notes}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-gray-900 mb-2">ملخص التكاليف</h4>
+        <div className="space-y-2 text-sm text-gray-700">
+          <div className="flex justify-between">
+            <span>المجموع الفرعي</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          {hasPhysicalProducts && shippingCost > 0 && (
+            <div className="flex justify-between">
+              <span>تكلفة الشحن</span>
+              <span>{formatPrice(shippingCost)}</span>
+            </div>
+          )}
+          {taxAmount > 0 && (
+            <div className="flex justify-between">
+              <span>الضريبة</span>
+              <span>{formatPrice(taxAmount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
+            <span>الإجمالي</span>
+            <span>{formatPrice(total)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

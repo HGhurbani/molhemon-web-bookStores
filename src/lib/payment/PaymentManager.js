@@ -262,7 +262,7 @@ export class PaymentManager {
       }
 
       // تحديد المزود من معرف Payment Intent
-      const provider = this.getProviderFromPaymentIntent(paymentIntentId);
+      const provider = await this.getProviderFromPaymentIntent(paymentIntentId);
       if (!provider) {
         throw new Error('Payment provider not found for this intent');
       }
@@ -288,7 +288,7 @@ export class PaymentManager {
         throw new Error('Payment Manager not initialized');
       }
 
-      const provider = this.getProviderFromPaymentIntent(paymentIntentId);
+      const provider = await this.getProviderFromPaymentIntent(paymentIntentId);
       if (!provider) {
         throw new Error('Payment provider not found for this intent');
       }
@@ -309,7 +309,7 @@ export class PaymentManager {
         throw new Error('Payment Manager not initialized');
       }
 
-      const provider = this.getProviderFromPaymentIntent(paymentIntentId);
+      const provider = await this.getProviderFromPaymentIntent(paymentIntentId);
       if (!provider) {
         throw new Error('Payment provider not found for this intent');
       }
@@ -356,7 +356,7 @@ export class PaymentManager {
         throw new Error('Payment Manager not initialized');
       }
 
-      const provider = this.getProviderFromPaymentIntent(paymentIntentId);
+      const provider = await this.getProviderFromPaymentIntent(paymentIntentId);
       if (!provider) {
         throw new Error('Payment provider not found for this intent');
       }
@@ -371,29 +371,41 @@ export class PaymentManager {
   /**
    * تحديد المزود من معرف Payment Intent
    */
-  getProviderFromPaymentIntent(paymentIntentId) {
+  async getProviderFromPaymentIntent(paymentIntentId) {
     if (paymentIntentId.startsWith('pi_')) {
-      return this.providers.get('stripe');
+      const provider = this.providers.get('stripe');
+      if (provider) return provider;
     } else if (paymentIntentId.startsWith('PAY-')) {
-      return this.providers.get('paypal');
+      const provider = this.providers.get('paypal');
+      if (provider) return provider;
     } else if (paymentIntentId.startsWith('tabby_')) {
-      return this.providers.get('tabby');
+      const provider = this.providers.get('tabby');
+      if (provider) return provider;
     } else if (paymentIntentId.startsWith('cod_')) {
-      return this.providers.get('cash_on_delivery');
+      const provider = this.providers.get('cash_on_delivery');
+      if (provider) return provider;
     }
-    
+
     // إذا لم نتمكن من تحديد المزود، نجرب جميع المزودين
-    for (const provider of this.providers.values()) {
-      try {
-        // محاولة الحصول على حالة الدفع من كل مزود
-        provider.getPaymentStatus(paymentIntentId);
-        return provider;
-      } catch (error) {
-        // استمر للمزود التالي
+    for (const [name, provider] of this.providers) {
+      if (typeof provider?.getPaymentStatus !== 'function') {
         continue;
       }
+
+      try {
+        // محاولة الحصول على حالة الدفع من كل مزود
+        const status = await provider.getPaymentStatus(paymentIntentId);
+        if (status !== null && status !== undefined) {
+          return provider;
+        }
+      } catch (error) {
+        logger.debug(
+          `Provider ${name} could not resolve payment intent ${paymentIntentId}`,
+          error
+        );
+      }
     }
-    
+
     return null;
   }
 

@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useCurrency, detectUserCurrency } from '@/lib/currencyContext.jsx';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast.js';
@@ -20,19 +20,34 @@ import SplashScreen from '@/components/SplashScreen.jsx';
 import { sellers as initialSellers, branches as initialBranches, paymentMethods as initialPaymentMethods } from '@/data/siteData.js';
 import api from '@/lib/api.js';
 import { TrendingUp, BookOpen, Users, DollarSign, Eye } from 'lucide-react';
-import { useLanguage, defaultLanguages } from '@/lib/languageContext.jsx';
 import { useTranslation } from 'react-i18next';
+import {
+  defaultLanguages,
+  ensureLanguageList,
+  getStoredLanguageCode,
+  getStoredLanguages,
+  storeLanguageCode,
+  storeLanguages,
+} from '@/lib/languagePreferences.js';
 import { jwtAuthManager, firebaseAuth } from '@/lib/jwtAuth.js';
 import { errorHandler } from '@/lib/errorHandler.js';
 import useDirection from '@/lib/useDirection.js';
 
-const App = () => {
+const AppContent = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [dashboardSection, setDashboardSection] = useState('overview');
   const { i18n } = useTranslation();
   useDirection(i18n);
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const { isAdmin: isAdminLoggedIn, isCustomer: isCustomerLoggedIn, currentUser, login } = useAuth();
-  const { setLanguage, setLanguages, languages } = useLanguage();
+  const [languages, setLanguagesState] = useState(() => getStoredLanguages());
+  const setLanguages = useCallback((nextLanguages) => {
+    setLanguagesState((prev) => {
+      const value = typeof nextLanguages === 'function' ? nextLanguages(prev) : nextLanguages;
+      return ensureLanguageList(value);
+    });
+  }, []);
   const { cart, setCart, addToCart, removeFromCart, updateQuantity } = useCart();
   const { favorites: wishlist, toggleFavorite } = useFavorites();
   const { settings: siteSettingsState, setSettings: setSiteSettingsState, refreshSettings } = useSettings();
@@ -70,6 +85,10 @@ const App = () => {
     return stored ? JSON.parse(stored) : [];
   });
   const [features, setFeatures] = useState([]);
+  
+  useEffect(() => {
+    storeLanguages(languages);
+  }, [languages]);
   const [bannersState, setBannersState] = useState(() => {
     const stored = localStorage.getItem('banners');
     return stored ? JSON.parse(stored) : [];
@@ -386,11 +405,43 @@ const App = () => {
 
   // تحديث اللغة الافتراضية
   useEffect(() => {
-    if (siteSettingsState.defaultLanguage) {
-      const lang = languages.find(l => l.code === siteSettingsState.defaultLanguage);
-      if (lang) setLanguage(lang);
+    const storedLanguage = getStoredLanguageCode();
+    const preferredLanguageFromSettings =
+      isAdmin && siteSettingsState.adminDefaultLanguage
+        ? siteSettingsState.adminDefaultLanguage
+        : siteSettingsState.defaultLanguage;
+
+    const fallbackLanguage = languages.length ? languages[0].code : null;
+
+    let nextLanguage = storedLanguage || preferredLanguageFromSettings || fallbackLanguage;
+
+    if (nextLanguage && !languages.some((language) => language.code === nextLanguage)) {
+      nextLanguage = fallbackLanguage;
     }
-  }, [siteSettingsState.defaultLanguage, setLanguage, languages]);
+
+    if (!nextLanguage) {
+      return;
+    }
+
+    if (i18n.language !== nextLanguage) {
+      void i18n.changeLanguage(nextLanguage);
+    }
+
+    storeLanguageCode(nextLanguage);
+  }, [
+    i18n,
+    isAdmin,
+    languages,
+    siteSettingsState.adminDefaultLanguage,
+    siteSettingsState.defaultLanguage,
+  ]);
+
+  useEffect(() => {
+    const activeLanguage = i18n.language || i18n.resolvedLanguage;
+    if (activeLanguage) {
+      storeLanguageCode(activeLanguage);
+    }
+  }, [i18n.language, i18n.resolvedLanguage]);
 
   // تحديث العملة الافتراضية
   useEffect(() => {
@@ -465,14 +516,6 @@ const App = () => {
       });
       return;
     }
-    if (feature.startsWith('change-language-')) {
-      const code = feature.split('change-language-')[1];
-      const lang = languages.find(l => l.code === code);
-      if (lang) {
-        setLanguage(lang);
-        return;
-      }
-    }
     toast({
       title: "🚧 هذه الميزة غير مطبقة بعد",
       description: "لا تقلق! سيتم تطبيقها الأيام القادمة",
@@ -485,13 +528,12 @@ const App = () => {
   }
 
   return (
-    <ErrorBoundary>
-      <Router>
-        <ScrollToTop />
-        <div className="font-sans" dir={i18n.dir()}>
-          <AnimatePresence mode="wait">
-            <Suspense fallback={<div>Loading...</div>}>
-              <Routes>
+    <>
+      <ScrollToTop />
+      <div className="font-sans" dir={i18n.dir()}>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
                 <Route
                   path="/admin/*"
                   element={
@@ -569,31 +611,39 @@ const App = () => {
                       wishlist={wishlist}
                       siteSettings={siteSettingsState}
                       features={features}
+                      languages={languages}
                     />
                   }
                 />
-              </Routes>
-            </Suspense>
-          </AnimatePresence>
-          <Toaster />
-          <AddToCartDialog
-            open={cartDialogOpen}
-            onOpenChange={setCartDialogOpen}
-            book={cartDialogBook}
-            handleAddToCart={handleAddToCart}
-            handleToggleWishlist={handleToggleWishlist}
-            wishlist={wishlist}
-            authors={authors}
-          />
-          <ChatWidget
-            open={chatOpen}
-            onOpenChange={setChatOpen}
-            contact={chatContact}
-          />
-        </div>
-      </Router>
-    </ErrorBoundary>
+            </Routes>
+          </Suspense>
+        </AnimatePresence>
+        <Toaster />
+        <AddToCartDialog
+          open={cartDialogOpen}
+          onOpenChange={setCartDialogOpen}
+          book={cartDialogBook}
+          handleAddToCart={handleAddToCart}
+          handleToggleWishlist={handleToggleWishlist}
+          wishlist={wishlist}
+          authors={authors}
+        />
+        <ChatWidget
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          contact={chatContact}
+        />
+      </div>
+    </>
   );
 };
+
+const App = () => (
+  <ErrorBoundary>
+    <Router>
+      <AppContent />
+    </Router>
+  </ErrorBoundary>
+);
 
 export default App;

@@ -13,6 +13,153 @@ import unifiedPaymentApi from './api/unifiedPaymentApi.js';
 import logger from './logger.js';
 import * as encryptedCache from './encryptedCache.js';
 import homeApi from './firebase/homeApi.js';
+import { jwtAuthManager } from './jwtAuth.js';
+
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.VITE_API_BASE_URL) ||
+  '';
+
+const ensureArrayResponse = (payload, key) => {
+  if (!payload) {
+    return [];
+  }
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (key && Array.isArray(payload[key])) {
+    return payload[key];
+  }
+
+  if (Array.isArray(payload.items)) {
+    return payload.items;
+  }
+
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  return [];
+};
+
+async function requestUserData(userId, resource, { method = 'GET', body } = {}) {
+  const context = `user-data:${resource}:${userId || 'anonymous'}`;
+
+  try {
+    if (!userId) {
+      throw errorHandler.createError(
+        errorHandler.errorTypes.VALIDATION,
+        'validation/user-id-missing',
+        'معرف المستخدم مطلوب لمزامنة البيانات',
+        context
+      );
+    }
+
+    if (!API_BASE_URL) {
+      throw errorHandler.createError(
+        errorHandler.errorTypes.UNKNOWN,
+        'config/api-base-url-missing',
+        'لم يتم تكوين عنوان الخادم لواجهات البرمجة',
+        context
+      );
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    };
+
+    if (jwtAuthManager && typeof jwtAuthManager.getIdToken === 'function') {
+      const token = await jwtAuthManager.getIdToken();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/${resource}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    if (!response.ok) {
+      const message = await response.text().catch(() => '');
+      const errorMessage = message || `فشل في معالجة طلب ${resource}`;
+      throw errorHandler.createError(
+        errorHandler.errorTypes.NETWORK,
+        `api/${resource}-${response.status}`,
+        errorMessage,
+        context
+      );
+    }
+
+    if (response.status === 204) {
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      return await response.json();
+    }
+
+    return null;
+  } catch (error) {
+    throw errorHandler.handleError(error, context);
+  }
+}
+
+const userDataApi = {
+  getFavorites: async (userId) => {
+    try {
+      const response = await requestUserData(userId, 'favorites');
+      return ensureArrayResponse(response, 'favorites');
+    } catch (error) {
+      throw errorHandler.handleError(error, `user-data:get-favorites:${userId}`);
+    }
+  },
+
+  saveFavorites: async (userId, favorites = []) => {
+    try {
+      const response = await requestUserData(userId, 'favorites', {
+        method: 'PUT',
+        body: {
+          favorites,
+          updatedAt: new Date().toISOString()
+        }
+      });
+      return response == null ? favorites : ensureArrayResponse(response, 'favorites');
+    } catch (error) {
+      throw errorHandler.handleError(error, `user-data:save-favorites:${userId}`);
+    }
+  },
+
+  getCart: async (userId) => {
+    try {
+      const response = await requestUserData(userId, 'cart');
+      return ensureArrayResponse(response, 'items');
+    } catch (error) {
+      throw errorHandler.handleError(error, `user-data:get-cart:${userId}`);
+    }
+  },
+
+  saveCart: async (userId, cartItems = []) => {
+    try {
+      const response = await requestUserData(userId, 'cart', {
+        method: 'PUT',
+        body: {
+          items: cartItems,
+          updatedAt: new Date().toISOString()
+        }
+      });
+      return response == null ? cartItems : ensureArrayResponse(response, 'items');
+    } catch (error) {
+      throw errorHandler.handleError(error, `user-data:save-cart:${userId}`);
+    }
+  }
+};
 
 // Firebase API هو الآن الخيار الوحيد مع Functions
 const api = {
@@ -84,6 +231,7 @@ const api = {
         siteName: { required: true, type: 'string', minLength: 2 },
         description: { required: true, type: 'string', minLength: 10 },
         defaultLanguage: { required: true, type: 'string' },
+        adminDefaultLanguage: { required: true, type: 'string' },
         defaultCurrency: { required: true, type: 'string' }
       };
 
@@ -824,6 +972,7 @@ const api = {
       throw errorHandler.handleError(error, `api:get-customer-data:${customerId}`);
     }
   },
+  userData: userDataApi,
   cart: CartService
 };
 
